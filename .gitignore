@@ -1,0 +1,36 @@
+# Rust
+/target/
+target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Debug files
+*.dSYM/
+
+# Test artifacts
+*.test
+
+# Environment files
+.env
+.env.local
+
+# Backup files
+*.bak
+*.backup
+
