@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "roshar-ws",
+    "roshar-ws-mgr",
 ]
 resolver = "2"
 

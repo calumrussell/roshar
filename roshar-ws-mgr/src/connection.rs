@@ -1,0 +1,364 @@
+use std::{sync::Arc, time::Duration};
+
+use anyhow::{Result, anyhow};
+use chrono::Local;
+use futures_util::{
+    SinkExt, StreamExt,
+    stream::{SplitSink, SplitStream},
+};
+use log::error;
+use tokio::net::TcpStream;
+use tokio_tungstenite::WebSocketStream;
+use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
+use tokio_util::sync::CancellationToken;
+
+use crate::{config::Config, manager::Message};
+
+#[derive(Debug)]
+pub enum ConnectionError {
+    ConnectionInactive,
+}
+
+impl std::fmt::Display for ConnectionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ConnectionError::ConnectionInactive => {
+                write!(f, "Called interactive function on inactive connection")
+            }
+        }
+    }
+}
+
+impl std::error::Error for ConnectionError {}
+
+type Reader = SplitStream<WebSocketStream<tokio_tungstenite::MaybeTlsStream<TcpStream>>>;
+
+pub struct ReadActor {
+    name: String,
+    reader: Reader,
+    bytes_recv: u64,
+    send: Arc<tokio::sync::broadcast::Sender<Message>>,
+}
+
+impl ReadActor {
+    fn new(
+        name: String,
+        reader: Reader,
+        send: Arc<tokio::sync::broadcast::Sender<Message>>,
+    ) -> Self {
+        Self {
+            name,
+            reader,
+            bytes_recv: 0,
+            send,
+        }
+    }
+
+    async fn run(&mut self, cancel_token: CancellationToken) {
+        loop {
+            tokio::select! {
+                msg_result = self.reader.next() => {
+                    match msg_result {
+                        Some(Ok(msg)) => {
+                            self.bytes_recv += msg.len() as u64;
+                            match msg {
+                                TungsteniteMessage::Ping(data) => {
+                                    let text = String::from_utf8_lossy(&data).to_string();
+                                    if let Err(e) = self.send.send(Message::PingMessage(self.name.clone(), text)) {
+                                        error!("Reader Global Send Error: {:?} {:?}", self.name.to_string(), e);
+                                    }
+                                },
+                                TungsteniteMessage::Pong(data) => {
+                                    let text = String::from_utf8_lossy(&data).to_string();
+                                    if let Err(e) = self.send.send(Message::PongMessage(self.name.clone(), text)) {
+                                        error!("Reader Global Send Error: {:?} {:?}", self.name.to_string(), e);
+                                    }
+                                },
+                                TungsteniteMessage::Text(text) => {
+                                    if let Err(e) = self.send.send(Message::TextMessage(self.name.clone(), text.to_string())) {
+                                        error!("Reader Global Send Error: {:?} {:?}", self.name.to_string(), e);
+                                    }
+                                },
+                                TungsteniteMessage::Binary(data) => {
+                                    if let Err(e) = self.send.send(Message::BinaryMessage(self.name.clone(), data.to_vec())) {
+                                        error!("Reader Global Send Error: {:?} {:?}", self.name.to_string(), e);
+                                    }
+                                },
+                                TungsteniteMessage::Close(close_frame) => {
+                                    let reason = close_frame.map(|f| f.reason.to_string());
+                                    if let Err(e) = self.send.send(Message::CloseMessage(self.name.clone(), reason)) {
+                                        error!("Reader Global Send Error: {:?} {:?}", self.name.to_string(), e);
+                                    }
+                                },
+                                TungsteniteMessage::Frame(_frame) => {
+                                    if let Err(e) = self.send.send(Message::FrameMessage(self.name.clone(), "Raw frame received".to_string())) {
+                                        error!("Reader Global Send Error: {:?} {:?}", self.name.to_string(), e);
+                                    }
+                                }
+                            }
+                        },
+                        Some(Err(e)) => {
+                            error!("ReadError for {:?}: {:?} (Debug: {:#?})", self.name, e, e);
+                            let _ = self.send.send(Message::ReadError(self.name.clone(), e.to_string()));
+                            break;
+                        },
+                        None => {
+                            error!("ReadError for {:?}: None", self.name);
+                            let _ = self.send.send(Message::ReadError(self.name.clone(), "None".to_string()));
+                            break;
+                        }
+                    }
+                },
+                _ = cancel_token.cancelled() => break,
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ReadActorHandle;
+
+pub struct PingActor {
+    name: String,
+    config: Config,
+    writer_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+    global_recv: tokio::sync::broadcast::Receiver<Message>,
+    last_pong_time: Option<i64>,
+}
+
+impl PingActor {
+    fn new(
+        name: String,
+        config: Config,
+        writer_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+        global_recv: tokio::sync::broadcast::Receiver<Message>,
+    ) -> Self {
+        Self {
+            name,
+            config,
+            writer_send,
+            global_recv,
+            last_pong_time: None,
+        }
+    }
+
+    async fn run(&mut self, cancel_token: CancellationToken) {
+        let mut ping_duration =
+            tokio::time::interval(Duration::from_secs(self.config.ping_duration));
+        let mut ping_timeout = tokio::time::interval(Duration::from_secs(self.config.ping_timeout));
+        let ping_msg_bytes: Vec<u8> = self.config.ping_message.clone().into();
+        let use_text_ping = self.config.use_text_ping.unwrap_or(false);
+
+        loop {
+            tokio::select! {
+                _ = ping_duration.tick() => {
+                    let ping_text = String::from_utf8_lossy(&ping_msg_bytes).to_string();
+                    let message = if use_text_ping {
+                        Message::TextMessage(self.name.clone(), ping_text)
+                    } else {
+                        Message::PingMessage(self.name.clone(), ping_text)
+                    };
+                    if let Err(e) = self.writer_send.send(message) {
+                        error!("Ping Write Error: {:?} {:?}", self.name, e.to_string());
+                    }
+                },
+                _ = ping_timeout.tick() => {
+                    let now = Local::now().timestamp();
+                    if let Some(last_pong) = self.last_pong_time {
+                        if now - last_pong > self.config.ping_timeout as i64 {
+                            if let Err(e) = self.writer_send.send(Message::PongReceiveTimeoutError(self.name.clone())) {
+                                error!("Ping Receive Timeout Error: {:?} {:?}", self.name, e.to_string());
+                            }
+                        }
+                    }
+                },
+                _ = cancel_token.cancelled() => break,
+                msg_result = self.global_recv.recv() => {
+                    if let Ok(Message::PongMessage(conn_name, _val)) = msg_result {
+                        if conn_name == self.name {
+                            self.last_pong_time = Some(Local::now().timestamp());
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct PingActorHandle;
+
+impl PingActorHandle {
+    pub fn new(
+        name: String,
+        config: Config,
+        writer_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+        global_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+        cancel_token: CancellationToken,
+    ) -> Self {
+        let global_recv = global_send.subscribe();
+        let mut actor = PingActor::new(name, config, writer_send, global_recv);
+        tokio::spawn(async move {
+            actor.run(cancel_token).await;
+        });
+
+        Self
+    }
+}
+
+impl ReadActorHandle {
+    pub fn new(
+        name: String,
+        reader: Reader,
+        cancel_token: CancellationToken,
+        sender: Arc<tokio::sync::broadcast::Sender<Message>>,
+    ) -> Self {
+        let mut actor = ReadActor::new(name, reader, Arc::clone(&sender));
+        tokio::spawn(async move {
+            actor.run(cancel_token).await;
+        });
+
+        Self
+    }
+}
+
+type Writer =
+    SplitSink<WebSocketStream<tokio_tungstenite::MaybeTlsStream<TcpStream>>, TungsteniteMessage>;
+
+pub struct WriteActor {
+    name: String,
+    writer: Writer,
+    read: tokio::sync::broadcast::Receiver<Message>,
+    global_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+}
+
+impl WriteActor {
+    fn new(
+        name: String,
+        writer: Writer,
+        read: tokio::sync::broadcast::Receiver<Message>,
+        global_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+    ) -> Self {
+        Self {
+            name,
+            writer,
+            read,
+            global_send,
+        }
+    }
+
+    async fn handle_message(&mut self, msg: Message) {
+        let tungstenite_msg = match msg {
+            Message::PingMessage(_name, data) => TungsteniteMessage::Ping(data.into_bytes().into()),
+            Message::PongMessage(_name, data) => TungsteniteMessage::Pong(data.into_bytes().into()),
+            Message::TextMessage(_name, text) => TungsteniteMessage::Text(text.into()),
+            Message::BinaryMessage(_name, data) => TungsteniteMessage::Binary(data.into()),
+            Message::CloseMessage(_name, reason) => {
+                let close_frame = reason.map(|r| tokio_tungstenite::tungstenite::protocol::CloseFrame {
+                    code: tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode::Normal,
+                    reason: r.into(),
+                });
+                TungsteniteMessage::Close(close_frame)
+            }
+            _ => return,
+        };
+
+        if let Err(e) = self.writer.send(tungstenite_msg).await {
+            error!("Write Error for {:?}: {:?} (Debug: {:#?})", self.name, e, e);
+            if let Err(e) = self
+                .global_send
+                .send(Message::WriteError(self.name.clone(), e.to_string()))
+            {
+                error!(
+                    "Write Error to global send for {:?}: {:?}",
+                    self.name,
+                    e.to_string()
+                );
+            }
+        }
+    }
+
+    async fn run(&mut self, cancel_token: CancellationToken) {
+        loop {
+            tokio::select! {
+                msg_recv = self.read.recv() => {
+                    match msg_recv {
+                        Ok(msg) => {
+                            self.handle_message(msg).await;
+                        },
+                        Err(_e) => {
+                            break;
+                        }
+                    }
+                },
+                _ = cancel_token.cancelled() => break,
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct WriteActorHandle {
+    pub sender: Arc<tokio::sync::broadcast::Sender<Message>>,
+}
+
+impl WriteActorHandle {
+    pub fn new(
+        name: String,
+        writer: Writer,
+        cancel_token: CancellationToken,
+        global_send: Arc<tokio::sync::broadcast::Sender<Message>>,
+    ) -> Self {
+        let (sender, receiver) = tokio::sync::broadcast::channel(512);
+        let mut actor = WriteActor::new(name, writer, receiver, global_send);
+        tokio::spawn(async move {
+            actor.run(cancel_token).await;
+        });
+
+        Self {
+            sender: Arc::new(sender),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+#[allow(dead_code)]
+pub struct Connection {
+    pub name: String,
+    pub writer: Option<WriteActorHandle>,
+    pub reader: Option<ReadActorHandle>,
+    pub ping: Option<PingActorHandle>,
+    pub config: Config,
+    pub cancel_token: Option<CancellationToken>,
+}
+
+impl Connection {
+    pub fn write(&self) -> Result<Arc<tokio::sync::broadcast::Sender<Message>>> {
+        if let Some(writer) = &self.writer {
+            return Ok(Arc::clone(&writer.sender));
+        }
+        Err(anyhow!(ConnectionError::ConnectionInactive))
+    }
+
+    pub fn get_cancel_token(&self) -> Option<CancellationToken> {
+        self.cancel_token.clone()
+    }
+
+    pub fn new_initialized(
+        name: &str,
+        config: Config,
+        writer: WriteActorHandle,
+        reader: ReadActorHandle,
+        ping: PingActorHandle,
+        cancel_token: CancellationToken,
+    ) -> Self {
+        Self {
+            name: name.to_string(),
+            config,
+            writer: Some(writer),
+            ping: Some(ping),
+            reader: Some(reader),
+            cancel_token: Some(cancel_token),
+        }
+    }
+}
