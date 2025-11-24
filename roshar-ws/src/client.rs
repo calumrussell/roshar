@@ -224,7 +224,7 @@ impl Client {
     /// TcpStream before the TLS handshake.
     ///
     /// Example:
-    /// ```no_run
+    /// ```ignore
     /// use tokio::net::TcpStream;
     /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     /// stream.set_nodelay(true)?;

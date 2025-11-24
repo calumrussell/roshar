@@ -2,6 +2,7 @@
 members = [
     "roshar-ws",
     "roshar-ws-mgr",
+    "roshar-bt",
 ]
 resolver = "2"
 

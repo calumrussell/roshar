@@ -1,4 +1,4 @@
-use urithiru::{Client, Frame, Reader};
+use roshar_ws::{Client, Frame, Reader};
 use std::time::{Duration, Instant};
 use tokio::time::timeout;
 use tokio::io::{AsyncRead, ReadBuf};
@@ -283,7 +283,7 @@ async fn test_synthetic_performance_urithiru() {
         let frame = Frame {
             fin: true,
             rsv: [false, false, false],
-            opcode: urithiru::Opcode::Text,
+            opcode: roshar_ws::Opcode::Text,
             masked: false,
             mask: None,
             payload: bytes::Bytes::from(payload.clone()),

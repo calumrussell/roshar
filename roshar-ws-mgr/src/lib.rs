@@ -21,6 +21,7 @@ mod test {
             ping_timeout: 15,
             url: url.to_string(),
             reconnect_timeout: 10,
+            use_text_ping: None,
             read_buffer_size: None,
             write_buffer_size: None,
             max_message_size: None,
