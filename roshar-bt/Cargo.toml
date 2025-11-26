@@ -2,6 +2,9 @@
 name = "roshar-bt"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Backtesting framework for trading strategies"
+repository = "https://github.com/calumrussell/roshar"
 
 [dependencies]
 anyhow = "1.0.95"

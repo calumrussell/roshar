@@ -4,6 +4,8 @@ version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+description = "Low-level WebSocket client library for Rust"
+repository = "https://github.com/calumrussell/roshar"
 
 [dependencies]
 tokio = { workspace = true }

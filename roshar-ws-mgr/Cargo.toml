@@ -1,7 +1,10 @@
 [package]
 name = "roshar-ws-mgr"
-version = "0.5.7"
+version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "WebSocket connection manager with automatic reconnection and heartbeat support"
+repository = "https://github.com/calumrussell/roshar"
 
 [lib]
 name = "roshar_ws_mgr"
