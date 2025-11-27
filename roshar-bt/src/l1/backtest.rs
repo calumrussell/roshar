@@ -93,11 +93,8 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
         let mid_price = (bid + ask) / 2.0;
         let mid_price_decimal = Decimal::from_f64(mid_price).unwrap();
 
-        self.performance.update(
-            self.curr_ts,
-            self.position,
-            mid_price_decimal,
-        );
+        self.performance
+            .update(self.curr_ts, self.position, mid_price_decimal);
     }
 
     pub fn get_performance_metrics(&self) -> &PerformanceMetrics {
@@ -110,7 +107,8 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
 
     pub fn generate_chart(&self, output_path: &str) -> Result<()> {
         let chart_data = ChartData::from_performance_metrics(&self.performance);
-        chart_data.create_multi_chart(output_path)
+        chart_data
+            .create_multi_chart(output_path)
             .map_err(|e| anyhow!("Failed to create chart: {}", e))?;
         Ok(())
     }
@@ -134,7 +132,9 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
                         }
                         EventSrcState::Active => {
                             //TODO: state is shared between thse two parsers
-                            if let Err(e) = self.parser.parse_candle(&self.buf, &mut self.candle_queue) {
+                            if let Err(e) =
+                                self.parser.parse_candle(&self.buf, &mut self.candle_queue)
+                            {
                                 warn!("Failed to parse line: {}", e);
                             }
 

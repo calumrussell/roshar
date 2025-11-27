@@ -4,9 +4,9 @@ use crate::handshake::{create_handshake_request, generate_key, parse_handshake_r
 use crate::reader::{Reader, ReaderType};
 use crate::writer::{Writer, WriterType};
 use bytes::BytesMut;
-use tokio_rustls::TlsConnector;
-use tokio_rustls::rustls::{ClientConfig, ServerName};
 use std::sync::OnceLock;
+use tokio_rustls::rustls::{ClientConfig, ServerName};
+use tokio_rustls::TlsConnector;
 
 // Platform-specific stream type
 #[cfg(feature = "uring")]
@@ -54,42 +54,46 @@ impl Client {
             // Cache the default config to avoid reloading certificates on every connection
             // This is the REAL optimization - certificate loading happens only once!
             static DEFAULT_CONFIG: OnceLock<std::sync::Arc<ClientConfig>> = OnceLock::new();
-            DEFAULT_CONFIG.get_or_init(|| {
-                let mut roots = tokio_rustls::rustls::RootCertStore::empty();
-                
-                // Load native root certificates
-                // rustls-native-certs 0.6 returns Result<Vec<Certificate>, io::Error>
-                match rustls_native_certs::load_native_certs() {
-                    Ok(certs) if !certs.is_empty() => {
-                        // Use add_parsable_certificates for better performance (batch operation)
-                        // This is more efficient than adding certs one by one
-                        let cert_slices: Vec<&[u8]> = certs.iter().map(|c| c.0.as_ref()).collect();
-                        let (_number_added, _number_ignored) = roots.add_parsable_certificates(&cert_slices);
-                        
-                        // Logging removed for performance - can be re-enabled for debugging
-                        // if number_added == 0 {
-                        //     eprintln!("Warning: No native root certificates were successfully added (ignored {number_ignored}/{total_number})");
-                        // } else if number_ignored > 0 {
-                        //     eprintln!("Debug: Added {number_added}/{total_number} native root certificates (ignored {number_ignored})");
-                        // }
+            DEFAULT_CONFIG
+                .get_or_init(|| {
+                    let mut roots = tokio_rustls::rustls::RootCertStore::empty();
+
+                    // Load native root certificates
+                    // rustls-native-certs 0.6 returns Result<Vec<Certificate>, io::Error>
+                    match rustls_native_certs::load_native_certs() {
+                        Ok(certs) if !certs.is_empty() => {
+                            // Use add_parsable_certificates for better performance (batch operation)
+                            // This is more efficient than adding certs one by one
+                            let cert_slices: Vec<&[u8]> =
+                                certs.iter().map(|c| c.0.as_ref()).collect();
+                            let (_number_added, _number_ignored) =
+                                roots.add_parsable_certificates(&cert_slices);
+
+                            // Logging removed for performance - can be re-enabled for debugging
+                            // if number_added == 0 {
+                            //     eprintln!("Warning: No native root certificates were successfully added (ignored {number_ignored}/{total_number})");
+                            // } else if number_ignored > 0 {
+                            //     eprintln!("Debug: Added {number_added}/{total_number} native root certificates (ignored {number_ignored})");
+                            // }
+                        }
+                        Ok(_) => {
+                            // Empty cert list - continue with empty root store
+                        }
+                        Err(_e) => {
+                            // Log error but don't fail - continue with empty root store
+                            // Logging removed for performance - can be re-enabled for debugging
+                            // eprintln!("Warning: Failed to load native root certificates: {}", e);
+                        }
                     }
-                    Ok(_) => {
-                        // Empty cert list - continue with empty root store
-                    }
-                    Err(_e) => {
-                        // Log error but don't fail - continue with empty root store
-                        // Logging removed for performance - can be re-enabled for debugging
-                        // eprintln!("Warning: Failed to load native root certificates: {}", e);
-                    }
-                }
-                
-                std::sync::Arc::new(
-                    ClientConfig::builder()
-                        .with_safe_defaults()
-                        .with_root_certificates(roots)
-                        .with_no_client_auth()
-                )
-            }).clone()
+
+                    std::sync::Arc::new(
+                        ClientConfig::builder()
+                            .with_safe_defaults()
+                            .with_root_certificates(roots)
+                            .with_no_client_auth(),
+                    )
+                })
+                .clone()
         });
 
         let connector = TlsConnector::from(config);
@@ -110,26 +114,31 @@ impl Client {
             addr
         } else {
             // Try to resolve hostname:port
-            let (host, port) = addr.rsplit_once(':')
+            let (host, port) = addr
+                .rsplit_once(':')
                 .ok_or_else(|| Error::Handshake(format!("Invalid address format: {}", addr)))?;
-            let port: u16 = port.parse()
+            let port: u16 = port
+                .parse()
                 .map_err(|e| Error::Handshake(format!("Invalid port: {}", e)))?;
-            
+
             // Resolve hostname
             use tokio::net::lookup_host;
-            let mut addrs = lookup_host((host, port)).await
-                .map_err(|e| Error::Handshake(format!("Failed to resolve hostname {}: {}", host, e)))?;
-            
-            addrs.next()
+            let mut addrs = lookup_host((host, port)).await.map_err(|e| {
+                Error::Handshake(format!("Failed to resolve hostname {}: {}", host, e))
+            })?;
+
+            addrs
+                .next()
                 .ok_or_else(|| Error::Handshake(format!("No addresses found for {}", host)))?
         };
 
         // Connect using platform-specific stream
-        let tcp_stream = TcpStream::connect(socket_addr).await
-            .map_err(|e| Error::Io(std::io::Error::new(
+        let tcp_stream = TcpStream::connect(socket_addr).await.map_err(|e| {
+            Error::Io(std::io::Error::new(
                 std::io::ErrorKind::ConnectionRefused,
                 format!("Failed to connect: {}", e),
-            )))?;
+            ))
+        })?;
 
         // Perform TLS handshake if needed, then split the stream
         let (reader_type, writer_type, host) = if let Some((connector, server_name)) = tls {
@@ -138,11 +147,13 @@ impl Client {
                 ServerName::IpAddress(ip) => ip.to_string(),
                 _ => format!("{}:{}", socket_addr.ip(), socket_addr.port()),
             };
-            
+
             // Do TLS handshake on the full stream
-            let tls_stream = connector.connect(server_name, tcp_stream).await
+            let tls_stream = connector
+                .connect(server_name, tcp_stream)
+                .await
                 .map_err(|e| Error::Tls(format!("TLS handshake failed: {}", e)))?;
-            
+
             // Split the TLS stream into read and write halves
             #[cfg(feature = "uring")]
             let (tls_read, tls_write) = tokio_uring::io::split(tls_stream);
@@ -179,15 +190,15 @@ impl Client {
 
         // Read handshake response - use read_buf for efficient reading
         let mut response = BytesMut::with_capacity(4096);
-        
+
         loop {
             // Use read_buf which is optimized for BytesMut (avoids zeroing)
             let n = reader.read_handshake_buf(&mut response).await?;
-            
+
             if n == 0 {
                 return Err(Error::ConnectionClosed);
             }
-            
+
             // Check if we have a complete HTTP response - optimized search
             // Search from the end backwards for \r\n\r\n (HTTP response terminator)
             if response.len() >= 4 {
@@ -195,8 +206,11 @@ impl Client {
                 let bytes = response.as_ref();
                 let mut found = false;
                 for i in (3..bytes.len()).rev() {
-                    if bytes[i-3] == b'\r' && bytes[i-2] == b'\n' && 
-                       bytes[i-1] == b'\r' && bytes[i] == b'\n' {
+                    if bytes[i - 3] == b'\r'
+                        && bytes[i - 2] == b'\n'
+                        && bytes[i - 1] == b'\r'
+                        && bytes[i] == b'\n'
+                    {
                         response.truncate(i + 1);
                         found = true;
                         break;
@@ -211,10 +225,7 @@ impl Client {
         // Parse and validate handshake response
         parse_handshake_response(&response)?;
 
-        Ok(Client {
-            reader,
-            writer,
-        })
+        Ok(Client { reader, writer })
     }
 
     /// Configure socket options before connecting
@@ -246,5 +257,3 @@ impl Client {
         self.writer.send_frame(frame).await
     }
 }
-
-

@@ -56,12 +56,8 @@ pub(crate) fn parse_frame_header(buf: &[u8], max_frame_size: usize) -> Result<Fr
                 "64-bit payload length not fully supported".to_string(),
             ));
         }
-        payload_len = u32::from_be_bytes([
-            len_bytes[4],
-            len_bytes[5],
-            len_bytes[6],
-            len_bytes[7],
-        ]) as usize;
+        payload_len =
+            u32::from_be_bytes([len_bytes[4], len_bytes[5], len_bytes[6], len_bytes[7]]) as usize;
         header_len = 10;
     }
 
@@ -187,7 +183,7 @@ impl Frame {
     /// If the frame is incomplete, returns `Error::IncompleteFrame`.
     pub fn parse(buf: &[u8], max_frame_size: usize) -> Result<(Self, usize)> {
         let header = parse_frame_header(buf, max_frame_size)?;
-        
+
         // Check if we have the full payload
         let total_len = header.header_len + header.payload_len;
         if buf.len() < total_len {
@@ -302,7 +298,7 @@ impl Frame {
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let mask = rng.gen::<[u8; 4]>();
-        
+
         Self {
             fin: true,
             rsv: [false, false, false],
@@ -318,7 +314,7 @@ impl Frame {
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let mask = rng.gen::<[u8; 4]>();
-        
+
         Self {
             fin: true,
             rsv: [false, false, false],
@@ -361,4 +357,3 @@ mod tests {
         assert_eq!(frame.payload, Bytes::from("Hello"));
     }
 }
-

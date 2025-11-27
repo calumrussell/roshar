@@ -235,7 +235,7 @@ impl EventSrc for S3Source {
         {
             if let Err(e) = self.load_next_object() {
                 error!("{:?}", e);
-                return None
+                return None;
             }
             if self.current_data.is_none() {
                 return Some(EventSrcState::Empty);
@@ -422,6 +422,10 @@ mod tests {
         }
         // HyperliquidCandleParser only emits a candle when the next candle arrives,
         // so with 4 input lines we get 3 output events (the last one is held)
-        assert_eq!(events.len(), 3, "Should read 3 events (parser holds last candle)");
+        assert_eq!(
+            events.len(),
+            3,
+            "Should read 3 events (parser holds last candle)"
+        );
     }
 }
