@@ -1,11 +1,13 @@
+use chrono::{DateTime, Utc};
 use log::debug;
+use serde::{Deserialize, Deserializer, Serialize};
 
-pub mod common;
-pub use common::*;
-
-pub mod http;
+#[cfg(feature = "clickhouse")]
+use clickhouse::Row;
 
 pub mod exchanges;
+pub mod orderbook;
+
 pub use exchanges::WebsocketSupportedExchanges;
 pub use exchanges::binance::*;
 pub use exchanges::bybit::*;
@@ -14,6 +16,234 @@ pub use exchanges::hyperliquid::*;
 pub use exchanges::kraken::*;
 pub use exchanges::krakenspot::*;
 pub use exchanges::mex::*;
+pub use orderbook::*;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct Candle {
+    pub open: String,
+    pub high: String,
+    pub low: String,
+    pub close: String,
+    pub volume: String,
+    pub exchange: String,
+    #[serde(with = "chrono::serde::ts_milliseconds")]
+    pub time: DateTime<Utc>,
+    #[serde(with = "chrono::serde::ts_milliseconds")]
+    pub close_time: DateTime<Utc>,
+    pub coin: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct Trade {
+    pub px: f64,
+    pub sz: f64,
+    pub time: i64,
+    pub exchange: String,
+    pub side: bool,
+    pub coin: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct DepthUpdate {
+    pub px: f64,
+    pub sz: f64,
+    pub time: i64,
+    pub exchange: String,
+    pub side: bool,
+    pub coin: String,
+}
+
+// New exchange types for daily partitioned tables
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct TradeData {
+    pub px: String,
+    pub qty: String,
+    pub time: u64,
+    #[serde(with = "chrono::serde::ts_milliseconds")]
+    pub time_ts: DateTime<Utc>,
+    pub ticker: String,
+    pub meta: String,
+    pub side: bool,
+    pub venue: Venue,
+}
+
+impl TradeData {
+    pub fn estimate_size(&self) -> usize {
+        std::mem::size_of::<Self>()
+            + self.px.capacity()
+            + self.qty.capacity()
+            + self.ticker.capacity()
+            + self.meta.capacity()
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct DepthUpdateData {
+    pub px: String,
+    pub qty: String,
+    pub time: u64,
+    #[serde(with = "chrono::serde::ts_milliseconds")]
+    pub time_ts: DateTime<Utc>,
+    pub ticker: String,
+    pub meta: String,
+    pub side: bool,
+    pub venue: Venue,
+}
+
+impl DepthUpdateData {
+    pub fn estimate_size(&self) -> usize {
+        std::mem::size_of::<Self>()
+            + self.px.capacity()
+            + self.qty.capacity()
+            + self.ticker.capacity()
+            + self.meta.capacity()
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct DepthSnapshotData {
+    pub bid_prices: Vec<String>,
+    pub bid_sizes: Vec<String>,
+    pub ask_prices: Vec<String>,
+    pub ask_sizes: Vec<String>,
+    pub time: u64,
+    #[serde(with = "chrono::serde::ts_milliseconds")]
+    pub time_ts: DateTime<Utc>,
+    pub ticker: String,
+    pub venue: Venue,
+}
+
+impl DepthSnapshotData {
+    pub fn estimate_size(&self) -> usize {
+        std::mem::size_of::<Self>()
+            + self.ticker.capacity()
+            + self.bid_prices.iter().map(|s| s.capacity()).sum::<usize>()
+            + self.bid_sizes.iter().map(|s| s.capacity()).sum::<usize>()
+            + self.ask_prices.iter().map(|s| s.capacity()).sum::<usize>()
+            + self.ask_sizes.iter().map(|s| s.capacity()).sum::<usize>()
+    }
+}
+
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "clickhouse", derive(Row))]
+pub struct DepthMetrics {
+    pub mid: f64,
+    pub front_b: f64,
+    pub back_b: f64,
+    pub best_b: f64,
+    pub weighted_b: f64,
+    pub exp_050_b: f64,
+    pub exp_025_b: f64,
+    pub exp_075_b: f64,
+    pub exchange: String,
+    pub coin: String,
+    pub time: i64,
+}
+
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[repr(u8)]
+pub enum Venue {
+    ByBit = 0,
+    Kraken = 1,
+    Hyperliquid = 2,
+    Mex = 3,
+    Binance = 4,
+    ByBitSpot = 5,
+    KrakenSpot = 6,
+}
+
+impl serde::Serialize for Venue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Venue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = u8::deserialize(deserializer)?;
+        match value {
+            0 => Ok(Venue::ByBit),
+            1 => Ok(Venue::Kraken),
+            2 => Ok(Venue::Hyperliquid),
+            3 => Ok(Venue::Mex),
+            4 => Ok(Venue::Binance),
+            5 => Ok(Venue::ByBitSpot),
+            6 => Ok(Venue::KrakenSpot),
+            _ => Err(serde::de::Error::custom(format!(
+                "Invalid venue value: {}",
+                value
+            ))),
+        }
+    }
+}
+
+impl From<String> for Venue {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "bybit" => Self::ByBit,
+            "kraken" => Self::Kraken,
+            "hl" => Self::Hyperliquid,
+            "hyperliquid" => Self::Hyperliquid,
+            "mex" => Self::Mex,
+            "binance" => Self::Binance,
+            "bybit-spot" => Self::ByBitSpot,
+            "kraken-spot" => Self::KrakenSpot,
+            _ => panic!("Unknown exchange: {value:?}"),
+        }
+    }
+}
+
+impl From<&str> for Venue {
+    fn from(value: &str) -> Self {
+        match value {
+            "bybit" => Self::ByBit,
+            "kraken" => Self::Kraken,
+            "hl" => Self::Hyperliquid,
+            "hyperliquid" => Self::Hyperliquid,
+            "mex" => Self::Mex,
+            "binance" => Self::Binance,
+            "bybit-spot" => Self::ByBitSpot,
+            "kraken-spot" => Self::KrakenSpot,
+            _ => panic!("Unknown exchange: {value:?}"),
+        }
+    }
+}
+
+impl Venue {
+    /// Get a static string reference for this venue (avoids allocation)
+    #[inline]
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::ByBit => "bybit",
+            Self::Kraken => "kraken",
+            Self::Hyperliquid => "hyperliquid",
+            Self::Mex => "mex",
+            Self::Binance => "binance",
+            Self::ByBitSpot => "bybit-spot",
+            Self::KrakenSpot => "kraken-spot",
+        }
+    }
+}
+
+impl std::fmt::Display for Venue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub enum SupportedMessages {
