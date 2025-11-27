@@ -131,23 +131,6 @@ impl DepthSnapshotData {
 }
 
 
-#[derive(Debug, Clone, Serialize)]
-#[cfg_attr(feature = "clickhouse", derive(Row))]
-pub struct DepthMetrics {
-    pub mid: f64,
-    pub front_b: f64,
-    pub back_b: f64,
-    pub best_b: f64,
-    pub weighted_b: f64,
-    pub exp_050_b: f64,
-    pub exp_025_b: f64,
-    pub exp_075_b: f64,
-    pub exchange: String,
-    pub coin: String,
-    pub time: i64,
-}
-
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 #[repr(u8)]
 pub enum Venue {
@@ -414,13 +397,3 @@ impl SupportedMessages {
     }
 }
 
-// Legacy websocket URL constants
-pub const HL_WSS_URL: &str = "wss://api.hyperliquid.xyz/ws";
-pub const HL_TESTNET_WSS_URL: &str = "wss://api.hyperliquid-testnet.xyz/ws";
-pub const MEX_WSS_URL: &str = "wss://wbs.mexc.com/ws";
-pub const HL_CANDLE_WSS_URL: &str = "wss://api.hyperliquid.xyz/ws";
-pub const BYBIT_WSS_URL: &str = "wss://stream.bybit.com/v5/public/linear";
-pub const BYBIT_SPOT_WSS_URL: &str = "wss://stream.bybit.com/v5/public/spot";
-pub const KRAKEN_SPOT_WSS_URL: &str = "wss://ws.kraken.com/v2";
-pub const KRAKEN_WSS_URL: &str = "wss://futures.kraken.com/ws/v1";
-pub const BINANCE_WSS_URL: &str = "wss://fstream.binance.com/ws";
