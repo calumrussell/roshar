@@ -1,0 +1,38 @@
+[package]
+name = "exchange-types"
+edition.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_urlencoded = "0.7"
+chrono = { workspace = true }
+log = { workspace = true }
+tokio = { workspace = true }
+clickhouse = { workspace = true }
+thiserror = { workspace = true }
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+parking_lot = "0.12"
+base64 = "0.22"
+hmac = "0.12"
+sha2 = "0.10"
+dotenv = "0.15"
+secp256k1 = "0.27"
+hex = "0.4"
+sha3 = "0.10"
+rmp-serde = "1.0"
+roshar-ws-mgr = { workspace = true }
+tokio-tungstenite = { version = "0.26.2", features = ["native-tls"] }
+zmq = { workspace = true }
+dashmap = "6.1"
+rust_decimal = { workspace = true }
+ordered-float = "4.2"
+rand = "0.8"
+compact_str = "0.8"
+hyperliquid_rust_sdk = "0.6.0"
+primitive-types = "0.11"
+ethers = "2.0"
