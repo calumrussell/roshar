@@ -12,9 +12,7 @@ pub mod orderbook;
 pub use exchanges::WebsocketSupportedExchanges;
 pub use exchanges::binance::*;
 pub use exchanges::bybit::*;
-pub use exchanges::bybitspot::*;
 pub use exchanges::kraken::*;
-pub use exchanges::krakenspot::*;
 pub use hyperliquid::*;
 pub use orderbook::*;
 
@@ -138,8 +136,6 @@ pub enum Venue {
     Kraken = 1,
     Hyperliquid = 2,
     Binance = 4,
-    ByBitSpot = 5,
-    KrakenSpot = 6,
 }
 
 impl serde::Serialize for Venue {
@@ -162,8 +158,6 @@ impl<'de> serde::Deserialize<'de> for Venue {
             1 => Ok(Venue::Kraken),
             2 => Ok(Venue::Hyperliquid),
             4 => Ok(Venue::Binance),
-            5 => Ok(Venue::ByBitSpot),
-            6 => Ok(Venue::KrakenSpot),
             _ => Err(serde::de::Error::custom(format!(
                 "Invalid venue value: {}",
                 value
@@ -180,8 +174,6 @@ impl From<String> for Venue {
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
             "binance" => Self::Binance,
-            "bybit-spot" => Self::ByBitSpot,
-            "kraken-spot" => Self::KrakenSpot,
             _ => panic!("Unknown exchange: {value:?}"),
         }
     }
@@ -195,8 +187,6 @@ impl From<&str> for Venue {
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
             "binance" => Self::Binance,
-            "bybit-spot" => Self::ByBitSpot,
-            "kraken-spot" => Self::KrakenSpot,
             _ => panic!("Unknown exchange: {value:?}"),
         }
     }
@@ -211,8 +201,6 @@ impl Venue {
             Self::Kraken => "kraken",
             Self::Hyperliquid => "hyperliquid",
             Self::Binance => "binance",
-            Self::ByBitSpot => "bybit-spot",
-            Self::KrakenSpot => "kraken-spot",
         }
     }
 }
@@ -230,15 +218,10 @@ pub enum SupportedMessages {
     HyperliquidUserFillsMessage(HyperliquidUserFillsMessage),
     HyperliquidOrderUpdatesMessage(HyperliquidOrderUpdatesMessage),
     HyperliquidBboMessage(HyperliquidBboMessage),
-    KrakenSpotOhlcMessage(KrakenSpotOhlcMessage),
     ByBitDepthMessage(ByBitDepthMessage),
     ByBitTradesMessage(ByBitTradesMessage),
     ByBitCandleMessage(ByBitCandleMessage),
     ByBitMessage(ByBitMessage),
-    ByBitSpotDepthMessage(ByBitSpotDepthMessage),
-    ByBitSpotTradesMessage(ByBitSpotTradesMessage),
-    KrakenSpotBookMessage(KrakenSpotBookMessage),
-    KrakenSpotTradeMessage(KrakenSpotTradeMessage),
     KrakenBookSnapshotMessage(KrakenBookSnapshotMessage),
     KrakenBookDeltaMessage(KrakenBookDeltaMessage),
     KrakenTradeSnapshotMessage(KrakenTradeSnapshotMessage),
@@ -290,32 +273,6 @@ impl SupportedMessages {
                 .map_err(|err| {
                     // Log unrecognized message for debugging purposes
                     debug!("Unrecognized bybit message format: {json} - Error: {err}");
-                    err
-                })
-                .ok(),
-
-            Venue::ByBitSpot => serde_json::from_str::<ByBitSpotDepthMessage>(json)
-                .map(SupportedMessages::ByBitSpotDepthMessage)
-                .or_else(|_| {
-                    serde_json::from_str::<ByBitTradesMessage>(json)
-                        .map(SupportedMessages::ByBitTradesMessage)
-                })
-                .map_err(|err| {
-                    // Log unrecognized message for debugging purposes
-                    debug!("Unrecognized bybit-spot message format: {json} - Error: {err}");
-                    err
-                })
-                .ok(),
-
-            Venue::KrakenSpot => serde_json::from_str::<KrakenSpotBookMessage>(json)
-                .map(SupportedMessages::KrakenSpotBookMessage)
-                .or_else(|_| {
-                    serde_json::from_str::<KrakenSpotTradeMessage>(json)
-                        .map(SupportedMessages::KrakenSpotTradeMessage)
-                })
-                .map_err(|err| {
-                    // Log unrecognized message for debugging purposes
-                    debug!("Unrecognized kraken-spot message format: {json} - Error: {err}");
                     err
                 })
                 .ok(),
