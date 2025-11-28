@@ -34,7 +34,7 @@ impl PerformanceMetrics {
     pub fn update(&mut self, timestamp: i64, position: Decimal, mid_price: Decimal) {
         self.prices.push_back((timestamp, mid_price));
         self.positions.push_back((timestamp, position));
-        
+
         // For the first update, cumulative return is 0
         if self.last_price.is_none() {
             self.cumulative_returns.push_back(Decimal::ZERO);
@@ -45,7 +45,7 @@ impl PerformanceMetrics {
             self.cumulative_return += position_return;
             self.cumulative_returns.push_back(self.cumulative_return);
         }
-        
+
         self.last_price = Some(mid_price);
         self.last_position = position;
     }
@@ -88,7 +88,7 @@ impl PerformanceMetrics {
     pub fn get_returns_history(&self) -> &VecDeque<Decimal> {
         &self.returns
     }
-    
+
     pub fn get_cumulative_returns_history(&self) -> &VecDeque<Decimal> {
         &self.cumulative_returns
     }

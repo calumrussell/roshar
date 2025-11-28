@@ -23,7 +23,13 @@ impl ChartData {
         }
     }
 
-    pub fn add_point(&mut self, timestamp: i64, price: Decimal, position: Decimal, cumulative_return: Decimal) {
+    pub fn add_point(
+        &mut self,
+        timestamp: i64,
+        price: Decimal,
+        position: Decimal,
+        cumulative_return: Decimal,
+    ) {
         self.data_points.push(TimeSeriesPoint {
             timestamp,
             price,
@@ -37,27 +43,31 @@ impl ChartData {
         let positions = performance.get_position_history();
         let prices = performance.get_prices();
         let cumulative_returns = performance.get_cumulative_returns_history();
-        
+
         for (i, &(timestamp, price)) in prices.iter().enumerate() {
             let position = if i < positions.len() {
                 positions[i].1
             } else {
                 positions.back().map_or(Decimal::ZERO, |p| p.1)
             };
-            
+
             let cumulative_return = if i < cumulative_returns.len() {
                 cumulative_returns[i]
             } else {
                 Decimal::ZERO
             };
-            
+
             chart_data.add_point(timestamp, price, position, cumulative_return);
         }
-        
+
         chart_data
     }
 
-    pub fn create_chart(&self, output_path: &str, title: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn create_chart(
+        &self,
+        output_path: &str,
+        title: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         if self.data_points.is_empty() {
             return Err("No data points to chart".into());
         }
@@ -70,10 +80,7 @@ impl ChartData {
             .margin(10)
             .x_label_area_size(60)
             .y_label_area_size(80)
-            .build_cartesian_2d(
-                self.get_time_range(),
-                self.get_price_range(),
-            )?;
+            .build_cartesian_2d(self.get_time_range(), self.get_price_range())?;
 
         chart
             .configure_mesh()
@@ -81,7 +88,8 @@ impl ChartData {
             .y_desc("Price")
             .draw()?;
 
-        let price_data: Vec<(i64, f64)> = self.data_points
+        let price_data: Vec<(i64, f64)> = self
+            .data_points
             .iter()
             .map(|p| (p.timestamp, p.price.to_f64().unwrap_or(0.0)))
             .collect();
@@ -114,22 +122,18 @@ impl ChartData {
         Ok(())
     }
 
-
-    fn draw_price_cumulative_return_overlay_chart(&self, area: &DrawingArea<BitMapBackend, plotters::coord::Shift>) -> Result<(), Box<dyn std::error::Error>> {
+    fn draw_price_cumulative_return_overlay_chart(
+        &self,
+        area: &DrawingArea<BitMapBackend, plotters::coord::Shift>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let mut chart = ChartBuilder::on(area)
             .caption("Price & Cumulative Return", ("sans-serif", 30))
             .margin(5)
             .x_label_area_size(40)
             .y_label_area_size(60)
             .right_y_label_area_size(60)
-            .build_cartesian_2d(
-                self.get_time_range(),
-                self.get_price_range(),
-            )?
-            .set_secondary_coord(
-                self.get_time_range(),
-                self.get_cumulative_return_range(),
-            );
+            .build_cartesian_2d(self.get_time_range(), self.get_price_range())?
+            .set_secondary_coord(self.get_time_range(), self.get_cumulative_return_range());
 
         chart
             .configure_mesh()
@@ -142,21 +146,25 @@ impl ChartData {
             .y_desc("Cumulative Return")
             .draw()?;
 
-        let price_data: Vec<(i64, f64)> = self.data_points
+        let price_data: Vec<(i64, f64)> = self
+            .data_points
             .iter()
             .map(|p| (p.timestamp, p.price.to_f64().unwrap_or(0.0)))
             .collect();
 
-        let return_data: Vec<(i64, f64)> = self.data_points
+        let return_data: Vec<(i64, f64)> = self
+            .data_points
             .iter()
             .map(|p| (p.timestamp, p.cumulative_return.to_f64().unwrap_or(0.0)))
             .collect();
 
-        chart.draw_series(LineSeries::new(price_data, &BLUE))?
+        chart
+            .draw_series(LineSeries::new(price_data, &BLUE))?
             .label("Price")
             .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &BLUE));
 
-        chart.draw_secondary_series(LineSeries::new(return_data, &GREEN))?
+        chart
+            .draw_secondary_series(LineSeries::new(return_data, &GREEN))?
             .label("Cumulative Return")
             .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &GREEN));
 
@@ -165,16 +173,16 @@ impl ChartData {
         Ok(())
     }
 
-    fn draw_position_chart(&self, area: &DrawingArea<BitMapBackend, plotters::coord::Shift>) -> Result<(), Box<dyn std::error::Error>> {
+    fn draw_position_chart(
+        &self,
+        area: &DrawingArea<BitMapBackend, plotters::coord::Shift>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let mut chart = ChartBuilder::on(area)
             .caption("Position", ("sans-serif", 30))
             .margin(5)
             .x_label_area_size(40)
             .y_label_area_size(60)
-            .build_cartesian_2d(
-                self.get_time_range(),
-                self.get_position_range(),
-            )?;
+            .build_cartesian_2d(self.get_time_range(), self.get_position_range())?;
 
         chart
             .configure_mesh()
@@ -182,12 +190,14 @@ impl ChartData {
             .y_desc("Position Size")
             .draw()?;
 
-        let position_data: Vec<(i64, f64)> = self.data_points
+        let position_data: Vec<(i64, f64)> = self
+            .data_points
             .iter()
             .map(|p| (p.timestamp, p.position.to_f64().unwrap_or(0.0)))
             .collect();
 
-        chart.draw_series(LineSeries::new(position_data, &RED))?
+        chart
+            .draw_series(LineSeries::new(position_data, &RED))?
             .label("Position")
             .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &RED));
 
@@ -203,13 +213,24 @@ impl ChartData {
     }
 
     fn get_time_range(&self) -> std::ops::Range<i64> {
-        let min_time = self.data_points.iter().map(|p| p.timestamp).min().unwrap_or(0);
-        let max_time = self.data_points.iter().map(|p| p.timestamp).max().unwrap_or(1);
+        let min_time = self
+            .data_points
+            .iter()
+            .map(|p| p.timestamp)
+            .min()
+            .unwrap_or(0);
+        let max_time = self
+            .data_points
+            .iter()
+            .map(|p| p.timestamp)
+            .max()
+            .unwrap_or(1);
         min_time..max_time
     }
 
     fn get_price_range(&self) -> std::ops::Range<f64> {
-        let prices: Vec<f64> = self.data_points
+        let prices: Vec<f64> = self
+            .data_points
             .iter()
             .map(|p| p.price.to_f64().unwrap_or(0.0))
             .collect();
@@ -220,7 +241,8 @@ impl ChartData {
     }
 
     fn get_cumulative_return_range(&self) -> std::ops::Range<f64> {
-        let returns: Vec<f64> = self.data_points
+        let returns: Vec<f64> = self
+            .data_points
             .iter()
             .map(|p| p.cumulative_return.to_f64().unwrap_or(0.0))
             .collect();
@@ -231,7 +253,8 @@ impl ChartData {
     }
 
     fn get_position_range(&self) -> std::ops::Range<f64> {
-        let positions: Vec<f64> = self.data_points
+        let positions: Vec<f64> = self
+            .data_points
             .iter()
             .map(|p| p.position.to_f64().unwrap_or(0.0))
             .collect();
@@ -252,7 +275,7 @@ mod tests {
         let mut chart_data = ChartData::new();
         chart_data.add_point(1000, dec!(100), dec!(10), dec!(0.01));
         chart_data.add_point(1001, dec!(101), dec!(5), dec!(0.02));
-        
+
         assert_eq!(chart_data.data_points.len(), 2);
         assert_eq!(chart_data.data_points[0].price, dec!(100));
         assert_eq!(chart_data.data_points[1].position, dec!(5));
@@ -264,7 +287,7 @@ mod tests {
         chart_data.add_point(1000, dec!(100), dec!(10), dec!(0.01));
         chart_data.add_point(2000, dec!(101), dec!(5), dec!(0.02));
         chart_data.add_point(1500, dec!(99), dec!(15), dec!(0.015));
-        
+
         let range = chart_data.get_time_range();
         assert_eq!(range.start, 1000);
         assert_eq!(range.end, 2000);

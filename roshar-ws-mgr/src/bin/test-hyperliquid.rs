@@ -2,8 +2,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{Result, anyhow};
-use roshar_ws_mgr::{Config, Manager, Message};
 use log::{error, info};
+use roshar_ws_mgr::{Config, Manager, Message};
 use serde::{Deserialize, Serialize};
 use tokio::time::sleep;
 
