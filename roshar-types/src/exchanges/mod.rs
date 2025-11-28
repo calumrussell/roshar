@@ -23,7 +23,7 @@ impl WebsocketSupportedExchanges {
     pub fn ping(&self) -> String {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::ping().to_json(),
-            WebsocketSupportedExchanges::Kraken => kraken::WssApi::ping(),
+            WebsocketSupportedExchanges::Kraken => kraken::KrakenWssMessage::ping().to_json(),
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::ping(),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::ping().to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::ping(),
@@ -34,7 +34,7 @@ impl WebsocketSupportedExchanges {
     pub fn depth(&self, coin: &str) -> String {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::l2_book(coin).to_json(),
-            WebsocketSupportedExchanges::Kraken => kraken::WssApi::depth(coin),
+            WebsocketSupportedExchanges::Kraken => kraken::KrakenWssMessage::depth(coin).to_json(),
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::depth(coin),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::depth(coin).to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::depth(coin),
@@ -45,7 +45,7 @@ impl WebsocketSupportedExchanges {
     pub fn trades(&self, coin: &str) -> String {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::Kraken => kraken::WssApi::trades(coin),
+            WebsocketSupportedExchanges::Kraken => kraken::KrakenWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::trades(coin),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::trades(coin),
