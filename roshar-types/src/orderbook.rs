@@ -208,7 +208,7 @@ impl<'a> LocalOrderBook<'a> {
     }
 
     pub fn bid_sizes(&self) -> Vec<String> {
-        self.bids.values().map(|v| v.to_string()).collect()
+       self.bids.values().map(|v| v.to_string()).collect()
     }
 
     pub fn ask_sizes(&self) -> Vec<String> {
