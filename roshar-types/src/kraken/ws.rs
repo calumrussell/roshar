@@ -1,7 +1,7 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
-use crate::{DepthUpdate, LocalOrderBook, LocalOrderBookError, Trade, Venue};
+use crate::{DepthUpdate, LocalOrderBook, LocalOrderBookError, OrderBookState, Trade, Venue};
 
 // Kraken Derivatives Book Structures
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -27,32 +27,18 @@ impl KrakenBookSnapshotMessage {
         true
     }
 
-    pub fn to_local_order_book(&self) -> LocalOrderBook {
-        use ordered_float::OrderedFloat;
-        use std::cmp::Reverse;
-
-        let mut bids = std::collections::BTreeMap::new();
-        let mut asks = std::collections::BTreeMap::new();
+    pub fn to_order_book_state(&self) -> OrderBookState {
+        let mut book = OrderBookState::new(50);
 
         for level in &self.bids {
-            bids.insert(
-                Reverse(OrderedFloat(level.price)),
-                level.qty.to_string().into(),
-            );
+            book.set_bid(level.price, &level.qty.to_string());
         }
 
         for level in &self.asks {
-            asks.insert(OrderedFloat(level.price), level.qty.to_string().into());
+            book.set_ask(level.price, &level.qty.to_string());
         }
 
-        LocalOrderBook {
-            bids,
-            asks,
-            last_update: self.timestamp,
-            last_update_ts: DateTime::from_timestamp_millis(self.timestamp).unwrap_or_default(),
-            exchange: Venue::Kraken.to_string().into(),
-            coin: self.product_id.as_str().into(),
-        }
+        book
     }
 
     pub fn to_depth_snapshot_data(&self) -> crate::DepthSnapshotData {
@@ -250,7 +236,7 @@ impl KrakenWssMessage {
 // Order book management
 pub struct KrakenOrderBook {
     pub symbol: String,
-    pub book: Option<LocalOrderBook>,
+    pub book: Option<OrderBookState>,
     pub counter: i64,
 }
 
@@ -261,6 +247,11 @@ impl KrakenOrderBook {
             book: None,
             counter: 0,
         }
+    }
+
+    /// Get a read-only view of the order book for calculations
+    pub fn as_view(&self) -> Option<LocalOrderBook<'_>> {
+        self.book.as_ref().map(|b| b.as_view())
     }
 
     pub fn new_update(&mut self, msg: &KrakenBookDeltaMessage) -> Result<(), LocalOrderBookError> {
@@ -279,8 +270,13 @@ impl KrakenOrderBook {
             let expected_seq = self.counter + 1;
             if msg_seq == expected_seq {
                 if let Some(ref mut book) = self.book {
-                    let updates = msg.to_depth_updates();
-                    book.apply_updates(&updates, 50);
+                    // Apply update directly
+                    let size_str = msg.qty.to_string();
+                    if msg.side == "sell" {
+                        book.set_ask(msg.price, &size_str);
+                    } else {
+                        book.set_bid(msg.price, &size_str);
+                    }
                     self.counter = msg_seq;
                 }
             } else {
@@ -310,7 +306,7 @@ impl KrakenOrderBook {
         }
 
         self.counter = msg.seq;
-        self.book = Some(msg.to_local_order_book());
+        self.book = Some(msg.to_order_book_state());
     }
 }
 
@@ -376,11 +372,11 @@ mod tests {
         assert!(order_book.book.is_some());
         assert_eq!(order_book.counter, 1000);
 
-        let book = order_book.book.as_ref().unwrap();
-        assert_eq!(book.test_bid_prices().len(), 2);
-        assert_eq!(book.test_ask_prices().len(), 2);
-        assert_eq!(book.test_bid_prices()[0], "50000");
-        assert_eq!(book.test_ask_prices()[0], "50001");
+        let view = order_book.as_view().unwrap();
+        assert_eq!(view.bid_prices().len(), 2);
+        assert_eq!(view.ask_prices().len(), 2);
+        assert_eq!(view.bid_prices()[0], "50000");
+        assert_eq!(view.ask_prices()[0], "50001");
     }
 
     #[test]

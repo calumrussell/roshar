@@ -442,12 +442,12 @@ impl BinanceTradeMessage {
 // Order book management
 use std::collections::VecDeque;
 
-use crate::{LocalOrderBook, LocalOrderBookError};
+use crate::{LocalOrderBook, LocalOrderBookError, OrderBookState};
 
 #[derive(Clone)]
 pub struct BinanceOrderBook {
     pub symbol: String,
-    pub book: Option<LocalOrderBook>,
+    pub book: Option<OrderBookState>,
     pub counter: u64,
     snapshot: Option<BinanceOrderBookSnapshot>,
     event_buff: VecDeque<BinanceDepthDiffMessage>,
@@ -491,29 +491,25 @@ impl BinanceOrderBook {
         self.snapshot = Some(snapshot);
     }
 
+    /// Get a read-only view of the order book for calculations
+    pub fn as_view(&self) -> Option<LocalOrderBook<'_>> {
+        self.book.as_ref().map(|b| b.as_view())
+    }
+
     /// Build the order book from snapshot and buffered events
     fn build_order_book_from_snapshot(
         &mut self,
         snapshot: &BinanceOrderBookSnapshot,
     ) -> Result<(), LocalOrderBookError> {
-        let mut updates = Vec::new();
-
         let exchange_str = Venue::Binance.as_str();
         let coin_str = self.symbol.as_str();
-        let time = chrono::Utc::now().timestamp_millis();
 
+        let mut book = OrderBookState::new(50);
+
+        // Apply snapshot bids directly
         for bid in &snapshot.bids {
-            if let (Ok(price), Ok(quantity)) = (bid[0].parse::<f64>(), bid[1].parse::<f64>()) {
-                if quantity > 0.0 {
-                    updates.push(DepthUpdate {
-                        time,
-                        exchange: exchange_str.to_string(),
-                        side: false,
-                        coin: coin_str.to_string(),
-                        px: price,
-                        sz: quantity,
-                    });
-                }
+            if let Ok(price) = bid[0].parse::<f64>() {
+                book.set_bid(price, &bid[1]);
             } else {
                 return Err(LocalOrderBookError::UnparseableInputs(
                     exchange_str.to_string(),
@@ -522,18 +518,10 @@ impl BinanceOrderBook {
             }
         }
 
+        // Apply snapshot asks directly
         for ask in &snapshot.asks {
-            if let (Ok(price), Ok(quantity)) = (ask[0].parse::<f64>(), ask[1].parse::<f64>()) {
-                if quantity > 0.0 {
-                    updates.push(DepthUpdate {
-                        time,
-                        exchange: exchange_str.to_string(),
-                        side: true,
-                        coin: coin_str.to_string(),
-                        px: price,
-                        sz: quantity,
-                    });
-                }
+            if let Ok(price) = ask[0].parse::<f64>() {
+                book.set_ask(price, &ask[1]);
             } else {
                 return Err(LocalOrderBookError::UnparseableInputs(
                     exchange_str.to_string(),
@@ -542,27 +530,28 @@ impl BinanceOrderBook {
             }
         }
 
-        let mut local_book = LocalOrderBook::new(
-            chrono::Utc::now().timestamp_millis(),
-            "binance".to_string(),
-            self.symbol.to_string(),
-        );
-
-        local_book.apply_updates(&updates, 50);
-
-        // Start with snapshot's last_update_id, then update if we have buffered events
+        // Apply buffered events
         let mut last_final_update_id: u64 = snapshot.last_update_id;
         while !self.event_buff.is_empty() {
             if let Some(event) = self.event_buff.pop_front() {
                 last_final_update_id = event.final_update_id;
-                if let Ok(updates) = event.to_depth_updates() {
-                    local_book.apply_updates(&updates, 50);
+                // Apply bids from event
+                for bid in &event.bids {
+                    if let Ok(price) = bid[0].parse::<f64>() {
+                        book.set_bid(price, &bid[1]);
+                    }
+                }
+                // Apply asks from event
+                for ask in &event.asks {
+                    if let Ok(price) = ask[0].parse::<f64>() {
+                        book.set_ask(price, &ask[1]);
+                    }
                 }
             }
         }
 
         self.counter = last_final_update_id;
-        self.book = Some(local_book);
+        self.book = Some(book);
         self.event_buff.clear();
 
         Ok(())
@@ -624,10 +613,19 @@ impl BinanceOrderBook {
 
                 if is_valid_sequence {
                     if let Some(ref mut book) = self.book {
-                        if let Ok(updates) = diff.to_depth_updates() {
-                            book.apply_updates(&updates, 50);
-                            self.counter = diff.final_update_id;
+                        // Apply bids directly
+                        for bid in &diff.bids {
+                            if let Ok(price) = bid[0].parse::<f64>() {
+                                book.set_bid(price, &bid[1]);
+                            }
                         }
+                        // Apply asks directly
+                        for ask in &diff.asks {
+                            if let Ok(price) = ask[0].parse::<f64>() {
+                                book.set_ask(price, &ask[1]);
+                            }
+                        }
+                        self.counter = diff.final_update_id;
                     }
                 } else {
                     // Sequence mismatch - reset state

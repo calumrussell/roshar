@@ -1,8 +1,7 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
-use crate::{Candle, DepthUpdate, LocalOrderBook, LocalOrderBookError, Trade, Venue};
+use crate::{Candle, DepthUpdate, LocalOrderBook, LocalOrderBookError, OrderBookState, Trade, Venue};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ByBitMessage {
@@ -31,39 +30,28 @@ impl ByBitDepthMessage {
         self.snapshot_type == "snapshot"
     }
 
-    pub fn to_local_order_book(&self) -> LocalOrderBook {
-        use ordered_float::OrderedFloat;
-        use std::cmp::Reverse;
-
-        let mut bids = BTreeMap::new();
-        let mut asks = BTreeMap::new();
+    pub fn to_order_book_state(&self) -> OrderBookState {
+        let mut book = OrderBookState::new(50);
 
         for level in &self.data.b {
             let formatted_px = remove_trailing_zeros(level.first().unwrap());
-            let formatted_sz = level.get(1).unwrap().to_string();
+            let formatted_sz = level.get(1).unwrap();
 
             if let Ok(price) = formatted_px.parse::<f64>() {
-                bids.insert(Reverse(OrderedFloat(price)), formatted_sz.as_str().into());
+                book.set_bid(price, formatted_sz);
             }
         }
 
         for level in &self.data.a {
             let formatted_px = remove_trailing_zeros(level.first().unwrap());
-            let formatted_sz = level.get(1).unwrap().to_string();
+            let formatted_sz = level.get(1).unwrap();
 
             if let Ok(price) = formatted_px.parse::<f64>() {
-                asks.insert(OrderedFloat(price), formatted_sz.as_str().into());
+                book.set_ask(price, formatted_sz);
             }
         }
 
-        LocalOrderBook {
-            bids,
-            asks,
-            last_update: self.ts as i64,
-            last_update_ts: DateTime::from_timestamp_millis(self.ts as i64).unwrap_or_default(),
-            exchange: Venue::ByBit.to_string().into(),
-            coin: self.data.s.as_str().into(),
-        }
+        book
     }
 
     pub fn to_depth_updates(&self) -> Result<Vec<DepthUpdate>, LocalOrderBookError> {
@@ -364,12 +352,17 @@ fn remove_trailing_zeros(s: &str) -> String {
 // Order book management
 pub struct BybitOrderBook {
     pub symbol: String,
-    pub book: Option<LocalOrderBook>,
+    pub book: Option<OrderBookState>,
 }
 
 impl BybitOrderBook {
     pub fn new(symbol: String) -> Self {
         Self { symbol, book: None }
+    }
+
+    /// Get a read-only view of the order book for calculations
+    pub fn as_view(&self) -> Option<LocalOrderBook<'_>> {
+        self.book.as_ref().map(|b| b.as_view())
     }
 
     pub fn new_update(&mut self, msg: &ByBitDepthMessage) -> Result<(), LocalOrderBookError> {
@@ -381,15 +374,24 @@ impl BybitOrderBook {
         }
 
         if msg.is_full_update() {
-            let local = msg.to_local_order_book();
-            self.book = Some(local);
+            let book = msg.to_order_book_state();
+            self.book = Some(book);
             return Ok(());
         }
 
         if let Some(ref mut book) = self.book {
-            let updates = msg.to_depth_updates();
-            if let Ok(updates) = updates {
-                book.apply_updates(&updates, 50);
+            // Apply updates directly
+            for bid in &msg.data.b {
+                let formatted_px = remove_trailing_zeros(bid.first().unwrap());
+                if let Ok(price) = formatted_px.parse::<f64>() {
+                    book.set_bid(price, bid.get(1).unwrap());
+                }
+            }
+            for ask in &msg.data.a {
+                let formatted_px = remove_trailing_zeros(ask.first().unwrap());
+                if let Ok(price) = formatted_px.parse::<f64>() {
+                    book.set_ask(price, ask.get(1).unwrap());
+                }
             }
         } else {
             return Err(LocalOrderBookError::BookUpdateBeforeSnapshot(
@@ -398,38 +400,17 @@ impl BybitOrderBook {
             ));
         }
 
+        // Validate BBO
         let validation_result = if let Some(ref book) = self.book {
             let (bid, ask) = book.get_bbo();
-            let bid_dec: Result<rust_decimal::Decimal, LocalOrderBookError> = match bid.parse() {
-                Ok(val) => Ok(val),
-                Err(_) => Err(LocalOrderBookError::UnparseableInputs(
+            match (bid, ask) {
+                (Some(b), Some(a)) if b > a => Err(LocalOrderBookError::BidAboveAsk(
+                    b.to_string(),
+                    a.to_string(),
                     Venue::ByBit.to_string(),
                     coin.clone(),
                 )),
-            };
-            let ask_dec: Result<rust_decimal::Decimal, LocalOrderBookError> = match ask.parse() {
-                Ok(val) => Ok(val),
-                Err(_) => Err(LocalOrderBookError::UnparseableInputs(
-                    Venue::ByBit.to_string(),
-                    coin.clone(),
-                )),
-            };
-
-            if let (Ok(bid), Ok(ask)) = (&bid_dec, &ask_dec) {
-                if bid > ask {
-                    Err(LocalOrderBookError::BidAboveAsk(
-                        bid.to_string(),
-                        ask.to_string(),
-                        Venue::ByBit.to_string(),
-                        coin.clone(),
-                    ))
-                } else {
-                    Ok(())
-                }
-            } else if bid_dec.is_err() {
-                bid_dec.map(|_| ())
-            } else {
-                ask_dec.map(|_| ())
+                _ => Ok(()),
             }
         } else {
             Err(LocalOrderBookError::BookUpdateBeforeSnapshot(
@@ -506,9 +487,9 @@ mod tests {
         assert!(result.is_ok());
         assert!(order_book.book.is_some());
 
-        let book = order_book.book.as_ref().unwrap();
-        assert_eq!(book.test_bid_prices().len(), 2);
-        assert_eq!(book.test_ask_prices().len(), 2);
+        let view = order_book.as_view().unwrap();
+        assert_eq!(view.bid_prices().len(), 2);
+        assert_eq!(view.ask_prices().len(), 2);
     }
 
     #[test]
@@ -566,9 +547,9 @@ mod tests {
         assert!(order_book.book.is_some());
 
         order_book.new_update(&snapshot2).unwrap();
-        let book_after = order_book.book.as_ref().unwrap();
+        let view = order_book.as_view().unwrap();
 
-        assert_eq!(book_after.test_bid_prices()[0], "51000");
+        assert_eq!(view.bid_prices()[0], "51000");
     }
 
     #[test]

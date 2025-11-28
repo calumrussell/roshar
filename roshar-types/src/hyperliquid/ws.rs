@@ -1,7 +1,7 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
-use crate::{LocalOrderBook, Trade, Venue};
+use crate::{LocalOrderBook, LocalOrderBookError, OrderBookState, Trade, Venue};
 
 // Hyperliquid Book Structures
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -25,34 +25,22 @@ pub struct HyperliquidBookMessage {
 }
 
 impl HyperliquidBookMessage {
-    pub fn to_local_order_book(&self) -> LocalOrderBook {
-        use ordered_float::OrderedFloat;
-        use std::cmp::Reverse;
-
-        let mut bids = std::collections::BTreeMap::new();
-        let mut asks = std::collections::BTreeMap::new();
+    pub fn to_order_book_state(&self) -> OrderBookState {
+        let mut book = OrderBookState::new(50);
 
         for level in &self.data.levels[0] {
             if let Ok(px) = level.px.parse::<f64>() {
-                bids.insert(Reverse(OrderedFloat(px)), level.sz.as_str().into());
+                book.set_bid(px, &level.sz);
             }
         }
 
         for level in &self.data.levels[1] {
             if let Ok(px) = level.px.parse::<f64>() {
-                asks.insert(OrderedFloat(px), level.sz.as_str().into());
+                book.set_ask(px, &level.sz);
             }
         }
 
-        LocalOrderBook {
-            bids,
-            asks,
-            last_update: self.data.time as i64,
-            last_update_ts: DateTime::from_timestamp_millis(self.data.time as i64)
-                .unwrap_or_default(),
-            exchange: Venue::Hyperliquid.to_string().into(),
-            coin: self.data.coin.as_str().into(),
-        }
+        book
     }
 
     pub fn to_depth_updates(&self) -> Vec<crate::DepthUpdateData> {
@@ -480,7 +468,7 @@ impl HyperliquidWssMessage {
 
 pub struct HlOrderBook {
     pub symbol: String,
-    pub book: Option<LocalOrderBook>,
+    pub book: Option<OrderBookState>,
 }
 
 impl HlOrderBook {
@@ -488,18 +476,23 @@ impl HlOrderBook {
         Self { symbol, book: None }
     }
 
+    /// Get a read-only view of the order book for calculations
+    pub fn as_view(&self) -> Option<LocalOrderBook<'_>> {
+        self.book.as_ref().map(|b| b.as_view())
+    }
+
     pub fn new_message(
         &mut self,
         msg: &HyperliquidBookMessage,
-    ) -> Result<(), crate::LocalOrderBookError> {
+    ) -> Result<(), LocalOrderBookError> {
         if msg.data.coin != self.symbol {
-            return Err(crate::LocalOrderBookError::WrongSymbol(
+            return Err(LocalOrderBookError::WrongSymbol(
                 self.symbol.clone(),
                 msg.data.coin.clone(),
             ));
         }
 
-        self.book = Some(msg.to_local_order_book());
+        self.book = Some(msg.to_order_book_state());
         Ok(())
     }
 }
@@ -590,13 +583,12 @@ mod tests {
             },
         };
 
-        let local_book = book_msg.to_local_order_book();
-        assert_eq!(local_book.test_coin(), "ETH");
-        assert_eq!(local_book.test_exchange(), Venue::Hyperliquid.to_string());
-        assert_eq!(local_book.test_bid_prices().len(), 1);
-        assert_eq!(local_book.test_ask_prices().len(), 1);
-        assert_eq!(local_book.test_bid_prices()[0], "2000.5");
-        assert_eq!(local_book.test_ask_prices()[0], "2001");
+        let book_state = book_msg.to_order_book_state();
+        let view = book_state.as_view();
+        assert_eq!(view.bid_prices().len(), 1);
+        assert_eq!(view.ask_prices().len(), 1);
+        assert_eq!(view.bid_prices()[0], "2000.5");
+        assert_eq!(view.ask_prices()[0], "2001");
     }
 
     #[test]
@@ -660,8 +652,8 @@ mod tests {
         assert!(order_book.new_message(&book_msg).is_ok());
         assert!(order_book.book.is_some());
 
-        let book = order_book.book.as_ref().unwrap();
-        let bbo = book.get_bbo();
+        let view = order_book.as_view().unwrap();
+        let bbo = view.get_bbo();
         assert_eq!(bbo.0, "50000");
         assert_eq!(bbo.1, "50100");
     }
