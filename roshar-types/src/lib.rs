@@ -5,14 +5,18 @@ use serde::{Deserialize, Deserializer, Serialize};
 #[cfg(feature = "clickhouse")]
 use clickhouse::Row;
 
-pub mod exchanges;
+pub mod binance;
+pub mod bybit;
 pub mod hyperliquid;
+pub mod kraken;
 pub mod orderbook;
 
-pub use exchanges::WebsocketSupportedExchanges;
-pub use exchanges::binance::*;
-pub use exchanges::bybit::*;
-pub use exchanges::kraken::*;
+mod websocket_supported_exchanges;
+pub use websocket_supported_exchanges::WebsocketSupportedExchanges;
+
+pub use binance::*;
+pub use bybit::*;
+pub use kraken::*;
 pub use hyperliquid::*;
 pub use orderbook::*;
 

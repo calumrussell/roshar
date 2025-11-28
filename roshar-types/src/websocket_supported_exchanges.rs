@@ -1,11 +1,3 @@
-pub mod binance;
-pub mod bybit;
-pub mod kraken;
-
-pub use binance::*;
-pub use bybit::*;
-pub use kraken::*;
-
 pub enum WebsocketSupportedExchanges {
     Hyperliquid,
     ByBit,
@@ -17,35 +9,35 @@ impl WebsocketSupportedExchanges {
     pub fn ping(&self) -> String {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::ping().to_json(),
-            WebsocketSupportedExchanges::Kraken => kraken::KrakenWssMessage::ping().to_json(),
-            WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::ping().to_json(),
-            WebsocketSupportedExchanges::Binance => binance::BinanceWssMessage::ping().to_json(),
+            WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::ping().to_json(),
+            WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::ping().to_json(),
+            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::ping().to_json(),
         }
     }
 
     pub fn depth(&self, coin: &str) -> String {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::l2_book(coin).to_json(),
-            WebsocketSupportedExchanges::Kraken => kraken::KrakenWssMessage::depth(coin).to_json(),
-            WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::depth(coin).to_json(),
-            WebsocketSupportedExchanges::Binance => binance::BinanceWssMessage::depth(coin).to_json(),
+            WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::depth(coin).to_json(),
+            WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::depth(coin).to_json(),
+            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::depth(coin).to_json(),
         }
     }
 
     pub fn trades(&self, coin: &str) -> String {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::Kraken => kraken::KrakenWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::Binance => binance::BinanceWssMessage::trades(coin).to_json(),
+            WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::trades(coin).to_json(),
+            WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::trades(coin).to_json(),
+            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::trades(coin).to_json(),
         }
     }
 
     pub fn candle(&self, coin: &str) -> Option<String> {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json()),
-            WebsocketSupportedExchanges::ByBit => Some(bybit::ByBitWssMessage::candle(coin).to_json()),
-            WebsocketSupportedExchanges::Binance => Some(binance::BinanceWssMessage::candle(coin).to_json()),
+            WebsocketSupportedExchanges::ByBit => Some(crate::bybit::ByBitWssMessage::candle(coin).to_json()),
+            WebsocketSupportedExchanges::Binance => Some(crate::binance::BinanceWssMessage::candle(coin).to_json()),
             _ => None,
         }
     }
