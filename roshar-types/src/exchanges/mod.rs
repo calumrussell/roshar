@@ -27,7 +27,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::ping(),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::ping().to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::ping(),
-            WebsocketSupportedExchanges::Binance => binance::WssApi::ping(),
+            WebsocketSupportedExchanges::Binance => binance::BinanceWssMessage::ping().to_json(),
         }
     }
 
@@ -38,7 +38,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::depth(coin),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::depth(coin).to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::depth(coin),
-            WebsocketSupportedExchanges::Binance => binance::WssApi::depth(coin),
+            WebsocketSupportedExchanges::Binance => binance::BinanceWssMessage::depth(coin).to_json(),
         }
     }
 
@@ -49,7 +49,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::trades(coin),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::trades(coin),
-            WebsocketSupportedExchanges::Binance => binance::WssApi::trades(coin),
+            WebsocketSupportedExchanges::Binance => binance::BinanceWssMessage::trades(coin).to_json(),
         }
     }
 
@@ -57,6 +57,7 @@ impl WebsocketSupportedExchanges {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json()),
             WebsocketSupportedExchanges::ByBit => Some(bybit::ByBitWssMessage::candle(coin).to_json()),
+            WebsocketSupportedExchanges::Binance => Some(binance::BinanceWssMessage::candle(coin).to_json()),
             _ => None,
         }
     }
