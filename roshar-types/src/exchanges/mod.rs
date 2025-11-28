@@ -1,45 +1,16 @@
 pub mod binance;
 pub mod bybit;
 pub mod bybitspot;
-pub mod hyperliquid;
 pub mod kraken;
 pub mod krakenspot;
 pub mod mex;
 
-use anyhow::{Result, anyhow};
-
 pub use binance::*;
 pub use bybit::*;
 pub use bybitspot::*;
-pub use hyperliquid::*;
 pub use kraken::*;
 pub use krakenspot::*;
 pub use mex::*;
-
-macro_rules! exchange_method_cant_fail {
-    ($self:expr, $method:ident) => {
-        match $self {
-            WebsocketSupportedExchanges::Hyperliquid => Ok(Hyperliquid::$method()),
-            WebsocketSupportedExchanges::Kraken => Ok(Kraken::$method()),
-            WebsocketSupportedExchanges::KrakenSpot => Ok(KrakenSpot::$method()),
-            WebsocketSupportedExchanges::ByBit => Ok(ByBit::$method()),
-            WebsocketSupportedExchanges::ByBitSpot => Ok(ByBitSpot::$method()),
-            WebsocketSupportedExchanges::Mexc => Ok(Mex::$method()),
-            WebsocketSupportedExchanges::Binance => Ok(Binance::$method()),
-        }
-    };
-    ($self:expr, $method:ident, $arg:expr) => {
-        match $self {
-            WebsocketSupportedExchanges::Hyperliquid => Ok(Hyperliquid::$method($arg)),
-            WebsocketSupportedExchanges::Kraken => Ok(Kraken::$method($arg)),
-            WebsocketSupportedExchanges::KrakenSpot => Ok(KrakenSpot::$method($arg)),
-            WebsocketSupportedExchanges::ByBit => Ok(ByBit::$method($arg)),
-            WebsocketSupportedExchanges::ByBitSpot => Ok(ByBitSpot::$method($arg)),
-            WebsocketSupportedExchanges::Mexc => Ok(Mex::$method($arg)),
-            WebsocketSupportedExchanges::Binance => Ok(Binance::$method($arg)),
-        }
-    };
-}
 
 pub enum WebsocketSupportedExchanges {
     Hyperliquid,
@@ -52,23 +23,47 @@ pub enum WebsocketSupportedExchanges {
 }
 
 impl WebsocketSupportedExchanges {
-    pub fn ping(&self) -> Result<String> {
-        exchange_method_cant_fail!(self, ping)
-    }
-
-    pub fn depth(&self, coin: &str) -> Result<String> {
-        exchange_method_cant_fail!(self, depth, coin)
-    }
-
-    pub fn trades(&self, coin: &str) -> Result<String> {
-        exchange_method_cant_fail!(self, trades, coin)
-    }
-
-    pub fn candle(&self, coin: &str) -> Result<String> {
+    pub fn ping(&self) -> String {
         match self {
-            WebsocketSupportedExchanges::Hyperliquid => Ok(Hyperliquid::candle(coin)),
-            WebsocketSupportedExchanges::ByBit => Ok(ByBit::candle(coin)),
-            _ => Err(anyhow!("Candle operation not supported for this exchange")),
+            WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::ping().to_json(),
+            WebsocketSupportedExchanges::Kraken => kraken::WssApi::ping(),
+            WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::ping(),
+            WebsocketSupportedExchanges::ByBit => bybit::WssApi::ping(),
+            WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::ping(),
+            WebsocketSupportedExchanges::Mexc => mex::WssApi::ping(),
+            WebsocketSupportedExchanges::Binance => binance::WssApi::ping(),
+        }
+    }
+
+    pub fn depth(&self, coin: &str) -> String {
+        match self {
+            WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::l2_book(coin).to_json(),
+            WebsocketSupportedExchanges::Kraken => kraken::WssApi::depth(coin),
+            WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::depth(coin),
+            WebsocketSupportedExchanges::ByBit => bybit::WssApi::depth(coin),
+            WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::depth(coin),
+            WebsocketSupportedExchanges::Mexc => mex::WssApi::depth(coin),
+            WebsocketSupportedExchanges::Binance => binance::WssApi::depth(coin),
+        }
+    }
+
+    pub fn trades(&self, coin: &str) -> String {
+        match self {
+            WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::trades(coin).to_json(),
+            WebsocketSupportedExchanges::Kraken => kraken::WssApi::trades(coin),
+            WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::trades(coin),
+            WebsocketSupportedExchanges::ByBit => bybit::WssApi::trades(coin),
+            WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::trades(coin),
+            WebsocketSupportedExchanges::Mexc => mex::WssApi::trades(coin),
+            WebsocketSupportedExchanges::Binance => binance::WssApi::trades(coin),
+        }
+    }
+
+    pub fn candle(&self, coin: &str) -> Option<String> {
+        match self {
+            WebsocketSupportedExchanges::Hyperliquid => Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json()),
+            WebsocketSupportedExchanges::ByBit => Some(bybit::WssApi::candle(coin)),
+            _ => None,
         }
     }
 

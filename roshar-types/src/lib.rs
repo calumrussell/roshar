@@ -6,16 +6,17 @@ use serde::{Deserialize, Deserializer, Serialize};
 use clickhouse::Row;
 
 pub mod exchanges;
+pub mod hyperliquid;
 pub mod orderbook;
 
 pub use exchanges::WebsocketSupportedExchanges;
 pub use exchanges::binance::*;
 pub use exchanges::bybit::*;
 pub use exchanges::bybitspot::*;
-pub use exchanges::hyperliquid::*;
 pub use exchanges::kraken::*;
 pub use exchanges::krakenspot::*;
 pub use exchanges::mex::*;
+pub use hyperliquid::*;
 pub use orderbook::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
