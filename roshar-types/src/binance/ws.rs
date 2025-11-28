@@ -439,6 +439,210 @@ impl BinanceTradeMessage {
     }
 }
 
+// Order book management
+use std::collections::VecDeque;
+
+use crate::{LocalOrderBook, LocalOrderBookError};
+
+#[derive(Clone)]
+pub struct BinanceOrderBook {
+    pub symbol: String,
+    pub book: Option<LocalOrderBook>,
+    pub counter: u64,
+    snapshot: Option<BinanceOrderBookSnapshot>,
+    event_buff: VecDeque<BinanceDepthDiffMessage>,
+}
+
+impl BinanceOrderBook {
+    pub fn new(symbol: String) -> Self {
+        Self {
+            symbol,
+            book: None,
+            counter: 0,
+            snapshot: None,
+            event_buff: VecDeque::new(),
+        }
+    }
+
+    /// Reset all order book state to handle reconnection
+    /// Clears snapshot, book, counter, and event buffer to allow fresh snapshot fetch
+    pub fn reset(&mut self) {
+        self.snapshot = None;
+        self.book = None;
+        self.counter = 0;
+        self.event_buff.clear();
+    }
+
+    /// Check if a snapshot is needed (no snapshot and no book)
+    pub fn needs_snapshot(&self) -> bool {
+        self.snapshot.is_none() && self.book.is_none()
+    }
+
+    /// Provide a snapshot fetched externally
+    pub fn set_snapshot(&mut self, snapshot: BinanceOrderBookSnapshot) {
+        // Clean old events from buffer before building orderbook
+        while let Some(ev) = self.event_buff.front() {
+            if ev.final_update_id < snapshot.last_update_id {
+                self.event_buff.pop_front();
+            } else {
+                break;
+            }
+        }
+        self.snapshot = Some(snapshot);
+    }
+
+    /// Build the order book from snapshot and buffered events
+    fn build_order_book_from_snapshot(
+        &mut self,
+        snapshot: &BinanceOrderBookSnapshot,
+    ) -> Result<(), LocalOrderBookError> {
+        let mut updates = Vec::new();
+
+        let exchange_str = Venue::Binance.as_str();
+        let coin_str = self.symbol.as_str();
+        let time = chrono::Utc::now().timestamp_millis();
+
+        for bid in &snapshot.bids {
+            if let (Ok(price), Ok(quantity)) = (bid[0].parse::<f64>(), bid[1].parse::<f64>()) {
+                if quantity > 0.0 {
+                    updates.push(DepthUpdate {
+                        time,
+                        exchange: exchange_str.to_string(),
+                        side: false,
+                        coin: coin_str.to_string(),
+                        px: price,
+                        sz: quantity,
+                    });
+                }
+            } else {
+                return Err(LocalOrderBookError::UnparseableInputs(
+                    exchange_str.to_string(),
+                    coin_str.to_string(),
+                ));
+            }
+        }
+
+        for ask in &snapshot.asks {
+            if let (Ok(price), Ok(quantity)) = (ask[0].parse::<f64>(), ask[1].parse::<f64>()) {
+                if quantity > 0.0 {
+                    updates.push(DepthUpdate {
+                        time,
+                        exchange: exchange_str.to_string(),
+                        side: true,
+                        coin: coin_str.to_string(),
+                        px: price,
+                        sz: quantity,
+                    });
+                }
+            } else {
+                return Err(LocalOrderBookError::UnparseableInputs(
+                    exchange_str.to_string(),
+                    coin_str.to_string(),
+                ));
+            }
+        }
+
+        let mut local_book = LocalOrderBook::new(
+            chrono::Utc::now().timestamp_millis(),
+            "binance".to_string(),
+            self.symbol.to_string(),
+        );
+
+        local_book.apply_updates(&updates, 50);
+
+        // Start with snapshot's last_update_id, then update if we have buffered events
+        let mut last_final_update_id: u64 = snapshot.last_update_id;
+        while !self.event_buff.is_empty() {
+            if let Some(event) = self.event_buff.pop_front() {
+                last_final_update_id = event.final_update_id;
+                if let Ok(updates) = event.to_depth_updates() {
+                    local_book.apply_updates(&updates, 50);
+                }
+            }
+        }
+
+        self.counter = last_final_update_id;
+        self.book = Some(local_book);
+        self.event_buff.clear();
+
+        Ok(())
+    }
+
+    pub fn new_update_diff(
+        &mut self,
+        diff: &BinanceDepthDiffMessage,
+    ) -> Result<(), LocalOrderBookError> {
+        let symbol = diff.symbol.clone();
+
+        // Validate symbol
+        if symbol != self.symbol {
+            return Err(LocalOrderBookError::WrongSymbol(
+                self.symbol.clone(),
+                symbol,
+            ));
+        }
+
+        // If no book yet, buffer the event
+        if self.book.is_none() {
+            self.event_buff.push_back(diff.clone());
+        }
+
+        if let Some(ref snapshot) = self.snapshot.clone() {
+            if self.book.is_none() {
+                let ev_count = self.event_buff.len();
+
+                let should_clear = if ev_count == 0 {
+                    diff.final_update_id > snapshot.last_update_id
+                } else {
+                    let front_ev = self.event_buff.front().unwrap();
+                    !(front_ev.first_update_id <= snapshot.last_update_id
+                        && front_ev.final_update_id >= snapshot.last_update_id)
+                };
+
+                if should_clear {
+                    self.snapshot = None;
+                    self.book = None;
+                    self.counter = 0;
+                    self.event_buff.clear();
+                    return Ok(());
+                }
+
+                if diff.final_update_id < snapshot.last_update_id {
+                    // Waiting for more messages
+                    return Ok(());
+                }
+
+                // Build order book from snapshot
+                self.build_order_book_from_snapshot(&snapshot)?;
+            } else {
+                // Accept message if it chains correctly:
+                // 1. Exact match: previous_final_update_id == counter (normal case)
+                // 2. Counter within range: first_update_id <= counter <= final_update_id (after snapshot)
+                let is_valid_sequence = diff.previous_final_update_id == self.counter
+                    || (diff.first_update_id <= self.counter
+                        && self.counter <= diff.final_update_id);
+
+                if is_valid_sequence {
+                    if let Some(ref mut book) = self.book {
+                        if let Ok(updates) = diff.to_depth_updates() {
+                            book.apply_updates(&updates, 50);
+                            self.counter = diff.final_update_id;
+                        }
+                    }
+                } else {
+                    // Sequence mismatch - reset state
+                    self.snapshot = None;
+                    self.book = None;
+                    self.counter = 0;
+                    self.event_buff.clear();
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
 // REST API response types (for reference/deserialization only, no client code)
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExchangeInfo {
@@ -648,5 +852,122 @@ mod tests {
         assert_eq!(bid_updates[0].sz, 1.0);
         assert_eq!(ask_updates[0].px, 50001.0);
         assert_eq!(ask_updates[0].sz, 1.5);
+    }
+
+    fn create_test_snapshot() -> BinanceOrderBookSnapshot {
+        BinanceOrderBookSnapshot {
+            last_update_id: 1000,
+            bids: vec![
+                ["50000.0".to_string(), "1.0".to_string()],
+                ["49999.0".to_string(), "2.0".to_string()],
+            ],
+            asks: vec![
+                ["50001.0".to_string(), "1.5".to_string()],
+                ["50002.0".to_string(), "2.5".to_string()],
+            ],
+        }
+    }
+
+    fn create_test_diff_message(
+        symbol: &str,
+        first_update_id: u64,
+        final_update_id: u64,
+        previous_final_update_id: u64,
+    ) -> BinanceDepthDiffMessage {
+        BinanceDepthDiffMessage {
+            event_type: "depthUpdate".to_string(),
+            event_time: 1234567890,
+            symbol: symbol.to_string(),
+            first_update_id,
+            final_update_id,
+            bids: vec![["50000.0".to_string(), "1.0".to_string()]],
+            asks: vec![],
+            previous_final_update_id,
+        }
+    }
+
+    #[test]
+    fn test_binance_order_book_new() {
+        let order_book = BinanceOrderBook::new("BTCUSDT".to_string());
+        assert_eq!(order_book.symbol, "BTCUSDT");
+        assert!(order_book.book.is_none());
+        assert_eq!(order_book.counter, 0);
+        assert!(order_book.needs_snapshot());
+    }
+
+    #[test]
+    fn test_binance_order_book_reset() {
+        let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
+        order_book.set_snapshot(create_test_snapshot());
+        order_book.counter = 1000;
+
+        order_book.reset();
+
+        assert!(order_book.book.is_none());
+        assert_eq!(order_book.counter, 0);
+        assert!(order_book.needs_snapshot());
+    }
+
+    #[test]
+    fn test_binance_order_book_wrong_symbol() {
+        let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
+        order_book.set_snapshot(create_test_snapshot());
+
+        let eth_msg = create_test_diff_message("ETHUSDT", 1001, 1001, 1000);
+
+        let result = order_book.new_update_diff(&eth_msg);
+        assert!(result.is_err());
+        if let Err(LocalOrderBookError::WrongSymbol(expected, received)) = result {
+            assert_eq!(expected, "BTCUSDT");
+            assert_eq!(received, "ETHUSDT");
+        } else {
+            panic!("Expected WrongSymbol error");
+        }
+    }
+
+    #[test]
+    fn test_binance_order_book_builds_from_snapshot() {
+        let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
+
+        // First diff arrives, triggers need for snapshot
+        let diff1 = create_test_diff_message("BTCUSDT", 999, 1000, 998);
+        order_book.new_update_diff(&diff1).unwrap();
+        assert!(order_book.needs_snapshot());
+
+        // Snapshot arrives
+        order_book.set_snapshot(create_test_snapshot());
+
+        // Next diff builds the book
+        let diff2 = create_test_diff_message("BTCUSDT", 1001, 1002, 1000);
+        order_book.new_update_diff(&diff2).unwrap();
+
+        assert!(order_book.book.is_some());
+        assert!(!order_book.needs_snapshot());
+    }
+
+    #[test]
+    fn test_binance_order_book_sequence_validation() {
+        let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
+
+        // Setup with snapshot
+        let diff1 = create_test_diff_message("BTCUSDT", 999, 1000, 998);
+        order_book.new_update_diff(&diff1).unwrap();
+        order_book.set_snapshot(create_test_snapshot());
+        let diff2 = create_test_diff_message("BTCUSDT", 1001, 1002, 1000);
+        order_book.new_update_diff(&diff2).unwrap();
+
+        assert!(order_book.book.is_some());
+        let counter_after_build = order_book.counter;
+
+        // Valid sequence update
+        let diff3 = create_test_diff_message("BTCUSDT", 1003, 1004, counter_after_build);
+        order_book.new_update_diff(&diff3).unwrap();
+        assert!(order_book.book.is_some());
+
+        // Out of sequence update should reset
+        let diff_bad = create_test_diff_message("BTCUSDT", 2000, 2001, 1999);
+        order_book.new_update_diff(&diff_bad).unwrap();
+        assert!(order_book.book.is_none());
+        assert!(order_book.needs_snapshot());
     }
 }
