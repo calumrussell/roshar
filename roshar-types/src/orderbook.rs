@@ -21,6 +21,8 @@ pub enum LocalOrderBookError {
     OutOfOrderUpdate(String, String, i64, i64),
     #[error("Wrong symbol: expected {0} but received message for {1}")]
     WrongSymbol(String, String),
+    #[error("Message is not a partial update for {0}/{1}")]
+    NotPartialUpdate(String, String),
 }
 
 #[derive(Debug)]

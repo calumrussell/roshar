@@ -18,3 +18,4 @@ thiserror = "1.0"
 clickhouse = { version = "0.13", optional = true }
 ordered-float = "4.2"
 compact_str = "0.8"
+rust_decimal = "1.35"
