@@ -21,7 +21,6 @@ impl Writer {
         Self { writer }
     }
 
-
     /// Send a frame
     ///
     /// This writes the frame directly to the writer without creating an intermediate buffer,
@@ -96,16 +95,16 @@ impl Writer {
             const CHUNK_SIZE: usize = 8192;
             let mut offset = 0;
             let mut mask_offset = 0;
-            
+
             while offset < frame.payload.len() {
                 let chunk_size = (frame.payload.len() - offset).min(CHUNK_SIZE);
                 let mut chunk = vec![0u8; chunk_size];
-                
+
                 // Apply mask to chunk
                 for i in 0..chunk_size {
                     chunk[i] = frame.payload[offset + i] ^ mask[(mask_offset + i) % 4];
                 }
-                
+
                 Self::write_all_internal(writer, &chunk).await?;
                 offset += chunk_size;
                 mask_offset = (mask_offset + chunk_size) % 4;
@@ -120,12 +119,8 @@ impl Writer {
 
     async fn write_all_internal(writer: &mut WriterType, buf: &[u8]) -> Result<()> {
         match writer {
-            WriterType::Plain(w) => {
-                w.write_all(buf).await.map_err(|e| Error::Io(e))
-            }
-            WriterType::Tls(tls) => {
-                tls.write_all(buf).await.map_err(|e| Error::Io(e))
-            }
+            WriterType::Plain(w) => w.write_all(buf).await.map_err(|e| Error::Io(e)),
+            WriterType::Tls(tls) => tls.write_all(buf).await.map_err(|e| Error::Io(e)),
         }
     }
 
@@ -134,5 +129,3 @@ impl Writer {
         Self::write_all_internal(&mut self.writer, buf).await
     }
 }
-
-

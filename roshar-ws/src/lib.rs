@@ -10,4 +10,3 @@ pub use error::{Error, Result};
 pub use frame::{Frame, FrameRef, Opcode};
 pub use reader::Reader;
 pub use writer::Writer;
-
