@@ -138,7 +138,6 @@ pub enum Venue {
     ByBit = 0,
     Kraken = 1,
     Hyperliquid = 2,
-    Mex = 3,
     Binance = 4,
     ByBitSpot = 5,
     KrakenSpot = 6,
@@ -163,7 +162,6 @@ impl<'de> serde::Deserialize<'de> for Venue {
             0 => Ok(Venue::ByBit),
             1 => Ok(Venue::Kraken),
             2 => Ok(Venue::Hyperliquid),
-            3 => Ok(Venue::Mex),
             4 => Ok(Venue::Binance),
             5 => Ok(Venue::ByBitSpot),
             6 => Ok(Venue::KrakenSpot),
@@ -182,7 +180,6 @@ impl From<String> for Venue {
             "kraken" => Self::Kraken,
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
-            "mex" => Self::Mex,
             "binance" => Self::Binance,
             "bybit-spot" => Self::ByBitSpot,
             "kraken-spot" => Self::KrakenSpot,
@@ -198,7 +195,6 @@ impl From<&str> for Venue {
             "kraken" => Self::Kraken,
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
-            "mex" => Self::Mex,
             "binance" => Self::Binance,
             "bybit-spot" => Self::ByBitSpot,
             "kraken-spot" => Self::KrakenSpot,
@@ -215,7 +211,6 @@ impl Venue {
             Self::ByBit => "bybit",
             Self::Kraken => "kraken",
             Self::Hyperliquid => "hyperliquid",
-            Self::Mex => "mex",
             Self::Binance => "binance",
             Self::ByBitSpot => "bybit-spot",
             Self::KrakenSpot => "kraken-spot",
@@ -237,8 +232,6 @@ pub enum SupportedMessages {
     HyperliquidOrderUpdatesMessage(HyperliquidOrderUpdatesMessage),
     HyperliquidBboMessage(HyperliquidBboMessage),
     KrakenSpotOhlcMessage(KrakenSpotOhlcMessage),
-    MexDepthMessage(MexDepthMessage),
-    MexDealsMessage(MexDealsMessage),
     ByBitDepthMessage(ByBitDepthMessage),
     ByBitTradesMessage(ByBitTradesMessage),
     ByBitCandleMessage(ByBitCandleMessage),
@@ -282,19 +275,6 @@ impl SupportedMessages {
                 .or_else(|_| {
                     serde_json::from_str::<HyperliquidBboMessage>(json)
                         .map(SupportedMessages::HyperliquidBboMessage)
-                })
-                .ok(),
-
-            Venue::Mex => serde_json::from_str::<MexDepthMessage>(json)
-                .map(SupportedMessages::MexDepthMessage)
-                .or_else(|_| {
-                    serde_json::from_str::<MexDealsMessage>(json)
-                        .map(SupportedMessages::MexDealsMessage)
-                })
-                .map_err(|err| {
-                    // Log unrecognized message for debugging purposes
-                    debug!("Unrecognized mex message format: {json} - Error: {err}");
-                    err
                 })
                 .ok(),
 

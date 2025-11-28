@@ -3,14 +3,12 @@ pub mod bybit;
 pub mod bybitspot;
 pub mod kraken;
 pub mod krakenspot;
-pub mod mex;
 
 pub use binance::*;
 pub use bybit::*;
 pub use bybitspot::*;
 pub use kraken::*;
 pub use krakenspot::*;
-pub use mex::*;
 
 pub enum WebsocketSupportedExchanges {
     Hyperliquid,
@@ -18,7 +16,6 @@ pub enum WebsocketSupportedExchanges {
     ByBitSpot,
     Kraken,
     KrakenSpot,
-    Mexc,
     Binance,
 }
 
@@ -30,7 +27,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::ping(),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::ping().to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::ping(),
-            WebsocketSupportedExchanges::Mexc => mex::WssApi::ping(),
             WebsocketSupportedExchanges::Binance => binance::WssApi::ping(),
         }
     }
@@ -42,7 +38,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::depth(coin),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::depth(coin).to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::depth(coin),
-            WebsocketSupportedExchanges::Mexc => mex::WssApi::depth(coin),
             WebsocketSupportedExchanges::Binance => binance::WssApi::depth(coin),
         }
     }
@@ -54,7 +49,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KrakenSpot => krakenspot::WssApi::trades(coin),
             WebsocketSupportedExchanges::ByBit => bybit::ByBitWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::ByBitSpot => bybitspot::WssApi::trades(coin),
-            WebsocketSupportedExchanges::Mexc => mex::WssApi::trades(coin),
             WebsocketSupportedExchanges::Binance => binance::WssApi::trades(coin),
         }
     }
@@ -75,7 +69,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBitSpot => "wss://stream.bybit.com/v5/public/spot",
             WebsocketSupportedExchanges::Kraken => "wss://futures.kraken.com/ws/v1",
             WebsocketSupportedExchanges::KrakenSpot => "wss://ws.kraken.com/v2",
-            WebsocketSupportedExchanges::Mexc => "wss://wbs.mexc.com/ws",
             WebsocketSupportedExchanges::Binance => "wss://fstream.binance.com/ws",
         }
     }
@@ -88,7 +81,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBitSpot => 20,
             WebsocketSupportedExchanges::Kraken => 30,
             WebsocketSupportedExchanges::KrakenSpot => 30,
-            WebsocketSupportedExchanges::Mexc => 30,
             WebsocketSupportedExchanges::Binance => 30,
         }
     }
@@ -101,7 +93,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBitSpot => 10,
             WebsocketSupportedExchanges::Kraken => 15,
             WebsocketSupportedExchanges::KrakenSpot => 15,
-            WebsocketSupportedExchanges::Mexc => 15,
             WebsocketSupportedExchanges::Binance => 15,
         }
     }
@@ -114,7 +105,6 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBitSpot => 5000,
             WebsocketSupportedExchanges::Kraken => 10000,
             WebsocketSupportedExchanges::KrakenSpot => 10000,
-            WebsocketSupportedExchanges::Mexc => 5000,
             WebsocketSupportedExchanges::Binance => 5000,
         }
     }
