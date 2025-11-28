@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WebsocketSupportedExchanges {
     Hyperliquid,
     ByBit,
@@ -38,6 +39,28 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Hyperliquid => Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json()),
             WebsocketSupportedExchanges::ByBit => Some(crate::bybit::ByBitWssMessage::candle(coin).to_json()),
             WebsocketSupportedExchanges::Binance => Some(crate::binance::BinanceWssMessage::candle(coin).to_json()),
+            _ => None,
+        }
+    }
+
+    /// Subscribe to depth for multiple symbols in a single message (Binance only)
+    /// Other exchanges don't support batching and will return None
+    pub fn batch_depth(&self, coins: &[String]) -> Option<String> {
+        match self {
+            WebsocketSupportedExchanges::Binance => {
+                Some(crate::binance::BinanceWssMessage::batch_depth(coins).to_json())
+            }
+            _ => None,
+        }
+    }
+
+    /// Subscribe to trades for multiple symbols in a single message (Binance only)
+    /// Other exchanges don't support batching and will return None
+    pub fn batch_trades(&self, coins: &[String]) -> Option<String> {
+        match self {
+            WebsocketSupportedExchanges::Binance => {
+                Some(crate::binance::BinanceWssMessage::batch_trades(coins).to_json())
+            }
             _ => None,
         }
     }

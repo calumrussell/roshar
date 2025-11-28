@@ -3,6 +3,7 @@
 mod config;
 mod connection;
 mod manager;
+pub mod handlers;
 
 pub use config::Config;
 pub use manager::{Manager, Message};
