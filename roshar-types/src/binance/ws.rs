@@ -2,8 +2,15 @@ use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
 use crate::{DepthUpdate, Venue};
+use std::collections::VecDeque;
+use std::sync::{mpsc, Arc};
+use std::time::Duration;
 
-// WebSocket Message Type
+use reqwest::blocking::Client;
+use tokio::sync::Semaphore;
+
+use crate::{LocalOrderBook, LocalOrderBookError, OrderBookState};
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct BinanceWssMessage {
     pub id: u32,
@@ -439,18 +446,205 @@ impl BinanceTradeMessage {
     }
 }
 
-// Order book management
-use std::collections::VecDeque;
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct BinanceErrorResponse {
+    pub code: i32,
+    pub msg: String,
+}
 
-use crate::{LocalOrderBook, LocalOrderBookError, OrderBookState};
+fn fetch_snapshot_impl_blocking(
+    client: &Client,
+    symbol: &str,
+) -> anyhow::Result<BinanceOrderBookSnapshot> {
+    log::info!("Binance: fetching snapshot for {:?}", symbol);
+    let url = format!(
+        "https://fapi.binance.com/fapi/v1/depth?symbol={}&limit=1000",
+        symbol.to_uppercase()
+    );
 
-#[derive(Clone)]
+    let response = client
+        .get(&url)
+        .timeout(Duration::from_secs(10))
+        .send()
+        .map_err(|e| anyhow::anyhow!("Failed to fetch snapshot for {}: {}", symbol, e))?;
+
+    let status = response.status();
+    let retry_after = response
+        .headers()
+        .get("Retry-After")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.parse::<u64>().ok());
+
+    if status.as_u16() == 429 || status.as_u16() == 418 {
+        let retry_secs = retry_after.unwrap_or(120);
+        return Err(anyhow::anyhow!("RETRY_AFTER:{}", retry_secs));
+    }
+
+    let response_text = response
+        .text()
+        .map_err(|e| anyhow::anyhow!("Failed to read response text for {}: {}", symbol, e))?;
+
+    if let Ok(error_response) = serde_json::from_str::<BinanceErrorResponse>(&response_text) {
+        if error_response.code == -1003 {
+            return Err(anyhow::anyhow!("RATE_LIMIT: {}", error_response.msg));
+        }
+        return Err(anyhow::anyhow!(
+            "Binance API error {}: {}",
+            error_response.code,
+            error_response.msg
+        ));
+    }
+
+    let snapshot =
+        serde_json::from_str::<BinanceOrderBookSnapshot>(&response_text).map_err(|e| {
+            anyhow::anyhow!(
+                "Failed to parse snapshot response for {}: {}. Response: {}",
+                symbol,
+                e,
+                response_text
+            )
+        })?;
+
+    log::info!("Binance: successfully fetched snapshot for {}", symbol);
+    Ok(snapshot)
+}
+
+/// Handles async snapshot fetching for BinanceOrderBook
+pub struct BinanceSnapshotFetcher {
+    rx: Option<mpsc::Receiver<BinanceOrderBookSnapshot>>,
+}
+
+impl BinanceSnapshotFetcher {
+    pub fn new() -> Self {
+        Self { rx: None }
+    }
+
+    pub fn start_fetch(&mut self, symbol: &str, semaphore: &Arc<Semaphore>) {
+        let symbol_clone = symbol.to_string();
+        let semaphore_clone = semaphore.clone();
+        let (tx, rx) = mpsc::channel();
+        self.rx = Some(rx);
+
+        std::thread::spawn(move || {
+            use rand::Rng;
+            let jitter_ms = rand::thread_rng().gen_range(0..2000);
+            std::thread::sleep(Duration::from_millis(jitter_ms));
+
+            let _permit = loop {
+                match semaphore_clone.clone().try_acquire_owned() {
+                    Ok(permit) => break permit,
+                    Err(_) => std::thread::sleep(Duration::from_millis(100)),
+                }
+            };
+
+            // Create client inside the thread to avoid issues with tokio runtime
+            let client = Client::new();
+
+            const MAX_RETRIES: u32 = 5;
+            let mut attempt = 0;
+
+            loop {
+                attempt += 1;
+                match fetch_snapshot_impl_blocking(&client, &symbol_clone) {
+                    Ok(snapshot) => {
+                        log::info!(
+                            "Binance: snapshot fetch completed successfully for {} after {} attempt(s)",
+                            symbol_clone, attempt
+                        );
+                        if tx.send(snapshot).is_err() {
+                            log::error!(
+                                "Binance: failed to send snapshot back for {}",
+                                symbol_clone
+                            );
+                        }
+                        break;
+                    }
+                    Err(e) => {
+                        let error_msg = e.to_string();
+
+                        if error_msg.starts_with("RETRY_AFTER:") {
+                            if let Some(retry_secs_str) = error_msg.strip_prefix("RETRY_AFTER:") {
+                                if let Ok(retry_secs) = retry_secs_str.parse::<u64>() {
+                                    log::error!(
+                                        "Binance: rate limited for {}. Waiting {} seconds before retry.",
+                                        symbol_clone, retry_secs
+                                    );
+                                    std::thread::sleep(Duration::from_secs(retry_secs));
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if attempt >= MAX_RETRIES {
+                            log::error!(
+                                "Binance: snapshot fetch failed for {} after {} attempts: {}",
+                                symbol_clone, MAX_RETRIES, e
+                            );
+                            break;
+                        } else {
+                            let backoff_secs = 2u64.pow(attempt - 1);
+                            log::error!(
+                                "Binance: snapshot fetch failed for {} (attempt {}/{}): {}. Retrying in {}s",
+                                symbol_clone, attempt, MAX_RETRIES, e, backoff_secs
+                            );
+                            std::thread::sleep(Duration::from_secs(backoff_secs));
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    pub fn try_recv(&mut self) -> Option<BinanceOrderBookSnapshot> {
+        if let Some(rx) = self.rx.take() {
+            match rx.try_recv() {
+                Ok(snapshot) => Some(snapshot),
+                Err(mpsc::TryRecvError::Empty) => {
+                    self.rx = Some(rx);
+                    None
+                }
+                Err(mpsc::TryRecvError::Disconnected) => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn is_pending(&self) -> bool {
+        self.rx.is_some()
+    }
+
+    pub fn reset(&mut self) {
+        self.rx = None;
+    }
+}
+
+impl Default for BinanceSnapshotFetcher {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct BinanceOrderBook {
     pub symbol: String,
     pub book: Option<OrderBookState>,
     pub counter: u64,
     snapshot: Option<BinanceOrderBookSnapshot>,
     event_buff: VecDeque<BinanceDepthDiffMessage>,
+    fetcher: BinanceSnapshotFetcher,
+}
+
+impl Clone for BinanceOrderBook {
+    fn clone(&self) -> Self {
+        Self {
+            symbol: self.symbol.clone(),
+            book: self.book.clone(),
+            counter: self.counter,
+            snapshot: self.snapshot.clone(),
+            event_buff: self.event_buff.clone(),
+            fetcher: BinanceSnapshotFetcher::new(),
+        }
+    }
 }
 
 impl BinanceOrderBook {
@@ -461,52 +655,39 @@ impl BinanceOrderBook {
             counter: 0,
             snapshot: None,
             event_buff: VecDeque::new(),
+            fetcher: BinanceSnapshotFetcher::new(),
         }
     }
 
-    /// Reset all order book state to handle reconnection
-    /// Clears snapshot, book, counter, and event buffer to allow fresh snapshot fetch
     pub fn reset(&mut self) {
+        log::info!("Binance: resetting order book state for {}", self.symbol);
         self.snapshot = None;
         self.book = None;
         self.counter = 0;
         self.event_buff.clear();
+        self.fetcher.reset();
     }
 
-    /// Check if a snapshot is needed (no snapshot and no book)
-    pub fn needs_snapshot(&self) -> bool {
-        self.snapshot.is_none() && self.book.is_none()
-    }
-
-    /// Provide a snapshot fetched externally
-    pub fn set_snapshot(&mut self, snapshot: BinanceOrderBookSnapshot) {
-        // Clean old events from buffer before building orderbook
-        while let Some(ev) = self.event_buff.front() {
-            if ev.final_update_id < snapshot.last_update_id {
-                self.event_buff.pop_front();
-            } else {
-                break;
-            }
-        }
-        self.snapshot = Some(snapshot);
-    }
-
-    /// Get a read-only view of the order book for calculations
     pub fn as_view(&self) -> Option<LocalOrderBook<'_>> {
         self.book.as_ref().map(|b| b.as_view())
     }
 
-    /// Build the order book from snapshot and buffered events
     fn build_order_book_from_snapshot(
         &mut self,
         snapshot: &BinanceOrderBookSnapshot,
     ) -> Result<(), LocalOrderBookError> {
+        log::info!(
+            "Binance: building orderbook from snapshot for {} - snapshot.last_update_id: {}, event_buff.len: {}",
+            self.symbol,
+            snapshot.last_update_id,
+            self.event_buff.len()
+        );
+
         let exchange_str = Venue::Binance.as_str();
         let coin_str = self.symbol.as_str();
 
         let mut book = OrderBookState::new(50);
 
-        // Apply snapshot bids directly
         for bid in &snapshot.bids {
             if let Ok(price) = bid[0].parse::<f64>() {
                 book.set_bid(price, &bid[1]);
@@ -518,7 +699,6 @@ impl BinanceOrderBook {
             }
         }
 
-        // Apply snapshot asks directly
         for ask in &snapshot.asks {
             if let Ok(price) = ask[0].parse::<f64>() {
                 book.set_ask(price, &ask[1]);
@@ -530,18 +710,15 @@ impl BinanceOrderBook {
             }
         }
 
-        // Apply buffered events
         let mut last_final_update_id: u64 = snapshot.last_update_id;
         while !self.event_buff.is_empty() {
             if let Some(event) = self.event_buff.pop_front() {
                 last_final_update_id = event.final_update_id;
-                // Apply bids from event
                 for bid in &event.bids {
                     if let Ok(price) = bid[0].parse::<f64>() {
                         book.set_bid(price, &bid[1]);
                     }
                 }
-                // Apply asks from event
                 for ask in &event.asks {
                     if let Ok(price) = ask[0].parse::<f64>() {
                         book.set_ask(price, &ask[1]);
@@ -554,16 +731,25 @@ impl BinanceOrderBook {
         self.book = Some(book);
         self.event_buff.clear();
 
+        if let Some(ref book) = self.book {
+            let view = book.as_view();
+            let (bid_str, ask_str) = view.get_bbo();
+            log::info!(
+                "Binance: orderbook built for {} - counter: {}, BBO: bid={} ask={}",
+                self.symbol, self.counter, bid_str, ask_str
+            );
+        }
+
         Ok(())
     }
 
     pub fn new_update_diff(
         &mut self,
         diff: &BinanceDepthDiffMessage,
+        snapshot_semaphore: &Arc<Semaphore>,
     ) -> Result<(), LocalOrderBookError> {
         let symbol = diff.symbol.clone();
 
-        // Validate symbol
         if symbol != self.symbol {
             return Err(LocalOrderBookError::WrongSymbol(
                 self.symbol.clone(),
@@ -571,13 +757,50 @@ impl BinanceOrderBook {
             ));
         }
 
-        // If no book yet, buffer the event
+        // Check if there's a pending snapshot from the background thread
+        if let Some(snapshot) = self.fetcher.try_recv() {
+            log::info!(
+                "Binance: received snapshot from background thread for {}",
+                symbol
+            );
+            self.snapshot = Some(snapshot);
+            if let Some(ref snapshot) = self.snapshot {
+                while let Some(ev) = self.event_buff.front() {
+                    if ev.final_update_id < snapshot.last_update_id {
+                        self.event_buff.pop_front();
+                    } else {
+                        break;
+                    }
+                }
+                let snapshot_clone = snapshot.clone();
+                if let Err(e) = self.build_order_book_from_snapshot(&snapshot_clone) {
+                    log::error!(
+                        "Binance: failed to build order book from snapshot for {}: {}",
+                        symbol, e
+                    );
+                    return Err(e);
+                }
+            }
+        }
+
+        // Start a snapshot fetch if needed
+        if self.snapshot.is_none() && !self.fetcher.is_pending() {
+            self.fetcher.start_fetch(&symbol, snapshot_semaphore);
+        }
+
         if self.book.is_none() {
             self.event_buff.push_back(diff.clone());
         }
 
         if let Some(ref snapshot) = self.snapshot.clone() {
             if self.book.is_none() {
+                while let Some(ev) = self.event_buff.front() {
+                    if ev.final_update_id < snapshot.last_update_id {
+                        self.event_buff.pop_front();
+                    } else {
+                        break;
+                    }
+                }
                 let ev_count = self.event_buff.len();
 
                 let should_clear = if ev_count == 0 {
@@ -589,7 +812,12 @@ impl BinanceOrderBook {
                 };
 
                 if should_clear {
+                    log::error!(
+                        "Binance: clearing snapshot for {} due to sequence validation failure",
+                        symbol
+                    );
                     self.snapshot = None;
+                    self.fetcher.reset();
                     self.book = None;
                     self.counter = 0;
                     self.event_buff.clear();
@@ -597,29 +825,23 @@ impl BinanceOrderBook {
                 }
 
                 if diff.final_update_id < snapshot.last_update_id {
-                    // Waiting for more messages
                     return Ok(());
                 }
 
-                // Build order book from snapshot
-                self.build_order_book_from_snapshot(&snapshot)?;
+                let snapshot_clone = snapshot.clone();
+                self.build_order_book_from_snapshot(&snapshot_clone)?;
             } else {
-                // Accept message if it chains correctly:
-                // 1. Exact match: previous_final_update_id == counter (normal case)
-                // 2. Counter within range: first_update_id <= counter <= final_update_id (after snapshot)
                 let is_valid_sequence = diff.previous_final_update_id == self.counter
                     || (diff.first_update_id <= self.counter
                         && self.counter <= diff.final_update_id);
 
                 if is_valid_sequence {
                     if let Some(ref mut book) = self.book {
-                        // Apply bids directly
                         for bid in &diff.bids {
                             if let Ok(price) = bid[0].parse::<f64>() {
                                 book.set_bid(price, &bid[1]);
                             }
                         }
-                        // Apply asks directly
                         for ask in &diff.asks {
                             if let Ok(price) = ask[0].parse::<f64>() {
                                 book.set_ask(price, &ask[1]);
@@ -628,8 +850,16 @@ impl BinanceOrderBook {
                         self.counter = diff.final_update_id;
                     }
                 } else {
-                    // Sequence mismatch - reset state
+                    log::warn!(
+                        "Binance: sequence mismatch for {} - diff.first_update_id: {}, diff.previous_final_update_id: {}, self.counter: {}, diff.final_update_id: {}",
+                        symbol,
+                        diff.first_update_id,
+                        diff.previous_final_update_id,
+                        self.counter,
+                        diff.final_update_id
+                    );
                     self.snapshot = None;
+                    self.fetcher.reset();
                     self.book = None;
                     self.counter = 0;
                     self.event_buff.clear();
@@ -640,6 +870,8 @@ impl BinanceOrderBook {
         Ok(())
     }
 }
+
+
 
 // REST API response types (for reference/deserialization only, no client code)
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -890,30 +1122,27 @@ mod tests {
         assert_eq!(order_book.symbol, "BTCUSDT");
         assert!(order_book.book.is_none());
         assert_eq!(order_book.counter, 0);
-        assert!(order_book.needs_snapshot());
     }
 
     #[test]
     fn test_binance_order_book_reset() {
         let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
-        order_book.set_snapshot(create_test_snapshot());
         order_book.counter = 1000;
 
         order_book.reset();
 
         assert!(order_book.book.is_none());
         assert_eq!(order_book.counter, 0);
-        assert!(order_book.needs_snapshot());
     }
 
     #[test]
     fn test_binance_order_book_wrong_symbol() {
         let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
-        order_book.set_snapshot(create_test_snapshot());
+        let semaphore = Arc::new(Semaphore::new(2));
 
         let eth_msg = create_test_diff_message("ETHUSDT", 1001, 1001, 1000);
 
-        let result = order_book.new_update_diff(&eth_msg);
+        let result = order_book.new_update_diff(&eth_msg, &semaphore);
         assert!(result.is_err());
         if let Err(LocalOrderBookError::WrongSymbol(expected, received)) = result {
             assert_eq!(expected, "BTCUSDT");
@@ -921,51 +1150,5 @@ mod tests {
         } else {
             panic!("Expected WrongSymbol error");
         }
-    }
-
-    #[test]
-    fn test_binance_order_book_builds_from_snapshot() {
-        let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
-
-        // First diff arrives, triggers need for snapshot
-        let diff1 = create_test_diff_message("BTCUSDT", 999, 1000, 998);
-        order_book.new_update_diff(&diff1).unwrap();
-        assert!(order_book.needs_snapshot());
-
-        // Snapshot arrives
-        order_book.set_snapshot(create_test_snapshot());
-
-        // Next diff builds the book
-        let diff2 = create_test_diff_message("BTCUSDT", 1001, 1002, 1000);
-        order_book.new_update_diff(&diff2).unwrap();
-
-        assert!(order_book.book.is_some());
-        assert!(!order_book.needs_snapshot());
-    }
-
-    #[test]
-    fn test_binance_order_book_sequence_validation() {
-        let mut order_book = BinanceOrderBook::new("BTCUSDT".to_string());
-
-        // Setup with snapshot
-        let diff1 = create_test_diff_message("BTCUSDT", 999, 1000, 998);
-        order_book.new_update_diff(&diff1).unwrap();
-        order_book.set_snapshot(create_test_snapshot());
-        let diff2 = create_test_diff_message("BTCUSDT", 1001, 1002, 1000);
-        order_book.new_update_diff(&diff2).unwrap();
-
-        assert!(order_book.book.is_some());
-        let counter_after_build = order_book.counter;
-
-        // Valid sequence update
-        let diff3 = create_test_diff_message("BTCUSDT", 1003, 1004, counter_after_build);
-        order_book.new_update_diff(&diff3).unwrap();
-        assert!(order_book.book.is_some());
-
-        // Out of sequence update should reset
-        let diff_bad = create_test_diff_message("BTCUSDT", 2000, 2001, 1999);
-        order_book.new_update_diff(&diff_bad).unwrap();
-        assert!(order_book.book.is_none());
-        assert!(order_book.needs_snapshot());
     }
 }

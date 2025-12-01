@@ -1,0 +1,661 @@
+pub mod rest;
+pub mod validator;
+pub mod ws;
+
+use ws::{
+    BboFeedHandler, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle, MarketDataState,
+    OrdersFeedHandler,
+};
+
+pub use rest::{ExchangeMetadataHandle, ExchangeMetadataManager};
+pub use validator::OrderValidator;
+pub use ws::MarketEvent;
+
+use rest::{
+    ExchangeApi, ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
+    ModifyOrderParams,
+};
+use roshar_types::{AssetInfo, OrderBookState, SpotMarketData, UserPerpetualsState};
+use tokio::sync::mpsc;
+
+/// Result of creating an order
+#[derive(Debug, Clone)]
+pub enum OrderResult {
+    /// Order was placed and is resting on the order book
+    Resting { order_id: String },
+    /// Order filled immediately (e.g., IOC orders)
+    Filled {
+        order_id: String,
+        filled_qty: f64,
+        avg_price: f64,
+    },
+}
+
+/// Configuration for Hyperliquid client
+#[derive(Debug, Clone, Copy)]
+pub struct HyperliquidConfig {
+    pub is_mainnet: bool,
+    pub metadata_update_interval_secs: u64,
+    pub wallet_address: Option<ethers::types::H160>, // Required for order operations
+}
+
+/// Hyperliquid-specific client implementation
+pub struct HyperliquidClient {
+    api: ExchangeApi,
+    wallet_address: Option<ethers::types::H160>,
+    validator: OrderValidator,
+    #[allow(dead_code)] // Kept to prevent metadata manager task from being dropped
+    metadata_manager_handle: tokio::task::JoinHandle<()>,
+    metadata_handle: ExchangeMetadataHandle,
+    #[allow(dead_code)] // Kept to prevent state manager tasks from being dropped
+    perp_state_manager_handle: tokio::task::JoinHandle<()>,
+    #[allow(dead_code)] // Kept to prevent state manager tasks from being dropped
+    spot_state_manager_handle: tokio::task::JoinHandle<()>,
+    perp_state_handle: crate::state_handle::StateHandle,
+    spot_state_handle: crate::state_handle::StateHandle,
+    is_mainnet: bool,
+    // Market data feed
+    market_data_handle: Option<MarketDataFeedHandle>,
+    market_data_state: Option<MarketDataState>,
+    #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
+    market_data_feed_handle: Option<tokio::task::JoinHandle<()>>,
+    event_rx: Option<mpsc::Receiver<MarketEvent>>,
+}
+
+impl HyperliquidClient {
+    /// Query spot asset info from metadata manager (for validation/mapping)
+    async fn query_spot_asset_info(
+        &self,
+    ) -> Result<std::collections::HashMap<String, rest::SpotAssetInfo>, String> {
+        self.metadata_handle.get_spot_asset_info().await
+    }
+
+    /// Query spot market data from metadata manager (for prices)
+    async fn query_spot_market_data(
+        &self,
+    ) -> Result<std::collections::HashMap<String, SpotMarketData>, String> {
+        self.metadata_handle.get_spot_market_data().await
+    }
+
+    /// Query perp asset info from metadata manager
+    async fn query_perp_asset_info(
+        &self,
+    ) -> Result<std::collections::HashMap<String, AssetInfo>, String> {
+        self.metadata_handle.get_perp_asset_info().await
+    }
+
+    /// Query funding rates from metadata manager
+    async fn query_funding_rates(&self) -> Result<Vec<(String, f64, f64, f64)>, String> {
+        self.metadata_handle.get_funding_rates().await
+    }
+
+    pub fn new(
+        config: HyperliquidConfig,
+        ws_manager: std::sync::Arc<roshar_ws_mgr::Manager>,
+    ) -> Self {
+        let validator = OrderValidator::new();
+
+        let api = if let Some(vault_addr) = config.wallet_address.as_ref() {
+            ExchangeApi::new_with_vault(config.is_mainnet, Some(format!("{:?}", vault_addr)))
+        } else {
+            ExchangeApi::new(config.is_mainnet)
+        };
+
+        let (metadata_handle, metadata_manager_handle) =
+            ExchangeMetadataManager::spawn(config.metadata_update_interval_secs, config.is_mainnet);
+
+        let wallet_addr = config.wallet_address;
+        let is_mainnet = config.is_mainnet;
+
+        let perp_init = if wallet_addr.is_some() {
+            Some(move || Self::fetch_perp_positions(wallet_addr, is_mainnet))
+        } else {
+            None
+        };
+
+        let spot_init = if wallet_addr.is_some() {
+            Some(move || Self::fetch_spot_positions(wallet_addr, is_mainnet))
+        } else {
+            None
+        };
+
+        let (perp_state_handle, perp_state_manager_handle) =
+            crate::state_manager::StateManager::spawn_with_init(perp_init);
+        let (spot_state_handle, spot_state_manager_handle) =
+            crate::state_manager::StateManager::spawn_with_init(spot_init);
+
+        if let Some(wallet_addr) = config.wallet_address.as_ref() {
+            let wallet_address_str = format!("{:?}", wallet_addr);
+
+            let orders_handler = OrdersFeedHandler::new(
+                wallet_address_str.clone(),
+                perp_state_handle.sender(),
+                spot_state_handle.sender(),
+                ws_manager.clone(),
+                metadata_handle.clone(),
+                !config.is_mainnet,
+            );
+            tokio::spawn(async move {
+                orders_handler.run().await;
+            });
+
+            // Spawn Fills WebSocket feed handler (routes to both perp and spot managers)
+            let fills_handler = FillsFeedHandler::new(
+                wallet_address_str,
+                perp_state_handle.sender(),
+                spot_state_handle.sender(),
+                ws_manager.clone(),
+                metadata_handle.clone(),
+                !config.is_mainnet,
+            );
+            tokio::spawn(async move {
+                fills_handler.run().await;
+            });
+
+            log::info!(
+                "Spawned Hyperliquid WebSocket feed handlers for wallet: {:?}",
+                wallet_addr
+            );
+        } else {
+            log::info!("No wallet address provided - WebSocket feeds not started");
+        }
+
+        // Set up market data feed
+        let (event_tx, event_rx) = mpsc::channel(10000);
+        let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, event_tx);
+        let market_data_handle = market_data_feed.get_handle();
+        let market_data_state = market_data_feed.get_state();
+        let market_data_feed_handle = tokio::spawn(async move {
+            market_data_feed.run().await;
+        });
+
+        Self {
+            api,
+            wallet_address: config.wallet_address,
+            validator,
+            metadata_manager_handle,
+            metadata_handle,
+            perp_state_manager_handle,
+            spot_state_manager_handle,
+            perp_state_handle,
+            spot_state_handle,
+            is_mainnet: config.is_mainnet,
+            market_data_handle: Some(market_data_handle),
+            market_data_state: Some(market_data_state),
+            market_data_feed_handle: Some(market_data_feed_handle),
+            event_rx: Some(event_rx),
+        }
+    }
+
+    /// Validate and round an order request
+    pub async fn validate_order(
+        &self,
+        request: validator::OrderRequest,
+    ) -> Result<validator::ValidatedOrder, String> {
+        // Determine if this is a spot or perp order
+        let is_spot = request.hyperliquid_is_spot.unwrap_or(false);
+
+        if is_spot {
+            let spot_asset_info = self.query_spot_asset_info().await?;
+            self.validator
+                .validate_and_round_hyperliquid_spot(request, &spot_asset_info)
+        } else {
+            let asset_info = self.query_perp_asset_info().await?;
+            self.validator
+                .validate_and_round_hyperliquid_perps(request, &asset_info)
+        }
+    }
+
+    /// Get spot ticker for a given perp name
+    /// For example: "HYPE" -> Some("@107")
+    /// Returns None if no USDC-quoted spot pair exists for the perp
+    pub async fn get_usdc_ticker_from_coin(
+        &self,
+        perp_name: &str,
+    ) -> Result<Option<String>, String> {
+        let spot_assets = self.query_spot_asset_info().await?;
+        const USDC_TOKEN_INDEX: u32 = 0;
+
+        for (_ticker, info) in spot_assets.iter() {
+            if info.quote_token.index == USDC_TOKEN_INDEX && info.base_token.name == perp_name {
+                return Ok(Some(info.asset.name.clone()));
+            }
+        }
+        Ok(None)
+    }
+
+    /// Create a new order
+    /// Returns OrderResult on success indicating whether order is resting or filled
+    pub async fn create_order(
+        &self,
+        ticker: &str,
+        is_buy: bool,
+        limit_px: f64,
+        sz: f64,
+        reduce_only: bool,
+        order_type: HyperliquidOrderType,
+    ) -> Result<OrderResult, String> {
+        let res = self
+            .api
+            .create_order(ticker, is_buy, limit_px, sz, reduce_only, order_type)
+            .await;
+
+        match res {
+            Ok(ExchangeResponseStatus::Ok(data)) => {
+                if let Some(first_status) = data.data.and_then(|d| d.statuses.into_iter().next()) {
+                    match first_status {
+                        ExchangeDataStatus::Error(msg) => {
+                            Err(format!("Exchange rejected order: {}", msg))
+                        }
+                        ExchangeDataStatus::Resting(order) => Ok(OrderResult::Resting {
+                            order_id: order.oid.to_string(),
+                        }),
+                        ExchangeDataStatus::Filled(order) => {
+                            // Parse filled quantities and price
+                            let filled_qty = order.total_sz.parse::<f64>().unwrap_or(0.0);
+                            let avg_price = order.avg_px.parse::<f64>().unwrap_or(0.0);
+
+                            Ok(OrderResult::Filled {
+                                order_id: order.oid.to_string(),
+                                filled_qty,
+                                avg_price,
+                            })
+                        }
+                        ExchangeDataStatus::WaitingForFill => {
+                            Err("Order waiting for fill".to_string())
+                        }
+                        ExchangeDataStatus::WaitingForTrigger => {
+                            Err("Order waiting for trigger".to_string())
+                        }
+                        ExchangeDataStatus::Success => {
+                            Err("Order returned success without ID".to_string())
+                        }
+                    }
+                } else {
+                    Err("No order status returned".to_string())
+                }
+            }
+            Ok(ExchangeResponseStatus::Err(err)) => Err(format!("Exchange error: {}", err)),
+            Err(e) => Err(format!("API error: {:?}", e)),
+        }
+    }
+
+    /// Cancel an order by order ID
+    pub async fn cancel_order(&self, asset: &str, oid: u64) -> Result<(), String> {
+        match self.api.cancel_order(asset, oid).await {
+            Ok(ExchangeResponseStatus::Ok(_)) => Ok(()),
+            Ok(ExchangeResponseStatus::Err(err)) => {
+                Err(format!("Failed to cancel order {}: {}", oid, err))
+            }
+            Err(e) => Err(format!("API error: {:?}", e)),
+        }
+    }
+
+    /// Modify an existing order
+    pub async fn modify_order(
+        &self,
+        oid: u64,
+        asset: &str,
+        is_buy: bool,
+        limit_px: f64,
+        sz: f64,
+    ) -> Result<(), String> {
+        let params = ModifyOrderParams {
+            oid,
+            asset: asset.to_string(),
+            is_buy,
+            limit_px,
+            sz,
+            reduce_only: false,
+            order_type: HyperliquidOrderType::Gtc,
+        };
+
+        self.api
+            .modify_order(params)
+            .await
+            .map_err(|e| format!("Failed to modify order: {:?}", e))?;
+
+        Ok(())
+    }
+
+    /// Query current position for a ticker from StateManager
+    /// Returns actual position and pending orders impact
+    pub async fn get_position(
+        &self,
+        ticker: &str,
+    ) -> Result<crate::state_manager::PositionState, String> {
+        // Try perp first, then spot
+        let perp_state = self.perp_state_handle.get_position(ticker).await?;
+
+        if perp_state.actual.abs() > 1e-10 || perp_state.pending.abs() > 1e-10 {
+            Ok(perp_state)
+        } else {
+            // Try spot
+            self.spot_state_handle.get_position(ticker).await
+        }
+    }
+
+    /// Query perpetual positions only from StateManager
+    /// Returns HashMap of perp ticker -> quantity (positive = long, negative = short)
+    pub async fn get_perp_positions(
+        &self,
+    ) -> Result<std::collections::HashMap<String, f64>, String> {
+        self.perp_state_handle.get_positions().await
+    }
+
+    /// Query spot positions only from StateManager
+    /// Returns HashMap of token name -> quantity
+    pub async fn get_spot_positions(
+        &self,
+    ) -> Result<std::collections::HashMap<String, f64>, String> {
+        self.spot_state_handle.get_positions().await
+    }
+
+    /// Query perp order status by order_id
+    pub async fn get_perp_order(
+        &self,
+        order_id: &str,
+    ) -> Result<Option<crate::state_manager::OrderStatus>, String> {
+        self.perp_state_handle.get_order(order_id).await
+    }
+
+    /// Query spot order status by order_id
+    pub async fn get_spot_order(
+        &self,
+        order_id: &str,
+    ) -> Result<Option<crate::state_manager::OrderStatus>, String> {
+        self.spot_state_handle.get_order(order_id).await
+    }
+
+    /// Check if a perp order is completed (fully filled)
+    pub async fn is_perp_order_completed(&self, order_id: &str) -> Result<bool, String> {
+        self.perp_state_handle.is_order_completed(order_id).await
+    }
+
+    /// Check if a spot order is completed (fully filled)
+    pub async fn is_spot_order_completed(&self, order_id: &str) -> Result<bool, String> {
+        self.spot_state_handle.is_order_completed(order_id).await
+    }
+
+    /// Get pending orders for a perp ticker
+    pub async fn get_perp_pending_orders(
+        &self,
+        ticker: &str,
+    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
+        self.perp_state_handle.get_pending_orders(ticker).await
+    }
+
+    /// Get pending orders for a spot ticker
+    pub async fn get_spot_pending_orders(
+        &self,
+        ticker: &str,
+    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
+        self.spot_state_handle.get_pending_orders(ticker).await
+    }
+
+    /// Fetch perp positions from exchange
+    /// Internal helper function used for StateManager initialization
+    async fn fetch_perp_positions(
+        wallet_address: Option<ethers::types::H160>,
+        is_mainnet: bool,
+    ) -> Result<std::collections::HashMap<String, f64>, String> {
+        let wallet_addr = wallet_address
+            .ok_or_else(|| "Wallet address required for fetching perp positions".to_string())?;
+
+        let info_api = if is_mainnet {
+            InfoApi::production()
+        } else {
+            InfoApi::testnet()
+        };
+
+        // Fetch perp positions
+        let perp_state = info_api
+            .user_perpetuals_state(wallet_addr)
+            .await
+            .map_err(|e| format!("Failed to fetch perpetuals state: {:?}", e))?;
+
+        let mut perp_positions = std::collections::HashMap::new();
+        for position in &perp_state.asset_positions {
+            let size = position
+                .position
+                .szi
+                .parse::<f64>()
+                .map_err(|e| format!("Failed to parse position size: {}", e))?;
+            if size.abs() > 1e-10 {
+                perp_positions.insert(position.position.coin.clone(), size);
+            }
+        }
+
+        Ok(perp_positions)
+    }
+
+    /// Fetch spot positions from exchange
+    /// Internal helper function used for StateManager initialization
+    async fn fetch_spot_positions(
+        wallet_address: Option<ethers::types::H160>,
+        is_mainnet: bool,
+    ) -> Result<std::collections::HashMap<String, f64>, String> {
+        let wallet_addr = wallet_address
+            .ok_or_else(|| "Wallet address required for fetching spot positions".to_string())?;
+
+        let info_api = if is_mainnet {
+            InfoApi::production()
+        } else {
+            InfoApi::testnet()
+        };
+
+        // Fetch spot clearinghouse state and parse balances
+        let spot_state = info_api
+            .user_spot_state(&format!("{:?}", wallet_addr))
+            .await
+            .map_err(|e| format!("Failed to fetch spot state: {:?}", e))?;
+
+        let mut spot_balances = std::collections::HashMap::new();
+        for balance in &spot_state.balances {
+            let balance_qty = balance
+                .total
+                .parse::<f64>()
+                .map_err(|e| format!("Failed to parse balance total: {}", e))?;
+            spot_balances.insert(balance.coin.clone(), balance_qty);
+        }
+
+        Ok(spot_balances)
+    }
+
+    /// Get all funding rates with size data from metadata manager (cached)
+    /// Returns Vec of (coin, funding_rate, open_interest, daily_volume)
+    pub async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, String> {
+        self.query_funding_rates().await
+    }
+
+    /// Get spot market info from exchange (REST API call)
+    /// Returns HashMap of spot ticker -> SpotMarketData
+    pub async fn get_info_spot(
+        &self,
+    ) -> Result<std::collections::HashMap<String, SpotMarketData>, String> {
+        let info_api = if self.is_mainnet {
+            InfoApi::production()
+        } else {
+            InfoApi::testnet()
+        };
+
+        info_api
+            .get_info_spot()
+            .await
+            .map_err(|e| format!("Failed to fetch spot market info: {:?}", e))
+    }
+
+    /// Get perp mark prices from cached metadata (no REST API call)
+    /// Returns HashMap of perp ticker -> mark price
+    pub async fn get_perp_prices(&self) -> Result<std::collections::HashMap<String, f64>, String> {
+        let asset_info = self.query_perp_asset_info().await?;
+        let mut prices = std::collections::HashMap::with_capacity(asset_info.len());
+
+        for (ticker, info) in asset_info {
+            if let Some(price_str) = &info.market_data.mark_price {
+                if let Ok(price) = price_str.parse::<f64>() {
+                    prices.insert(ticker, price);
+                }
+            }
+        }
+
+        Ok(prices)
+    }
+
+    /// Get spot mark prices from cached metadata (no REST API call)
+    /// Returns HashMap of spot ticker -> mark price
+    pub async fn get_spot_prices(&self) -> Result<std::collections::HashMap<String, f64>, String> {
+        let spot_market_data = self.query_spot_market_data().await?;
+        let mut prices = std::collections::HashMap::with_capacity(spot_market_data.len());
+
+        for (ticker, data) in spot_market_data {
+            if let Ok(price) = data.mark_price.parse::<f64>() {
+                prices.insert(ticker, price);
+            }
+        }
+
+        Ok(prices)
+    }
+
+    /// Get full user perpetuals state from exchange (REST API call)
+    /// Returns complete UserPerpetualsState including positions, margin, and liquidation info
+    pub async fn get_user_perpetuals_state(&self) -> Result<UserPerpetualsState, String> {
+        let wallet_address = self
+            .wallet_address
+            .ok_or_else(|| "Wallet address required for get_user_perpetuals_state".to_string())?;
+
+        // Create InfoApi to query account state
+        let info_api = if self.is_mainnet {
+            InfoApi::production()
+        } else {
+            InfoApi::testnet()
+        };
+
+        // Fetch user perpetuals state
+        info_api
+            .user_perpetuals_state(wallet_address)
+            .await
+            .map_err(|e| format!("Failed to fetch perpetuals state: {:?}", e))
+    }
+
+    /// Get maximum leverage allowed for a specific coin
+    /// Returns the maxLeverage from exchange metadata
+    pub async fn get_max_leverage(&self, coin: &str) -> Result<u32, String> {
+        let asset_info = self.query_perp_asset_info().await?;
+
+        asset_info
+            .get(coin)
+            .map(|info| info.asset.max_leverage)
+            .ok_or_else(|| format!("No asset info found for {}", coin))
+    }
+
+    /// Update leverage for a specific asset
+    /// Returns Ok(()) if successful, Err if failed
+    pub async fn update_leverage(
+        &self,
+        leverage: u32,
+        coin: &str,
+        is_cross: bool,
+    ) -> Result<(), String> {
+        self.api
+            .update_leverage(leverage, coin, is_cross)
+            .await
+            .map_err(|e| format!("Failed to update leverage: {:?}", e))
+            .and_then(|status| match status {
+                ExchangeResponseStatus::Ok(_) => Ok(()),
+                ExchangeResponseStatus::Err(msg) => {
+                    Err(format!("Exchange returned error: {}", msg))
+                }
+            })
+    }
+
+    /// Setup BBO feed for specified tickers
+    /// Returns a receiver that will get (ticker, bid, ask) tuples
+    /// and a handle for adding subscriptions dynamically
+    /// The feed runs in a background task
+    pub fn setup_bbo_feed(
+        &self,
+        tickers: Vec<String>,
+        ws_manager: std::sync::Arc<roshar_ws_mgr::Manager>,
+    ) -> (
+        tokio::sync::broadcast::Receiver<(String, f64, f64)>,
+        ws::BboFeedHandle,
+    ) {
+        let (bbo_tx, bbo_rx) = tokio::sync::broadcast::channel(1000);
+
+        let handler = BboFeedHandler::new(
+            tickers.clone(),
+            bbo_tx,
+            ws_manager,
+            !self.is_mainnet, // is_testnet
+        );
+
+        let handle = handler.get_handle();
+
+        tokio::spawn(async move {
+            handler.run().await;
+        });
+
+        log::info!("BBO feed handler spawned for {} tickers", tickers.len());
+
+        (bbo_rx, handle)
+    }
+
+    // --- Pattern A: Polling API ---
+
+    /// Start depth subscription for a coin (idempotent)
+    /// The order book state will be maintained in the background
+    pub async fn create_depth_subscription(&self, coin: &str) -> Result<(), String> {
+        if let Some(handle) = &self.market_data_handle {
+            handle.add_depth(coin).await
+        } else {
+            Err("Market data handler not initialized".to_string())
+        }
+    }
+
+    /// Remove depth subscription for a coin
+    pub async fn remove_depth_subscription(&self, coin: &str) -> Result<(), String> {
+        if let Some(handle) = &self.market_data_handle {
+            handle.remove_depth(coin).await
+        } else {
+            Err("Market data handler not initialized".to_string())
+        }
+    }
+
+    /// Get the current order book state for a coin (Pattern A)
+    /// Returns None if not subscribed or no data received yet
+    pub fn get_latest_depth(&self, coin: &str) -> Option<OrderBookState> {
+        self.market_data_state
+            .as_ref()
+            .and_then(|state| state.get_latest_depth(coin))
+    }
+
+    /// Start trades subscription for a coin (idempotent)
+    pub async fn create_trades_subscription(&self, coin: &str) -> Result<(), String> {
+        if let Some(handle) = &self.market_data_handle {
+            handle.add_trades(coin).await
+        } else {
+            Err("Market data handler not initialized".to_string())
+        }
+    }
+
+    /// Remove trades subscription for a coin
+    pub async fn remove_trades_subscription(&self, coin: &str) -> Result<(), String> {
+        if let Some(handle) = &self.market_data_handle {
+            handle.remove_trades(coin).await
+        } else {
+            Err("Market data handler not initialized".to_string())
+        }
+    }
+
+    // --- Pattern B: Reactive API ---
+
+    /// Take the market events receiver for reactive consumption
+    /// Returns None if already taken or not initialized
+    /// Note: This takes ownership of the receiver - it can only be called once
+    pub fn take_market_events_receiver(&mut self) -> Option<mpsc::Receiver<MarketEvent>> {
+        self.event_rx.take()
+    }
+}

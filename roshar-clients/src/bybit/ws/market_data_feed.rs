@@ -1,0 +1,381 @@
+use std::collections::{HashMap, HashSet};
+use std::sync::{Arc, RwLock};
+
+use roshar_types::{
+    ByBitDepthMessage, ByBitTradesMessage, ByBitWssMessage, BybitOrderBook, OrderBookState,
+    SupportedMessages, Trade, Venue,
+};
+use roshar_ws_mgr::Manager;
+use tokio::sync::mpsc;
+
+use crate::BYBIT_WSS_URL;
+
+#[derive(Debug, Clone)]
+pub enum MarketEvent {
+    DepthUpdate {
+        symbol: String,
+        book: Arc<OrderBookState>,
+    },
+    TradeUpdate {
+        symbol: String,
+        trades: Arc<Vec<Trade>>,
+    },
+}
+
+#[derive(Debug)]
+pub enum SubscriptionCommand {
+    AddDepth { symbol: String },
+    RemoveDepth { symbol: String },
+    AddTrades { symbol: String },
+    RemoveTrades { symbol: String },
+}
+
+#[derive(Clone)]
+pub struct MarketDataFeedHandle {
+    command_tx: mpsc::Sender<SubscriptionCommand>,
+}
+
+impl MarketDataFeedHandle {
+    pub async fn add_depth(&self, symbol: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::AddDepth {
+                symbol: symbol.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send add_depth command: {}", e))
+    }
+
+    pub async fn remove_depth(&self, symbol: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::RemoveDepth {
+                symbol: symbol.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send remove_depth command: {}", e))
+    }
+
+    pub async fn add_trades(&self, symbol: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::AddTrades {
+                symbol: symbol.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send add_trades command: {}", e))
+    }
+
+    pub async fn remove_trades(&self, symbol: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::RemoveTrades {
+                symbol: symbol.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send remove_trades command: {}", e))
+    }
+}
+
+#[derive(Clone)]
+pub struct MarketDataState {
+    order_books: Arc<RwLock<HashMap<String, BybitOrderBook>>>,
+}
+
+impl MarketDataState {
+    pub fn new() -> Self {
+        Self {
+            order_books: Arc::new(RwLock::new(HashMap::new())),
+        }
+    }
+
+    pub fn get_latest_depth(&self, symbol: &str) -> Option<OrderBookState> {
+        let books = self.order_books.read().ok()?;
+        books.get(symbol).and_then(|ob| ob.book.clone())
+    }
+}
+
+impl Default for MarketDataState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub struct MarketDataFeed {
+    ws_manager: Arc<Manager>,
+    conn_name: String,
+
+    state: MarketDataState,
+    event_tx: mpsc::Sender<MarketEvent>,
+
+    command_rx: mpsc::Receiver<SubscriptionCommand>,
+    command_tx: mpsc::Sender<SubscriptionCommand>,
+
+    depth_subscriptions: HashSet<String>,
+    trades_subscriptions: HashSet<String>,
+
+    is_connected: bool,
+    pending_commands: Vec<SubscriptionCommand>,
+}
+
+impl MarketDataFeed {
+    pub fn new(ws_manager: Arc<Manager>, event_tx: mpsc::Sender<MarketEvent>) -> Self {
+        let (command_tx, command_rx) = mpsc::channel(100);
+
+        Self {
+            ws_manager,
+            conn_name: "bybit-market-data".to_string(),
+            state: MarketDataState::new(),
+            event_tx,
+            command_rx,
+            command_tx,
+            depth_subscriptions: HashSet::new(),
+            trades_subscriptions: HashSet::new(),
+            is_connected: false,
+            pending_commands: Vec::new(),
+        }
+    }
+
+    pub fn get_handle(&self) -> MarketDataFeedHandle {
+        MarketDataFeedHandle {
+            command_tx: self.command_tx.clone(),
+        }
+    }
+
+    pub fn get_state(&self) -> MarketDataState {
+        self.state.clone()
+    }
+
+    pub async fn run(mut self) {
+        let mut recv = self.ws_manager.setup_reader(&self.conn_name, 1000);
+        log::info!(
+            "WebSocket reader set up for ByBit market data feed: {}",
+            self.conn_name
+        );
+
+        let ws_config = roshar_ws_mgr::Config {
+            name: self.conn_name.clone(),
+            url: BYBIT_WSS_URL.to_string(),
+            ping_duration: 10,
+            ping_message: ByBitWssMessage::ping().to_json(),
+            ping_timeout: 10,
+            reconnect_timeout: 90,
+            read_buffer_size: Some(33554432),
+            write_buffer_size: Some(2097152),
+            max_message_size: Some(41943040),
+            max_frame_size: Some(20971520),
+            tcp_recv_buffer_size: Some(16777216),
+            tcp_send_buffer_size: Some(4194304),
+            tcp_nodelay: Some(true),
+            broadcast_channel_size: Some(131072),
+            use_text_ping: Some(true),
+        };
+
+        if let Err(e) = self.ws_manager.new_conn(&self.conn_name, ws_config) {
+            log::error!(
+                "Failed to create ByBit market data WebSocket connection: {}",
+                e
+            );
+            return;
+        }
+
+        loop {
+            tokio::select! {
+                msg = recv.recv() => {
+                    match msg {
+                        Ok(roshar_ws_mgr::Message::SuccessfulHandshake(_name)) => {
+                            log::info!("ByBit market data feed WebSocket connected: {}", self.conn_name);
+                            self.is_connected = true;
+
+                            let pending = std::mem::take(&mut self.pending_commands);
+                            for cmd in pending {
+                                self.handle_command(cmd);
+                            }
+
+                            self.resubscribe_all();
+                        }
+                        Ok(roshar_ws_mgr::Message::TextMessage(_name, content)) => {
+                            self.handle_message(&content).await;
+                        }
+                        Ok(roshar_ws_mgr::Message::ReadError(_name, err)) => {
+                            log::error!("Websocket read error in ByBit market data feed: {}", err);
+                            self.is_connected = false;
+                        }
+                        Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
+                            log::error!("Websocket write error in ByBit market data feed: {}", err);
+                        }
+                        Ok(roshar_ws_mgr::Message::PongReceiveTimeoutError(_name)) => {
+                            log::warn!("Pong receive timeout in ByBit market data feed");
+                            self.is_connected = false;
+                        }
+                        Ok(_) => {}
+                        Err(e) => {
+                            log::error!("Failed to receive WebSocket message: {}", e);
+                            break;
+                        }
+                    }
+                }
+                Some(cmd) = self.command_rx.recv() => {
+                    if self.is_connected {
+                        self.handle_command(cmd);
+                    } else {
+                        self.pending_commands.push(cmd);
+                    }
+                }
+            }
+        }
+    }
+
+    fn resubscribe_all(&self) {
+        for symbol in &self.depth_subscriptions {
+            let sub_msg = ByBitWssMessage::depth(symbol).to_json();
+            if let Err(e) = self.ws_manager.write(
+                &self.conn_name,
+                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+            ) {
+                log::error!("Failed to resubscribe to depth for {}: {}", symbol, e);
+            }
+        }
+
+        for symbol in &self.trades_subscriptions {
+            let sub_msg = ByBitWssMessage::trades(symbol).to_json();
+            if let Err(e) = self.ws_manager.write(
+                &self.conn_name,
+                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+            ) {
+                log::error!("Failed to resubscribe to trades for {}: {}", symbol, e);
+            }
+        }
+    }
+
+    fn handle_command(&mut self, cmd: SubscriptionCommand) {
+        match cmd {
+            SubscriptionCommand::AddDepth { symbol } => {
+                if self.depth_subscriptions.insert(symbol.clone()) {
+                    if let Ok(mut books) = self.state.order_books.write() {
+                        books.insert(symbol.clone(), BybitOrderBook::new(symbol.clone()));
+                    }
+
+                    let sub_msg = ByBitWssMessage::depth(&symbol).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+                    ) {
+                        log::error!("Failed to subscribe to depth for {}: {}", symbol, e);
+                        self.depth_subscriptions.remove(&symbol);
+                        if let Ok(mut books) = self.state.order_books.write() {
+                            books.remove(&symbol);
+                        }
+                    } else {
+                        log::info!("Subscribed to ByBit depth for {}", symbol);
+                    }
+                }
+            }
+            SubscriptionCommand::RemoveDepth { symbol } => {
+                if self.depth_subscriptions.remove(&symbol) {
+                    if let Ok(mut books) = self.state.order_books.write() {
+                        books.remove(&symbol);
+                    }
+
+                    let unsub_msg = ByBitWssMessage::depth_unsub(&symbol).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                    ) {
+                        log::error!("Failed to unsubscribe from depth for {}: {}", symbol, e);
+                    } else {
+                        log::info!("Unsubscribed from ByBit depth for {}", symbol);
+                    }
+                }
+            }
+            SubscriptionCommand::AddTrades { symbol } => {
+                if self.trades_subscriptions.insert(symbol.clone()) {
+                    let sub_msg = ByBitWssMessage::trades(&symbol).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+                    ) {
+                        log::error!("Failed to subscribe to trades for {}: {}", symbol, e);
+                        self.trades_subscriptions.remove(&symbol);
+                    } else {
+                        log::info!("Subscribed to ByBit trades for {}", symbol);
+                    }
+                }
+            }
+            SubscriptionCommand::RemoveTrades { symbol } => {
+                if self.trades_subscriptions.remove(&symbol) {
+                    let unsub_msg = ByBitWssMessage::trades_unsub(&symbol).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                    ) {
+                        log::error!("Failed to unsubscribe from trades for {}: {}", symbol, e);
+                    } else {
+                        log::info!("Unsubscribed from ByBit trades for {}", symbol);
+                    }
+                }
+            }
+        }
+    }
+
+    async fn handle_message(&mut self, content: &str) {
+        let msg = match SupportedMessages::from_message(content, Venue::ByBit) {
+            Some(msg) => msg,
+            None => return,
+        };
+
+        match msg {
+            SupportedMessages::ByBitDepthMessage(depth_msg) => {
+                self.handle_depth(depth_msg).await;
+            }
+            SupportedMessages::ByBitTradesMessage(trades_msg) => {
+                self.handle_trades(trades_msg).await;
+            }
+            _ => {}
+        }
+    }
+
+    async fn handle_depth(&mut self, msg: ByBitDepthMessage) {
+        let symbol = msg.data.s.clone();
+
+        let book_state = {
+            let Ok(mut books) = self.state.order_books.write() else {
+                return;
+            };
+            if let Some(order_book) = books.get_mut(&symbol) {
+                if let Err(e) = order_book.new_update(&msg) {
+                    log::error!("Failed to update order book for {}: {:?}", symbol, e);
+                    return;
+                }
+                order_book.book.clone()
+            } else {
+                return;
+            }
+        };
+
+        if let Some(book) = book_state {
+            let _ = self
+                .event_tx
+                .send(MarketEvent::DepthUpdate {
+                    symbol,
+                    book: Arc::new(book),
+                })
+                .await;
+        }
+    }
+
+    async fn handle_trades(&self, msg: ByBitTradesMessage) {
+        if msg.data.is_empty() {
+            return;
+        }
+
+        let symbol = msg.data[0].s.clone();
+        let trades = msg.to_trades();
+
+        if !trades.is_empty() {
+            let _ = self
+                .event_tx
+                .send(MarketEvent::TradeUpdate {
+                    symbol,
+                    trades: Arc::new(trades),
+                })
+                .await;
+        }
+    }
+}
