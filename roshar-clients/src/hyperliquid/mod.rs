@@ -3,8 +3,8 @@ pub mod validator;
 pub mod ws;
 
 use ws::{
-    BboFeed, BboFeedHandle, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle, MarketDataState,
-    OrdersFeedHandler,
+    BboFeed, BboFeedHandle, CandleFeed, CandleFeedHandle, FillsFeedHandler, MarketDataFeed,
+    MarketDataFeedHandle, OrdersFeedHandler,
 };
 
 pub use rest::{ExchangeMetadataHandle, ExchangeMetadataManager};
@@ -55,15 +55,18 @@ pub struct HyperliquidClient {
     spot_state_handle: crate::state_handle::StateHandle,
     is_mainnet: bool,
     // Market data feed
-    market_data_handle: Option<MarketDataFeedHandle>,
-    market_data_state: Option<MarketDataState>,
+    market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
-    market_data_feed_handle: Option<tokio::task::JoinHandle<()>>,
+    market_data_feed_handle: tokio::task::JoinHandle<()>,
     event_rx: Option<mpsc::Receiver<MarketEvent>>,
     // BBO feed
     bbo_handle: BboFeedHandle,
     #[allow(dead_code)] // Kept to prevent BBO feed task from being dropped
     bbo_feed_handle: tokio::task::JoinHandle<()>,
+    // Candle feed
+    candle_handle: CandleFeedHandle,
+    #[allow(dead_code)] // Kept to prevent Candle feed task from being dropped
+    candle_feed_handle: tokio::task::JoinHandle<()>,
 }
 
 impl HyperliquidClient {
@@ -171,11 +174,17 @@ impl HyperliquidClient {
             bbo_feed.run().await;
         });
 
+        // Set up Candle feed
+        let candle_feed = CandleFeed::new(ws_manager.clone(), !config.is_mainnet);
+        let candle_handle = candle_feed.get_handle();
+        let candle_feed_handle = tokio::spawn(async move {
+            candle_feed.run().await;
+        });
+
         // Set up market data feed
         let (event_tx, event_rx) = mpsc::channel(10000);
         let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, event_tx);
         let market_data_handle = market_data_feed.get_handle();
-        let market_data_state = market_data_feed.get_state();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
         });
@@ -191,12 +200,13 @@ impl HyperliquidClient {
             perp_state_handle,
             spot_state_handle,
             is_mainnet: config.is_mainnet,
-            market_data_handle: Some(market_data_handle),
-            market_data_state: Some(market_data_state),
-            market_data_feed_handle: Some(market_data_feed_handle),
+            market_data_handle,
+            market_data_feed_handle,
             event_rx: Some(event_rx),
             bbo_handle,
             bbo_feed_handle,
+            candle_handle,
+            candle_feed_handle,
         }
     }
 
@@ -601,6 +611,26 @@ impl HyperliquidClient {
         self.bbo_handle.get_latest_bbo(ticker).await
     }
 
+    /// Start candle subscription for a coin (idempotent)
+    /// The candle state will be maintained in the background
+    pub async fn create_candle_subscription(&self, coin: &str) -> Result<(), String> {
+        self.candle_handle.add_subscription(coin).await
+    }
+
+    /// Remove candle subscription for a coin
+    pub async fn remove_candle_subscription(&self, coin: &str) -> Result<(), String> {
+        self.candle_handle.remove_subscription(coin).await
+    }
+
+    /// Get the latest candle for a coin
+    /// Returns None if not subscribed or no data received yet
+    pub async fn get_latest_candle(
+        &self,
+        coin: &str,
+    ) -> Result<Option<roshar_types::Candle>, String> {
+        self.candle_handle.get_latest_candle(coin).await
+    }
+
     /// Get historical funding rates for a coin
     /// Returns funding rate history from start_time to end_time (or now if None)
     pub async fn get_historical_funding_rates(
@@ -635,51 +665,30 @@ impl HyperliquidClient {
         self.spot_state_handle.get_all_pending_orders().await
     }
 
-    // --- Pattern A: Polling API ---
-
     /// Start depth subscription for a coin (idempotent)
-    /// The order book state will be maintained in the background
-    pub async fn create_depth_subscription(&self, coin: &str) -> Result<(), String> {
-        if let Some(handle) = &self.market_data_handle {
-            handle.add_depth(coin).await
-        } else {
-            Err("Market data handler not initialized".to_string())
-        }
+    pub async fn add_depth(&self, coin: &str) -> Result<(), String> {
+        self.market_data_handle.add_depth(coin).await
     }
 
     /// Remove depth subscription for a coin
-    pub async fn remove_depth_subscription(&self, coin: &str) -> Result<(), String> {
-        if let Some(handle) = &self.market_data_handle {
-            handle.remove_depth(coin).await
-        } else {
-            Err("Market data handler not initialized".to_string())
-        }
+    pub async fn remove_depth(&self, coin: &str) -> Result<(), String> {
+        self.market_data_handle.remove_depth(coin).await
     }
 
-    /// Get the current order book state for a coin (Pattern A)
+    /// Get the current order book state for a coin
     /// Returns None if not subscribed or no data received yet
-    pub fn get_latest_depth(&self, coin: &str) -> Option<OrderBookState> {
-        self.market_data_state
-            .as_ref()
-            .and_then(|state| state.get_latest_depth(coin))
+    pub async fn get_latest_depth(&self, coin: &str) -> Result<Option<OrderBookState>, String> {
+        self.market_data_handle.get_latest_depth(coin).await
     }
 
     /// Start trades subscription for a coin (idempotent)
-    pub async fn create_trades_subscription(&self, coin: &str) -> Result<(), String> {
-        if let Some(handle) = &self.market_data_handle {
-            handle.add_trades(coin).await
-        } else {
-            Err("Market data handler not initialized".to_string())
-        }
+    pub async fn add_trades(&self, coin: &str) -> Result<(), String> {
+        self.market_data_handle.add_trades(coin).await
     }
 
     /// Remove trades subscription for a coin
-    pub async fn remove_trades_subscription(&self, coin: &str) -> Result<(), String> {
-        if let Some(handle) = &self.market_data_handle {
-            handle.remove_trades(coin).await
-        } else {
-            Err("Market data handler not initialized".to_string())
-        }
+    pub async fn remove_trades(&self, coin: &str) -> Result<(), String> {
+        self.market_data_handle.remove_trades(coin).await
     }
 
     // --- Pattern B: Reactive API ---

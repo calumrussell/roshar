@@ -1,12 +1,12 @@
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use roshar_types::{
     BinanceDepthDiffMessage, BinanceOrderBook, BinanceTradeMessage, OrderBookState,
     SupportedMessages, Trade, Venue,
 };
 use roshar_ws_mgr::Manager;
-use tokio::sync::{mpsc, Semaphore};
+use tokio::sync::{mpsc, oneshot, Semaphore};
 
 use crate::BINANCE_WSS_URL;
 
@@ -22,12 +22,15 @@ pub enum MarketEvent {
     },
 }
 
-#[derive(Debug)]
 pub enum SubscriptionCommand {
     AddDepth { symbol: String },
     RemoveDepth { symbol: String },
     AddTrades { symbol: String },
     RemoveTrades { symbol: String },
+    GetDepth {
+        symbol: String,
+        response: oneshot::Sender<Option<OrderBookState>>,
+    },
 }
 
 #[derive(Clone)]
@@ -71,41 +74,20 @@ impl MarketDataFeedHandle {
             .await
             .map_err(|e| format!("Failed to send remove_trades command: {}", e))
     }
-}
 
-#[derive(Clone)]
-pub struct MarketDataState {
-    order_books: Arc<RwLock<HashMap<String, OrderBookState>>>,
-}
+    pub async fn get_latest_depth(&self, symbol: &str) -> Result<Option<OrderBookState>, String> {
+        let (response_tx, response_rx) = oneshot::channel();
+        self.command_tx
+            .send(SubscriptionCommand::GetDepth {
+                symbol: symbol.to_string(),
+                response: response_tx,
+            })
+            .await
+            .map_err(|e| format!("Failed to send get_depth command: {}", e))?;
 
-impl MarketDataState {
-    pub fn new() -> Self {
-        Self {
-            order_books: Arc::new(RwLock::new(HashMap::new())),
-        }
-    }
-
-    pub fn get_latest_depth(&self, symbol: &str) -> Option<OrderBookState> {
-        let books = self.order_books.read().ok()?;
-        books.get(symbol).cloned()
-    }
-
-    fn update_book(&self, symbol: &str, book: OrderBookState) {
-        if let Ok(mut books) = self.order_books.write() {
-            books.insert(symbol.to_string(), book);
-        }
-    }
-
-    fn remove_book(&self, symbol: &str) {
-        if let Ok(mut books) = self.order_books.write() {
-            books.remove(symbol);
-        }
-    }
-}
-
-impl Default for MarketDataState {
-    fn default() -> Self {
-        Self::new()
+        response_rx
+            .await
+            .map_err(|e| format!("Failed to receive depth response: {}", e))
     }
 }
 
@@ -113,7 +95,6 @@ pub struct MarketDataFeed {
     ws_manager: Arc<Manager>,
     conn_name: String,
 
-    state: MarketDataState,
     order_books: HashMap<String, BinanceOrderBook>,
     event_tx: mpsc::Sender<MarketEvent>,
 
@@ -136,7 +117,6 @@ impl MarketDataFeed {
         Self {
             ws_manager,
             conn_name: "binance-market-data".to_string(),
-            state: MarketDataState::new(),
             order_books: HashMap::new(),
             event_tx,
             command_rx,
@@ -153,10 +133,6 @@ impl MarketDataFeed {
         MarketDataFeedHandle {
             command_tx: self.command_tx.clone(),
         }
-    }
-
-    pub fn get_state(&self) -> MarketDataState {
-        self.state.clone()
     }
 
     pub async fn run(mut self) {
@@ -232,10 +208,17 @@ impl MarketDataFeed {
                     }
                 }
                 Some(cmd) = self.command_rx.recv() => {
-                    if self.is_connected {
-                        self.handle_command(cmd).await;
-                    } else {
-                        self.pending_commands.push(cmd);
+                    match &cmd {
+                        SubscriptionCommand::GetDepth { .. } => {
+                            self.handle_command(cmd).await;
+                        }
+                        _ => {
+                            if self.is_connected {
+                                self.handle_command(cmd).await;
+                            } else {
+                                self.pending_commands.push(cmd);
+                            }
+                        }
                     }
                 }
             }
@@ -279,7 +262,6 @@ impl MarketDataFeed {
                         log::error!("Failed to subscribe to depth for {}: {}", symbol, e);
                         self.depth_subscriptions.remove(&symbol);
                         self.order_books.remove(&symbol);
-                        self.state.remove_book(&symbol);
                     } else {
                         log::info!("Subscribed to Binance depth for {}", symbol);
                     }
@@ -288,7 +270,6 @@ impl MarketDataFeed {
             SubscriptionCommand::RemoveDepth { symbol } => {
                 if self.depth_subscriptions.remove(&symbol) {
                     self.order_books.remove(&symbol);
-                    self.state.remove_book(&symbol);
 
                     let unsub_msg = roshar_types::BinanceWssMessage::depth_unsub(&symbol).to_json();
                     if let Err(e) = self.ws_manager.write(
@@ -329,6 +310,13 @@ impl MarketDataFeed {
                     }
                 }
             }
+            SubscriptionCommand::GetDepth { symbol, response } => {
+                let result = self
+                    .order_books
+                    .get(&symbol)
+                    .and_then(|book| book.book.clone());
+                let _ = response.send(result);
+            }
         }
     }
 
@@ -362,9 +350,6 @@ impl MarketDataFeed {
         };
 
         if let Some(book) = book_state {
-            // Update the shared state for polling
-            self.state.update_book(&symbol, book.clone());
-
             let _ = self
                 .event_tx
                 .send(MarketEvent::DepthUpdate {

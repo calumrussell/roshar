@@ -17,23 +17,24 @@ pub use hyperliquid::rest::{
 };
 pub use hyperliquid::validator::{OrderRequest, ValidatedOrder};
 pub use hyperliquid::{HyperliquidClient, HyperliquidConfig, MarketEvent};
-pub use state_handle::StateHandle;
 pub use state_manager::{PendingOrderInfo, PositionState};
 
 // Re-export Binance types
-pub use binance::BinanceRestClient;
+pub use binance::{BinanceClient, BinanceRestClient};
+pub use binance::{MarketEvent as BinanceMarketEvent};
 
 // Re-export ByBit types
 pub use bybit::{
-    ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitTickerData, ByBitTickersResponse,
-    MarketApi as ByBitMarketApi, OrderManagementApi as ByBitOrderManagementApi,
+    ByBitClient, ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitTickerData,
+    ByBitTickersResponse, MarketApi as ByBitMarketApi, MarketEvent as ByBitMarketEvent,
+    OrderManagementApi as ByBitOrderManagementApi,
 };
 
 // Re-export Kraken types
 pub use kraken::{
-    ChartsApi as KrakenChartsApi, KrakenGetLeverageResponse, KrakenLeveragePreference,
+    ChartsApi as KrakenChartsApi, KrakenClient, KrakenGetLeverageResponse, KrakenLeveragePreference,
     KrakenLeverageSettingResponse, KrakenModifyResponse, KrakenOpenOrdersResponse, KrakenOrder,
     KrakenOrderResponse, KrakenOrderStatusResponse, KrakenRestCandleData, KrakenRestCandleResponse,
-    KrakenTickerData, MarketApi as KrakenMarketApi, MultiCollateralApi as KrakenMultiCollateralApi,
-    OrderManagementApi as KrakenOrderManagementApi,
+    KrakenTickerData, MarketApi as KrakenMarketApi, MarketEvent as KrakenMarketEvent,
+    MultiCollateralApi as KrakenMultiCollateralApi, OrderManagementApi as KrakenOrderManagementApi,
 };

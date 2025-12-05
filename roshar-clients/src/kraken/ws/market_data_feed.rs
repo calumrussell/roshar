@@ -1,12 +1,12 @@
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use roshar_types::{
     KrakenBookDeltaMessage, KrakenBookSnapshotMessage, KrakenOrderBook, KrakenTradeDeltaMessage,
     KrakenTradeSnapshotMessage, KrakenWssMessage, OrderBookState, SupportedMessages, Trade, Venue,
 };
 use roshar_ws_mgr::Manager;
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, oneshot};
 
 use crate::KRAKEN_WSS_URL;
 
@@ -22,12 +22,15 @@ pub enum MarketEvent {
     },
 }
 
-#[derive(Debug)]
 pub enum SubscriptionCommand {
     AddDepth { symbol: String },
     RemoveDepth { symbol: String },
     AddTrades { symbol: String },
     RemoveTrades { symbol: String },
+    GetDepth {
+        symbol: String,
+        response: oneshot::Sender<Option<OrderBookState>>,
+    },
 }
 
 #[derive(Clone)]
@@ -71,29 +74,20 @@ impl MarketDataFeedHandle {
             .await
             .map_err(|e| format!("Failed to send remove_trades command: {}", e))
     }
-}
 
-#[derive(Clone)]
-pub struct MarketDataState {
-    order_books: Arc<RwLock<HashMap<String, KrakenOrderBook>>>,
-}
+    pub async fn get_latest_depth(&self, symbol: &str) -> Result<Option<OrderBookState>, String> {
+        let (response_tx, response_rx) = oneshot::channel();
+        self.command_tx
+            .send(SubscriptionCommand::GetDepth {
+                symbol: symbol.to_string(),
+                response: response_tx,
+            })
+            .await
+            .map_err(|e| format!("Failed to send get_depth command: {}", e))?;
 
-impl MarketDataState {
-    pub fn new() -> Self {
-        Self {
-            order_books: Arc::new(RwLock::new(HashMap::new())),
-        }
-    }
-
-    pub fn get_latest_depth(&self, symbol: &str) -> Option<OrderBookState> {
-        let books = self.order_books.read().ok()?;
-        books.get(symbol).and_then(|ob| ob.book.clone())
-    }
-}
-
-impl Default for MarketDataState {
-    fn default() -> Self {
-        Self::new()
+        response_rx
+            .await
+            .map_err(|e| format!("Failed to receive depth response: {}", e))
     }
 }
 
@@ -101,7 +95,7 @@ pub struct MarketDataFeed {
     ws_manager: Arc<Manager>,
     conn_name: String,
 
-    state: MarketDataState,
+    order_books: HashMap<String, KrakenOrderBook>,
     event_tx: mpsc::Sender<MarketEvent>,
 
     command_rx: mpsc::Receiver<SubscriptionCommand>,
@@ -121,7 +115,7 @@ impl MarketDataFeed {
         Self {
             ws_manager,
             conn_name: "kraken-market-data".to_string(),
-            state: MarketDataState::new(),
+            order_books: HashMap::new(),
             event_tx,
             command_rx,
             command_tx,
@@ -136,10 +130,6 @@ impl MarketDataFeed {
         MarketDataFeedHandle {
             command_tx: self.command_tx.clone(),
         }
-    }
-
-    pub fn get_state(&self) -> MarketDataState {
-        self.state.clone()
     }
 
     pub async fn run(mut self) {
@@ -185,7 +175,7 @@ impl MarketDataFeed {
 
                             let pending = std::mem::take(&mut self.pending_commands);
                             for cmd in pending {
-                                self.handle_command(cmd);
+                                self.handle_command(cmd).await;
                             }
 
                             self.resubscribe_all();
@@ -212,10 +202,17 @@ impl MarketDataFeed {
                     }
                 }
                 Some(cmd) = self.command_rx.recv() => {
-                    if self.is_connected {
-                        self.handle_command(cmd);
-                    } else {
-                        self.pending_commands.push(cmd);
+                    match &cmd {
+                        SubscriptionCommand::GetDepth { .. } => {
+                            self.handle_command(cmd).await;
+                        }
+                        _ => {
+                            if self.is_connected {
+                                self.handle_command(cmd).await;
+                            } else {
+                                self.pending_commands.push(cmd);
+                            }
+                        }
                     }
                 }
             }
@@ -244,13 +241,12 @@ impl MarketDataFeed {
         }
     }
 
-    fn handle_command(&mut self, cmd: SubscriptionCommand) {
+    async fn handle_command(&mut self, cmd: SubscriptionCommand) {
         match cmd {
             SubscriptionCommand::AddDepth { symbol } => {
                 if self.depth_subscriptions.insert(symbol.clone()) {
-                    if let Ok(mut books) = self.state.order_books.write() {
-                        books.insert(symbol.clone(), KrakenOrderBook::new(symbol.clone()));
-                    }
+                    self.order_books
+                        .insert(symbol.clone(), KrakenOrderBook::new(symbol.clone()));
 
                     let sub_msg = KrakenWssMessage::depth(&symbol).to_json();
                     if let Err(e) = self.ws_manager.write(
@@ -259,9 +255,7 @@ impl MarketDataFeed {
                     ) {
                         log::error!("Failed to subscribe to depth for {}: {}", symbol, e);
                         self.depth_subscriptions.remove(&symbol);
-                        if let Ok(mut books) = self.state.order_books.write() {
-                            books.remove(&symbol);
-                        }
+                        self.order_books.remove(&symbol);
                     } else {
                         log::info!("Subscribed to Kraken depth for {}", symbol);
                     }
@@ -269,9 +263,7 @@ impl MarketDataFeed {
             }
             SubscriptionCommand::RemoveDepth { symbol } => {
                 if self.depth_subscriptions.remove(&symbol) {
-                    if let Ok(mut books) = self.state.order_books.write() {
-                        books.remove(&symbol);
-                    }
+                    self.order_books.remove(&symbol);
 
                     let unsub_msg = KrakenWssMessage::depth_unsub(&symbol).to_json();
                     if let Err(e) = self.ws_manager.write(
@@ -311,6 +303,13 @@ impl MarketDataFeed {
                     }
                 }
             }
+            SubscriptionCommand::GetDepth { symbol, response } => {
+                let result = self
+                    .order_books
+                    .get(&symbol)
+                    .and_then(|book| book.book.clone());
+                let _ = response.send(result);
+            }
         }
     }
 
@@ -340,16 +339,11 @@ impl MarketDataFeed {
     async fn handle_snapshot(&mut self, msg: KrakenBookSnapshotMessage) {
         let symbol = msg.product_id.clone();
 
-        let book_state = {
-            let Ok(mut books) = self.state.order_books.write() else {
-                return;
-            };
-            if let Some(order_book) = books.get_mut(&symbol) {
-                order_book.new_snapshot(&msg);
-                order_book.book.clone()
-            } else {
-                return;
-            }
+        let book_state = if let Some(order_book) = self.order_books.get_mut(&symbol) {
+            order_book.new_snapshot(&msg);
+            order_book.book.clone()
+        } else {
+            None
         };
 
         if let Some(book) = book_state {
@@ -366,19 +360,14 @@ impl MarketDataFeed {
     async fn handle_delta(&mut self, msg: KrakenBookDeltaMessage) {
         let symbol = msg.product_id.clone();
 
-        let book_state = {
-            let Ok(mut books) = self.state.order_books.write() else {
-                return;
-            };
-            if let Some(order_book) = books.get_mut(&symbol) {
-                if let Err(e) = order_book.new_update(&msg) {
-                    log::error!("Failed to update order book for {}: {:?}", symbol, e);
-                    return;
-                }
-                order_book.book.clone()
-            } else {
+        let book_state = if let Some(order_book) = self.order_books.get_mut(&symbol) {
+            if let Err(e) = order_book.new_update(&msg) {
+                log::error!("Failed to update order book for {}: {:?}", symbol, e);
                 return;
             }
+            order_book.book.clone()
+        } else {
+            None
         };
 
         if let Some(book) = book_state {
