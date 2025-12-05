@@ -1,9 +1,9 @@
 pub mod rest;
 pub mod ws;
 
+use rest::BinanceRestClient;
 use ws::{MarketDataFeed, MarketDataFeedHandle};
 
-pub use rest::BinanceRestClient;
 pub use ws::MarketEvent;
 
 use roshar_ws_mgr::Manager;
@@ -77,5 +77,16 @@ impl BinanceClient {
         symbol: &str,
     ) -> Result<Option<roshar_types::OrderBookState>, String> {
         self.market_data_handle.get_latest_depth(symbol).await
+    }
+
+    /// Get 24hr ticker data for all symbols or a specific symbol
+    pub async fn get_24hr_ticker(
+        &self,
+        symbol: Option<&str>,
+    ) -> Result<Vec<roshar_types::TickerData>, String> {
+        BinanceRestClient::new()
+            .get_24hr_ticker(symbol)
+            .await
+            .map_err(|e| format!("Failed to get 24hr ticker: {}", e))
     }
 }

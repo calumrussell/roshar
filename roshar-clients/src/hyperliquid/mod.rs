@@ -480,21 +480,20 @@ impl HyperliquidClient {
         self.query_funding_rates().await
     }
 
-    /// Get spot market info from exchange (REST API call)
+    /// Get perp asset info from cached metadata
+    /// Returns HashMap of perp ticker -> AssetInfo (includes market_data with open_interest, mark_price, day_notional_volume)
+    pub async fn get_perp_asset_info(
+        &self,
+    ) -> Result<std::collections::HashMap<String, AssetInfo>, String> {
+        self.query_perp_asset_info().await
+    }
+
+    /// Get spot market data from cached metadata
     /// Returns HashMap of spot ticker -> SpotMarketData
-    pub async fn get_info_spot(
+    pub async fn get_spot_market_data(
         &self,
     ) -> Result<std::collections::HashMap<String, SpotMarketData>, String> {
-        let info_api = if self.is_mainnet {
-            InfoApi::production()
-        } else {
-            InfoApi::testnet()
-        };
-
-        info_api
-            .get_info_spot()
-            .await
-            .map_err(|e| format!("Failed to fetch spot market info: {:?}", e))
+        self.query_spot_market_data().await
     }
 
     /// Get perp mark prices from cached metadata (no REST API call)

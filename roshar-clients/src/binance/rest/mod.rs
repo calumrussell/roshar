@@ -1,3 +1,3 @@
 mod client;
 
-pub use client::BinanceRestClient;
+pub(crate) use client::BinanceRestClient;

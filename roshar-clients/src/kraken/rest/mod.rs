@@ -6,8 +6,9 @@ mod market;
 mod multi_collateral;
 mod order_management;
 
-pub use charts::ChartsApi;
-pub use market::{KrakenRestCandleData, KrakenRestCandleResponse, KrakenTickerData, MarketApi};
+pub(crate) use charts::ChartsApi;
+pub use market::{KrakenRestCandleData, KrakenRestCandleResponse, KrakenTickerData};
+pub(crate) use market::MarketApi;
 pub use multi_collateral::{
     KrakenGetLeverageResponse, KrakenLeveragePreference, KrakenLeverageSettingResponse,
     MultiCollateralApi,

@@ -5,7 +5,7 @@ use ws::{MarketDataFeed, MarketDataFeedHandle};
 
 pub use rest::{
     ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitOrderResult, ByBitTickerData,
-    ByBitTickersResponse, MarketApi, OrderManagementApi,
+    ByBitTickersResponse,
 };
 pub use ws::MarketEvent;
 
