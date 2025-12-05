@@ -1,23 +1,63 @@
 use roshar_types::{HyperliquidBboMessage, HyperliquidWssMessage, SupportedMessages, Venue};
 use roshar_ws_mgr::Manager;
-use std::collections::HashSet;
-use tokio::sync::{broadcast, mpsc};
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+use tokio::sync::{mpsc, oneshot};
 
 use crate::{HL_TESTNET_WSS_URL, HL_WSS_URL};
 
-/// Handle for adding subscriptions to the BBO feed
+/// Commands for BBO feed management
+enum BboCommand {
+    Add { ticker: String },
+    Remove { ticker: String },
+    GetBbo {
+        ticker: String,
+        response: oneshot::Sender<Option<(f64, f64)>>,
+    },
+}
+
+/// Handle for interacting with the BBO feed
 #[derive(Clone)]
-pub struct BboFeedHandle {
-    subscription_tx: mpsc::Sender<String>,
+pub(crate) struct BboFeedHandle {
+    command_tx: mpsc::Sender<BboCommand>,
 }
 
 impl BboFeedHandle {
     /// Add a ticker subscription dynamically
-    pub async fn add_subscription(&self, ticker: String) -> Result<(), String> {
-        self.subscription_tx
-            .send(ticker)
+    pub async fn add_subscription(&self, ticker: &str) -> Result<(), String> {
+        self.command_tx
+            .send(BboCommand::Add {
+                ticker: ticker.to_string(),
+            })
             .await
             .map_err(|e| format!("Failed to send subscription request: {}", e))
+    }
+
+    /// Remove a ticker subscription dynamically
+    pub async fn remove_subscription(&self, ticker: &str) -> Result<(), String> {
+        self.command_tx
+            .send(BboCommand::Remove {
+                ticker: ticker.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send unsubscription request: {}", e))
+    }
+
+    /// Get the latest BBO for a ticker
+    /// Returns None if not subscribed or no data received yet
+    pub async fn get_latest_bbo(&self, ticker: &str) -> Result<Option<(f64, f64)>, String> {
+        let (response_tx, response_rx) = oneshot::channel();
+        self.command_tx
+            .send(BboCommand::GetBbo {
+                ticker: ticker.to_string(),
+                response: response_tx,
+            })
+            .await
+            .map_err(|e| format!("Failed to send get BBO request: {}", e))?;
+
+        response_rx
+            .await
+            .map_err(|e| format!("Failed to receive BBO response: {}", e))
     }
 }
 
@@ -25,41 +65,51 @@ impl BboFeedHandle {
 /// - Uses shared WebSocket Manager
 /// - Subscribes to BBO feed for specified tickers
 /// - Parses BBO messages
-/// - Sends (ticker, bid, ask) tuples via broadcast channel (supports multiple receivers)
-/// - Supports dynamic subscription via BboFeedHandle
-pub struct BboFeedHandler {
-    tickers: Vec<String>,
-    bbo_tx: broadcast::Sender<(String, f64, f64)>,
-    subscription_rx: mpsc::Receiver<String>,
-    subscription_tx: mpsc::Sender<String>,
-    ws_manager: std::sync::Arc<Manager>,
+/// - Maintains state for polling access via BboFeedHandle
+/// - Supports dynamic subscription management
+pub(crate) struct BboFeed {
+    ws_manager: Arc<Manager>,
     is_testnet: bool,
     conn_name: String,
+
+    // BBO data storage: ticker -> (bid, ask)
+    bbo_data: HashMap<String, (f64, f64)>,
+
+    // Command channel
+    command_rx: mpsc::Receiver<BboCommand>,
+    command_tx: mpsc::Sender<BboCommand>,
+
+    // Track what we're subscribed to
+    subscriptions: HashSet<String>,
+
+    // Track connection state
+    is_connected: bool,
+
+    // Queue commands received before connection is established
+    pending_commands: Vec<BboCommand>,
 }
 
-impl BboFeedHandler {
-    pub fn new(
-        tickers: Vec<String>,
-        bbo_tx: broadcast::Sender<(String, f64, f64)>,
-        ws_manager: std::sync::Arc<Manager>,
-        is_testnet: bool,
-    ) -> Self {
-        let (subscription_tx, subscription_rx) = mpsc::channel(100);
+impl BboFeed {
+    pub fn new(ws_manager: Arc<Manager>, is_testnet: bool) -> Self {
+        let (command_tx, command_rx) = mpsc::channel(100);
+
         Self {
-            tickers,
-            bbo_tx,
-            subscription_rx,
-            subscription_tx,
             ws_manager,
             is_testnet,
             conn_name: "hyperliquid-bbo".to_string(),
+            bbo_data: HashMap::new(),
+            command_rx,
+            command_tx,
+            subscriptions: HashSet::new(),
+            is_connected: false,
+            pending_commands: Vec::new(),
         }
     }
 
-    /// Get a handle for adding subscriptions
+    /// Get a handle for interacting with the BBO feed
     pub fn get_handle(&self) -> BboFeedHandle {
         BboFeedHandle {
-            subscription_tx: self.subscription_tx.clone(),
+            command_tx: self.command_tx.clone(),
         }
     }
 
@@ -100,45 +150,37 @@ impl BboFeedHandler {
             return;
         }
 
-        // Track subscribed tickers
-        let mut subscribed_tickers: HashSet<String> = HashSet::new();
-
-        // Process messages and subscription requests
+        // Process messages and commands
         loop {
             tokio::select! {
                 msg = recv.recv() => {
                     match msg {
                         Ok(roshar_ws_mgr::Message::SuccessfulHandshake(_name)) => {
-                            log::info!("BBO feed WebSocket connected");
-                            // Subscribe to initial tickers
-                            for ticker in &self.tickers {
-                                if subscribed_tickers.insert(ticker.clone()) {
-                                    let bbo_sub = HyperliquidWssMessage::bbo(ticker).to_json();
-                                    if let Err(e) = self.ws_manager.write(
-                                        &self.conn_name,
-                                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), bbo_sub),
-                                    ) {
-                                        log::error!("Failed to subscribe to BBO for {}: {}", ticker, e);
-                                        subscribed_tickers.remove(ticker);
-                                    } else {
-                                        log::info!("Subscribed to BBO feed for {}", ticker);
-                                    }
-                                }
+                            log::info!("BBO feed WebSocket connected: {}", self.conn_name);
+                            self.is_connected = true;
+
+                            // Process any pending commands that arrived before connection
+                            let pending = std::mem::take(&mut self.pending_commands);
+                            for cmd in pending {
+                                self.handle_command(cmd);
                             }
+
+                            // Resubscribe all existing subscriptions (for reconnects)
+                            self.resubscribe_all();
                         }
                         Ok(roshar_ws_mgr::Message::TextMessage(_name, content)) => {
-                            if let Err(e) = self.handle_message(&content).await {
-                                log::error!("Failed to handle BBO message: {}", e);
-                            }
+                            self.handle_message(&content);
                         }
                         Ok(roshar_ws_mgr::Message::ReadError(_name, err)) => {
                             log::error!("Websocket read error in BBO feed: {}", err);
+                            self.is_connected = false;
                         }
                         Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
                             log::error!("Websocket write error in BBO feed: {}", err);
                         }
                         Ok(roshar_ws_mgr::Message::PongReceiveTimeoutError(_name)) => {
                             log::warn!("Pong receive timeout in BBO feed");
+                            self.is_connected = false;
                         }
                         Ok(_) => {
                             // Other message types (ping, pong, close, etc.)
@@ -149,50 +191,87 @@ impl BboFeedHandler {
                         }
                     }
                 }
-                Some(ticker) = self.subscription_rx.recv() => {
-                    // Add subscription dynamically
-                    if subscribed_tickers.insert(ticker.clone()) {
-                        let bbo_sub = HyperliquidWssMessage::bbo(&ticker).to_json();
-                        if let Err(e) = self.ws_manager.write(
-                            &self.conn_name,
-                            roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), bbo_sub),
-                        ) {
-                            log::error!("Failed to subscribe to BBO for {}: {}", ticker, e);
-                            subscribed_tickers.remove(&ticker);
-                        } else {
-                            log::info!("Subscribed to BBO feed for {}", ticker);
+                Some(cmd) = self.command_rx.recv() => {
+                    // GetBbo commands can always be handled immediately
+                    // Add/Remove commands need connection for subscription
+                    match &cmd {
+                        BboCommand::GetBbo { .. } => {
+                            self.handle_command(cmd);
                         }
-                    } else {
-                        log::debug!("Already subscribed to BBO for {}", ticker);
+                        _ => {
+                            if self.is_connected {
+                                self.handle_command(cmd);
+                            } else {
+                                self.pending_commands.push(cmd);
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    async fn handle_message(&self, content: &str) -> Result<(), String> {
+    fn resubscribe_all(&self) {
+        for ticker in &self.subscriptions {
+            let sub_msg = HyperliquidWssMessage::bbo(ticker).to_json();
+            if let Err(e) = self.ws_manager.write(
+                &self.conn_name,
+                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+            ) {
+                log::error!("Failed to resubscribe to BBO for {}: {}", ticker, e);
+            }
+        }
+    }
+
+    fn handle_command(&mut self, cmd: BboCommand) {
+        match cmd {
+            BboCommand::Add { ticker } => {
+                if self.subscriptions.insert(ticker.clone()) {
+                    let sub_msg = HyperliquidWssMessage::bbo(&ticker).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+                    ) {
+                        log::error!("Failed to subscribe to BBO for {}: {}", ticker, e);
+                        self.subscriptions.remove(&ticker);
+                    } else {
+                        log::info!("Subscribed to BBO feed for {}", ticker);
+                    }
+                }
+            }
+            BboCommand::Remove { ticker } => {
+                if self.subscriptions.remove(&ticker) {
+                    // Remove from state
+                    self.bbo_data.remove(&ticker);
+
+                    // Note: Hyperliquid may not have an explicit unsubscribe for BBO
+                    // The subscription will be dropped on reconnect if not in the set
+                    log::info!("Removed BBO subscription for {}", ticker);
+                }
+            }
+            BboCommand::GetBbo { ticker, response } => {
+                let result = self.bbo_data.get(&ticker).copied();
+                let _ = response.send(result);
+            }
+        }
+    }
+
+    fn handle_message(&mut self, content: &str) {
         // Parse into SupportedMessages
         let msg = match SupportedMessages::from_message(content, Venue::Hyperliquid) {
             Some(msg) => msg,
             None => {
                 // Silently ignore unparseable messages (e.g., subscription responses)
-                return Ok(());
+                return;
             }
         };
 
-        match msg {
-            SupportedMessages::HyperliquidBboMessage(bbo_msg) => {
-                self.handle_bbo(bbo_msg).await?;
-            }
-            _ => {
-                // Ignore other message types
-            }
+        if let SupportedMessages::HyperliquidBboMessage(bbo_msg) = msg {
+            self.handle_bbo(bbo_msg);
         }
-
-        Ok(())
     }
 
-    async fn handle_bbo(&self, bbo_msg: HyperliquidBboMessage) -> Result<(), String> {
+    fn handle_bbo(&mut self, bbo_msg: HyperliquidBboMessage) {
         let ticker = bbo_msg.data.coin.clone();
 
         // Extract bid and ask from the BBO array
@@ -206,9 +285,7 @@ impl BboFeedHandler {
             .and_then(|level| level.px.parse::<f64>().ok())
             .unwrap_or(0.0);
 
-        // Send BBO update via broadcast channel (ignore if no receivers)
-        let _ = self.bbo_tx.send((ticker.clone(), bid, ask));
-
-        Ok(())
+        // Update state
+        self.bbo_data.insert(ticker, (bid, ask));
     }
 }

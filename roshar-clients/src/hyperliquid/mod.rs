@@ -3,7 +3,7 @@ pub mod validator;
 pub mod ws;
 
 use ws::{
-    BboFeedHandler, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle, MarketDataState,
+    BboFeed, BboFeedHandle, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle, MarketDataState,
     OrdersFeedHandler,
 };
 
@@ -60,6 +60,10 @@ pub struct HyperliquidClient {
     #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
     market_data_feed_handle: Option<tokio::task::JoinHandle<()>>,
     event_rx: Option<mpsc::Receiver<MarketEvent>>,
+    // BBO feed
+    bbo_handle: BboFeedHandle,
+    #[allow(dead_code)] // Kept to prevent BBO feed task from being dropped
+    bbo_feed_handle: tokio::task::JoinHandle<()>,
 }
 
 impl HyperliquidClient {
@@ -160,6 +164,13 @@ impl HyperliquidClient {
             log::info!("No wallet address provided - WebSocket feeds not started");
         }
 
+        // Set up BBO feed
+        let bbo_feed = BboFeed::new(ws_manager.clone(), !config.is_mainnet);
+        let bbo_handle = bbo_feed.get_handle();
+        let bbo_feed_handle = tokio::spawn(async move {
+            bbo_feed.run().await;
+        });
+
         // Set up market data feed
         let (event_tx, event_rx) = mpsc::channel(10000);
         let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, event_tx);
@@ -184,6 +195,8 @@ impl HyperliquidClient {
             market_data_state: Some(market_data_state),
             market_data_feed_handle: Some(market_data_feed_handle),
             event_rx: Some(event_rx),
+            bbo_handle,
+            bbo_feed_handle,
         }
     }
 
@@ -571,36 +584,21 @@ impl HyperliquidClient {
             })
     }
 
-    /// Setup BBO feed for specified tickers
-    /// Returns a receiver that will get (ticker, bid, ask) tuples
-    /// and a handle for adding subscriptions dynamically
-    /// The feed runs in a background task
-    pub fn setup_bbo_feed(
-        &self,
-        tickers: Vec<String>,
-        ws_manager: std::sync::Arc<roshar_ws_mgr::Manager>,
-    ) -> (
-        tokio::sync::broadcast::Receiver<(String, f64, f64)>,
-        ws::BboFeedHandle,
-    ) {
-        let (bbo_tx, bbo_rx) = tokio::sync::broadcast::channel(1000);
+    /// Start BBO subscription for a ticker (idempotent)
+    /// The BBO state will be maintained in the background
+    pub async fn create_bbo_subscription(&self, ticker: &str) -> Result<(), String> {
+        self.bbo_handle.add_subscription(ticker).await
+    }
 
-        let handler = BboFeedHandler::new(
-            tickers.clone(),
-            bbo_tx,
-            ws_manager,
-            !self.is_mainnet, // is_testnet
-        );
+    /// Remove BBO subscription for a ticker
+    pub async fn remove_bbo_subscription(&self, ticker: &str) -> Result<(), String> {
+        self.bbo_handle.remove_subscription(ticker).await
+    }
 
-        let handle = handler.get_handle();
-
-        tokio::spawn(async move {
-            handler.run().await;
-        });
-
-        log::info!("BBO feed handler spawned for {} tickers", tickers.len());
-
-        (bbo_rx, handle)
+    /// Get the latest BBO (best bid/offer) for a ticker
+    /// Returns None if not subscribed or no data received yet
+    pub async fn get_latest_bbo(&self, ticker: &str) -> Result<Option<(f64, f64)>, String> {
+        self.bbo_handle.get_latest_bbo(ticker).await
     }
 
     // --- Pattern A: Polling API ---
