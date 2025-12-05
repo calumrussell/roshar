@@ -154,7 +154,7 @@ impl MarketDataFeed {
             tcp_send_buffer_size: Some(4194304),
             tcp_nodelay: Some(true),
             broadcast_channel_size: Some(131072),
-            use_text_ping: Some(true),
+            use_text_ping: Some(false),
         };
 
         if let Err(e) = self.ws_manager.new_conn(&self.conn_name, ws_config) {
