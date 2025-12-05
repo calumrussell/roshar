@@ -3,8 +3,8 @@ pub mod validator;
 pub mod ws;
 
 use ws::{
-    BboFeed, BboFeedHandle, CandleFeed, CandleFeedHandle, FillsFeedHandler, MarketDataFeed,
-    MarketDataFeedHandle, OrdersFeedHandler,
+    BboFeed, BboFeedHandle, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle,
+    OrdersFeedHandler,
 };
 
 pub use rest::{ExchangeMetadataHandle, ExchangeMetadataManager};
@@ -63,10 +63,6 @@ pub struct HyperliquidClient {
     bbo_handle: BboFeedHandle,
     #[allow(dead_code)] // Kept to prevent BBO feed task from being dropped
     bbo_feed_handle: tokio::task::JoinHandle<()>,
-    // Candle feed
-    candle_handle: CandleFeedHandle,
-    #[allow(dead_code)] // Kept to prevent Candle feed task from being dropped
-    candle_feed_handle: tokio::task::JoinHandle<()>,
 }
 
 impl HyperliquidClient {
@@ -174,13 +170,6 @@ impl HyperliquidClient {
             bbo_feed.run().await;
         });
 
-        // Set up Candle feed
-        let candle_feed = CandleFeed::new(ws_manager.clone(), !config.is_mainnet);
-        let candle_handle = candle_feed.get_handle();
-        let candle_feed_handle = tokio::spawn(async move {
-            candle_feed.run().await;
-        });
-
         // Set up market data feed
         let (event_tx, event_rx) = mpsc::channel(10000);
         let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, event_tx);
@@ -205,8 +194,6 @@ impl HyperliquidClient {
             event_rx: Some(event_rx),
             bbo_handle,
             bbo_feed_handle,
-            candle_handle,
-            candle_feed_handle,
         }
     }
 
@@ -612,23 +599,14 @@ impl HyperliquidClient {
     }
 
     /// Start candle subscription for a coin (idempotent)
-    /// The candle state will be maintained in the background
-    pub async fn create_candle_subscription(&self, coin: &str) -> Result<(), String> {
-        self.candle_handle.add_subscription(coin).await
+    /// Candle updates will be delivered via the MarketEvent receiver
+    pub async fn add_candles(&self, coin: &str) -> Result<(), String> {
+        self.market_data_handle.add_candles(coin).await
     }
 
     /// Remove candle subscription for a coin
-    pub async fn remove_candle_subscription(&self, coin: &str) -> Result<(), String> {
-        self.candle_handle.remove_subscription(coin).await
-    }
-
-    /// Get the latest candle for a coin
-    /// Returns None if not subscribed or no data received yet
-    pub async fn get_latest_candle(
-        &self,
-        coin: &str,
-    ) -> Result<Option<roshar_types::Candle>, String> {
-        self.candle_handle.get_latest_candle(coin).await
+    pub async fn remove_candles(&self, coin: &str) -> Result<(), String> {
+        self.market_data_handle.remove_candles(coin).await
     }
 
     /// Get historical funding rates for a coin
@@ -691,12 +669,9 @@ impl HyperliquidClient {
         self.market_data_handle.remove_trades(coin).await
     }
 
-    // --- Pattern B: Reactive API ---
-
-    /// Take the market events receiver for reactive consumption
-    /// Returns None if already taken or not initialized
-    /// Note: This takes ownership of the receiver - it can only be called once
-    pub fn take_market_events_receiver(&mut self) -> Option<mpsc::Receiver<MarketEvent>> {
+    /// Take the event receiver for reactive market data consumption
+    /// Can only be called once - returns None on subsequent calls
+    pub fn take_event_receiver(&mut self) -> Option<mpsc::Receiver<MarketEvent>> {
         self.event_rx.take()
     }
 }

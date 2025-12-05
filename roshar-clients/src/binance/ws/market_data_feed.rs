@@ -2,8 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use roshar_types::{
-    BinanceDepthDiffMessage, BinanceOrderBook, BinanceTradeMessage, OrderBookState,
-    SupportedMessages, Trade, Venue,
+    BinanceCandleMessage, BinanceDepthDiffMessage, BinanceOrderBook, BinanceTradeMessage, Candle,
+    OrderBookState, SupportedMessages, Trade, Venue,
 };
 use roshar_ws_mgr::Manager;
 use tokio::sync::{mpsc, oneshot, Semaphore};
@@ -20,6 +20,10 @@ pub enum MarketEvent {
         symbol: String,
         trades: Arc<Vec<Trade>>,
     },
+    CandleUpdate {
+        symbol: String,
+        candle: Arc<Candle>,
+    },
 }
 
 pub enum SubscriptionCommand {
@@ -27,6 +31,8 @@ pub enum SubscriptionCommand {
     RemoveDepth { symbol: String },
     AddTrades { symbol: String },
     RemoveTrades { symbol: String },
+    AddCandles { symbol: String },
+    RemoveCandles { symbol: String },
     GetDepth {
         symbol: String,
         response: oneshot::Sender<Option<OrderBookState>>,
@@ -75,6 +81,24 @@ impl MarketDataFeedHandle {
             .map_err(|e| format!("Failed to send remove_trades command: {}", e))
     }
 
+    pub async fn add_candles(&self, symbol: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::AddCandles {
+                symbol: symbol.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send add_candles command: {}", e))
+    }
+
+    pub async fn remove_candles(&self, symbol: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::RemoveCandles {
+                symbol: symbol.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send remove_candles command: {}", e))
+    }
+
     pub async fn get_latest_depth(&self, symbol: &str) -> Result<Option<OrderBookState>, String> {
         let (response_tx, response_rx) = oneshot::channel();
         self.command_tx
@@ -103,6 +127,7 @@ pub struct MarketDataFeed {
 
     depth_subscriptions: HashSet<String>,
     trades_subscriptions: HashSet<String>,
+    candles_subscriptions: HashSet<String>,
 
     is_connected: bool,
     pending_commands: Vec<SubscriptionCommand>,
@@ -123,6 +148,7 @@ impl MarketDataFeed {
             command_tx,
             depth_subscriptions: HashSet::new(),
             trades_subscriptions: HashSet::new(),
+            candles_subscriptions: HashSet::new(),
             is_connected: false,
             pending_commands: Vec::new(),
             snapshot_semaphore: Arc::new(Semaphore::new(2)),
@@ -245,6 +271,16 @@ impl MarketDataFeed {
                 log::error!("Failed to resubscribe to trades for {}: {}", symbol, e);
             }
         }
+
+        for symbol in &self.candles_subscriptions {
+            let sub_msg = roshar_types::BinanceWssMessage::candle(symbol).to_json();
+            if let Err(e) = self.ws_manager.write(
+                &self.conn_name,
+                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+            ) {
+                log::error!("Failed to resubscribe to candles for {}: {}", symbol, e);
+            }
+        }
     }
 
     async fn handle_command(&mut self, cmd: SubscriptionCommand) {
@@ -310,6 +346,33 @@ impl MarketDataFeed {
                     }
                 }
             }
+            SubscriptionCommand::AddCandles { symbol } => {
+                if self.candles_subscriptions.insert(symbol.clone()) {
+                    let sub_msg = roshar_types::BinanceWssMessage::candle(&symbol).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+                    ) {
+                        log::error!("Failed to subscribe to candles for {}: {}", symbol, e);
+                        self.candles_subscriptions.remove(&symbol);
+                    } else {
+                        log::info!("Subscribed to Binance candles for {}", symbol);
+                    }
+                }
+            }
+            SubscriptionCommand::RemoveCandles { symbol } => {
+                if self.candles_subscriptions.remove(&symbol) {
+                    let unsub_msg = roshar_types::BinanceWssMessage::candle_unsub(&symbol).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                    ) {
+                        log::error!("Failed to unsubscribe from candles for {}: {}", symbol, e);
+                    } else {
+                        log::info!("Unsubscribed from Binance candles for {}", symbol);
+                    }
+                }
+            }
             SubscriptionCommand::GetDepth { symbol, response } => {
                 let result = self
                     .order_books
@@ -321,6 +384,12 @@ impl MarketDataFeed {
     }
 
     async fn handle_message(&mut self, content: &str) {
+        // Try to parse as candle message first (not in SupportedMessages)
+        if let Ok(candle_msg) = serde_json::from_str::<BinanceCandleMessage>(content) {
+            self.handle_candle(candle_msg).await;
+            return;
+        }
+
         let msg = match SupportedMessages::from_message(content, Venue::Binance) {
             Some(msg) => msg,
             None => return,
@@ -393,6 +462,19 @@ impl MarketDataFeed {
             .send(MarketEvent::TradeUpdate {
                 symbol,
                 trades: Arc::new(vec![trade]),
+            })
+            .await;
+    }
+
+    async fn handle_candle(&mut self, msg: BinanceCandleMessage) {
+        let candle = msg.to_candle();
+        let symbol = candle.coin.clone();
+
+        let _ = self
+            .event_tx
+            .send(MarketEvent::CandleUpdate {
+                symbol,
+                candle: Arc::new(candle),
             })
             .await;
     }

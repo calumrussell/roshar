@@ -2,8 +2,9 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use roshar_types::{
-    HlOrderBook, HyperliquidBookMessage, HyperliquidTradesMessage, HyperliquidWssMessage,
-    OrderBookState, SupportedMessages, Trade, Venue,
+    Candle, HlOrderBook, HyperliquidBookMessage, HyperliquidCandleMessage,
+    HyperliquidTradesMessage, HyperliquidWssMessage, OrderBookState, SupportedMessages, Trade,
+    Venue,
 };
 use roshar_ws_mgr::Manager;
 use tokio::sync::{mpsc, oneshot};
@@ -20,6 +21,10 @@ pub enum MarketEvent {
         coin: String,
         trades: Arc<Vec<Trade>>,
     },
+    CandleUpdate {
+        coin: String,
+        candle: Arc<Candle>,
+    },
 }
 
 pub enum SubscriptionCommand {
@@ -27,6 +32,8 @@ pub enum SubscriptionCommand {
     RemoveDepth { coin: String },
     AddTrades { coin: String },
     RemoveTrades { coin: String },
+    AddCandles { coin: String },
+    RemoveCandles { coin: String },
     GetDepth {
         coin: String,
         response: oneshot::Sender<Option<OrderBookState>>,
@@ -75,6 +82,24 @@ impl MarketDataFeedHandle {
             .map_err(|e| format!("Failed to send remove_trades command: {}", e))
     }
 
+    pub async fn add_candles(&self, coin: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::AddCandles {
+                coin: coin.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send add_candles command: {}", e))
+    }
+
+    pub async fn remove_candles(&self, coin: &str) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::RemoveCandles {
+                coin: coin.to_string(),
+            })
+            .await
+            .map_err(|e| format!("Failed to send remove_candles command: {}", e))
+    }
+
     pub async fn get_latest_depth(&self, coin: &str) -> Result<Option<OrderBookState>, String> {
         let (response_tx, response_rx) = oneshot::channel();
         self.command_tx
@@ -104,6 +129,7 @@ pub struct MarketDataFeed {
 
     depth_subscriptions: HashSet<String>,
     trades_subscriptions: HashSet<String>,
+    candles_subscriptions: HashSet<String>,
 
     is_connected: bool,
     pending_commands: Vec<SubscriptionCommand>,
@@ -127,6 +153,7 @@ impl MarketDataFeed {
             command_tx,
             depth_subscriptions: HashSet::new(),
             trades_subscriptions: HashSet::new(),
+            candles_subscriptions: HashSet::new(),
             is_connected: false,
             pending_commands: Vec::new(),
         }
@@ -248,6 +275,16 @@ impl MarketDataFeed {
                 log::error!("Failed to resubscribe to trades for {}: {}", coin, e);
             }
         }
+
+        for coin in &self.candles_subscriptions {
+            let sub_msg = HyperliquidWssMessage::candle(coin).to_json();
+            if let Err(e) = self.ws_manager.write(
+                &self.conn_name,
+                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+            ) {
+                log::error!("Failed to resubscribe to candles for {}: {}", coin, e);
+            }
+        }
     }
 
     async fn handle_command(&mut self, cmd: SubscriptionCommand) {
@@ -312,6 +349,33 @@ impl MarketDataFeed {
                     }
                 }
             }
+            SubscriptionCommand::AddCandles { coin } => {
+                if self.candles_subscriptions.insert(coin.clone()) {
+                    let sub_msg = HyperliquidWssMessage::candle(&coin).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+                    ) {
+                        log::error!("Failed to subscribe to candles for {}: {}", coin, e);
+                        self.candles_subscriptions.remove(&coin);
+                    } else {
+                        log::info!("Subscribed to candles for {}", coin);
+                    }
+                }
+            }
+            SubscriptionCommand::RemoveCandles { coin } => {
+                if self.candles_subscriptions.remove(&coin) {
+                    let unsub_msg = HyperliquidWssMessage::candle_unsub(&coin).to_json();
+                    if let Err(e) = self.ws_manager.write(
+                        &self.conn_name,
+                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                    ) {
+                        log::error!("Failed to unsubscribe from candles for {}: {}", coin, e);
+                    } else {
+                        log::info!("Unsubscribed from candles for {}", coin);
+                    }
+                }
+            }
             SubscriptionCommand::GetDepth { coin, response } => {
                 let result = self
                     .order_books
@@ -323,6 +387,12 @@ impl MarketDataFeed {
     }
 
     async fn handle_message(&mut self, content: &str) {
+        // Try to parse as candle message first (not in SupportedMessages)
+        if let Ok(candle_msg) = serde_json::from_str::<HyperliquidCandleMessage>(content) {
+            self.handle_candle(candle_msg).await;
+            return;
+        }
+
         let msg = match SupportedMessages::from_message(content, Venue::Hyperliquid) {
             Some(msg) => msg,
             None => return,
@@ -380,5 +450,18 @@ impl MarketDataFeed {
                 })
                 .await;
         }
+    }
+
+    async fn handle_candle(&self, msg: HyperliquidCandleMessage) {
+        let candle = msg.to_candle();
+        let coin = candle.coin.clone();
+
+        let _ = self
+            .event_tx
+            .send(MarketEvent::CandleUpdate {
+                coin,
+                candle: Arc::new(candle),
+            })
+            .await;
     }
 }
