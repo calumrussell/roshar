@@ -113,4 +113,18 @@ impl StateHandle {
             .await
             .map_err(|e| format!("Failed to send initialize positions message: {}", e))
     }
+
+    /// Get all pending orders across all tickers
+    pub async fn get_all_pending_orders(
+        &self,
+    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
+        let (reply_tx, reply_rx) = tokio::sync::oneshot::channel();
+        self.state_query_tx
+            .send(StateMessage::GetAllPendingOrders { reply: reply_tx })
+            .await
+            .map_err(|e| format!("Failed to query all pending orders: {}", e))?;
+        reply_rx
+            .await
+            .map_err(|e| format!("Failed to receive all pending orders: {}", e))
+    }
 }

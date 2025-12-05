@@ -601,6 +601,40 @@ impl HyperliquidClient {
         self.bbo_handle.get_latest_bbo(ticker).await
     }
 
+    /// Get historical funding rates for a coin
+    /// Returns funding rate history from start_time to end_time (or now if None)
+    pub async fn get_historical_funding_rates(
+        &self,
+        coin: &str,
+        start_time: u64,
+        end_time: Option<u64>,
+    ) -> Result<Vec<roshar_types::HistoricalFundingRate>, String> {
+        let info_api = if self.is_mainnet {
+            InfoApi::production()
+        } else {
+            InfoApi::testnet()
+        };
+
+        info_api
+            .get_historical_funding_rates(coin, start_time, end_time)
+            .await
+            .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
+    }
+
+    /// Get all pending perp orders across all tickers
+    pub async fn get_all_perp_pending_orders(
+        &self,
+    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
+        self.perp_state_handle.get_all_pending_orders().await
+    }
+
+    /// Get all pending spot orders across all tickers
+    pub async fn get_all_spot_pending_orders(
+        &self,
+    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
+        self.spot_state_handle.get_all_pending_orders().await
+    }
+
     // --- Pattern A: Polling API ---
 
     /// Start depth subscription for a coin (idempotent)

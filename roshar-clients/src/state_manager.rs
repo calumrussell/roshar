@@ -64,6 +64,9 @@ pub enum StateMessage {
     InitializePositions {
         positions: HashMap<String, f64>,
     },
+    GetAllPendingOrders {
+        reply: tokio::sync::oneshot::Sender<Vec<PendingOrderInfo>>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -363,6 +366,21 @@ impl StateManager {
             StateMessage::IsOrderCompleted { order_id, reply } => {
                 let is_completed = self.completed_orders.contains(&order_id);
                 let _ = reply.send(is_completed);
+            }
+            StateMessage::GetAllPendingOrders { reply } => {
+                let pending_orders: Vec<PendingOrderInfo> = self
+                    .pending_orders
+                    .values()
+                    .map(|o| PendingOrderInfo {
+                        order_id: o.order_id.clone(),
+                        ticker: o.ticker.clone(),
+                        qty: o.qty,
+                        px: o.px,
+                        venue: o.venue,
+                        raw_order: o.raw_order.clone(),
+                    })
+                    .collect();
+                let _ = reply.send(pending_orders);
             }
         }
     }
