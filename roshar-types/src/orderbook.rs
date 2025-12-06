@@ -214,6 +214,26 @@ impl<'a> LocalOrderBook<'a> {
     pub fn ask_sizes(&self) -> Vec<String> {
         self.asks.values().map(|v| v.to_string()).collect()
     }
+
+    /// Convert the view to a DepthSnapshotData for database storage.
+    /// This copies the data since DepthSnapshotData needs owned Vecs.
+    pub fn to_depth_snapshot_data(
+        &self,
+        venue: crate::Venue,
+        ticker: String,
+    ) -> crate::DepthSnapshotData {
+        let now = chrono::Utc::now();
+        crate::DepthSnapshotData {
+            bid_prices: self.bid_prices(),
+            bid_sizes: self.bid_sizes(),
+            ask_prices: self.ask_prices(),
+            ask_sizes: self.ask_sizes(),
+            time: now.timestamp_millis() as u64,
+            time_ts: now,
+            ticker,
+            venue,
+        }
+    }
 }
 
 #[cfg(test)]
