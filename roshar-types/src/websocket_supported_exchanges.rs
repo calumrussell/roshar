@@ -21,7 +21,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::l2_book(coin).to_json(),
             WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::depth(coin).to_json(),
             WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::depth(coin).to_json(),
-            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::depth(coin).to_json(),
+            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::batch_depth(&[coin.to_string()]).to_json(),
         }
     }
 
@@ -30,7 +30,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::trades(coin).to_json(),
+            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::batch_trades(&[coin.to_string()]).to_json(),
         }
     }
 
@@ -38,7 +38,7 @@ impl WebsocketSupportedExchanges {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json()),
             WebsocketSupportedExchanges::ByBit => Some(crate::bybit::ByBitWssMessage::candle(coin).to_json()),
-            WebsocketSupportedExchanges::Binance => Some(crate::binance::BinanceWssMessage::candle(coin).to_json()),
+            WebsocketSupportedExchanges::Binance => Some(crate::binance::BinanceWssMessage::batch_candles(&[coin.to_string()]).to_json()),
             _ => None,
         }
     }

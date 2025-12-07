@@ -27,12 +27,12 @@ pub enum MarketEvent {
 }
 
 pub enum SubscriptionCommand {
-    AddDepth { symbol: String },
-    RemoveDepth { symbol: String },
-    AddTrades { symbol: String },
-    RemoveTrades { symbol: String },
-    AddCandles { symbol: String },
-    RemoveCandles { symbol: String },
+    AddDepth { symbols: Vec<String> },
+    RemoveDepth { symbols: Vec<String> },
+    AddTrades { symbols: Vec<String> },
+    RemoveTrades { symbols: Vec<String> },
+    AddCandles { symbols: Vec<String> },
+    RemoveCandles { symbols: Vec<String> },
     GetDepth {
         symbol: String,
         response: oneshot::Sender<Option<OrderBookState>>,
@@ -46,55 +46,55 @@ pub struct MarketDataFeedHandle {
 }
 
 impl MarketDataFeedHandle {
-    pub async fn add_depth(&self, symbol: &str) -> Result<(), String> {
+    pub async fn add_depth(&self, symbols: &[&str]) -> Result<(), String> {
         self.command_tx
             .send(SubscriptionCommand::AddDepth {
-                symbol: symbol.to_string(),
+                symbols: symbols.iter().map(|s| s.to_string()).collect(),
             })
             .await
             .map_err(|e| format!("Failed to send add_depth command: {}", e))
     }
 
-    pub async fn remove_depth(&self, symbol: &str) -> Result<(), String> {
+    pub async fn remove_depth(&self, symbols: &[&str]) -> Result<(), String> {
         self.command_tx
             .send(SubscriptionCommand::RemoveDepth {
-                symbol: symbol.to_string(),
+                symbols: symbols.iter().map(|s| s.to_string()).collect(),
             })
             .await
             .map_err(|e| format!("Failed to send remove_depth command: {}", e))
     }
 
-    pub async fn add_trades(&self, symbol: &str) -> Result<(), String> {
+    pub async fn add_trades(&self, symbols: &[&str]) -> Result<(), String> {
         self.command_tx
             .send(SubscriptionCommand::AddTrades {
-                symbol: symbol.to_string(),
+                symbols: symbols.iter().map(|s| s.to_string()).collect(),
             })
             .await
             .map_err(|e| format!("Failed to send add_trades command: {}", e))
     }
 
-    pub async fn remove_trades(&self, symbol: &str) -> Result<(), String> {
+    pub async fn remove_trades(&self, symbols: &[&str]) -> Result<(), String> {
         self.command_tx
             .send(SubscriptionCommand::RemoveTrades {
-                symbol: symbol.to_string(),
+                symbols: symbols.iter().map(|s| s.to_string()).collect(),
             })
             .await
             .map_err(|e| format!("Failed to send remove_trades command: {}", e))
     }
 
-    pub async fn add_candles(&self, symbol: &str) -> Result<(), String> {
+    pub async fn add_candles(&self, symbols: &[&str]) -> Result<(), String> {
         self.command_tx
             .send(SubscriptionCommand::AddCandles {
-                symbol: symbol.to_string(),
+                symbols: symbols.iter().map(|s| s.to_string()).collect(),
             })
             .await
             .map_err(|e| format!("Failed to send add_candles command: {}", e))
     }
 
-    pub async fn remove_candles(&self, symbol: &str) -> Result<(), String> {
+    pub async fn remove_candles(&self, symbols: &[&str]) -> Result<(), String> {
         self.command_tx
             .send(SubscriptionCommand::RemoveCandles {
-                symbol: symbol.to_string(),
+                symbols: symbols.iter().map(|s| s.to_string()).collect(),
             })
             .await
             .map_err(|e| format!("Failed to send remove_candles command: {}", e))
@@ -219,11 +219,13 @@ impl MarketDataFeed {
                             log::info!("Binance market data feed WebSocket connected: {}", self.conn_name);
                             self.is_connected = true;
 
+                            // Process pending commands
                             let pending = std::mem::take(&mut self.pending_commands);
                             for cmd in pending {
                                 self.handle_command(cmd).await;
                             }
 
+                            // Resubscribe to existing subscriptions
                             self.resubscribe_all();
                         }
                         Ok(roshar_ws_mgr::Message::TextMessage(_name, content)) => {
@@ -269,125 +271,176 @@ impl MarketDataFeed {
     }
 
     fn resubscribe_all(&mut self) {
+        // Collect all streams into a single batch subscription
+        let mut streams = Vec::new();
+
         for symbol in &self.depth_subscriptions {
-            let sub_msg = roshar_types::BinanceWssMessage::depth(symbol).to_json();
-            if let Err(e) = self.ws_manager.write(
-                &self.conn_name,
-                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
-            ) {
-                log::error!("Failed to resubscribe to depth for {}: {}", symbol, e);
-            }
+            streams.push(format!("{}@depth@100ms", symbol.to_lowercase()));
         }
 
         for symbol in &self.trades_subscriptions {
-            let sub_msg = roshar_types::BinanceWssMessage::trades(symbol).to_json();
-            if let Err(e) = self.ws_manager.write(
-                &self.conn_name,
-                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
-            ) {
-                log::error!("Failed to resubscribe to trades for {}: {}", symbol, e);
-            }
+            streams.push(format!("{}@trade", symbol.to_lowercase()));
         }
 
         for symbol in &self.candles_subscriptions {
-            let sub_msg = roshar_types::BinanceWssMessage::candle(symbol).to_json();
-            if let Err(e) = self.ws_manager.write(
-                &self.conn_name,
-                roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
-            ) {
-                log::error!("Failed to resubscribe to candles for {}: {}", symbol, e);
-            }
+            streams.push(format!("{}@kline_1m", symbol.to_lowercase()));
+        }
+
+        if streams.is_empty() {
+            return;
+        }
+
+        let sub_msg = roshar_types::BinanceWssMessage::batch_subscribe(streams.clone()).to_json();
+        if let Err(e) = self.ws_manager.write(
+            &self.conn_name,
+            roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
+        ) {
+            log::error!("Failed to batch resubscribe: {}", e);
+        } else {
+            log::info!(
+                "Batch resubscribed to {} Binance streams",
+                streams.len()
+            );
         }
     }
 
     async fn handle_command(&mut self, cmd: SubscriptionCommand) {
         match cmd {
-            SubscriptionCommand::AddDepth { symbol } => {
-                if self.depth_subscriptions.insert(symbol.clone()) {
-                    self.order_books
-                        .insert(symbol.clone(), BinanceOrderBook::new(symbol.clone()));
+            SubscriptionCommand::AddDepth { symbols } => {
+                let mut new_symbols = Vec::new();
+                for symbol in symbols {
+                    if self.depth_subscriptions.insert(symbol.clone()) {
+                        self.order_books
+                            .insert(symbol.clone(), BinanceOrderBook::new(symbol.clone()));
+                        new_symbols.push(symbol);
+                    }
+                }
 
-                    let sub_msg = roshar_types::BinanceWssMessage::depth(&symbol).to_json();
+                if !new_symbols.is_empty() {
+                    let sub_msg = roshar_types::BinanceWssMessage::batch_depth(&new_symbols).to_json();
                     if let Err(e) = self.ws_manager.write(
                         &self.conn_name,
                         roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
                     ) {
-                        log::error!("Failed to subscribe to depth for {}: {}", symbol, e);
-                        self.depth_subscriptions.remove(&symbol);
+                        log::error!("Failed to subscribe to depth: {}", e);
+                        for symbol in &new_symbols {
+                            self.depth_subscriptions.remove(symbol);
+                            self.order_books.remove(symbol);
+                        }
+                    } else {
+                        log::info!("Subscribed to Binance depth for {:?}", new_symbols);
+                    }
+                }
+            }
+            SubscriptionCommand::RemoveDepth { symbols } => {
+                let mut removed = Vec::new();
+                for symbol in symbols {
+                    if self.depth_subscriptions.remove(&symbol) {
                         self.order_books.remove(&symbol);
-                    } else {
-                        log::info!("Subscribed to Binance depth for {}", symbol);
+                        removed.push(symbol);
                     }
                 }
-            }
-            SubscriptionCommand::RemoveDepth { symbol } => {
-                if self.depth_subscriptions.remove(&symbol) {
-                    self.order_books.remove(&symbol);
 
-                    let unsub_msg = roshar_types::BinanceWssMessage::depth_unsub(&symbol).to_json();
-                    if let Err(e) = self.ws_manager.write(
-                        &self.conn_name,
-                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
-                    ) {
-                        log::error!("Failed to unsubscribe from depth for {}: {}", symbol, e);
-                    } else {
-                        log::info!("Unsubscribed from Binance depth for {}", symbol);
+                if !removed.is_empty() {
+                    // TODO: batch unsubscribe if needed
+                    for symbol in &removed {
+                        let unsub_msg = roshar_types::BinanceWssMessage::depth_unsub(symbol).to_json();
+                        if let Err(e) = self.ws_manager.write(
+                            &self.conn_name,
+                            roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                        ) {
+                            log::error!("Failed to unsubscribe from depth for {}: {}", symbol, e);
+                        }
                     }
+                    log::info!("Unsubscribed from Binance depth for {:?}", removed);
                 }
             }
-            SubscriptionCommand::AddTrades { symbol } => {
-                if self.trades_subscriptions.insert(symbol.clone()) {
-                    let sub_msg = roshar_types::BinanceWssMessage::trades(&symbol).to_json();
+            SubscriptionCommand::AddTrades { symbols } => {
+                let mut new_symbols = Vec::new();
+                for symbol in symbols {
+                    if self.trades_subscriptions.insert(symbol.clone()) {
+                        new_symbols.push(symbol);
+                    }
+                }
+
+                if !new_symbols.is_empty() {
+                    let sub_msg = roshar_types::BinanceWssMessage::batch_trades(&new_symbols).to_json();
                     if let Err(e) = self.ws_manager.write(
                         &self.conn_name,
                         roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
                     ) {
-                        log::error!("Failed to subscribe to trades for {}: {}", symbol, e);
-                        self.trades_subscriptions.remove(&symbol);
+                        log::error!("Failed to subscribe to trades: {}", e);
+                        for symbol in &new_symbols {
+                            self.trades_subscriptions.remove(symbol);
+                        }
                     } else {
-                        log::info!("Subscribed to Binance trades for {}", symbol);
+                        log::info!("Subscribed to Binance trades for {:?}", new_symbols);
                     }
                 }
             }
-            SubscriptionCommand::RemoveTrades { symbol } => {
-                if self.trades_subscriptions.remove(&symbol) {
-                    let unsub_msg =
-                        roshar_types::BinanceWssMessage::trades_unsub(&symbol).to_json();
-                    if let Err(e) = self.ws_manager.write(
-                        &self.conn_name,
-                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
-                    ) {
-                        log::error!("Failed to unsubscribe from trades for {}: {}", symbol, e);
-                    } else {
-                        log::info!("Unsubscribed from Binance trades for {}", symbol);
+            SubscriptionCommand::RemoveTrades { symbols } => {
+                let mut removed = Vec::new();
+                for symbol in symbols {
+                    if self.trades_subscriptions.remove(&symbol) {
+                        removed.push(symbol);
                     }
                 }
+
+                if !removed.is_empty() {
+                    for symbol in &removed {
+                        let unsub_msg = roshar_types::BinanceWssMessage::trades_unsub(symbol).to_json();
+                        if let Err(e) = self.ws_manager.write(
+                            &self.conn_name,
+                            roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                        ) {
+                            log::error!("Failed to unsubscribe from trades for {}: {}", symbol, e);
+                        }
+                    }
+                    log::info!("Unsubscribed from Binance trades for {:?}", removed);
+                }
             }
-            SubscriptionCommand::AddCandles { symbol } => {
-                if self.candles_subscriptions.insert(symbol.clone()) {
-                    let sub_msg = roshar_types::BinanceWssMessage::candle(&symbol).to_json();
+            SubscriptionCommand::AddCandles { symbols } => {
+                let mut new_symbols = Vec::new();
+                for symbol in symbols {
+                    if self.candles_subscriptions.insert(symbol.clone()) {
+                        new_symbols.push(symbol);
+                    }
+                }
+
+                if !new_symbols.is_empty() {
+                    let sub_msg = roshar_types::BinanceWssMessage::batch_candles(&new_symbols).to_json();
                     if let Err(e) = self.ws_manager.write(
                         &self.conn_name,
                         roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), sub_msg),
                     ) {
-                        log::error!("Failed to subscribe to candles for {}: {}", symbol, e);
-                        self.candles_subscriptions.remove(&symbol);
+                        log::error!("Failed to subscribe to candles: {}", e);
+                        for symbol in &new_symbols {
+                            self.candles_subscriptions.remove(symbol);
+                        }
                     } else {
-                        log::info!("Subscribed to Binance candles for {}", symbol);
+                        log::info!("Subscribed to Binance candles for {:?}", new_symbols);
                     }
                 }
             }
-            SubscriptionCommand::RemoveCandles { symbol } => {
-                if self.candles_subscriptions.remove(&symbol) {
-                    let unsub_msg = roshar_types::BinanceWssMessage::candle_unsub(&symbol).to_json();
-                    if let Err(e) = self.ws_manager.write(
-                        &self.conn_name,
-                        roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
-                    ) {
-                        log::error!("Failed to unsubscribe from candles for {}: {}", symbol, e);
-                    } else {
-                        log::info!("Unsubscribed from Binance candles for {}", symbol);
+            SubscriptionCommand::RemoveCandles { symbols } => {
+                let mut removed = Vec::new();
+                for symbol in symbols {
+                    if self.candles_subscriptions.remove(&symbol) {
+                        removed.push(symbol);
                     }
+                }
+
+                if !removed.is_empty() {
+                    for symbol in &removed {
+                        let unsub_msg = roshar_types::BinanceWssMessage::candle_unsub(symbol).to_json();
+                        if let Err(e) = self.ws_manager.write(
+                            &self.conn_name,
+                            roshar_ws_mgr::Message::TextMessage(self.conn_name.clone(), unsub_msg),
+                        ) {
+                            log::error!("Failed to unsubscribe from candles for {}: {}", symbol, e);
+                        }
+                    }
+                    log::info!("Unsubscribed from Binance candles for {:?}", removed);
                 }
             }
             SubscriptionCommand::GetDepth { symbol, response } => {

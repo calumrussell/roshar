@@ -53,34 +53,34 @@ impl BinanceClient {
             .ok_or_else(|| "Raw receiver already taken".to_string())
     }
 
-    /// Subscribe to depth updates for a symbol
-    pub async fn add_depth(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.add_depth(symbol).await
+    /// Subscribe to depth updates for symbols (batch subscription)
+    pub async fn add_depth(&self, symbols: &[&str]) -> Result<(), String> {
+        self.market_data_handle.add_depth(symbols).await
     }
 
-    /// Unsubscribe from depth updates for a symbol
-    pub async fn remove_depth(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.remove_depth(symbol).await
+    /// Unsubscribe from depth updates for symbols
+    pub async fn remove_depth(&self, symbols: &[&str]) -> Result<(), String> {
+        self.market_data_handle.remove_depth(symbols).await
     }
 
-    /// Subscribe to trade updates for a symbol
-    pub async fn add_trades(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.add_trades(symbol).await
+    /// Subscribe to trade updates for symbols (batch subscription)
+    pub async fn add_trades(&self, symbols: &[&str]) -> Result<(), String> {
+        self.market_data_handle.add_trades(symbols).await
     }
 
-    /// Unsubscribe from trade updates for a symbol
-    pub async fn remove_trades(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.remove_trades(symbol).await
+    /// Unsubscribe from trade updates for symbols
+    pub async fn remove_trades(&self, symbols: &[&str]) -> Result<(), String> {
+        self.market_data_handle.remove_trades(symbols).await
     }
 
-    /// Subscribe to candle updates for a symbol
-    pub async fn add_candles(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.add_candles(symbol).await
+    /// Subscribe to candle updates for symbols (batch subscription)
+    pub async fn add_candles(&self, symbols: &[&str]) -> Result<(), String> {
+        self.market_data_handle.add_candles(symbols).await
     }
 
-    /// Unsubscribe from candle updates for a symbol
-    pub async fn remove_candles(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.remove_candles(symbol).await
+    /// Unsubscribe from candle updates for symbols
+    pub async fn remove_candles(&self, symbols: &[&str]) -> Result<(), String> {
+        self.market_data_handle.remove_candles(symbols).await
     }
 
     /// Get the latest depth for a symbol

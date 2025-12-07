@@ -32,14 +32,6 @@ impl BinanceWssMessage {
         }
     }
 
-    pub fn depth(symbol: &str) -> Self {
-        Self {
-            id: 1,
-            method: "SUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@depth@100ms", symbol.to_lowercase())]),
-        }
-    }
-
     pub fn depth_unsub(symbol: &str) -> Self {
         Self {
             id: 1,
@@ -48,27 +40,11 @@ impl BinanceWssMessage {
         }
     }
 
-    pub fn trades(symbol: &str) -> Self {
-        Self {
-            id: 1,
-            method: "SUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@trade", symbol.to_lowercase())]),
-        }
-    }
-
     pub fn trades_unsub(symbol: &str) -> Self {
         Self {
             id: 1,
             method: "UNSUBSCRIBE".to_string(),
             params: Some(vec![format!("{}@trade", symbol.to_lowercase())]),
-        }
-    }
-
-    pub fn candle(symbol: &str) -> Self {
-        Self {
-            id: 1,
-            method: "SUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@kline_1m", symbol.to_lowercase())]),
         }
     }
 
@@ -101,6 +77,28 @@ impl BinanceWssMessage {
             id: 1,
             method: "SUBSCRIBE".to_string(),
             params: Some(params),
+        }
+    }
+
+    pub fn batch_candles(symbols: &[String]) -> Self {
+        let params: Vec<String> = symbols
+            .iter()
+            .map(|symbol| format!("{}@kline_1m", symbol.to_lowercase()))
+            .collect();
+        Self {
+            id: 1,
+            method: "SUBSCRIBE".to_string(),
+            params: Some(params),
+        }
+    }
+
+    /// Subscribe to multiple streams in a single message
+    /// streams should be in format like "btcusdt@depth@100ms", "ethusdt@trade", etc.
+    pub fn batch_subscribe(streams: Vec<String>) -> Self {
+        Self {
+            id: 1,
+            method: "SUBSCRIBE".to_string(),
+            params: Some(streams),
         }
     }
 }
