@@ -37,6 +37,7 @@ pub enum SubscriptionCommand {
         symbol: String,
         response: oneshot::Sender<Option<OrderBookState>>,
     },
+    SetRawMode { enabled: bool },
 }
 
 #[derive(Clone)]
@@ -113,6 +114,13 @@ impl MarketDataFeedHandle {
             .await
             .map_err(|e| format!("Failed to receive depth response: {}", e))
     }
+
+    pub async fn set_raw_mode(&self, enabled: bool) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::SetRawMode { enabled })
+            .await
+            .map_err(|e| format!("Failed to send set_raw_mode command: {}", e))
+    }
 }
 
 pub struct MarketDataFeed {
@@ -121,6 +129,7 @@ pub struct MarketDataFeed {
 
     order_books: HashMap<String, BinanceOrderBook>,
     event_tx: mpsc::Sender<MarketEvent>,
+    raw_tx: mpsc::Sender<String>,
 
     command_rx: mpsc::Receiver<SubscriptionCommand>,
     command_tx: mpsc::Sender<SubscriptionCommand>,
@@ -133,10 +142,16 @@ pub struct MarketDataFeed {
     pending_commands: Vec<SubscriptionCommand>,
 
     snapshot_semaphore: Arc<Semaphore>,
+
+    raw_mode: bool,
 }
 
 impl MarketDataFeed {
-    pub fn new(ws_manager: Arc<Manager>, event_tx: mpsc::Sender<MarketEvent>) -> Self {
+    pub fn new(
+        ws_manager: Arc<Manager>,
+        event_tx: mpsc::Sender<MarketEvent>,
+        raw_tx: mpsc::Sender<String>,
+    ) -> Self {
         let (command_tx, command_rx) = mpsc::channel(100);
 
         Self {
@@ -144,6 +159,7 @@ impl MarketDataFeed {
             conn_name: "binance-market-data".to_string(),
             order_books: HashMap::new(),
             event_tx,
+            raw_tx,
             command_rx,
             command_tx,
             depth_subscriptions: HashSet::new(),
@@ -152,6 +168,7 @@ impl MarketDataFeed {
             is_connected: false,
             pending_commands: Vec::new(),
             snapshot_semaphore: Arc::new(Semaphore::new(2)),
+            raw_mode: false,
         }
     }
 
@@ -380,10 +397,19 @@ impl MarketDataFeed {
                     .and_then(|book| book.book.clone());
                 let _ = response.send(result);
             }
+            SubscriptionCommand::SetRawMode { enabled } => {
+                self.raw_mode = enabled;
+                log::info!("Raw mode set to {} for Binance market data feed", enabled);
+            }
         }
     }
 
     async fn handle_message(&mut self, content: &str) {
+        if self.raw_mode {
+            let _ = self.raw_tx.send(content.to_string()).await;
+            return;
+        }
+
         // Try to parse as candle message first (not in SupportedMessages)
         if let Ok(candle_msg) = serde_json::from_str::<BinanceCandleMessage>(content) {
             self.handle_candle(candle_msg).await;

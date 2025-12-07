@@ -16,12 +16,14 @@ pub struct BinanceClient {
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
     event_rx: Option<mpsc::Receiver<MarketEvent>>,
+    raw_rx: Option<mpsc::Receiver<String>>,
 }
 
 impl BinanceClient {
     pub fn new(ws_manager: Arc<Manager>) -> Self {
         let (event_tx, event_rx) = mpsc::channel(10000);
-        let market_data_feed = MarketDataFeed::new(ws_manager, event_tx);
+        let (raw_tx, raw_rx) = mpsc::channel(10000);
+        let market_data_feed = MarketDataFeed::new(ws_manager, event_tx, raw_tx);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
@@ -31,6 +33,7 @@ impl BinanceClient {
             market_data_handle,
             market_data_feed_handle,
             event_rx: Some(event_rx),
+            raw_rx: Some(raw_rx),
         }
     }
 
@@ -38,6 +41,16 @@ impl BinanceClient {
     /// Can only be called once - returns None on subsequent calls
     pub fn take_event_receiver(&mut self) -> Option<mpsc::Receiver<MarketEvent>> {
         self.event_rx.take()
+    }
+
+    /// Take the raw receiver for raw JSON message consumption
+    /// Can only be called once - returns None on subsequent calls
+    /// This enables raw mode - no parsing will occur, only raw JSON forwarding
+    pub async fn take_raw_receiver(&mut self) -> Result<mpsc::Receiver<String>, String> {
+        self.market_data_handle.set_raw_mode(true).await?;
+        self.raw_rx
+            .take()
+            .ok_or_else(|| "Raw receiver already taken".to_string())
     }
 
     /// Subscribe to depth updates for a symbol
