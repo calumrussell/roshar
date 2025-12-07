@@ -30,13 +30,17 @@ impl HyperliquidBookMessage {
 
         for level in &self.data.levels[0] {
             if let Ok(px) = level.px.parse::<f64>() {
-                book.set_bid(px, &level.sz);
+                if let Err(e) = book.set_bid(px, &level.sz) {
+                    log::error!("Hyperliquid: failed to set bid for {} at price {}: {}", self.data.coin, px, e);
+                }
             }
         }
 
         for level in &self.data.levels[1] {
             if let Ok(px) = level.px.parse::<f64>() {
-                book.set_ask(px, &level.sz);
+                if let Err(e) = book.set_ask(px, &level.sz) {
+                    log::error!("Hyperliquid: failed to set ask for {} at price {}: {}", self.data.coin, px, e);
+                }
             }
         }
 

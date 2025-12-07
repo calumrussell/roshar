@@ -42,28 +42,52 @@ impl OrderBookState {
         }
     }
 
-    /// Set or update a bid level. If size is "0" or empty, removes the level.
+    /// Set or update a bid level. If size is zero or empty, removes the level.
+    /// Returns error if size cannot be parsed as f64.
     #[inline]
-    pub fn set_bid(&mut self, price: f64, size: &str) {
+    pub fn set_bid(&mut self, price: f64, size: &str) -> Result<(), LocalOrderBookError> {
         let key = Reverse(OrderedFloat(price));
-        if size == "0" || size.is_empty() || size == "0.0" {
+        if size.is_empty() {
+            self.bids.remove(&key);
+            return Ok(());
+        }
+        let size_f64 = size.parse::<f64>().map_err(|_| {
+            LocalOrderBookError::UnparseableInputs(
+                format!("bid size: {}", size),
+                format!("price: {}", price),
+            )
+        })?;
+        if size_f64 == 0.0 {
             self.bids.remove(&key);
         } else {
             self.bids.insert(key, size.into());
             self.trim_bids();
         }
+        Ok(())
     }
 
-    /// Set or update an ask level. If size is "0" or empty, removes the level.
+    /// Set or update an ask level. If size is zero or empty, removes the level.
+    /// Returns error if size cannot be parsed as f64.
     #[inline]
-    pub fn set_ask(&mut self, price: f64, size: &str) {
+    pub fn set_ask(&mut self, price: f64, size: &str) -> Result<(), LocalOrderBookError> {
         let key = OrderedFloat(price);
-        if size == "0" || size.is_empty() || size == "0.0" {
+        if size.is_empty() {
+            self.asks.remove(&key);
+            return Ok(());
+        }
+        let size_f64 = size.parse::<f64>().map_err(|_| {
+            LocalOrderBookError::UnparseableInputs(
+                format!("ask size: {}", size),
+                format!("price: {}", price),
+            )
+        })?;
+        if size_f64 == 0.0 {
             self.asks.remove(&key);
         } else {
             self.asks.insert(key, size.into());
             self.trim_asks();
         }
+        Ok(())
     }
 
     /// Remove a bid level by price
@@ -243,9 +267,9 @@ mod tests {
     #[test]
     fn test_order_book_state_set_bid() {
         let mut state = OrderBookState::new(50);
-        state.set_bid(100.0, "1.5");
-        state.set_bid(101.0, "2.0");
-        state.set_bid(99.0, "3.0");
+        state.set_bid(100.0, "1.5").unwrap();
+        state.set_bid(101.0, "2.0").unwrap();
+        state.set_bid(99.0, "3.0").unwrap();
 
         let view = state.as_view();
         let prices = view.bid_prices();
@@ -259,9 +283,9 @@ mod tests {
     #[test]
     fn test_order_book_state_set_ask() {
         let mut state = OrderBookState::new(50);
-        state.set_ask(103.0, "1.5");
-        state.set_ask(101.0, "2.0");
-        state.set_ask(102.0, "3.0");
+        state.set_ask(103.0, "1.5").unwrap();
+        state.set_ask(101.0, "2.0").unwrap();
+        state.set_ask(102.0, "3.0").unwrap();
 
         let view = state.as_view();
         let prices = view.ask_prices();
@@ -275,8 +299,8 @@ mod tests {
     #[test]
     fn test_order_book_state_remove_on_zero() {
         let mut state = OrderBookState::new(50);
-        state.set_bid(100.0, "1.5");
-        state.set_bid(100.0, "0");
+        state.set_bid(100.0, "1.5").unwrap();
+        state.set_bid(100.0, "0").unwrap();
 
         assert!(state.bids().is_empty());
     }
@@ -284,10 +308,10 @@ mod tests {
     #[test]
     fn test_order_book_state_max_depth() {
         let mut state = OrderBookState::new(2);
-        state.set_bid(100.0, "1.0");
-        state.set_bid(101.0, "2.0");
-        state.set_bid(102.0, "3.0");
-        state.set_bid(99.0, "4.0");
+        state.set_bid(100.0, "1.0").unwrap();
+        state.set_bid(101.0, "2.0").unwrap();
+        state.set_bid(102.0, "3.0").unwrap();
+        state.set_bid(99.0, "4.0").unwrap();
 
         // Should only keep top 2 bids (102, 101)
         assert_eq!(state.bids().len(), 2);
@@ -300,10 +324,10 @@ mod tests {
     #[test]
     fn test_order_book_state_get_bbo() {
         let mut state = OrderBookState::new(50);
-        state.set_bid(100.0, "1.0");
-        state.set_bid(101.0, "2.0");
-        state.set_ask(102.0, "1.5");
-        state.set_ask(103.0, "2.5");
+        state.set_bid(100.0, "1.0").unwrap();
+        state.set_bid(101.0, "2.0").unwrap();
+        state.set_ask(102.0, "1.5").unwrap();
+        state.set_ask(103.0, "2.5").unwrap();
 
         let (bid, ask) = state.get_bbo();
         assert_eq!(bid, Some(101.0));
@@ -313,8 +337,8 @@ mod tests {
     #[test]
     fn test_local_order_book_view_get_bbo() {
         let mut state = OrderBookState::new(50);
-        state.set_bid(100.0, "1.0");
-        state.set_ask(101.0, "1.5");
+        state.set_bid(100.0, "1.0").unwrap();
+        state.set_ask(101.0, "1.5").unwrap();
 
         let view = state.as_view();
         let (bid, ask) = view.get_bbo();
@@ -325,8 +349,8 @@ mod tests {
     #[test]
     fn test_order_book_state_clear() {
         let mut state = OrderBookState::new(50);
-        state.set_bid(100.0, "1.0");
-        state.set_ask(101.0, "1.5");
+        state.set_bid(100.0, "1.0").unwrap();
+        state.set_ask(101.0, "1.5").unwrap();
 
         state.clear();
 

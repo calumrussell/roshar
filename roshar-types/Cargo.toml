@@ -1,6 +1,6 @@
 [package]
 name = "roshar-types"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "Type definitions for cryptocurrency exchange websocket messages"
 license = "MIT"

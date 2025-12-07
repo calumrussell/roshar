@@ -38,7 +38,9 @@ impl ByBitDepthMessage {
             let formatted_sz = level.get(1).unwrap();
 
             if let Ok(price) = formatted_px.parse::<f64>() {
-                book.set_bid(price, formatted_sz);
+                if let Err(e) = book.set_bid(price, formatted_sz) {
+                    log::error!("ByBit: failed to set bid for {} at price {}: {}", self.data.s, price, e);
+                }
             }
         }
 
@@ -47,7 +49,9 @@ impl ByBitDepthMessage {
             let formatted_sz = level.get(1).unwrap();
 
             if let Ok(price) = formatted_px.parse::<f64>() {
-                book.set_ask(price, formatted_sz);
+                if let Err(e) = book.set_ask(price, formatted_sz) {
+                    log::error!("ByBit: failed to set ask for {} at price {}: {}", self.data.s, price, e);
+                }
             }
         }
 
@@ -384,13 +388,17 @@ impl BybitOrderBook {
             for bid in &msg.data.b {
                 let formatted_px = remove_trailing_zeros(bid.first().unwrap());
                 if let Ok(price) = formatted_px.parse::<f64>() {
-                    book.set_bid(price, bid.get(1).unwrap());
+                    if let Err(e) = book.set_bid(price, bid.get(1).unwrap()) {
+                        log::error!("ByBit: failed to set bid update for {} at price {}: {}", coin, price, e);
+                    }
                 }
             }
             for ask in &msg.data.a {
                 let formatted_px = remove_trailing_zeros(ask.first().unwrap());
                 if let Ok(price) = formatted_px.parse::<f64>() {
-                    book.set_ask(price, ask.get(1).unwrap());
+                    if let Err(e) = book.set_ask(price, ask.get(1).unwrap()) {
+                        log::error!("ByBit: failed to set ask update for {} at price {}: {}", coin, price, e);
+                    }
                 }
             }
         } else {

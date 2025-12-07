@@ -31,11 +31,15 @@ impl KrakenBookSnapshotMessage {
         let mut book = OrderBookState::new(50);
 
         for level in &self.bids {
-            book.set_bid(level.price, &level.qty.to_string());
+            if let Err(e) = book.set_bid(level.price, &level.qty.to_string()) {
+                log::error!("Kraken: failed to set bid for {} at price {}: {}", self.product_id, level.price, e);
+            }
         }
 
         for level in &self.asks {
-            book.set_ask(level.price, &level.qty.to_string());
+            if let Err(e) = book.set_ask(level.price, &level.qty.to_string()) {
+                log::error!("Kraken: failed to set ask for {} at price {}: {}", self.product_id, level.price, e);
+            }
         }
 
         book
@@ -273,9 +277,11 @@ impl KrakenOrderBook {
                     // Apply update directly
                     let size_str = msg.qty.to_string();
                     if msg.side == "sell" {
-                        book.set_ask(msg.price, &size_str);
-                    } else {
-                        book.set_bid(msg.price, &size_str);
+                        if let Err(e) = book.set_ask(msg.price, &size_str) {
+                            log::error!("Kraken: failed to set ask update for {} at price {}: {}", coin, msg.price, e);
+                        }
+                    } else if let Err(e) = book.set_bid(msg.price, &size_str) {
+                        log::error!("Kraken: failed to set bid update for {} at price {}: {}", coin, msg.price, e);
                     }
                     self.counter = msg_seq;
                 }

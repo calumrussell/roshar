@@ -688,7 +688,13 @@ impl BinanceOrderBook {
 
         for bid in &snapshot.bids {
             if let Ok(price) = bid[0].parse::<f64>() {
-                book.set_bid(price, &bid[1]);
+                if let Err(e) = book.set_bid(price, &bid[1]) {
+                    log::error!(
+                        "Binance: failed to set bid for {} at price {}: {}",
+                        coin_str, price, e
+                    );
+                    return Err(e);
+                }
             } else {
                 return Err(LocalOrderBookError::UnparseableInputs(
                     exchange_str.to_string(),
@@ -699,7 +705,13 @@ impl BinanceOrderBook {
 
         for ask in &snapshot.asks {
             if let Ok(price) = ask[0].parse::<f64>() {
-                book.set_ask(price, &ask[1]);
+                if let Err(e) = book.set_ask(price, &ask[1]) {
+                    log::error!(
+                        "Binance: failed to set ask for {} at price {}: {}",
+                        coin_str, price, e
+                    );
+                    return Err(e);
+                }
             } else {
                 return Err(LocalOrderBookError::UnparseableInputs(
                     exchange_str.to_string(),
@@ -714,12 +726,16 @@ impl BinanceOrderBook {
                 last_final_update_id = event.final_update_id;
                 for bid in &event.bids {
                     if let Ok(price) = bid[0].parse::<f64>() {
-                        book.set_bid(price, &bid[1]);
+                        if let Err(e) = book.set_bid(price, &bid[1]) {
+                            log::error!("Binance: failed to set bid from event buffer for {} at price {}: {}", coin_str, price, e);
+                        }
                     }
                 }
                 for ask in &event.asks {
                     if let Ok(price) = ask[0].parse::<f64>() {
-                        book.set_ask(price, &ask[1]);
+                        if let Err(e) = book.set_ask(price, &ask[1]) {
+                            log::error!("Binance: failed to set ask from event buffer for {} at price {}: {}", coin_str, price, e);
+                        }
                     }
                 }
             }
@@ -837,12 +853,16 @@ impl BinanceOrderBook {
                     if let Some(ref mut book) = self.book {
                         for bid in &diff.bids {
                             if let Ok(price) = bid[0].parse::<f64>() {
-                                book.set_bid(price, &bid[1]);
+                                if let Err(e) = book.set_bid(price, &bid[1]) {
+                                    log::error!("Binance: failed to set bid diff for {} at price {}: {}", symbol, price, e);
+                                }
                             }
                         }
                         for ask in &diff.asks {
                             if let Ok(price) = ask[0].parse::<f64>() {
-                                book.set_ask(price, &ask[1]);
+                                if let Err(e) = book.set_ask(price, &ask[1]) {
+                                    log::error!("Binance: failed to set ask diff for {} at price {}: {}", symbol, price, e);
+                                }
                             }
                         }
                         self.counter = diff.final_update_id;
@@ -948,33 +968,36 @@ mod tests {
     }
 
     #[test]
-    fn test_wss_message_depth() {
-        let msg = BinanceWssMessage::depth("BTCUSDT");
+    fn test_wss_message_batch_depth() {
+        let msg = BinanceWssMessage::batch_depth(&["BTCUSDT".to_string(), "ETHUSDT".to_string()]);
         let json = msg.to_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["method"], "SUBSCRIBE");
         assert_eq!(parsed["params"][0], "btcusdt@depth@100ms");
+        assert_eq!(parsed["params"][1], "ethusdt@depth@100ms");
     }
 
     #[test]
-    fn test_wss_message_trades() {
-        let msg = BinanceWssMessage::trades("BTCUSDT");
+    fn test_wss_message_batch_trades() {
+        let msg = BinanceWssMessage::batch_trades(&["BTCUSDT".to_string(), "ETHUSDT".to_string()]);
         let json = msg.to_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["method"], "SUBSCRIBE");
         assert_eq!(parsed["params"][0], "btcusdt@trade");
+        assert_eq!(parsed["params"][1], "ethusdt@trade");
     }
 
     #[test]
-    fn test_wss_message_candle() {
-        let msg = BinanceWssMessage::candle("BTCUSDT");
+    fn test_wss_message_batch_candles() {
+        let msg = BinanceWssMessage::batch_candles(&["BTCUSDT".to_string(), "ETHUSDT".to_string()]);
         let json = msg.to_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["method"], "SUBSCRIBE");
         assert_eq!(parsed["params"][0], "btcusdt@kline_1m");
+        assert_eq!(parsed["params"][1], "ethusdt@kline_1m");
     }
 
     #[test]
