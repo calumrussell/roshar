@@ -39,6 +39,7 @@ pub enum SubscriptionCommand {
         response: oneshot::Sender<Option<OrderBookState>>,
     },
     SetRawMode { enabled: bool },
+    Restart,
 }
 
 #[derive(Clone)]
@@ -121,6 +122,13 @@ impl MarketDataFeedHandle {
             .send(SubscriptionCommand::SetRawMode { enabled })
             .await
             .map_err(|e| format!("Failed to send set_raw_mode command: {}", e))
+    }
+
+    pub async fn restart_feed(&self) -> Result<(), String> {
+        self.command_tx
+            .send(SubscriptionCommand::Restart)
+            .await
+            .map_err(|e| format!("Failed to send restart: {}", e))
     }
 }
 
@@ -215,6 +223,14 @@ impl MarketDataFeed {
             return;
         }
 
+        // Set up ConnectionHandlers for automatic reconnection
+        let _handlers = roshar_ws_mgr::handlers::ConnectionHandlers::new(
+            self.ws_manager.clone(),
+            self.conn_name.clone(),
+        )
+        .with_error_handling()
+        .start();
+
         loop {
             tokio::select! {
                 msg = recv.recv() => {
@@ -239,6 +255,15 @@ impl MarketDataFeed {
                         }
                         Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
                             log::error!("Websocket write error in market data feed: {}", err);
+                            self.is_connected = false;
+                        }
+                        Ok(roshar_ws_mgr::Message::CloseMessage(_name, reason)) => {
+                            if let Some(close_reason) = reason {
+                                log::error!("Hyperliquid websocket closed with reason: {}", close_reason);
+                            } else {
+                                log::error!("Hyperliquid websocket closed without reason");
+                            }
+                            self.is_connected = false;
                         }
                         Ok(roshar_ws_mgr::Message::PongReceiveTimeoutError(_name)) => {
                             log::warn!("Pong receive timeout in market data feed");
@@ -246,8 +271,16 @@ impl MarketDataFeed {
                         }
                         Ok(_) => {}
                         Err(e) => {
-                            log::error!("Failed to receive WebSocket message: {}", e);
-                            break;
+                            use tokio::sync::broadcast::error::RecvError;
+                            match e {
+                                RecvError::Lagged(skipped) => {
+                                    log::warn!("Broadcast channel lagged, skipped {} messages", skipped);
+                                }
+                                RecvError::Closed => {
+                                    log::error!("Broadcast channel closed");
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -400,6 +433,12 @@ impl MarketDataFeed {
             SubscriptionCommand::SetRawMode { enabled } => {
                 self.raw_mode = enabled;
                 log::info!("Raw mode set to {} for market data feed", enabled);
+            }
+            SubscriptionCommand::Restart => {
+                self.is_connected = false;
+                self.ws_manager.reconnect_with_close(&self.conn_name, true);
+                self.order_books.clear();
+                // Resubcription will happen after SuccessfulHandshake
             }
         }
     }

@@ -687,4 +687,9 @@ impl HyperliquidClient {
             .take()
             .ok_or_else(|| "Raw receiver already taken".to_string())
     }
+
+    /// Trigger restart of market data feed
+    pub async fn restart_market_data(&self) {
+        self.market_data_handle.restart_feed().await;
+    }
 }

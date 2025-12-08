@@ -1,4 +1,5 @@
 use chrono::DateTime;
+use log::warn;
 use serde::{Deserialize, Serialize};
 
 use crate::{DepthUpdate, Venue};
@@ -687,36 +688,50 @@ impl BinanceOrderBook {
         let mut book = OrderBookState::new(50);
 
         for bid in &snapshot.bids {
-            if let Ok(price) = bid[0].parse::<f64>() {
-                if let Err(e) = book.set_bid(price, &bid[1]) {
-                    log::error!(
-                        "Binance: failed to set bid for {} at price {}: {}",
-                        coin_str, price, e
-                    );
-                    return Err(e);
+            match bid[0].parse::<f64>() {
+                Ok(price) => {
+                    if let Err(e) = book.set_bid(price, &bid[1]) {
+                        log::error!(
+                            "Binance: failed to set bid for {} at price {}: {}",
+                            coin_str, price, e
+                        );
+                        return Err(e);
+                    }
                 }
-            } else {
-                return Err(LocalOrderBookError::UnparseableInputs(
-                    exchange_str.to_string(),
-                    coin_str.to_string(),
-                ));
+                Err(e) => {
+                    log::error!(
+                        "Binance: failed to parse bid price for {}: raw='{}', error={}",
+                        coin_str, bid[0], e
+                    );
+                    return Err(LocalOrderBookError::UnparseableInputs(
+                        exchange_str.to_string(),
+                        coin_str.to_string(),
+                    ));
+                }
             }
         }
 
         for ask in &snapshot.asks {
-            if let Ok(price) = ask[0].parse::<f64>() {
-                if let Err(e) = book.set_ask(price, &ask[1]) {
-                    log::error!(
-                        "Binance: failed to set ask for {} at price {}: {}",
-                        coin_str, price, e
-                    );
-                    return Err(e);
+            match ask[0].parse::<f64>() {
+                Ok(price) => {
+                    if let Err(e) = book.set_ask(price, &ask[1]) {
+                        log::error!(
+                            "Binance: failed to set ask for {} at price {}: {}",
+                            coin_str, price, e
+                        );
+                        return Err(e);
+                    }
                 }
-            } else {
-                return Err(LocalOrderBookError::UnparseableInputs(
-                    exchange_str.to_string(),
-                    coin_str.to_string(),
-                ));
+                Err(e) => {
+                    log::error!(
+                        "Binance: failed to parse ask price for {}: raw='{}', error={}",
+                        coin_str, ask[0], e
+                    );
+                    return Err(LocalOrderBookError::UnparseableInputs(
+                        exchange_str.to_string(),
+                        coin_str.to_string(),
+                    ));
+                }
             }
         }
 
@@ -741,7 +756,21 @@ impl BinanceOrderBook {
             }
         }
 
+        // Trim after all updates are processed
+        book.trim();
+
         self.counter = last_final_update_id;
+
+        // Validate order book has both bids and asks
+        if book.bids().is_empty() || book.asks().is_empty() {
+            return Err(LocalOrderBookError::InvalidOrderBook(
+                Venue::Binance.to_string(),
+                self.symbol.clone(),
+                book.bids().len(),
+                book.asks().len(),
+            ));
+        }
+
         self.book = Some(book);
         self.event_buff.clear();
 
@@ -749,8 +778,8 @@ impl BinanceOrderBook {
             let view = book.as_view();
             let (bid_str, ask_str) = view.get_bbo();
             log::info!(
-                "Binance: orderbook built for {} - counter: {}, BBO: bid={} ask={}",
-                self.symbol, self.counter, bid_str, ask_str
+                "Binance: orderbook built for {} - counter: {}, BBO: bid={} ask={}, bid_count={}, ask_count={}",
+                self.symbol, self.counter, bid_str, ask_str, book.bids().len(), book.asks().len()
             );
         }
 
@@ -774,8 +803,12 @@ impl BinanceOrderBook {
         // Check if there's a pending snapshot from the background thread
         if let Some(snapshot) = self.fetcher.try_recv() {
             log::info!(
-                "Binance: received snapshot from background thread for {}",
-                symbol
+                "Binance: received snapshot from background thread for {} - bids: {}, asks: {}, first_bid: {:?}, first_ask: {:?}",
+                symbol,
+                snapshot.bids.len(),
+                snapshot.asks.len(),
+                snapshot.bids.first(),
+                snapshot.asks.first()
             );
             self.snapshot = Some(snapshot);
             if let Some(ref snapshot) = self.snapshot {
@@ -852,19 +885,33 @@ impl BinanceOrderBook {
                 if is_valid_sequence {
                     if let Some(ref mut book) = self.book {
                         for bid in &diff.bids {
-                            if let Ok(price) = bid[0].parse::<f64>() {
-                                if let Err(e) = book.set_bid(price, &bid[1]) {
-                                    log::error!("Binance: failed to set bid diff for {} at price {}: {}", symbol, price, e);
+                            match bid[0].parse::<f64>() {
+                                Ok(price) => {
+                                    if let Err(e) = book.set_bid(price, &bid[1]) {
+                                        log::error!("Binance: failed to set bid diff for {} at price {}: {}", symbol, price, e);
+                                    }
+                                }
+                                Err(e) => {
+                                    log::error!("Binance: failed to parse bid diff price for {}: raw='{}', error={}", symbol, bid[0], e);
                                 }
                             }
                         }
                         for ask in &diff.asks {
-                            if let Ok(price) = ask[0].parse::<f64>() {
-                                if let Err(e) = book.set_ask(price, &ask[1]) {
-                                    log::error!("Binance: failed to set ask diff for {} at price {}: {}", symbol, price, e);
+                            match ask[0].parse::<f64>() {
+                                Ok(price) => {
+                                    if let Err(e) = book.set_ask(price, &ask[1]) {
+                                        log::error!("Binance: failed to set ask diff for {} at price {}: {}", symbol, price, e);
+                                    }
+                                }
+                                Err(e) => {
+                                    log::error!("Binance: failed to parse ask diff price for {}: raw='{}', error={}", symbol, ask[0], e);
                                 }
                             }
                         }
+
+                        // Trim after all diff updates are processed
+                        book.trim();
+
                         self.counter = diff.final_update_id;
                     }
                 } else {

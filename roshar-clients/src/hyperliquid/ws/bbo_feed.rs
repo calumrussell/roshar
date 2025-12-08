@@ -178,6 +178,14 @@ impl BboFeed {
                         Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
                             log::error!("Websocket write error in BBO feed: {}", err);
                         }
+                        Ok(roshar_ws_mgr::Message::CloseMessage(_name, reason)) => {
+                            if let Some(close_reason) = reason {
+                                log::error!("Hyperliquid BBO websocket closed with reason: {}", close_reason);
+                            } else {
+                                log::error!("Hyperliquid BBO websocket closed without reason");
+                            }
+                            self.is_connected = false;
+                        }
                         Ok(roshar_ws_mgr::Message::PongReceiveTimeoutError(_name)) => {
                             log::warn!("Pong receive timeout in BBO feed");
                             self.is_connected = false;
