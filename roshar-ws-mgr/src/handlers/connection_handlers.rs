@@ -94,6 +94,7 @@ impl ConnectionHandlers {
     /// - ReadError
     /// - WriteError
     /// - CloseMessage
+    /// - PongReceiveTimeoutError
     ///
     /// And triggers `manager.reconnect()` when detected.
     pub fn with_error_handling(mut self) -> Self {

@@ -55,6 +55,9 @@ impl ByBitDepthMessage {
             }
         }
 
+        // Trim after all updates are processed
+        book.trim();
+
         book
     }
 
@@ -401,6 +404,8 @@ impl BybitOrderBook {
                     }
                 }
             }
+            // Trim after all updates are processed
+            book.trim();
         } else {
             return Err(LocalOrderBookError::BookUpdateBeforeSnapshot(
                 Venue::ByBit.to_string(),

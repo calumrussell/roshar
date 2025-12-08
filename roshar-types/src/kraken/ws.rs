@@ -42,6 +42,9 @@ impl KrakenBookSnapshotMessage {
             }
         }
 
+        // Trim after all updates are processed
+        book.trim();
+
         book
     }
 
@@ -283,6 +286,8 @@ impl KrakenOrderBook {
                     } else if let Err(e) = book.set_bid(msg.price, &size_str) {
                         log::error!("Kraken: failed to set bid update for {} at price {}: {}", coin, msg.price, e);
                     }
+                    // Trim after update
+                    book.trim();
                     self.counter = msg_seq;
                 }
             } else {

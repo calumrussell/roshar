@@ -1,4 +1,5 @@
 use compact_str::CompactString;
+use log;
 use ordered_float::OrderedFloat;
 use std::cmp::Reverse;
 use std::collections::BTreeMap;
@@ -18,6 +19,8 @@ pub enum LocalOrderBookError {
     WrongSymbol(String, String),
     #[error("Message is not a partial update for {0}/{1}")]
     NotPartialUpdate(String, String),
+    #[error("Invalid order book for {0}/{1}: bids={2}, asks={3}")]
+    InvalidOrderBook(String, String, usize, usize),
 }
 
 /// Type aliases for order book storage
@@ -44,6 +47,7 @@ impl OrderBookState {
 
     /// Set or update a bid level. If size is zero or empty, removes the level.
     /// Returns error if size cannot be parsed as f64.
+    /// NOTE: Does NOT trim. Caller must call `trim()` after processing a batch of updates.
     #[inline]
     pub fn set_bid(&mut self, price: f64, size: &str) -> Result<(), LocalOrderBookError> {
         let key = Reverse(OrderedFloat(price));
@@ -61,13 +65,13 @@ impl OrderBookState {
             self.bids.remove(&key);
         } else {
             self.bids.insert(key, size.into());
-            self.trim_bids();
         }
         Ok(())
     }
 
     /// Set or update an ask level. If size is zero or empty, removes the level.
     /// Returns error if size cannot be parsed as f64.
+    /// NOTE: Does NOT trim. Caller must call `trim()` after processing a batch of updates.
     #[inline]
     pub fn set_ask(&mut self, price: f64, size: &str) -> Result<(), LocalOrderBookError> {
         let key = OrderedFloat(price);
@@ -85,7 +89,6 @@ impl OrderBookState {
             self.asks.remove(&key);
         } else {
             self.asks.insert(key, size.into());
-            self.trim_asks();
         }
         Ok(())
     }
@@ -135,7 +138,14 @@ impl OrderBookState {
         (bid, ask)
     }
 
-    fn trim_bids(&mut self) {
+    /// Trim both sides to max_depth. Call this after processing a batch of updates.
+    pub fn trim(&mut self) {
+        self.trim_bids();
+        self.trim_asks();
+    }
+
+    /// Trim bids to max_depth
+    pub fn trim_bids(&mut self) {
         if self.bids.len() > self.max_depth {
             let keys_to_remove: Vec<_> = self.bids.keys().skip(self.max_depth).cloned().collect();
             for key in keys_to_remove {
@@ -144,7 +154,8 @@ impl OrderBookState {
         }
     }
 
-    fn trim_asks(&mut self) {
+    /// Trim asks to max_depth
+    pub fn trim_asks(&mut self) {
         if self.asks.len() > self.max_depth {
             let keys_to_remove: Vec<_> = self.asks.keys().skip(self.max_depth).cloned().collect();
             for key in keys_to_remove {
@@ -232,7 +243,7 @@ impl<'a> LocalOrderBook<'a> {
     }
 
     pub fn bid_sizes(&self) -> Vec<String> {
-       self.bids.values().map(|v| v.to_string()).collect()
+        self.bids.values().map(|v| v.to_string()).collect()
     }
 
     pub fn ask_sizes(&self) -> Vec<String> {
@@ -313,6 +324,9 @@ mod tests {
         state.set_bid(102.0, "3.0").unwrap();
         state.set_bid(99.0, "4.0").unwrap();
 
+        // Trim after batch of updates
+        state.trim();
+
         // Should only keep top 2 bids (102, 101)
         assert_eq!(state.bids().len(), 2);
         let view = state.as_view();
@@ -355,5 +369,32 @@ mod tests {
         state.clear();
 
         assert!(state.is_empty());
+    }
+
+    #[test]
+    fn test_order_book_state_eth_prices() {
+        let mut state = OrderBookState::new(50);
+
+        // Test ETH-like prices
+        state.set_bid(3127.05, "65.905").unwrap();
+        state.set_bid(3127.04, "0.320").unwrap();
+        state.set_bid(3126.99, "1.773").unwrap();
+
+        state.set_ask(3127.14, "0.320").unwrap();
+        state.set_ask(3127.17, "1.773").unwrap();
+
+        let view = state.as_view();
+        let bid_prices = view.bid_prices();
+        let ask_prices = view.ask_prices();
+
+        println!("bid_prices: {:?}", bid_prices);
+        println!("ask_prices: {:?}", ask_prices);
+
+        assert_eq!(bid_prices.len(), 3);
+        assert_eq!(ask_prices.len(), 2);
+
+        // Check prices are not empty
+        assert!(!bid_prices[0].is_empty());
+        assert!(!ask_prices[0].is_empty());
     }
 }

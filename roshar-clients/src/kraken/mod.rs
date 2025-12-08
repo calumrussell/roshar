@@ -65,6 +65,11 @@ impl KrakenClient {
             .ok_or_else(|| "Raw receiver already taken".to_string())
     }
 
+    /// Trigger restart of market data feed
+    pub async fn restart_market_data(&self) {
+        self.market_data_handle.restart_feed().await;
+    }
+
     /// Subscribe to depth updates for a symbol
     pub async fn add_depth(&self, symbol: &str) -> Result<(), String> {
         self.market_data_handle.add_depth(symbol).await

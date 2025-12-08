@@ -53,6 +53,11 @@ impl BinanceClient {
             .ok_or_else(|| "Raw receiver already taken".to_string())
     }
 
+    /// Trigger restart of market data feed
+    pub async fn restart_market_data(&self) {
+        self.market_data_handle.restart_feed().await;
+    }
+
     /// Subscribe to depth updates for symbols (batch subscription)
     pub async fn add_depth(&self, symbols: &[&str]) -> Result<(), String> {
         self.market_data_handle.add_depth(symbols).await

@@ -44,6 +44,9 @@ impl HyperliquidBookMessage {
             }
         }
 
+        // Trim after all updates are processed
+        book.trim();
+
         book
     }
 

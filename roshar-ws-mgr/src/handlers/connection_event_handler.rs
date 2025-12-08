@@ -22,7 +22,7 @@ impl ConnectionEventHandler {
 impl MessageHandler for ConnectionEventHandler {
     async fn on_message(&self, message: &Message) {
         match message {
-            Message::ReadError(_, _) | Message::WriteError(_, _) | Message::CloseMessage(_, _) => {
+            Message::ReadError(_, _) | Message::WriteError(_, _) | Message::CloseMessage(_, _) | Message::PongReceiveTimeoutError(_) => {
                 let mgr = self.manager.clone();
                 let name = self.connection_name.clone();
                 tokio::spawn(async move {
@@ -61,6 +61,13 @@ mod tests {
     async fn test_on_message_handles_close_message() {
         let handler = create_test_handler();
         let msg = Message::CloseMessage("test".to_string(), Some("close".to_string()));
+        handler.on_message(&msg).await;
+    }
+
+    #[tokio::test]
+    async fn test_on_message_handles_pong_timeout() {
+        let handler = create_test_handler();
+        let msg = Message::PongReceiveTimeoutError("test".to_string());
         handler.on_message(&msg).await;
     }
 

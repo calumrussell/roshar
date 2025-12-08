@@ -94,4 +94,9 @@ impl ByBitClient {
     pub async fn remove_candles(&self, symbol: &str) -> Result<(), String> {
         self.market_data_handle.remove_candles(symbol).await
     }
+
+    /// Trigger restart of market data feed
+    pub async fn restart_market_data(&self) {
+        self.market_data_handle.restart_feed().await;
+    }
 }
