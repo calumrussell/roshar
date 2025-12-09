@@ -10,6 +10,7 @@ pub mod bybit;
 pub mod hyperliquid;
 pub mod kraken;
 pub mod orderbook;
+pub mod polymarket;
 
 mod websocket_supported_exchanges;
 pub use websocket_supported_exchanges::WebsocketSupportedExchanges;
@@ -19,6 +20,7 @@ pub use bybit::*;
 pub use kraken::*;
 pub use hyperliquid::*;
 pub use orderbook::*;
+pub use polymarket::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "clickhouse", derive(Row))]

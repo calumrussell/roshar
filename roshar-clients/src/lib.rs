@@ -4,6 +4,7 @@ pub mod constants;
 pub mod http;
 pub mod hyperliquid;
 pub mod kraken;
+pub mod polymarket;
 mod state_handle;
 mod state_manager;
 
@@ -34,3 +35,6 @@ pub use kraken::{
     KrakenTickerData, MarketEvent as KrakenMarketEvent,
     MultiCollateralApi as KrakenMultiCollateralApi, OrderManagementApi as KrakenOrderManagementApi,
 };
+
+// Re-export Polymarket types
+pub use polymarket::GammaApi;
