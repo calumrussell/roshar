@@ -14,11 +14,9 @@ mod binance {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let (event_tx, _event_rx) = mpsc::channel::<MarketEvent>(1000);
 
-        let feed = MarketDataFeed::new(ws_manager.clone(), event_tx);
+        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
         let handle = feed.get_handle();
-        let state = feed.get_state();
 
         tokio::spawn(async move {
             feed.run().await;
@@ -34,7 +32,7 @@ mod binance {
 
         let mut attempts = 0;
         loop {
-            if let Some(book) = state.get_latest_depth("BTCUSDT") {
+            if let Ok(Some(book)) = handle.get_latest_depth("BTCUSDT").await {
                 let view = book.as_view();
                 let (bid, ask) = view.get_bbo();
                 println!("[Binance] BTCUSDT BBO: bid={}, ask={}", bid, ask);
@@ -63,10 +61,10 @@ mod binance {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let (event_tx, mut event_rx) = mpsc::channel::<MarketEvent>(1000);
 
-        let feed = MarketDataFeed::new(ws_manager.clone(), event_tx);
+        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
         let handle = feed.get_handle();
+        let mut event_rx = handle.get_event_channel().await.expect("Failed to get event channel");
 
         tokio::spawn(async move {
             feed.run().await;
@@ -146,9 +144,8 @@ mod bybit {
         let ws_manager: Arc<Manager> = Manager::new();
         let (event_tx, _event_rx) = mpsc::channel::<MarketEvent>(1000);
 
-        let feed = MarketDataFeed::new(ws_manager.clone(), event_tx);
+        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
         let handle = feed.get_handle();
-        let state = feed.get_state();
 
         tokio::spawn(async move {
             feed.run().await;
@@ -164,7 +161,7 @@ mod bybit {
 
         let mut attempts = 0;
         loop {
-            if let Some(book) = state.get_latest_depth("BTCUSDT") {
+            if let Ok(Some(book)) = handle.get_latest_depth("BTCUSDT").await {
                 let view = book.as_view();
                 let (bid, ask) = view.get_bbo();
                 println!("[ByBit] BTCUSDT BBO: bid={}, ask={}", bid, ask);
@@ -195,7 +192,7 @@ mod bybit {
         let ws_manager: Arc<Manager> = Manager::new();
         let (event_tx, mut event_rx) = mpsc::channel::<MarketEvent>(1000);
 
-        let feed = MarketDataFeed::new(ws_manager.clone(), event_tx);
+        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
         let handle = feed.get_handle();
 
         tokio::spawn(async move {
@@ -276,9 +273,8 @@ mod kraken {
         let ws_manager: Arc<Manager> = Manager::new();
         let (event_tx, _event_rx) = mpsc::channel::<MarketEvent>(1000);
 
-        let feed = MarketDataFeed::new(ws_manager.clone(), event_tx);
+        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
         let handle = feed.get_handle();
-        let state = feed.get_state();
 
         tokio::spawn(async move {
             feed.run().await;
@@ -294,7 +290,7 @@ mod kraken {
 
         let mut attempts = 0;
         loop {
-            if let Some(book) = state.get_latest_depth("PI_XBTUSD") {
+            if let Ok(Some(book)) = handle.get_latest_depth("PI_XBTUSD").await {
                 let view = book.as_view();
                 let (bid, ask) = view.get_bbo();
                 println!("[Kraken] PI_XBTUSD BBO: bid={}, ask={}", bid, ask);
@@ -325,7 +321,7 @@ mod kraken {
         let ws_manager: Arc<Manager> = Manager::new();
         let (event_tx, mut event_rx) = mpsc::channel::<MarketEvent>(1000);
 
-        let feed = MarketDataFeed::new(ws_manager.clone(), event_tx);
+        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
         let handle = feed.get_handle();
 
         tokio::spawn(async move {
