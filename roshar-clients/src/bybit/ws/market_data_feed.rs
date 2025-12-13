@@ -37,7 +37,12 @@ pub enum SubscriptionCommand {
         symbol: String,
         response: oneshot::Sender<Option<OrderBookState>>,
     },
-    SetRawMode { enabled: bool },
+    GetEventChannel {
+        response: oneshot::Sender<mpsc::Receiver<MarketEvent>>,
+    },
+    GetRawChannel {
+        response: oneshot::Sender<mpsc::Receiver<String>>,
+    },
     Restart,
 }
 
@@ -116,11 +121,32 @@ impl MarketDataFeedHandle {
             .map_err(|e| format!("Failed to receive depth response: {}", e))
     }
 
-    pub async fn set_raw_mode(&self, enabled: bool) -> Result<(), String> {
+    pub async fn get_event_channel(&self) -> Result<mpsc::Receiver<MarketEvent>, String> {
+        let (response_tx, response_rx) = oneshot::channel();
         self.command_tx
-            .send(SubscriptionCommand::SetRawMode { enabled })
+            .send(SubscriptionCommand::GetEventChannel {
+                response: response_tx,
+            })
             .await
-            .map_err(|e| format!("Failed to send set_raw_mode command: {}", e))
+            .map_err(|e| format!("Failed to send get_event_channel command: {}", e))?;
+
+        response_rx
+            .await
+            .map_err(|e| format!("Failed to receive event channel: {}", e))
+    }
+
+    pub async fn get_raw_channel(&self) -> Result<mpsc::Receiver<String>, String> {
+        let (response_tx, response_rx) = oneshot::channel();
+        self.command_tx
+            .send(SubscriptionCommand::GetRawChannel {
+                response: response_tx,
+            })
+            .await
+            .map_err(|e| format!("Failed to send get_raw_channel command: {}", e))?;
+
+        response_rx
+            .await
+            .map_err(|e| format!("Failed to receive raw channel: {}", e))
     }
 
     pub async fn restart_feed(&self) -> Result<(), String> {
@@ -137,7 +163,9 @@ pub struct MarketDataFeed {
 
     order_books: HashMap<String, BybitOrderBook>,
     event_tx: mpsc::Sender<MarketEvent>,
+    event_rx: Option<mpsc::Receiver<MarketEvent>>,
     raw_tx: mpsc::Sender<String>,
+    raw_rx: Option<mpsc::Receiver<String>>,
 
     command_rx: mpsc::Receiver<SubscriptionCommand>,
     command_tx: mpsc::Sender<SubscriptionCommand>,
@@ -150,22 +178,26 @@ pub struct MarketDataFeed {
     pending_commands: Vec<SubscriptionCommand>,
 
     raw_mode: bool,
+    channel_size: usize,
 }
 
 impl MarketDataFeed {
     pub fn new(
         ws_manager: Arc<Manager>,
-        event_tx: mpsc::Sender<MarketEvent>,
-        raw_tx: mpsc::Sender<String>,
+        channel_size: usize,
     ) -> Self {
         let (command_tx, command_rx) = mpsc::channel(100);
+        let (event_tx, event_rx) = mpsc::channel(channel_size);
+        let (raw_tx, raw_rx) = mpsc::channel(channel_size);
 
         Self {
             ws_manager,
             conn_name: "bybit-market-data".to_string(),
             order_books: HashMap::new(),
             event_tx,
+            event_rx: Some(event_rx),
             raw_tx,
+            raw_rx: Some(raw_rx),
             command_rx,
             command_tx,
             depth_subscriptions: HashSet::new(),
@@ -174,6 +206,7 @@ impl MarketDataFeed {
             is_connected: false,
             pending_commands: Vec::new(),
             raw_mode: false,
+            channel_size,
         }
     }
 
@@ -184,7 +217,7 @@ impl MarketDataFeed {
     }
 
     pub async fn run(mut self) {
-        let mut recv = self.ws_manager.setup_reader(&self.conn_name, 1000);
+        let mut recv = self.ws_manager.setup_reader(&self.conn_name, self.channel_size);
         log::info!(
             "WebSocket reader set up for ByBit market data feed: {}",
             self.conn_name
@@ -408,13 +441,27 @@ impl MarketDataFeed {
                     .and_then(|book| book.book.clone());
                 let _ = response.send(result);
             }
-            SubscriptionCommand::SetRawMode { enabled } => {
-                self.raw_mode = enabled;
-                log::info!("Raw mode set to {} for ByBit market data feed", enabled);
+            SubscriptionCommand::GetEventChannel { response } => {
+                if let Some(event_rx) = self.event_rx.take() {
+                    self.raw_mode = false;
+                    log::info!("Event channel requested for ByBit market data feed, raw_mode disabled");
+                    let _ = response.send(event_rx);
+                } else {
+                    log::warn!("Event channel already taken for ByBit market data feed");
+                }
+            }
+            SubscriptionCommand::GetRawChannel { response } => {
+                if let Some(raw_rx) = self.raw_rx.take() {
+                    self.raw_mode = true;
+                    log::info!("Raw channel requested for ByBit market data feed, raw_mode enabled");
+                    let _ = response.send(raw_rx);
+                } else {
+                    log::warn!("Raw channel already taken for ByBit market data feed");
+                }
             }
             SubscriptionCommand::Restart => {
                 self.is_connected = false;
-                self.ws_manager.reconnect_with_close(&self.conn_name, true);
+                let _ = self.ws_manager.reconnect_with_close(&self.conn_name, true).await;
                 self.order_books.clear();
                 // Resubcription will happen after SuccessfulHandshake
             }

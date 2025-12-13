@@ -58,8 +58,6 @@ pub struct HyperliquidClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
     market_data_feed_handle: tokio::task::JoinHandle<()>,
-    event_rx: Option<mpsc::Receiver<MarketEvent>>,
-    raw_rx: Option<mpsc::Receiver<String>>,
     // BBO feed
     bbo_handle: BboFeedHandle,
     #[allow(dead_code)] // Kept to prevent BBO feed task from being dropped
@@ -96,6 +94,7 @@ impl HyperliquidClient {
     pub fn new(
         config: HyperliquidConfig,
         ws_manager: std::sync::Arc<roshar_ws_mgr::Manager>,
+        channel_size: usize,
     ) -> Self {
         let validator = OrderValidator::new();
 
@@ -172,9 +171,7 @@ impl HyperliquidClient {
         });
 
         // Set up market data feed
-        let (event_tx, event_rx) = mpsc::channel(10000);
-        let (raw_tx, raw_rx) = mpsc::channel(10000);
-        let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, event_tx, raw_tx);
+        let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
@@ -193,8 +190,6 @@ impl HyperliquidClient {
             is_mainnet: config.is_mainnet,
             market_data_handle,
             market_data_feed_handle,
-            event_rx: Some(event_rx),
-            raw_rx: Some(raw_rx),
             bbo_handle,
             bbo_feed_handle,
         }
@@ -672,24 +667,25 @@ impl HyperliquidClient {
     }
 
     /// Take the event receiver for reactive market data consumption
-    /// Can only be called once - returns None on subsequent calls
-    pub fn take_event_receiver(&mut self) -> Option<mpsc::Receiver<MarketEvent>> {
-        self.event_rx.take()
+    /// Get the event receiver for reactive market data consumption
+    /// Can only be called once - subsequent calls will return an error
+    /// Automatically disables raw mode
+    pub async fn take_event_receiver(&self) -> Result<mpsc::Receiver<MarketEvent>, String> {
+        self.market_data_handle.get_event_channel().await
     }
 
-    /// Take the raw receiver for raw JSON message consumption
-    /// Can only be called once - returns None on subsequent calls
-    /// This enables raw mode - no parsing will occur, only raw JSON forwarding
+    /// Get the raw receiver for raw JSON message consumption
+    /// Can only be called once - subsequent calls will return an error
+    /// Automatically enables raw mode - no parsing will occur, only raw JSON forwarding
     /// This is useful for stream writers that need to forward messages to Redis/etc
-    pub async fn take_raw_receiver(&mut self) -> Result<mpsc::Receiver<String>, String> {
-        self.market_data_handle.set_raw_mode(true).await?;
-        self.raw_rx
-            .take()
-            .ok_or_else(|| "Raw receiver already taken".to_string())
+    pub async fn take_raw_receiver(&self) -> Result<mpsc::Receiver<String>, String> {
+        self.market_data_handle.get_raw_channel().await
     }
 
     /// Trigger restart of market data feed
     pub async fn restart_market_data(&self) {
-        self.market_data_handle.restart_feed().await;
+        if let Err(e) = self.market_data_handle.restart_feed().await {
+            log::error!("Failed to send restart command to Hyperliquid market data feed: {}", e);
+        }
     }
 }

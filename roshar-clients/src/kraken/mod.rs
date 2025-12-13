@@ -1,7 +1,7 @@
 pub mod rest;
 pub mod ws;
 
-use ws::{MarketDataFeed, MarketDataFeedHandle};
+use ws::MarketDataFeedHandle;
 
 use rest::{ChartsApi, MarketApi};
 pub use rest::{
@@ -11,6 +11,7 @@ pub use rest::{
     MultiCollateralApi, OrderManagementApi,
 };
 pub use ws::MarketEvent;
+pub(crate) use ws::MarketDataFeed;
 
 use roshar_types::Candle;
 use roshar_ws_mgr::Manager;
@@ -23,19 +24,12 @@ pub struct KrakenClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
-    // Event receiver
-    event_rx: Option<mpsc::Receiver<MarketEvent>>,
-    raw_rx: Option<mpsc::Receiver<String>>,
 }
 
 impl KrakenClient {
-    pub fn new(ws_manager: Arc<Manager>) -> Self {
-        // Create event channel
-        let (event_tx, event_rx) = mpsc::channel(10000);
-        let (raw_tx, raw_rx) = mpsc::channel(10000);
-
+    pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
         // Set up WebSocket market data feed
-        let market_data_feed = MarketDataFeed::new(ws_manager, event_tx, raw_tx);
+        let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
@@ -44,30 +38,28 @@ impl KrakenClient {
         Self {
             market_data_handle,
             market_data_feed_handle,
-            event_rx: Some(event_rx),
-            raw_rx: Some(raw_rx),
         }
     }
 
-    /// Take the event receiver for reactive market data consumption
-    /// Can only be called once - returns None on subsequent calls
-    pub fn take_event_receiver(&mut self) -> Option<mpsc::Receiver<MarketEvent>> {
-        self.event_rx.take()
+    /// Get the event receiver for reactive market data consumption
+    /// Can only be called once - subsequent calls will return an error
+    /// Automatically disables raw mode
+    pub async fn take_event_receiver(&self) -> Result<mpsc::Receiver<MarketEvent>, String> {
+        self.market_data_handle.get_event_channel().await
     }
 
-    /// Take the raw receiver for raw JSON message consumption
-    /// Can only be called once - returns None on subsequent calls
-    /// This enables raw mode - no parsing will occur, only raw JSON forwarding
-    pub async fn take_raw_receiver(&mut self) -> Result<mpsc::Receiver<String>, String> {
-        self.market_data_handle.set_raw_mode(true).await?;
-        self.raw_rx
-            .take()
-            .ok_or_else(|| "Raw receiver already taken".to_string())
+    /// Get the raw receiver for raw JSON message consumption
+    /// Can only be called once - subsequent calls will return an error
+    /// Automatically enables raw mode - no parsing will occur, only raw JSON forwarding
+    pub async fn take_raw_receiver(&self) -> Result<mpsc::Receiver<String>, String> {
+        self.market_data_handle.get_raw_channel().await
     }
 
     /// Trigger restart of market data feed
     pub async fn restart_market_data(&self) {
-        self.market_data_handle.restart_feed().await;
+        if let Err(e) = self.market_data_handle.restart_feed().await {
+            log::error!("Failed to send restart command to Kraken market data feed: {}", e);
+        }
     }
 
     /// Subscribe to depth updates for a symbol
