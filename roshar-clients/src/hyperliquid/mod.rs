@@ -1,6 +1,6 @@
-pub mod rest;
+pub(crate) mod rest;
 pub mod validator;
-pub mod ws;
+pub(crate) mod ws;
 
 use ws::{
     BboFeed, BboFeedHandle, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle,

@@ -1,5 +1,5 @@
-pub mod rest;
-pub mod ws;
+pub(crate) mod rest;
+pub(crate) mod ws;
 
 use rest::BinanceRestClient;
 use ws::MarketDataFeedHandle;
