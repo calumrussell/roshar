@@ -252,14 +252,6 @@ impl MarketDataFeed {
             return;
         }
 
-        // Set up ConnectionHandlers for automatic reconnection
-        let _handlers = roshar_ws_mgr::handlers::ConnectionHandlers::new(
-            self.ws_manager.clone(),
-            self.conn_name.clone(),
-        )
-        .with_error_handling()
-        .start();
-
         loop {
             tokio::select! {
                 msg = recv.recv() => {
@@ -286,13 +278,37 @@ impl MarketDataFeed {
                             for book in self.order_books.values_mut() {
                                 book.reset();
                             }
+                            if let Err(e) = self.ws_manager.reconnect_with_close(&self.conn_name, false).await {
+                                log::error!("Failed to trigger reconnect after read error: {}", e);
+                            }
                         }
                         Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
                             log::error!("Websocket write error in Binance market data feed: {}", err);
+                            // Don't reconnect - ReadError or CloseMessage should trigger it
+                        }
+                        Ok(roshar_ws_mgr::Message::CloseMessage(_name, reason)) => {
+                            if let Some(close_reason) = reason.as_ref() {
+                                log::error!("Binance websocket closed with reason: {}", close_reason);
+                            } else {
+                                log::error!("Binance websocket closed without reason");
+                            }
+                            self.is_connected = false;
+                            for book in self.order_books.values_mut() {
+                                book.reset();
+                            }
+                            if let Err(e) = self.ws_manager.reconnect_with_close(&self.conn_name, false).await {
+                                log::error!("Failed to trigger reconnect after close: {}", e);
+                            }
                         }
                         Ok(roshar_ws_mgr::Message::PongReceiveTimeoutError(_name)) => {
                             log::warn!("Pong receive timeout in Binance market data feed");
                             self.is_connected = false;
+                            for book in self.order_books.values_mut() {
+                                book.reset();
+                            }
+                            if let Err(e) = self.ws_manager.reconnect(&self.conn_name).await {
+                                log::error!("Failed to trigger reconnect after pong timeout: {}", e);
+                            }
                         }
                         Ok(_) => {}
                         Err(e) => {
