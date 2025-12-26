@@ -174,21 +174,35 @@ impl BboFeed {
                         Ok(roshar_ws_mgr::Message::ReadError(_name, err)) => {
                             log::error!("Websocket read error in BBO feed: {}", err);
                             self.is_connected = false;
+                            // Trigger reconnection
+                            if let Err(e) = self.ws_manager.reconnect_with_close(&self.conn_name, false).await {
+                                log::error!("Failed to trigger reconnect after read error: {}", e);
+                            }
                         }
                         Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
                             log::error!("Websocket write error in BBO feed: {}", err);
+                            // Write errors on already closed connection don't need reconnect trigger
+                            // as ReadError or CloseMessage should have already triggered it
                         }
                         Ok(roshar_ws_mgr::Message::CloseMessage(_name, reason)) => {
-                            if let Some(close_reason) = reason {
+                            if let Some(close_reason) = reason.as_ref() {
                                 log::error!("Hyperliquid BBO websocket closed with reason: {}", close_reason);
                             } else {
                                 log::error!("Hyperliquid BBO websocket closed without reason");
                             }
                             self.is_connected = false;
+                            // Trigger reconnection
+                            if let Err(e) = self.ws_manager.reconnect_with_close(&self.conn_name, false).await {
+                                log::error!("Failed to trigger reconnect after close: {}", e);
+                            }
                         }
                         Ok(roshar_ws_mgr::Message::PongReceiveTimeoutError(_name)) => {
                             log::warn!("Pong receive timeout in BBO feed");
                             self.is_connected = false;
+                            // Trigger reconnection - send close message since connection might still be open
+                            if let Err(e) = self.ws_manager.reconnect(&self.conn_name).await {
+                                log::error!("Failed to trigger reconnect after pong timeout: {}", e);
+                            }
                         }
                         Ok(_) => {
                             // Other message types (ping, pong, close, etc.)
