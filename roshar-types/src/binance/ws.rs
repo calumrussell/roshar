@@ -845,8 +845,9 @@ impl BinanceOrderBook {
             self.event_buff.push_back(diff.clone());
         }
 
-        if let Some(ref snapshot) = self.snapshot.clone() {
-            if self.book.is_none() {
+        // Handle book building from snapshot (only when book doesn't exist yet)
+        if self.book.is_none() {
+            if let Some(ref snapshot) = self.snapshot {
                 while let Some(ev) = self.event_buff.front() {
                     if ev.final_update_id < snapshot.last_update_id {
                         self.event_buff.pop_front();
@@ -883,58 +884,59 @@ impl BinanceOrderBook {
 
                 let snapshot_clone = snapshot.clone();
                 self.build_order_book_from_snapshot(&snapshot_clone)?;
-            } else {
-                let is_valid_sequence = diff.previous_final_update_id == self.counter
-                    || (diff.first_update_id <= self.counter
-                        && self.counter <= diff.final_update_id);
+            }
+        } else if self.snapshot.is_some() {
+            // Book exists, apply diff directly
+            let is_valid_sequence = diff.previous_final_update_id == self.counter
+                || (diff.first_update_id <= self.counter
+                    && self.counter <= diff.final_update_id);
 
-                if is_valid_sequence {
-                    if let Some(ref mut book) = self.book {
-                        for bid in &diff.bids {
-                            match bid[0].parse::<f64>() {
-                                Ok(price) => {
-                                    if let Err(e) = book.set_bid(price, &bid[1]) {
-                                        log::error!("Binance: failed to set bid diff for {} at price {}: {}", symbol, price, e);
-                                    }
-                                }
-                                Err(e) => {
-                                    log::error!("Binance: failed to parse bid diff price for {}: raw='{}', error={}", symbol, bid[0], e);
+            if is_valid_sequence {
+                if let Some(ref mut book) = self.book {
+                    for bid in &diff.bids {
+                        match bid[0].parse::<f64>() {
+                            Ok(price) => {
+                                if let Err(e) = book.set_bid(price, &bid[1]) {
+                                    log::error!("Binance: failed to set bid diff for {} at price {}: {}", symbol, price, e);
                                 }
                             }
-                        }
-                        for ask in &diff.asks {
-                            match ask[0].parse::<f64>() {
-                                Ok(price) => {
-                                    if let Err(e) = book.set_ask(price, &ask[1]) {
-                                        log::error!("Binance: failed to set ask diff for {} at price {}: {}", symbol, price, e);
-                                    }
-                                }
-                                Err(e) => {
-                                    log::error!("Binance: failed to parse ask diff price for {}: raw='{}', error={}", symbol, ask[0], e);
-                                }
+                            Err(e) => {
+                                log::error!("Binance: failed to parse bid diff price for {}: raw='{}', error={}", symbol, bid[0], e);
                             }
                         }
-
-                        // Trim after all diff updates are processed
-                        book.trim();
-
-                        self.counter = diff.final_update_id;
                     }
-                } else {
-                    log::warn!(
-                        "Binance: sequence mismatch for {} - diff.first_update_id: {}, diff.previous_final_update_id: {}, self.counter: {}, diff.final_update_id: {}",
-                        symbol,
-                        diff.first_update_id,
-                        diff.previous_final_update_id,
-                        self.counter,
-                        diff.final_update_id
-                    );
-                    self.snapshot = None;
-                    self.fetcher.reset();
-                    self.book = None;
-                    self.counter = 0;
-                    self.event_buff.clear();
+                    for ask in &diff.asks {
+                        match ask[0].parse::<f64>() {
+                            Ok(price) => {
+                                if let Err(e) = book.set_ask(price, &ask[1]) {
+                                    log::error!("Binance: failed to set ask diff for {} at price {}: {}", symbol, price, e);
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Binance: failed to parse ask diff price for {}: raw='{}', error={}", symbol, ask[0], e);
+                            }
+                        }
+                    }
+
+                    // Trim after all diff updates are processed
+                    book.trim();
+
+                    self.counter = diff.final_update_id;
                 }
+            } else {
+                log::warn!(
+                    "Binance: sequence mismatch for {} - diff.first_update_id: {}, diff.previous_final_update_id: {}, self.counter: {}, diff.final_update_id: {}",
+                    symbol,
+                    diff.first_update_id,
+                    diff.previous_final_update_id,
+                    self.counter,
+                    diff.final_update_id
+                );
+                self.snapshot = None;
+                self.fetcher.reset();
+                self.book = None;
+                self.counter = 0;
+                self.event_buff.clear();
             }
         }
 
