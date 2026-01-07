@@ -667,6 +667,12 @@ impl BinanceOrderBook {
         self.fetcher.reset();
     }
 
+    /// Set a snapshot directly, bypassing the REST API fetch.
+    /// Useful for testing/benchmarking where you want to pre-populate the orderbook.
+    pub fn set_snapshot(&mut self, snapshot: BinanceOrderBookSnapshot) {
+        self.snapshot = Some(snapshot);
+    }
+
     pub fn as_view(&self) -> Option<LocalOrderBook<'_>> {
         self.book.as_ref().map(|b| b.as_view())
     }
