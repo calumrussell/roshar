@@ -34,4 +34,4 @@ dashmap = "6.1"
 chrono = "0.4.41"
 url = "2.5"
 async-trait = "0.1"
-roshar-types = { version = "0.1.6", path = "../roshar-types" }
+roshar-types = { version = "0.1.12", path = "../roshar-types" }
