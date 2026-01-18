@@ -120,4 +120,12 @@ impl BinanceClient {
             .await
             .map_err(|e| format!("Failed to get historical funding rates: {}", e))
     }
+
+    /// Get exchange info including all available symbols
+    pub async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
+        BinanceRestClient::new()
+            .get_exchange_info()
+            .await
+            .map_err(|e| format!("Failed to get exchange info: {}", e))
+    }
 }
