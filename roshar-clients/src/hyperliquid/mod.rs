@@ -54,8 +54,6 @@ pub struct HyperliquidClient {
     spot_state_manager_handle: tokio::task::JoinHandle<()>,
     perp_state_handle: crate::state_handle::StateHandle,
     spot_state_handle: crate::state_handle::StateHandle,
-    is_mainnet: bool,
-    requests_per_second: u32,
     // Market data feed
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
@@ -64,6 +62,8 @@ pub struct HyperliquidClient {
     bbo_handle: BboFeedHandle,
     #[allow(dead_code)] // Kept to prevent BBO feed task from being dropped
     bbo_feed_handle: tokio::task::JoinHandle<()>,
+    // REST API client (shared for rate limiting)
+    info_api: InfoApi,
 }
 
 impl HyperliquidClient {
@@ -183,6 +183,13 @@ impl HyperliquidClient {
             market_data_feed.run().await;
         });
 
+        // Create shared InfoApi for rate-limited REST calls
+        let info_api = if config.is_mainnet {
+            InfoApi::production(config.requests_per_second)
+        } else {
+            InfoApi::testnet(config.requests_per_second)
+        };
+
         Self {
             api,
             wallet_address: config.wallet_address,
@@ -193,12 +200,11 @@ impl HyperliquidClient {
             spot_state_manager_handle,
             perp_state_handle,
             spot_state_handle,
-            is_mainnet: config.is_mainnet,
-            requests_per_second: config.requests_per_second,
             market_data_handle,
             market_data_feed_handle,
             bbo_handle,
             bbo_feed_handle,
+            info_api,
         }
     }
 
@@ -542,15 +548,8 @@ impl HyperliquidClient {
             .wallet_address
             .ok_or_else(|| "Wallet address required for get_user_perpetuals_state".to_string())?;
 
-        // Create InfoApi to query account state
-        let info_api = if self.is_mainnet {
-            InfoApi::production(self.requests_per_second)
-        } else {
-            InfoApi::testnet(self.requests_per_second)
-        };
-
         // Fetch user perpetuals state
-        info_api
+        self.info_api
             .user_perpetuals_state(wallet_address)
             .await
             .map_err(|e| format!("Failed to fetch perpetuals state: {:?}", e))
@@ -623,13 +622,7 @@ impl HyperliquidClient {
         start_time: u64,
         end_time: Option<u64>,
     ) -> Result<Vec<roshar_types::HistoricalFundingRate>, String> {
-        let info_api = if self.is_mainnet {
-            InfoApi::production(self.requests_per_second)
-        } else {
-            InfoApi::testnet(self.requests_per_second)
-        };
-
-        info_api
+        self.info_api
             .get_historical_funding_rates(coin, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
