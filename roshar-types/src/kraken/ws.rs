@@ -32,13 +32,23 @@ impl KrakenBookSnapshotMessage {
 
         for level in &self.bids {
             if let Err(e) = book.set_bid(level.price, &level.qty.to_string()) {
-                log::error!("Kraken: failed to set bid for {} at price {}: {}", self.product_id, level.price, e);
+                log::error!(
+                    "Kraken: failed to set bid for {} at price {}: {}",
+                    self.product_id,
+                    level.price,
+                    e
+                );
             }
         }
 
         for level in &self.asks {
             if let Err(e) = book.set_ask(level.price, &level.qty.to_string()) {
-                log::error!("Kraken: failed to set ask for {} at price {}: {}", self.product_id, level.price, e);
+                log::error!(
+                    "Kraken: failed to set ask for {} at price {}: {}",
+                    self.product_id,
+                    level.price,
+                    e
+                );
             }
         }
 
@@ -281,10 +291,20 @@ impl KrakenOrderBook {
                     let size_str = msg.qty.to_string();
                     if msg.side == "sell" {
                         if let Err(e) = book.set_ask(msg.price, &size_str) {
-                            log::error!("Kraken: failed to set ask update for {} at price {}: {}", coin, msg.price, e);
+                            log::error!(
+                                "Kraken: failed to set ask update for {} at price {}: {}",
+                                coin,
+                                msg.price,
+                                e
+                            );
                         }
                     } else if let Err(e) = book.set_bid(msg.price, &size_str) {
-                        log::error!("Kraken: failed to set bid update for {} at price {}: {}", coin, msg.price, e);
+                        log::error!(
+                            "Kraken: failed to set bid update for {} at price {}: {}",
+                            coin,
+                            msg.price,
+                            e
+                        );
                     }
                     // Trim after update
                     book.trim();

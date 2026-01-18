@@ -5,6 +5,6 @@ mod orders_feed;
 
 pub(crate) use bbo_feed::{BboFeed, BboFeedHandle};
 pub(crate) use fills_feed::FillsFeedHandler;
-pub(crate) use market_data_feed::{MarketDataFeed, MarketDataFeedHandle};
 pub use market_data_feed::MarketEvent;
+pub(crate) use market_data_feed::{MarketDataFeed, MarketDataFeedHandle};
 pub(crate) use orders_feed::OrdersFeedHandler;

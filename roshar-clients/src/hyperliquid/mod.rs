@@ -685,7 +685,10 @@ impl HyperliquidClient {
     /// Trigger restart of market data feed
     pub async fn restart_market_data(&self) {
         if let Err(e) = self.market_data_handle.restart_feed().await {
-            log::error!("Failed to send restart command to Hyperliquid market data feed: {}", e);
+            log::error!(
+                "Failed to send restart command to Hyperliquid market data feed: {}",
+                e
+            );
         }
     }
 }

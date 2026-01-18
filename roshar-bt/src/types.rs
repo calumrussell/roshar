@@ -147,7 +147,7 @@ impl Candle {
             close: Decimal::from_str(close).unwrap(),
             low: Decimal::from_str(low).unwrap(),
             open: Decimal::from_str(open).unwrap(),
-            time: time.clone(),
+            time: *time,
         }
     }
 }

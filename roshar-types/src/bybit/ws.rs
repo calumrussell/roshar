@@ -1,7 +1,9 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
-use crate::{Candle, DepthUpdate, LocalOrderBook, LocalOrderBookError, OrderBookState, Trade, Venue};
+use crate::{
+    Candle, DepthUpdate, LocalOrderBook, LocalOrderBookError, OrderBookState, Trade, Venue,
+};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ByBitMessage {
@@ -39,7 +41,12 @@ impl ByBitDepthMessage {
 
             if let Ok(price) = formatted_px.parse::<f64>() {
                 if let Err(e) = book.set_bid(price, formatted_sz) {
-                    log::error!("ByBit: failed to set bid for {} at price {}: {}", self.data.s, price, e);
+                    log::error!(
+                        "ByBit: failed to set bid for {} at price {}: {}",
+                        self.data.s,
+                        price,
+                        e
+                    );
                 }
             }
         }
@@ -50,7 +57,12 @@ impl ByBitDepthMessage {
 
             if let Ok(price) = formatted_px.parse::<f64>() {
                 if let Err(e) = book.set_ask(price, formatted_sz) {
-                    log::error!("ByBit: failed to set ask for {} at price {}: {}", self.data.s, price, e);
+                    log::error!(
+                        "ByBit: failed to set ask for {} at price {}: {}",
+                        self.data.s,
+                        price,
+                        e
+                    );
                 }
             }
         }
@@ -392,7 +404,12 @@ impl BybitOrderBook {
                 let formatted_px = remove_trailing_zeros(bid.first().unwrap());
                 if let Ok(price) = formatted_px.parse::<f64>() {
                     if let Err(e) = book.set_bid(price, bid.get(1).unwrap()) {
-                        log::error!("ByBit: failed to set bid update for {} at price {}: {}", coin, price, e);
+                        log::error!(
+                            "ByBit: failed to set bid update for {} at price {}: {}",
+                            coin,
+                            price,
+                            e
+                        );
                     }
                 }
             }
@@ -400,7 +417,12 @@ impl BybitOrderBook {
                 let formatted_px = remove_trailing_zeros(ask.first().unwrap());
                 if let Ok(price) = formatted_px.parse::<f64>() {
                     if let Err(e) = book.set_ask(price, ask.get(1).unwrap()) {
-                        log::error!("ByBit: failed to set ask update for {} at price {}: {}", coin, price, e);
+                        log::error!(
+                            "ByBit: failed to set ask update for {} at price {}: {}",
+                            coin,
+                            price,
+                            e
+                        );
                     }
                 }
             }

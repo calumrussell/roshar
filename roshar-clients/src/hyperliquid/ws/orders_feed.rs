@@ -105,7 +105,11 @@ impl OrdersFeedHandler {
                 roshar_ws_mgr::Message::ReadError(_name, err) => {
                     log::error!("Websocket read error in orders feed: {}", err);
                     // Trigger reconnection
-                    if let Err(e) = self.ws_manager.reconnect_with_close(&conn_name, false).await {
+                    if let Err(e) = self
+                        .ws_manager
+                        .reconnect_with_close(&conn_name, false)
+                        .await
+                    {
                         log::error!("Failed to trigger reconnect after read error: {}", e);
                     }
                 }
@@ -116,12 +120,19 @@ impl OrdersFeedHandler {
                 }
                 roshar_ws_mgr::Message::CloseMessage(_name, reason) => {
                     if let Some(close_reason) = reason.as_ref() {
-                        log::error!("Websocket closed with reason in orders feed: {}", close_reason);
+                        log::error!(
+                            "Websocket closed with reason in orders feed: {}",
+                            close_reason
+                        );
                     } else {
                         log::error!("Websocket closed without reason in orders feed");
                     }
                     // Trigger reconnection
-                    if let Err(e) = self.ws_manager.reconnect_with_close(&conn_name, false).await {
+                    if let Err(e) = self
+                        .ws_manager
+                        .reconnect_with_close(&conn_name, false)
+                        .await
+                    {
                         log::error!("Failed to trigger reconnect after close: {}", e);
                     }
                 }

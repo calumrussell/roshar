@@ -47,18 +47,17 @@ impl Reader {
     async fn read_until(&mut self, needed: usize) -> Result<()> {
         while self.read_buffer.len() < needed {
             let n = match &mut self.reader {
-                ReaderType::Plain(r) => r
-                    .read_buf(&mut self.read_buffer)
-                    .await
-                    .map_err(|e| Error::Io(e))?,
+                ReaderType::Plain(r) => {
+                    r.read_buf(&mut self.read_buffer).await.map_err(Error::Io)?
+                }
                 ReaderType::Tls(tls) => tls
                     .read_buf(&mut self.read_buffer)
                     .await
-                    .map_err(|e| Error::Io(e))?,
+                    .map_err(Error::Io)?,
             };
 
             if n == 0 {
-                if self.read_buffer.len() == 0 {
+                if self.read_buffer.is_empty() {
                     return Err(Error::ConnectionClosed);
                 }
                 return Err(Error::IncompleteFrame {
@@ -167,8 +166,8 @@ impl Reader {
     /// Read data for handshake into BytesMut (optimized version using read_buf)
     pub(crate) async fn read_handshake_buf(&mut self, buf: &mut BytesMut) -> Result<usize> {
         match &mut self.reader {
-            ReaderType::Plain(r) => r.read_buf(buf).await.map_err(|e| Error::Io(e)),
-            ReaderType::Tls(tls) => tls.read_buf(buf).await.map_err(|e| Error::Io(e)),
+            ReaderType::Plain(r) => r.read_buf(buf).await.map_err(Error::Io),
+            ReaderType::Tls(tls) => tls.read_buf(buf).await.map_err(Error::Io),
         }
     }
 }

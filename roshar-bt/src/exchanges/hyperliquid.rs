@@ -1,6 +1,6 @@
 use std::collections::{HashMap, VecDeque};
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::source::{CandleProducer, CandleWriter, EventProducer, EventWriter};

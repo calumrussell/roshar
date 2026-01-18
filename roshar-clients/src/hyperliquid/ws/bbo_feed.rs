@@ -8,8 +8,12 @@ use crate::{HL_TESTNET_WSS_URL, HL_WSS_URL};
 
 /// Commands for BBO feed management
 enum BboCommand {
-    Add { ticker: String },
-    Remove { ticker: String },
+    Add {
+        ticker: String,
+    },
+    Remove {
+        ticker: String,
+    },
     GetBbo {
         ticker: String,
         response: oneshot::Sender<Option<(f64, f64)>>,

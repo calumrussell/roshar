@@ -1,5 +1,4 @@
 use chrono::DateTime;
-use log::warn;
 use serde::{Deserialize, Serialize};
 
 use crate::{DepthUpdate, Venue};
@@ -577,7 +576,9 @@ impl BinanceSnapshotFetcher {
                         if attempt >= MAX_RETRIES {
                             log::error!(
                                 "Binance: snapshot fetch failed for {} after {} attempts: {}",
-                                symbol_clone, MAX_RETRIES, e
+                                symbol_clone,
+                                MAX_RETRIES,
+                                e
                             );
                             break;
                         } else {
@@ -699,7 +700,9 @@ impl BinanceOrderBook {
                     if let Err(e) = book.set_bid(price, &bid[1]) {
                         log::error!(
                             "Binance: failed to set bid for {} at price {}: {}",
-                            coin_str, price, e
+                            coin_str,
+                            price,
+                            e
                         );
                         return Err(e);
                     }
@@ -707,7 +710,9 @@ impl BinanceOrderBook {
                 Err(e) => {
                     log::error!(
                         "Binance: failed to parse bid price for {}: raw='{}', error={}",
-                        coin_str, bid[0], e
+                        coin_str,
+                        bid[0],
+                        e
                     );
                     return Err(LocalOrderBookError::UnparseableInputs(
                         exchange_str.to_string(),
@@ -723,7 +728,9 @@ impl BinanceOrderBook {
                     if let Err(e) = book.set_ask(price, &ask[1]) {
                         log::error!(
                             "Binance: failed to set ask for {} at price {}: {}",
-                            coin_str, price, e
+                            coin_str,
+                            price,
+                            e
                         );
                         return Err(e);
                     }
@@ -731,7 +738,9 @@ impl BinanceOrderBook {
                 Err(e) => {
                     log::error!(
                         "Binance: failed to parse ask price for {}: raw='{}', error={}",
-                        coin_str, ask[0], e
+                        coin_str,
+                        ask[0],
+                        e
                     );
                     return Err(LocalOrderBookError::UnparseableInputs(
                         exchange_str.to_string(),
@@ -829,7 +838,8 @@ impl BinanceOrderBook {
                 if let Err(e) = self.build_order_book_from_snapshot(&snapshot_clone) {
                     log::error!(
                         "Binance: failed to build order book from snapshot for {}: {}",
-                        symbol, e
+                        symbol,
+                        e
                     );
                     return Err(e);
                 }
@@ -888,8 +898,7 @@ impl BinanceOrderBook {
         } else if self.snapshot.is_some() {
             // Book exists, apply diff directly
             let is_valid_sequence = diff.previous_final_update_id == self.counter
-                || (diff.first_update_id <= self.counter
-                    && self.counter <= diff.final_update_id);
+                || (diff.first_update_id <= self.counter && self.counter <= diff.final_update_id);
 
             if is_valid_sequence {
                 if let Some(ref mut book) = self.book {
@@ -897,7 +906,12 @@ impl BinanceOrderBook {
                         match bid[0].parse::<f64>() {
                             Ok(price) => {
                                 if let Err(e) = book.set_bid(price, &bid[1]) {
-                                    log::error!("Binance: failed to set bid diff for {} at price {}: {}", symbol, price, e);
+                                    log::error!(
+                                        "Binance: failed to set bid diff for {} at price {}: {}",
+                                        symbol,
+                                        price,
+                                        e
+                                    );
                                 }
                             }
                             Err(e) => {
@@ -909,7 +923,12 @@ impl BinanceOrderBook {
                         match ask[0].parse::<f64>() {
                             Ok(price) => {
                                 if let Err(e) = book.set_ask(price, &ask[1]) {
-                                    log::error!("Binance: failed to set ask diff for {} at price {}: {}", symbol, price, e);
+                                    log::error!(
+                                        "Binance: failed to set ask diff for {} at price {}: {}",
+                                        symbol,
+                                        price,
+                                        e
+                                    );
                                 }
                             }
                             Err(e) => {
@@ -943,8 +962,6 @@ impl BinanceOrderBook {
         Ok(())
     }
 }
-
-
 
 // REST API response types (for reference/deserialization only, no client code)
 #[derive(Debug, Serialize, Deserialize, Clone)]

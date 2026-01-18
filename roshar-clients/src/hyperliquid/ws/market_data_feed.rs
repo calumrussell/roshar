@@ -28,12 +28,24 @@ pub enum MarketEvent {
 }
 
 pub enum SubscriptionCommand {
-    AddDepth { coin: String },
-    RemoveDepth { coin: String },
-    AddTrades { coin: String },
-    RemoveTrades { coin: String },
-    AddCandles { coin: String },
-    RemoveCandles { coin: String },
+    AddDepth {
+        coin: String,
+    },
+    RemoveDepth {
+        coin: String,
+    },
+    AddTrades {
+        coin: String,
+    },
+    RemoveTrades {
+        coin: String,
+    },
+    AddCandles {
+        coin: String,
+    },
+    RemoveCandles {
+        coin: String,
+    },
     GetDepth {
         coin: String,
         response: oneshot::Sender<Option<OrderBookState>>,
@@ -184,11 +196,7 @@ pub struct MarketDataFeed {
 }
 
 impl MarketDataFeed {
-    pub fn new(
-        ws_manager: Arc<Manager>,
-        is_testnet: bool,
-        channel_size: usize,
-    ) -> Self {
+    pub fn new(ws_manager: Arc<Manager>, is_testnet: bool, channel_size: usize) -> Self {
         let (command_tx, command_rx) = mpsc::channel(100);
         let (event_tx, event_rx) = mpsc::channel(channel_size);
         let (raw_tx, raw_rx) = mpsc::channel(channel_size);
@@ -221,7 +229,9 @@ impl MarketDataFeed {
     }
 
     pub async fn run(mut self) {
-        let mut recv = self.ws_manager.setup_reader(&self.conn_name, self.channel_size);
+        let mut recv = self
+            .ws_manager
+            .setup_reader(&self.conn_name, self.channel_size);
         log::info!(
             "WebSocket reader set up for market data feed: {}",
             self.conn_name
@@ -476,7 +486,9 @@ impl MarketDataFeed {
             SubscriptionCommand::GetRawChannel { response } => {
                 if let Some(raw_rx) = self.raw_rx.take() {
                     self.raw_mode = true;
-                    log::info!("Raw channel requested for Hyperliquid market data feed, raw_mode enabled");
+                    log::info!(
+                        "Raw channel requested for Hyperliquid market data feed, raw_mode enabled"
+                    );
                     let _ = response.send(raw_rx);
                 } else {
                     log::warn!("Raw channel already taken for Hyperliquid market data feed");
@@ -484,7 +496,10 @@ impl MarketDataFeed {
             }
             SubscriptionCommand::Restart => {
                 self.is_connected = false;
-                let _ = self.ws_manager.reconnect_with_close(&self.conn_name, true).await;
+                let _ = self
+                    .ws_manager
+                    .reconnect_with_close(&self.conn_name, true)
+                    .await;
                 self.order_books.clear();
                 // Resubcription will happen after SuccessfulHandshake
             }

@@ -122,7 +122,7 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
     //For L1, the dataset sets the time so we step over each event
     pub fn step(&mut self) -> Result<()> {
         if self.ev_queue.front().is_none() {
-            for i in 0..self.line_chunk {
+            for _i in 0..self.line_chunk {
                 if let Some(src_state) = self.src.pop(&mut self.buf) {
                     match src_state {
                         EventSrcState::Empty => {

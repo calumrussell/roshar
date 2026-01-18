@@ -1,12 +1,11 @@
 use roshar_ws_mgr::Manager;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::mpsc;
 
 // Binance tests
 mod binance {
     use super::*;
-    use roshar_clients::binance::{MarketDataFeed, MarketEvent};
+    use roshar_clients::binance::{BinanceClient, MarketEvent};
 
     #[tokio::test]
     #[ignore]
@@ -14,25 +13,19 @@ mod binance {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-
-        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
-        let handle = feed.get_handle();
-
-        tokio::spawn(async move {
-            feed.run().await;
-        });
+        let client = BinanceClient::new(ws_manager, 1000);
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
-        handle
-            .add_depth("BTCUSDT")
+        client
+            .add_depth(&["BTCUSDT"])
             .await
             .expect("Failed to subscribe to BTCUSDT");
         println!("[Binance] Subscribed to BTCUSDT depth");
 
         let mut attempts = 0;
         loop {
-            if let Ok(Some(book)) = handle.get_latest_depth("BTCUSDT").await {
+            if let Ok(Some(book)) = client.get_latest_depth("BTCUSDT").await {
                 let view = book.as_view();
                 let (bid, ask) = view.get_bbo();
                 println!("[Binance] BTCUSDT BBO: bid={}, ask={}", bid, ask);
@@ -61,23 +54,20 @@ mod binance {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-
-        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
-        let handle = feed.get_handle();
-        let mut event_rx = handle.get_event_channel().await.expect("Failed to get event channel");
-
-        tokio::spawn(async move {
-            feed.run().await;
-        });
+        let client = BinanceClient::new(ws_manager, 1000);
+        let mut event_rx = client
+            .take_event_receiver()
+            .await
+            .expect("Failed to get event channel");
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
-        handle
-            .add_depth("BTCUSDT")
+        client
+            .add_depth(&["BTCUSDT"])
             .await
             .expect("Failed to subscribe to BTCUSDT depth");
-        handle
-            .add_trades("BTCUSDT")
+        client
+            .add_trades(&["BTCUSDT"])
             .await
             .expect("Failed to subscribe to BTCUSDT trades");
         println!("[Binance] Subscribed to BTCUSDT depth and trades");
@@ -108,6 +98,7 @@ mod binance {
                                 trades.len()
                             );
                         }
+                        _ => {}
                     }
                 }
             }
@@ -134,7 +125,7 @@ mod binance {
 // ByBit tests
 mod bybit {
     use super::*;
-    use roshar_clients::bybit::{MarketDataFeed, MarketEvent};
+    use roshar_clients::bybit::{ByBitClient, MarketEvent};
 
     #[tokio::test]
     #[ignore]
@@ -142,18 +133,11 @@ mod bybit {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let (event_tx, _event_rx) = mpsc::channel::<MarketEvent>(1000);
-
-        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
-        let handle = feed.get_handle();
-
-        tokio::spawn(async move {
-            feed.run().await;
-        });
+        let client = ByBitClient::new(ws_manager, 1000);
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
-        handle
+        client
             .add_depth("BTCUSDT")
             .await
             .expect("Failed to subscribe to BTCUSDT");
@@ -161,7 +145,7 @@ mod bybit {
 
         let mut attempts = 0;
         loop {
-            if let Ok(Some(book)) = handle.get_latest_depth("BTCUSDT").await {
+            if let Ok(Some(book)) = client.get_latest_depth("BTCUSDT").await {
                 let view = book.as_view();
                 let (bid, ask) = view.get_bbo();
                 println!("[ByBit] BTCUSDT BBO: bid={}, ask={}", bid, ask);
@@ -190,22 +174,19 @@ mod bybit {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let (event_tx, mut event_rx) = mpsc::channel::<MarketEvent>(1000);
-
-        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
-        let handle = feed.get_handle();
-
-        tokio::spawn(async move {
-            feed.run().await;
-        });
+        let client = ByBitClient::new(ws_manager, 1000);
+        let mut event_rx = client
+            .take_event_receiver()
+            .await
+            .expect("Failed to get event channel");
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
-        handle
+        client
             .add_depth("BTCUSDT")
             .await
             .expect("Failed to subscribe to BTCUSDT depth");
-        handle
+        client
             .add_trades("BTCUSDT")
             .await
             .expect("Failed to subscribe to BTCUSDT trades");
@@ -237,6 +218,7 @@ mod bybit {
                                 trades.len()
                             );
                         }
+                        _ => {}
                     }
                 }
             }
@@ -263,7 +245,7 @@ mod bybit {
 // Kraken tests
 mod kraken {
     use super::*;
-    use roshar_clients::kraken::{MarketDataFeed, MarketEvent};
+    use roshar_clients::kraken::{KrakenClient, MarketEvent};
 
     #[tokio::test]
     #[ignore]
@@ -271,18 +253,11 @@ mod kraken {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let (event_tx, _event_rx) = mpsc::channel::<MarketEvent>(1000);
-
-        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
-        let handle = feed.get_handle();
-
-        tokio::spawn(async move {
-            feed.run().await;
-        });
+        let client = KrakenClient::new(ws_manager, 1000);
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
-        handle
+        client
             .add_depth("PI_XBTUSD")
             .await
             .expect("Failed to subscribe to PI_XBTUSD");
@@ -290,7 +265,7 @@ mod kraken {
 
         let mut attempts = 0;
         loop {
-            if let Ok(Some(book)) = handle.get_latest_depth("PI_XBTUSD").await {
+            if let Ok(Some(book)) = client.get_latest_depth("PI_XBTUSD").await {
                 let view = book.as_view();
                 let (bid, ask) = view.get_bbo();
                 println!("[Kraken] PI_XBTUSD BBO: bid={}, ask={}", bid, ask);
@@ -319,22 +294,19 @@ mod kraken {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let (event_tx, mut event_rx) = mpsc::channel::<MarketEvent>(1000);
-
-        let feed = MarketDataFeed::new(ws_manager.clone(), 1000);
-        let handle = feed.get_handle();
-
-        tokio::spawn(async move {
-            feed.run().await;
-        });
+        let client = KrakenClient::new(ws_manager, 1000);
+        let mut event_rx = client
+            .take_event_receiver()
+            .await
+            .expect("Failed to get event channel");
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
-        handle
+        client
             .add_depth("PI_XBTUSD")
             .await
             .expect("Failed to subscribe to PI_XBTUSD depth");
-        handle
+        client
             .add_trades("PI_XBTUSD")
             .await
             .expect("Failed to subscribe to PI_XBTUSD trades");
@@ -366,6 +338,7 @@ mod kraken {
                                 trades.len()
                             );
                         }
+                        _ => {}
                     }
                 }
             }

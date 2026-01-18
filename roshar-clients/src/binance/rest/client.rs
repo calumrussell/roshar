@@ -189,7 +189,11 @@ mod tests {
             .get_historical_funding_rates("BTCUSDT", start_time, end_time)
             .await;
 
-        assert!(result.is_ok(), "Failed to fetch funding rates: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to fetch funding rates: {:?}",
+            result.err()
+        );
 
         let rates = result.unwrap();
 

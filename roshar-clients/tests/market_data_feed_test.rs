@@ -16,11 +16,11 @@ async fn test_pattern_a_polling() {
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
-    let client = HyperliquidClient::new(config, ws_manager);
+    let client = HyperliquidClient::new(config, ws_manager, 1000);
 
     // Subscribe to BTC depth
     client
-        .create_depth_subscription("BTC")
+        .add_depth("BTC")
         .await
         .expect("Failed to create depth subscription");
 
@@ -32,7 +32,11 @@ async fn test_pattern_a_polling() {
     // Poll for latest depth
     let mut attempts = 0;
     loop {
-        if let Some(book) = client.get_latest_depth("BTC") {
+        if let Some(book) = client
+            .get_latest_depth("BTC")
+            .await
+            .expect("Failed to get depth")
+        {
             let view = book.as_view();
             let (bid, ask) = view.get_bbo();
             println!("BTC BBO: bid={}, ask={}", bid, ask);
@@ -54,7 +58,7 @@ async fn test_pattern_a_polling() {
 
     // Cleanup
     client
-        .remove_depth_subscription("BTC")
+        .remove_depth("BTC")
         .await
         .expect("Failed to remove subscription");
 }
@@ -72,20 +76,21 @@ async fn test_pattern_b_reactive() {
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
-    let mut client = HyperliquidClient::new(config, ws_manager);
+    let client = HyperliquidClient::new(config, ws_manager, 1000);
 
     // Take the event receiver
     let mut rx = client
-        .take_market_events_receiver()
+        .take_event_receiver()
+        .await
         .expect("Failed to take event receiver");
 
     // Subscribe to BTC depth and trades
     client
-        .create_depth_subscription("BTC")
+        .add_depth("BTC")
         .await
         .expect("Failed to create depth subscription");
     client
-        .create_trades_subscription("BTC")
+        .add_trades("BTC")
         .await
         .expect("Failed to create trades subscription");
 
@@ -123,6 +128,7 @@ async fn test_pattern_b_reactive() {
                             );
                         }
                     }
+                    _ => {}
                 }
             }
         }
@@ -158,17 +164,18 @@ async fn test_multiple_coins() {
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
-    let mut client = HyperliquidClient::new(config, ws_manager);
+    let client = HyperliquidClient::new(config, ws_manager, 1000);
 
     let mut rx = client
-        .take_market_events_receiver()
+        .take_event_receiver()
+        .await
         .expect("Failed to take event receiver");
 
     // Subscribe to multiple coins
     let coins = vec!["BTC", "ETH", "SOL"];
     for coin in &coins {
         client
-            .create_depth_subscription(coin)
+            .add_depth(coin)
             .await
             .expect(&format!("Failed to subscribe to {}", coin));
         println!("Subscribed to {} depth", coin);
@@ -216,11 +223,11 @@ async fn test_dynamic_subscriptions() {
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
-    let client = HyperliquidClient::new(config, ws_manager);
+    let client = HyperliquidClient::new(config, ws_manager, 1000);
 
     // Subscribe to BTC
     client
-        .create_depth_subscription("BTC")
+        .add_depth("BTC")
         .await
         .expect("Failed to subscribe to BTC");
     println!("Subscribed to BTC");
@@ -230,14 +237,18 @@ async fn test_dynamic_subscriptions() {
 
     // Verify we have BTC data
     assert!(
-        client.get_latest_depth("BTC").is_some(),
+        client
+            .get_latest_depth("BTC")
+            .await
+            .expect("Failed to get depth")
+            .is_some(),
         "Should have BTC data"
     );
     println!("Got BTC data");
 
     // Subscribe to ETH dynamically
     client
-        .create_depth_subscription("ETH")
+        .add_depth("ETH")
         .await
         .expect("Failed to subscribe to ETH");
     println!("Subscribed to ETH");
@@ -247,18 +258,26 @@ async fn test_dynamic_subscriptions() {
 
     // Verify we have both
     assert!(
-        client.get_latest_depth("BTC").is_some(),
+        client
+            .get_latest_depth("BTC")
+            .await
+            .expect("Failed to get depth")
+            .is_some(),
         "Should still have BTC data"
     );
     assert!(
-        client.get_latest_depth("ETH").is_some(),
+        client
+            .get_latest_depth("ETH")
+            .await
+            .expect("Failed to get depth")
+            .is_some(),
         "Should have ETH data"
     );
     println!("Got both BTC and ETH data");
 
     // Remove BTC subscription
     client
-        .remove_depth_subscription("BTC")
+        .remove_depth("BTC")
         .await
         .expect("Failed to remove BTC subscription");
     println!("Removed BTC subscription");
@@ -268,11 +287,19 @@ async fn test_dynamic_subscriptions() {
 
     // BTC data should be gone after command is processed
     assert!(
-        client.get_latest_depth("BTC").is_none(),
+        client
+            .get_latest_depth("BTC")
+            .await
+            .expect("Failed to get depth")
+            .is_none(),
         "BTC data should be removed"
     );
     assert!(
-        client.get_latest_depth("ETH").is_some(),
+        client
+            .get_latest_depth("ETH")
+            .await
+            .expect("Failed to get depth")
+            .is_some(),
         "ETH data should still be there"
     );
     println!("BTC removed, ETH still present");

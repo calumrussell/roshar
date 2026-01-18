@@ -119,8 +119,8 @@ impl Writer {
 
     async fn write_all_internal(writer: &mut WriterType, buf: &[u8]) -> Result<()> {
         match writer {
-            WriterType::Plain(w) => w.write_all(buf).await.map_err(|e| Error::Io(e)),
-            WriterType::Tls(tls) => tls.write_all(buf).await.map_err(|e| Error::Io(e)),
+            WriterType::Plain(w) => w.write_all(buf).await.map_err(Error::Io),
+            WriterType::Tls(tls) => tls.write_all(buf).await.map_err(Error::Io),
         }
     }
 

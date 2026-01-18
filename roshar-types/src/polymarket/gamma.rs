@@ -33,9 +33,11 @@ where
 
     match Option::<StringOrFloat>::deserialize(deserializer)? {
         None => Ok(None),
-        Some(StringOrFloat::String(s)) => s.parse::<f64>().ok().map(Some).ok_or_else(|| {
-            serde::de::Error::custom(format!("failed to parse '{}' as f64", s))
-        }),
+        Some(StringOrFloat::String(s)) => s
+            .parse::<f64>()
+            .ok()
+            .map(Some)
+            .ok_or_else(|| serde::de::Error::custom(format!("failed to parse '{}' as f64", s))),
         Some(StringOrFloat::Float(f)) => Ok(Some(f)),
     }
 }
@@ -221,7 +223,11 @@ pub struct PolymarketEvent {
     pub volume_1yr: Option<f64>,
     #[serde(rename = "liquidityAmm", default, deserialize_with = "string_or_float")]
     pub liquidity_amm: Option<f64>,
-    #[serde(rename = "liquidityClob", default, deserialize_with = "string_or_float")]
+    #[serde(
+        rename = "liquidityClob",
+        default,
+        deserialize_with = "string_or_float"
+    )]
     pub liquidity_clob: Option<f64>,
     #[serde(default, deserialize_with = "string_or_float")]
     pub competitive: Option<f64>,
@@ -273,7 +279,11 @@ pub struct PolymarketMarket {
     pub description: Option<String>,
     #[serde(default, deserialize_with = "json_string_or_vec")]
     pub outcomes: Vec<String>,
-    #[serde(rename = "outcomePrices", default, deserialize_with = "json_string_or_vec")]
+    #[serde(
+        rename = "outcomePrices",
+        default,
+        deserialize_with = "json_string_or_vec"
+    )]
     pub outcome_prices: Vec<String>,
     #[serde(default, deserialize_with = "string_or_float")]
     pub volume: Option<f64>,

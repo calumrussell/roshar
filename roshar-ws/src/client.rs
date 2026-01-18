@@ -241,7 +241,6 @@ impl Client {
     /// stream.set_nodelay(true)?;
     /// // Then use the stream with Client::connect...
     /// ```
-
     /// Split the client into separate reader and writer
     ///
     /// This allows concurrent reading and writing operations.

@@ -7,8 +7,8 @@ pub use rest::{
     ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitOrderResult, ByBitTickerData,
     ByBitTickersResponse,
 };
-pub use ws::MarketEvent;
 pub(crate) use ws::MarketDataFeed;
+pub use ws::MarketEvent;
 
 use roshar_ws_mgr::Manager;
 use std::sync::Arc;
@@ -91,7 +91,10 @@ impl ByBitClient {
     /// Trigger restart of market data feed
     pub async fn restart_market_data(&self) {
         if let Err(e) = self.market_data_handle.restart_feed().await {
-            log::error!("Failed to send restart command to ByBit market data feed: {}", e);
+            log::error!(
+                "Failed to send restart command to ByBit market data feed: {}",
+                e
+            );
         }
     }
 }

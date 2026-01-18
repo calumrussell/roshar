@@ -12,7 +12,6 @@ use dashmap::DashMap;
 use futures_util::StreamExt;
 use log::{debug, error};
 use tokio::{net::TcpSocket, task::JoinHandle, time::sleep};
-use tokio_tungstenite;
 use tokio_util::sync::CancellationToken;
 use url::Url;
 

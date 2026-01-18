@@ -9,36 +9,64 @@ pub enum WebsocketSupportedExchanges {
 impl WebsocketSupportedExchanges {
     pub fn ping(&self) -> String {
         match self {
-            WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::ping().to_json(),
-            WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::ping().to_json(),
+            WebsocketSupportedExchanges::Hyperliquid => {
+                crate::hyperliquid::HyperliquidWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Kraken => {
+                crate::kraken::KrakenWssMessage::ping().to_json()
+            }
             WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::ping().to_json(),
-            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::ping().to_json(),
+            WebsocketSupportedExchanges::Binance => {
+                crate::binance::BinanceWssMessage::ping().to_json()
+            }
         }
     }
 
     pub fn depth(&self, coin: &str) -> String {
         match self {
-            WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::l2_book(coin).to_json(),
-            WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::depth(coin).to_json(),
-            WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::depth(coin).to_json(),
-            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::batch_depth(&[coin.to_string()]).to_json(),
+            WebsocketSupportedExchanges::Hyperliquid => {
+                crate::hyperliquid::HyperliquidWssMessage::l2_book(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Kraken => {
+                crate::kraken::KrakenWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::ByBit => {
+                crate::bybit::ByBitWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Binance => {
+                crate::binance::BinanceWssMessage::batch_depth(&[coin.to_string()]).to_json()
+            }
         }
     }
 
     pub fn trades(&self, coin: &str) -> String {
         match self {
-            WebsocketSupportedExchanges::Hyperliquid => crate::hyperliquid::HyperliquidWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::Kraken => crate::kraken::KrakenWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::ByBit => crate::bybit::ByBitWssMessage::trades(coin).to_json(),
-            WebsocketSupportedExchanges::Binance => crate::binance::BinanceWssMessage::batch_trades(&[coin.to_string()]).to_json(),
+            WebsocketSupportedExchanges::Hyperliquid => {
+                crate::hyperliquid::HyperliquidWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Kraken => {
+                crate::kraken::KrakenWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::ByBit => {
+                crate::bybit::ByBitWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Binance => {
+                crate::binance::BinanceWssMessage::batch_trades(&[coin.to_string()]).to_json()
+            }
         }
     }
 
     pub fn candle(&self, coin: &str) -> Option<String> {
         match self {
-            WebsocketSupportedExchanges::Hyperliquid => Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json()),
-            WebsocketSupportedExchanges::ByBit => Some(crate::bybit::ByBitWssMessage::candle(coin).to_json()),
-            WebsocketSupportedExchanges::Binance => Some(crate::binance::BinanceWssMessage::batch_candles(&[coin.to_string()]).to_json()),
+            WebsocketSupportedExchanges::Hyperliquid => {
+                Some(crate::hyperliquid::HyperliquidWssMessage::candle(coin).to_json())
+            }
+            WebsocketSupportedExchanges::ByBit => {
+                Some(crate::bybit::ByBitWssMessage::candle(coin).to_json())
+            }
+            WebsocketSupportedExchanges::Binance => Some(
+                crate::binance::BinanceWssMessage::batch_candles(&[coin.to_string()]).to_json(),
+            ),
             _ => None,
         }
     }

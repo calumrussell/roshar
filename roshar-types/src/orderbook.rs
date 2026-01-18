@@ -1,5 +1,4 @@
 use compact_str::CompactString;
-use log;
 use ordered_float::OrderedFloat;
 use std::cmp::Reverse;
 use std::collections::BTreeMap;

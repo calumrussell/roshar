@@ -16,6 +16,12 @@ pub struct ChartData {
     pub data_points: Vec<TimeSeriesPoint>,
 }
 
+impl Default for ChartData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChartData {
     pub fn new() -> Self {
         Self {
@@ -97,7 +103,7 @@ impl ChartData {
         chart
             .draw_series(LineSeries::new(price_data, &BLUE))?
             .label("Price")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &BLUE));
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], BLUE));
 
         chart.configure_series_labels().draw()?;
 
@@ -161,12 +167,12 @@ impl ChartData {
         chart
             .draw_series(LineSeries::new(price_data, &BLUE))?
             .label("Price")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &BLUE));
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], BLUE));
 
         chart
             .draw_secondary_series(LineSeries::new(return_data, &GREEN))?
             .label("Cumulative Return")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &GREEN));
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], GREEN));
 
         chart.configure_series_labels().draw()?;
 
@@ -199,7 +205,7 @@ impl ChartData {
         chart
             .draw_series(LineSeries::new(position_data, &RED))?
             .label("Position")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], &RED));
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 10, y)], RED));
 
         let zero_line: Vec<(i64, f64)> = vec![
             (self.data_points.first().unwrap().timestamp, 0.0),

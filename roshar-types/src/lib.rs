@@ -17,8 +17,8 @@ pub use websocket_supported_exchanges::WebsocketSupportedExchanges;
 
 pub use binance::*;
 pub use bybit::*;
-pub use kraken::*;
 pub use hyperliquid::*;
+pub use kraken::*;
 pub use orderbook::*;
 pub use polymarket::*;
 
@@ -244,7 +244,6 @@ impl BookDeltaData {
         deltas
     }
 }
-
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 #[repr(u8)]
