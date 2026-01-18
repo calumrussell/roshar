@@ -1,3 +1,4 @@
+use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -72,22 +73,26 @@ pub struct ByBitTickerData {
 }
 
 /// ByBit Market API
-pub struct MarketApi;
+pub struct MarketApi {
+    client: RateLimitedClient,
+}
 
 impl MarketApi {
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
     pub async fn get_tickers(
+        &self,
     ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!(
             "{}/v5/market/tickers?category=linear",
             super::BYBIT_REST_URL
         );
-        let client = crate::http::get_http_client();
 
-        let response = client
-            .get(&url)
-            .header("Content-Type", "application/json")
-            .send()
-            .await?;
+        let response = self.client.get(&url).await?;
 
         if !response.status().is_success() {
             return Err(format!(

@@ -13,6 +13,7 @@ async fn test_pattern_a_polling() {
         is_mainnet: true,
         metadata_update_interval_secs: 300,
         wallet_address: None,
+        requests_per_second: 10,
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
@@ -73,6 +74,7 @@ async fn test_pattern_b_reactive() {
         is_mainnet: true,
         metadata_update_interval_secs: 300,
         wallet_address: None,
+        requests_per_second: 10,
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
@@ -161,6 +163,7 @@ async fn test_multiple_coins() {
         is_mainnet: true,
         metadata_update_interval_secs: 300,
         wallet_address: None,
+        requests_per_second: 10,
     };
 
     let ws_manager: Arc<Manager> = Manager::new();
@@ -220,6 +223,7 @@ async fn test_dynamic_subscriptions() {
         is_mainnet: true,
         metadata_update_interval_secs: 300,
         wallet_address: None,
+        requests_per_second: 10,
     };
 
     let ws_manager: Arc<Manager> = Manager::new();

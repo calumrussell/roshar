@@ -1,19 +1,27 @@
+use crate::http::RateLimitedClient;
 use chrono::DateTime;
 use roshar_types::Candle;
 
 use super::market::KrakenRestCandleResponse;
 
-pub struct ChartsApi;
+pub struct ChartsApi {
+    client: RateLimitedClient,
+}
 
 impl ChartsApi {
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
     pub async fn fetch_candle(
+        &self,
         symbol: &str,
     ) -> Result<Vec<Candle>, Box<dyn std::error::Error + Send + Sync>> {
-        let client = crate::http::get_http_client();
-
         let url = format!("https://futures.kraken.com/api/charts/v1/trade/{symbol}/1m");
 
-        let response = client.get(&url).send().await?;
+        let response = self.client.get(&url).await?;
         let candle_response: KrakenRestCandleResponse = response.json().await?;
         Ok(Self::process_candle_response(candle_response, symbol))
     }

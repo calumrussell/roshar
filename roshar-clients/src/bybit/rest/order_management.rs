@@ -1,3 +1,4 @@
+use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 
 use super::auth::AuthApi;
@@ -81,10 +82,19 @@ impl ByBitCreateOrderRequest {
 }
 
 /// ByBit Order Management API
-pub struct OrderManagementApi;
+pub struct OrderManagementApi {
+    client: RateLimitedClient,
+}
 
 impl OrderManagementApi {
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
     pub async fn create_order(
+        &self,
         request: &ByBitCreateOrderRequest,
     ) -> Result<ByBitCreateOrderResponse, Box<dyn std::error::Error + Send + Sync>> {
         let base_url = AuthApi::get_base_url();
@@ -97,9 +107,8 @@ impl OrderManagementApi {
         // Create authentication headers
         let headers = AuthApi::create_headers_post(&json_body)?;
 
-        // Build the request
-        let client = crate::http::get_http_client();
-        let mut request_builder = client.post(&url).body(json_body);
+        // Build the request with rate limiting
+        let mut request_builder = self.client.post(&url).await.body(json_body);
 
         // Add headers
         for (key, value) in headers {

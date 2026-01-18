@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 use anyhow::{Context, Result};
 
+use crate::http::RateLimitedClient;
 use roshar_types::{
     AssetInfo, FundingHistory, HistoricalFundingRate, InfoApiRequest, MetaAndAssetCtxs,
     SpotClearinghouseState, SpotMarketData, SpotMetaAndAssetCtxs, UserOrder, UserPerpetualsState,
@@ -11,29 +12,35 @@ use roshar_types::{
 
 pub struct InfoApi {
     base_url: String,
+    client: RateLimitedClient,
 }
 
 impl InfoApi {
-    pub fn new(base_url: Option<String>) -> Self {
+    pub fn new(base_url: Option<String>, requests_per_second: u32) -> Self {
         Self {
             base_url: base_url.unwrap_or_else(|| "https://api.hyperliquid.xyz".to_string()),
+            client: RateLimitedClient::new(requests_per_second),
         }
     }
 
-    pub fn production() -> Self {
-        Self::new(None)
+    pub fn production(requests_per_second: u32) -> Self {
+        Self::new(None, requests_per_second)
     }
 
-    pub fn testnet() -> Self {
-        Self::new(Some("https://api.hyperliquid-testnet.xyz".to_string()))
+    pub fn testnet(requests_per_second: u32) -> Self {
+        Self::new(
+            Some("https://api.hyperliquid-testnet.xyz".to_string()),
+            requests_per_second,
+        )
     }
 
     pub async fn get_spot_meta_and_asset_ctxs(&self) -> Result<SpotMetaAndAssetCtxs> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&InfoApiRequest {
                 typ: "spotMetaAndAssetCtxs".to_string(),
             })
@@ -64,11 +71,12 @@ impl InfoApi {
     }
 
     pub async fn get_info(&self) -> Result<HashMap<String, AssetInfo>> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&InfoApiRequest {
                 typ: "metaAndAssetCtxs".to_string(),
             })
@@ -91,11 +99,12 @@ impl InfoApi {
     }
 
     pub async fn get_all_funding_rates_with_size(&self) -> Result<Vec<(String, f64, f64, f64)>> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&InfoApiRequest {
                 typ: "metaAndAssetCtxs".to_string(),
             })
@@ -149,7 +158,6 @@ impl InfoApi {
     }
 
     pub async fn get_user_orders(&self, user_address: &str) -> Result<Vec<UserOrder>> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
         let request_body = serde_json::json!({
@@ -157,8 +165,10 @@ impl InfoApi {
             "user": user_address
         });
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&request_body)
             .send()
             .await
@@ -209,7 +219,6 @@ impl InfoApi {
     }
 
     pub async fn get_funding_history(&self, user_address: &str) -> Result<Vec<FundingHistory>> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
         let request_body = serde_json::json!({
@@ -218,8 +227,10 @@ impl InfoApi {
             "startTime": 0
         });
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&request_body)
             .send()
             .await
@@ -278,7 +289,6 @@ impl InfoApi {
         start_time: u64,
         end_time: Option<u64>,
     ) -> Result<Vec<HistoricalFundingRate>> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
         let mut request_body = serde_json::json!({
@@ -291,8 +301,10 @@ impl InfoApi {
             request_body["endTime"] = serde_json::Value::Number(serde_json::Number::from(end_time));
         }
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&request_body)
             .send()
             .await
@@ -317,7 +329,6 @@ impl InfoApi {
         &self,
         user_address: &str,
     ) -> Result<UserPerpetualsState> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
         let request_body = serde_json::json!({
@@ -325,8 +336,10 @@ impl InfoApi {
             "user": user_address
         });
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&request_body)
             .send()
             .await
@@ -348,7 +361,6 @@ impl InfoApi {
     }
 
     pub async fn user_spot_state(&self, user_address: &str) -> Result<SpotClearinghouseState> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
         let request_body = serde_json::json!({
@@ -356,8 +368,10 @@ impl InfoApi {
             "user": user_address
         });
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&request_body)
             .send()
             .await
@@ -379,15 +393,16 @@ impl InfoApi {
     }
 
     pub async fn meta(&self) -> Result<serde_json::Value> {
-        let client = crate::http::get_http_client();
         let url = format!("{}/info", self.base_url);
 
         let request_body = serde_json::json!({
             "type": "meta"
         });
 
-        let response = client
-            .post(url)
+        let response = self
+            .client
+            .post(&url)
+            .await
             .json(&request_body)
             .send()
             .await
@@ -406,24 +421,12 @@ impl InfoApi {
     }
 
     /// Get open orders for a wallet address
-    ///
-    /// # Arguments
-    /// * `wallet_address` - The Ethereum wallet address (H160) to query orders for
-    ///
-    /// # Returns
-    /// A vector of UserOrder structs representing all open orders for the wallet
     pub async fn open_orders(&self, wallet_address: ethers::types::H160) -> Result<Vec<UserOrder>> {
         let address_str = format!("{:#x}", wallet_address);
         self.get_user_orders(&address_str).await
     }
 
     /// Get perpetuals account state for a wallet address
-    ///
-    /// # Arguments
-    /// * `wallet_address` - The Ethereum wallet address (H160) to query state for
-    ///
-    /// # Returns
-    /// UserPerpetualsState containing positions, margin, and account information
     pub async fn user_perpetuals_state(
         &self,
         wallet_address: ethers::types::H160,
@@ -439,7 +442,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_all_funding_rates_with_size() {
-        let info_api = InfoApi::production();
+        let info_api = InfoApi::production(10);
         let result = info_api.get_all_funding_rates_with_size().await;
 
         assert!(
@@ -472,7 +475,7 @@ mod tests {
         let user_address = std::env::var("HYPERLIQUID_WALLET_ADDRESS")
             .expect("HYPERLIQUID_WALLET_ADDRESS environment variable not set");
 
-        let info_api = InfoApi::testnet();
+        let info_api = InfoApi::testnet(10);
         let result = info_api.get_user_orders(&user_address).await;
 
         assert!(
@@ -504,7 +507,7 @@ mod tests {
         let user_address = std::env::var("HYPERLIQUID_WALLET_ADDRESS")
             .expect("HYPERLIQUID_WALLET_ADDRESS environment variable not set");
 
-        let info_api = InfoApi::testnet();
+        let info_api = InfoApi::testnet(10);
         let result = info_api.get_funding_history(&user_address).await;
 
         assert!(
@@ -535,12 +538,11 @@ mod tests {
         let user_address_str = std::env::var("HYPERLIQUID_WALLET_ADDRESS")
             .expect("HYPERLIQUID_WALLET_ADDRESS environment variable not set");
 
-        // Parse the string address into H160
         let wallet_address: ethers::types::H160 = user_address_str
             .parse()
             .expect("Invalid wallet address format");
 
-        let info_api = InfoApi::testnet();
+        let info_api = InfoApi::testnet(10);
         let result = info_api.open_orders(wallet_address).await;
 
         assert!(
@@ -572,12 +574,11 @@ mod tests {
         let user_address_str = std::env::var("HYPERLIQUID_WALLET_ADDRESS")
             .expect("HYPERLIQUID_WALLET_ADDRESS environment variable not set");
 
-        // Parse the string address into H160
         let wallet_address: ethers::types::H160 = user_address_str
             .parse()
             .expect("Invalid wallet address format");
 
-        let info_api = InfoApi::testnet();
+        let info_api = InfoApi::testnet(10);
         let result = info_api.user_perpetuals_state(wallet_address).await;
 
         assert!(
@@ -599,7 +600,6 @@ mod tests {
 
     #[test]
     fn test_h160_address_formatting() {
-        // Test that H160 address formatting works correctly
         let test_address: ethers::types::H160 = "0x1234567890123456789012345678901234567890"
             .parse()
             .unwrap();

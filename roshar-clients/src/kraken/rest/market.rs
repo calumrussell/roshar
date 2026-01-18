@@ -1,3 +1,4 @@
+use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -50,15 +51,23 @@ pub struct KrakenRestCandleResponse {
     pub candles: Vec<KrakenRestCandleData>,
 }
 
-pub struct MarketApi;
+pub struct MarketApi {
+    client: RateLimitedClient,
+}
 
 impl MarketApi {
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
     pub async fn get_all_funding_rates_with_size(
+        &self,
     ) -> Result<Vec<(String, f64, f64, f64)>, Box<dyn std::error::Error>> {
-        let client = crate::http::get_http_client();
         let url = "https://futures.kraken.com/derivatives/api/v3/tickers";
 
-        let response = client.get(url).send().await?;
+        let response = self.client.get(url).await?;
         let ticker_response: KrakenTickerResponse = response.json().await?;
 
         let mut funding_rates = Vec::new();
@@ -83,12 +92,12 @@ impl MarketApi {
     }
 
     pub async fn get_tickers(
+        &self,
     ) -> Result<std::collections::HashMap<String, KrakenTickerData>, Box<dyn std::error::Error>>
     {
-        let client = crate::http::get_http_client();
         let url = "https://futures.kraken.com/derivatives/api/v3/tickers";
 
-        let response = client.get(url).send().await?;
+        let response = self.client.get(url).await?;
         let ticker_response: KrakenTickerResponse = response.json().await?;
 
         let mut tickers = std::collections::HashMap::new();

@@ -1,3 +1,4 @@
+use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 
 use super::auth::AuthApi;
@@ -37,17 +38,27 @@ pub struct KrakenGetLeverageResponse {
 }
 
 /// Kraken Multi-Collateral API
-pub struct MultiCollateralApi;
+pub struct MultiCollateralApi {
+    client: RateLimitedClient,
+}
 
 impl MultiCollateralApi {
-    async fn make_get_request<R>(endpoint: &str) -> Result<R, Box<dyn std::error::Error>>
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
+    async fn make_get_request<R>(&self, endpoint: &str) -> Result<R, Box<dyn std::error::Error>>
     where
         R: for<'de> Deserialize<'de>,
     {
-        let client = crate::http::get_http_client();
         let headers = AuthApi::create_headers(endpoint, "")?;
 
-        let mut request = client.get(format!("{BASE_URL}{endpoint}"));
+        let mut request = self
+            .client
+            .request(reqwest::Method::GET, &format!("{BASE_URL}{endpoint}"))
+            .await;
 
         for (key, value) in headers {
             request = request.header(key, value);
@@ -60,6 +71,7 @@ impl MultiCollateralApi {
     }
 
     async fn make_put_request<T, R>(
+        &self,
         endpoint: &str,
         request_data: &T,
     ) -> Result<R, Box<dyn std::error::Error>>
@@ -67,11 +79,13 @@ impl MultiCollateralApi {
         T: Serialize,
         R: for<'de> Deserialize<'de>,
     {
-        let client = crate::http::get_http_client();
         let post_data = serde_urlencoded::to_string(request_data)?;
         let headers = AuthApi::create_headers(endpoint, &post_data)?;
 
-        let mut request = client.put(format!("{BASE_URL}{endpoint}"));
+        let mut request = self
+            .client
+            .request(reqwest::Method::PUT, &format!("{BASE_URL}{endpoint}"))
+            .await;
 
         for (key, value) in headers {
             request = request.header(key, value);
@@ -88,11 +102,15 @@ impl MultiCollateralApi {
         Ok(parsed)
     }
 
-    pub async fn get_leverage() -> Result<KrakenGetLeverageResponse, Box<dyn std::error::Error>> {
-        Self::make_get_request("/derivatives/api/v3/leveragepreferences").await
+    pub async fn get_leverage(
+        &self,
+    ) -> Result<KrakenGetLeverageResponse, Box<dyn std::error::Error>> {
+        self.make_get_request("/derivatives/api/v3/leveragepreferences")
+            .await
     }
 
     pub async fn set_leverage(
+        &self,
         symbol: &str,
         margin_type: &str,
     ) -> Result<KrakenLeverageSettingResponse, Box<dyn std::error::Error>> {
@@ -101,7 +119,8 @@ impl MultiCollateralApi {
             margin_type: margin_type.to_string(),
         };
 
-        Self::make_put_request("/derivatives/api/v3/leveragepreferences", &leverage_request).await
+        self.make_put_request("/derivatives/api/v3/leveragepreferences", &leverage_request)
+            .await
     }
 }
 
@@ -112,11 +131,8 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_get_leverage() -> Result<(), Box<dyn std::error::Error>> {
-        use std::{thread::sleep, time::Duration};
-
-        sleep(Duration::from_millis(110));
-
-        let leverage_response = MultiCollateralApi::get_leverage().await?;
+        let api = MultiCollateralApi::new(10);
+        let leverage_response = api.get_leverage().await?;
 
         assert_eq!(leverage_response.result, "success");
         Ok(())
@@ -125,17 +141,13 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_set_leverage() -> Result<(), Box<dyn std::error::Error>> {
-        use std::{thread::sleep, time::Duration};
+        let api = MultiCollateralApi::new(10);
 
-        sleep(Duration::from_millis(200));
-
-        let set_response = MultiCollateralApi::set_leverage("PF_XBTUSD", "cross").await?;
+        let set_response = api.set_leverage("PF_XBTUSD", "cross").await?;
 
         assert_eq!(set_response.result, "success");
 
-        sleep(Duration::from_millis(100));
-
-        let reset_response = MultiCollateralApi::set_leverage("PF_XBTUSD", "isolated").await?;
+        let reset_response = api.set_leverage("PF_XBTUSD", "isolated").await?;
 
         assert_eq!(reset_response.result, "success");
         Ok(())

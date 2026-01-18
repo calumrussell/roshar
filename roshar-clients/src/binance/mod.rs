@@ -11,15 +11,22 @@ use roshar_ws_mgr::Manager;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
-/// Binance client that manages WebSocket feeds
+/// Binance client that manages WebSocket feeds and REST API calls
 pub struct BinanceClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
+    rest_client: BinanceRestClient,
 }
 
 impl BinanceClient {
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
+    /// Create a new Binance client.
+    ///
+    /// # Arguments
+    /// * `ws_manager` - WebSocket manager
+    /// * `channel_size` - Channel size for market data
+    /// * `requests_per_second` - Maximum REST API requests per second
+    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, requests_per_second: u32) -> Self {
         let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
@@ -29,6 +36,7 @@ impl BinanceClient {
         Self {
             market_data_handle,
             market_data_feed_handle,
+            rest_client: BinanceRestClient::new(requests_per_second),
         }
     }
 
@@ -100,7 +108,7 @@ impl BinanceClient {
         &self,
         symbol: Option<&str>,
     ) -> Result<Vec<roshar_types::TickerData>, String> {
-        BinanceRestClient::new()
+        self.rest_client
             .get_24hr_ticker(symbol)
             .await
             .map_err(|e| format!("Failed to get 24hr ticker: {}", e))
@@ -109,13 +117,15 @@ impl BinanceClient {
     /// Get historical funding rates for a symbol
     ///
     /// Handles pagination internally - returns all funding rates in the time range.
+    /// If rate limiting is configured (via `with_rate_limit`), each page request
+    /// respects the rate limit.
     pub async fn get_historical_funding_rates(
         &self,
         symbol: &str,
         start_time: i64,
         end_time: i64,
     ) -> Result<Vec<roshar_types::BinanceHistoricalFundingRate>, String> {
-        BinanceRestClient::new()
+        self.rest_client
             .get_historical_funding_rates(symbol, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to get historical funding rates: {}", e))
@@ -123,7 +133,7 @@ impl BinanceClient {
 
     /// Get exchange info including all available symbols
     pub async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
-        BinanceRestClient::new()
+        self.rest_client
             .get_exchange_info()
             .await
             .map_err(|e| format!("Failed to get exchange info: {}", e))
