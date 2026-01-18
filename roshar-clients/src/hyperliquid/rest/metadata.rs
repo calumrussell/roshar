@@ -97,6 +97,7 @@ pub struct ExchangeMetadataManager {
     update_interval_secs: u64,
     query_rx: tokio::sync::mpsc::Receiver<MetadataQuery>,
     is_production: bool,
+    requests_per_second: u32,
 }
 
 impl ExchangeMetadataManager {
@@ -104,9 +105,10 @@ impl ExchangeMetadataManager {
     pub fn spawn(
         update_interval_secs: u64,
         is_production: bool,
+        requests_per_second: u32,
     ) -> (ExchangeMetadataHandle, tokio::task::JoinHandle<()>) {
         let (query_tx, query_rx) = tokio::sync::mpsc::channel(100);
-        let manager = Self::new(update_interval_secs, query_rx, is_production);
+        let manager = Self::new(update_interval_secs, query_rx, is_production, requests_per_second);
         let handle = tokio::spawn(async move {
             manager.run().await;
         });
@@ -118,6 +120,7 @@ impl ExchangeMetadataManager {
         update_interval_secs: u64,
         query_rx: tokio::sync::mpsc::Receiver<MetadataQuery>,
         is_production: bool,
+        requests_per_second: u32,
     ) -> Self {
         Self {
             hyperliquid_perps_asset_info: HashMap::new(),
@@ -127,6 +130,7 @@ impl ExchangeMetadataManager {
             update_interval_secs,
             query_rx,
             is_production,
+            requests_per_second,
         }
     }
 
@@ -189,9 +193,9 @@ impl ExchangeMetadataManager {
 
     async fn update_hyperliquid_perps_metadata(&mut self) -> Result<(), String> {
         let info_api = if self.is_production {
-            InfoApi::production()
+            InfoApi::production(self.requests_per_second)
         } else {
-            InfoApi::testnet()
+            InfoApi::testnet(self.requests_per_second)
         };
 
         let asset_info = info_api
@@ -264,9 +268,9 @@ impl ExchangeMetadataManager {
 
     async fn update_hyperliquid_spot_metadata(&mut self) -> Result<(), String> {
         let info_api = if self.is_production {
-            InfoApi::production()
+            InfoApi::production(self.requests_per_second)
         } else {
-            InfoApi::testnet()
+            InfoApi::testnet(self.requests_per_second)
         };
 
         // Get raw data directly from API - single call gives us everything

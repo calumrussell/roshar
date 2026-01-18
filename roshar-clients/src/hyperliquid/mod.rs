@@ -37,6 +37,7 @@ pub struct HyperliquidConfig {
     pub is_mainnet: bool,
     pub metadata_update_interval_secs: u64,
     pub wallet_address: Option<ethers::types::H160>, // Required for order operations
+    pub requests_per_second: u32, // Rate limit for REST API calls
 }
 
 /// Hyperliquid-specific client implementation
@@ -54,6 +55,7 @@ pub struct HyperliquidClient {
     perp_state_handle: crate::state_handle::StateHandle,
     spot_state_handle: crate::state_handle::StateHandle,
     is_mainnet: bool,
+    requests_per_second: u32,
     // Market data feed
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
@@ -105,19 +107,20 @@ impl HyperliquidClient {
         };
 
         let (metadata_handle, metadata_manager_handle) =
-            ExchangeMetadataManager::spawn(config.metadata_update_interval_secs, config.is_mainnet);
+            ExchangeMetadataManager::spawn(config.metadata_update_interval_secs, config.is_mainnet, config.requests_per_second);
 
         let wallet_addr = config.wallet_address;
         let is_mainnet = config.is_mainnet;
+        let requests_per_second = config.requests_per_second;
 
         let perp_init = if wallet_addr.is_some() {
-            Some(move || Self::fetch_perp_positions(wallet_addr, is_mainnet))
+            Some(move || Self::fetch_perp_positions(wallet_addr, is_mainnet, requests_per_second))
         } else {
             None
         };
 
         let spot_init = if wallet_addr.is_some() {
-            Some(move || Self::fetch_spot_positions(wallet_addr, is_mainnet))
+            Some(move || Self::fetch_spot_positions(wallet_addr, is_mainnet, requests_per_second))
         } else {
             None
         };
@@ -188,6 +191,7 @@ impl HyperliquidClient {
             perp_state_handle,
             spot_state_handle,
             is_mainnet: config.is_mainnet,
+            requests_per_second: config.requests_per_second,
             market_data_handle,
             market_data_feed_handle,
             bbo_handle,
@@ -406,14 +410,15 @@ impl HyperliquidClient {
     async fn fetch_perp_positions(
         wallet_address: Option<ethers::types::H160>,
         is_mainnet: bool,
+        requests_per_second: u32,
     ) -> Result<std::collections::HashMap<String, f64>, String> {
         let wallet_addr = wallet_address
             .ok_or_else(|| "Wallet address required for fetching perp positions".to_string())?;
 
         let info_api = if is_mainnet {
-            InfoApi::production()
+            InfoApi::production(requests_per_second)
         } else {
-            InfoApi::testnet()
+            InfoApi::testnet(requests_per_second)
         };
 
         // Fetch perp positions
@@ -442,14 +447,15 @@ impl HyperliquidClient {
     async fn fetch_spot_positions(
         wallet_address: Option<ethers::types::H160>,
         is_mainnet: bool,
+        requests_per_second: u32,
     ) -> Result<std::collections::HashMap<String, f64>, String> {
         let wallet_addr = wallet_address
             .ok_or_else(|| "Wallet address required for fetching spot positions".to_string())?;
 
         let info_api = if is_mainnet {
-            InfoApi::production()
+            InfoApi::production(requests_per_second)
         } else {
-            InfoApi::testnet()
+            InfoApi::testnet(requests_per_second)
         };
 
         // Fetch spot clearinghouse state and parse balances
@@ -535,9 +541,9 @@ impl HyperliquidClient {
 
         // Create InfoApi to query account state
         let info_api = if self.is_mainnet {
-            InfoApi::production()
+            InfoApi::production(self.requests_per_second)
         } else {
-            InfoApi::testnet()
+            InfoApi::testnet(self.requests_per_second)
         };
 
         // Fetch user perpetuals state
@@ -615,9 +621,9 @@ impl HyperliquidClient {
         end_time: Option<u64>,
     ) -> Result<Vec<roshar_types::HistoricalFundingRate>, String> {
         let info_api = if self.is_mainnet {
-            InfoApi::production()
+            InfoApi::production(self.requests_per_second)
         } else {
-            InfoApi::testnet()
+            InfoApi::testnet(self.requests_per_second)
         };
 
         info_api

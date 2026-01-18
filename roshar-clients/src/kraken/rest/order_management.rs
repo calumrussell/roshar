@@ -1,5 +1,6 @@
 #![allow(clippy::too_many_arguments)]
 
+use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 
 use super::auth::AuthApi;
@@ -199,10 +200,19 @@ pub struct KrakenEditEvent {
 }
 
 /// Kraken Order Management API
-pub struct OrderManagementApi;
+pub struct OrderManagementApi {
+    client: RateLimitedClient,
+}
 
 impl OrderManagementApi {
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
     async fn make_request<T, R>(
+        &self,
         endpoint: &str,
         request_data: &T,
     ) -> Result<R, Box<dyn std::error::Error>>
@@ -210,11 +220,13 @@ impl OrderManagementApi {
         T: Serialize,
         R: for<'de> Deserialize<'de>,
     {
-        let client = crate::http::get_http_client();
         let post_data = serde_urlencoded::to_string(request_data)?;
         let headers = AuthApi::create_headers(endpoint, &post_data)?;
 
-        let mut request = client.post(format!("{BASE_URL}{endpoint}"));
+        let mut request = self
+            .client
+            .post(&format!("{BASE_URL}{endpoint}"))
+            .await;
 
         for (key, value) in headers {
             request = request.header(key, value);
@@ -231,14 +243,16 @@ impl OrderManagementApi {
         Ok(parsed)
     }
 
-    async fn make_get_request<R>(endpoint: &str) -> Result<R, Box<dyn std::error::Error>>
+    async fn make_get_request<R>(&self, endpoint: &str) -> Result<R, Box<dyn std::error::Error>>
     where
         R: for<'de> Deserialize<'de>,
     {
-        let client = crate::http::get_http_client();
         let headers = AuthApi::create_headers(endpoint, "")?;
 
-        let mut request = client.get(format!("{BASE_URL}{endpoint}"));
+        let mut request = self
+            .client
+            .request(reqwest::Method::GET, &format!("{BASE_URL}{endpoint}"))
+            .await;
 
         for (key, value) in headers {
             request = request.header(key, value);
@@ -252,6 +266,7 @@ impl OrderManagementApi {
     }
 
     pub async fn create_order(
+        &self,
         symbol: &str,
         side: &str,
         order_type: &str,
@@ -276,10 +291,11 @@ impl OrderManagementApi {
             post_only,
         };
 
-        Self::make_request("/derivatives/api/v3/sendorder", &order_request).await
+        self.make_request("/derivatives/api/v3/sendorder", &order_request).await
     }
 
     pub async fn cancel_order(
+        &self,
         order_id: Option<&str>,
         cli_ord_id: Option<&str>,
     ) -> Result<KrakenCancelResponse, Box<dyn std::error::Error>> {
@@ -292,10 +308,11 @@ impl OrderManagementApi {
             cli_ord_id: None,
         };
 
-        Self::make_request("/derivatives/api/v3/cancelorder", &cancel_request).await
+        self.make_request("/derivatives/api/v3/cancelorder", &cancel_request).await
     }
 
     pub async fn modify_order(
+        &self,
         order_id: &str,
         size: Option<f64>,
         limit_price: Option<f64>,
@@ -308,22 +325,21 @@ impl OrderManagementApi {
             stop_price,
         };
 
-        Self::make_request("/derivatives/api/v3/editorder", &modify_request).await
+        self.make_request("/derivatives/api/v3/editorder", &modify_request).await
     }
 
-    pub async fn get_open_orders() -> Result<KrakenOpenOrdersResponse, Box<dyn std::error::Error>> {
-        Self::make_get_request("/derivatives/api/v3/openorders").await
+    pub async fn get_open_orders(&self) -> Result<KrakenOpenOrdersResponse, Box<dyn std::error::Error>> {
+        self.make_get_request("/derivatives/api/v3/openorders").await
     }
 
     pub async fn get_order_status(
+        &self,
         order_ids: Option<Vec<String>>,
         cli_ord_ids: Option<Vec<String>>,
     ) -> Result<KrakenOrderStatusResponse, Box<dyn std::error::Error>> {
         if order_ids.is_none() && cli_ord_ids.is_none() {
             return Err("Either order_ids or cli_ord_ids must be provided".into());
         }
-
-        let client = crate::http::get_http_client();
 
         // Build form data manually for array handling
         let mut form_data = Vec::new();
@@ -344,7 +360,7 @@ impl OrderManagementApi {
         let endpoint = "/derivatives/api/v3/orders/status";
         let headers = AuthApi::create_headers(endpoint, &post_data)?;
 
-        let mut request = client.post(format!("{BASE_URL}{endpoint}"));
+        let mut request = self.client.post(&format!("{BASE_URL}{endpoint}")).await;
 
         for (key, value) in headers {
             request = request.header(key, value);
@@ -362,26 +378,25 @@ impl OrderManagementApi {
     }
 
     pub async fn dead_mans_switch(
+        &self,
         timeout: u32,
     ) -> Result<KrakenDeadMansSwitchResponse, Box<dyn std::error::Error>> {
         let dms_request = KrakenDeadMansSwitchRequest { timeout };
 
-        Self::make_request("/derivatives/api/v3/cancelallordersafter", &dms_request).await
+        self.make_request("/derivatives/api/v3/cancelallordersafter", &dms_request).await
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{thread::sleep, time::Duration};
-
     use super::OrderManagementApi;
 
     #[tokio::test]
     #[ignore]
     async fn test_create_order() -> Result<(), Box<dyn std::error::Error>> {
-        sleep(Duration::from_millis(100));
+        let api = OrderManagementApi::new(10);
 
-        let order_result = OrderManagementApi::create_order(
+        let order_result = api.create_order(
             "PF_XBTUSD",
             "buy",
             "post",
@@ -395,10 +410,10 @@ mod tests {
         )
         .await?;
 
-        let open_orders = OrderManagementApi::get_open_orders().await?;
+        let open_orders = api.get_open_orders().await?;
         assert_eq!(open_orders.result, "success");
 
-        let modify_result = OrderManagementApi::modify_order(
+        let modify_result = api.modify_order(
             &order_result.data.send_status.order_id,
             Some(0.0002),
             Some(29000.0),
@@ -407,7 +422,7 @@ mod tests {
         .await?;
         assert_eq!(modify_result.result, "success");
 
-        let status_result = OrderManagementApi::get_order_status(
+        let status_result = api.get_order_status(
             Some(vec![order_result.data.send_status.order_id.clone()]),
             None,
         )
@@ -415,7 +430,7 @@ mod tests {
         assert_eq!(status_result.result, "success");
 
         let cancel_result =
-            OrderManagementApi::cancel_order(Some(&order_result.data.send_status.order_id), None)
+            api.cancel_order(Some(&order_result.data.send_status.order_id), None)
                 .await?;
         assert_eq!(cancel_result.result, "success");
 
@@ -426,12 +441,12 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_dead_mans_switch() -> Result<(), Box<dyn std::error::Error>> {
-        sleep(Duration::from_millis(220));
+        let api = OrderManagementApi::new(10);
 
-        let dms_result = OrderManagementApi::dead_mans_switch(60).await?;
+        let dms_result = api.dead_mans_switch(60).await?;
         assert_eq!(dms_result.result, "success");
 
-        let cancel_dms = OrderManagementApi::dead_mans_switch(0).await?;
+        let cancel_dms = api.dead_mans_switch(0).await?;
         assert_eq!(cancel_dms.result, "success");
         Ok(())
     }

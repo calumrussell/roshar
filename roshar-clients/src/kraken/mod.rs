@@ -24,10 +24,13 @@ pub struct KrakenClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
+    // REST APIs
+    charts_api: ChartsApi,
+    market_api: MarketApi,
 }
 
 impl KrakenClient {
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
+    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, requests_per_second: u32) -> Self {
         // Set up WebSocket market data feed
         let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
@@ -38,6 +41,8 @@ impl KrakenClient {
         Self {
             market_data_handle,
             market_data_feed_handle,
+            charts_api: ChartsApi::new(requests_per_second),
+            market_api: MarketApi::new(requests_per_second),
         }
     }
 
@@ -88,7 +93,8 @@ impl KrakenClient {
     /// Fetch candles for a symbol directly from the exchange
     /// Returns the most recent completed 1-minute candle
     pub async fn fetch_candles(&self, symbol: &str) -> Result<Vec<Candle>, String> {
-        ChartsApi::fetch_candle(symbol)
+        self.charts_api
+            .fetch_candle(symbol)
             .await
             .map_err(|e| format!("Failed to fetch candles: {}", e))
     }
@@ -106,7 +112,8 @@ impl KrakenClient {
     pub async fn get_tickers(
         &self,
     ) -> Result<std::collections::HashMap<String, KrakenTickerData>, String> {
-        MarketApi::get_tickers()
+        self.market_api
+            .get_tickers()
             .await
             .map_err(|e| format!("Failed to get tickers: {}", e))
     }
@@ -116,7 +123,8 @@ impl KrakenClient {
     pub async fn get_all_funding_rates_with_size(
         &self,
     ) -> Result<Vec<(String, f64, f64, f64)>, String> {
-        MarketApi::get_all_funding_rates_with_size()
+        self.market_api
+            .get_all_funding_rates_with_size()
             .await
             .map_err(|e| format!("Failed to get funding rates: {}", e))
     }

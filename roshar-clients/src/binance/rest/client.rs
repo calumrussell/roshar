@@ -1,3 +1,4 @@
+use crate::http::RateLimitedClient;
 use roshar_types::{
     BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
     TickerData,
@@ -6,20 +7,31 @@ use roshar_types::{
 const BASE_URL: &str = "https://fapi.binance.com";
 
 /// Binance Futures REST API client
-pub struct BinanceRestClient;
+pub struct BinanceRestClient {
+    client: RateLimitedClient,
+}
 
 impl BinanceRestClient {
-    pub fn new() -> Self {
-        Self
+    /// Create a new client with rate limiting.
+    ///
+    /// # Arguments
+    /// * `requests_per_second` - Maximum requests per second
+    pub fn new(requests_per_second: u32) -> Self {
+        Self {
+            client: RateLimitedClient::new(requests_per_second),
+        }
+    }
+
+    /// Make a GET request, respecting rate limits.
+    async fn get(&self, url: &str) -> Result<reqwest::Response, reqwest::Error> {
+        self.client.get(url).await
     }
 
     pub async fn get_exchange_info(
         &self,
     ) -> Result<ExchangeInfo, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("{}/fapi/v1/exchangeInfo", BASE_URL);
-        let client = crate::http::get_http_client();
-
-        let response = client.get(&url).send().await?;
+        let response = self.get(&url).await?;
 
         if !response.status().is_success() {
             return Err(format!("Binance API error: HTTP {}", response.status()).into());
@@ -37,9 +49,7 @@ impl BinanceRestClient {
         symbol: &str,
     ) -> Result<OpenInterestData, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("{}/fapi/v1/openInterest?symbol={}", BASE_URL, symbol);
-        let client = crate::http::get_http_client();
-
-        let response = client.get(&url).send().await?;
+        let response = self.get(&url).await?;
 
         if !response.status().is_success() {
             return Err(format!("Binance API error: HTTP {}", response.status()).into());
@@ -62,8 +72,7 @@ impl BinanceRestClient {
             url.push_str(&format!("?symbol={symbol}"));
         }
 
-        let client = crate::http::get_http_client();
-        let response = client.get(&url).send().await?;
+        let response = self.get(&url).await?;
 
         if !response.status().is_success() {
             return Err(format!("Binance API error: HTTP {}", response.status()).into());
@@ -94,9 +103,7 @@ impl BinanceRestClient {
             "{}/fapi/v1/depth?symbol={}&limit={}",
             BASE_URL, symbol, limit
         );
-        let client = crate::http::get_http_client();
-
-        let response = client.get(&url).send().await?;
+        let response = self.get(&url).await?;
 
         if !response.status().is_success() {
             return Err(format!("Binance API error: HTTP {}", response.status()).into());
@@ -112,6 +119,7 @@ impl BinanceRestClient {
     /// Fetch historical funding rates for a symbol
     ///
     /// Handles pagination internally - returns all funding rates in the time range.
+    /// If rate limiting is configured, each page request respects the rate limit.
     ///
     /// # Arguments
     /// * `symbol` - Trading pair symbol (e.g., "BTCUSDT")
@@ -123,7 +131,6 @@ impl BinanceRestClient {
         start_time: i64,
         end_time: i64,
     ) -> Result<Vec<BinanceHistoricalFundingRate>, Box<dyn std::error::Error + Send + Sync>> {
-        let client = crate::http::get_http_client();
         let mut all_rates = Vec::new();
         let mut current_start = start_time;
         const LIMIT: u32 = 1000;
@@ -134,12 +141,15 @@ impl BinanceRestClient {
                 BASE_URL, symbol, current_start, end_time, LIMIT
             );
 
-            let response = client.get(&url).send().await?;
+            let response = self.get(&url).await?;
 
             if !response.status().is_success() {
                 let status = response.status();
                 let body = response.text().await.unwrap_or_default();
-                return Err(format!("Binance API error: HTTP {} - {}", status, body).into());
+                return Err(
+                    format!("Historical funding rates endpoint failed (status: {status}): {body}")
+                        .into(),
+                );
             }
 
             let response_text = response.text().await?;
@@ -166,11 +176,6 @@ impl BinanceRestClient {
     }
 }
 
-impl Default for BinanceRestClient {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -184,7 +189,7 @@ mod tests {
         let end_time = chrono::Utc::now().timestamp_millis();
         let start_time = end_time - (730 * 24 * 60 * 60 * 1000); // 2 years ago
 
-        let client = BinanceRestClient::new();
+        let client = BinanceRestClient::new(10);
         let result = client
             .get_historical_funding_rates("BTCUSDT", start_time, end_time)
             .await;
