@@ -1,5 +1,7 @@
+use crate::http::RateLimitedClient;
 use roshar_types::{AssetInfo, SpotAsset, SpotMarketData, SpotToken};
 use std::collections::HashMap;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 
 use super::InfoApi;
@@ -96,24 +98,19 @@ pub struct ExchangeMetadataManager {
     hyperliquid_funding_rates: Vec<(String, f64, f64, f64)>, // (coin, funding_rate, open_interest, daily_volume)
     update_interval_secs: u64,
     query_rx: tokio::sync::mpsc::Receiver<MetadataQuery>,
-    is_production: bool,
-    requests_per_second: u32,
+    info_api: InfoApi,
 }
 
 impl ExchangeMetadataManager {
-    /// Spawn a new metadata manager and return the handle and query channel
+    /// Spawn a new metadata manager and return the handle and query channel.
+    /// Uses a shared RateLimitedClient to coordinate rate limiting across all Hyperliquid API calls.
     pub fn spawn(
         update_interval_secs: u64,
         is_production: bool,
-        requests_per_second: u32,
+        http_client: Arc<RateLimitedClient>,
     ) -> (ExchangeMetadataHandle, tokio::task::JoinHandle<()>) {
         let (query_tx, query_rx) = tokio::sync::mpsc::channel(100);
-        let manager = Self::new(
-            update_interval_secs,
-            query_rx,
-            is_production,
-            requests_per_second,
-        );
+        let manager = Self::new(update_interval_secs, query_rx, is_production, http_client);
         let handle = tokio::spawn(async move {
             manager.run().await;
         });
@@ -125,8 +122,14 @@ impl ExchangeMetadataManager {
         update_interval_secs: u64,
         query_rx: tokio::sync::mpsc::Receiver<MetadataQuery>,
         is_production: bool,
-        requests_per_second: u32,
+        http_client: Arc<RateLimitedClient>,
     ) -> Self {
+        let info_api = if is_production {
+            InfoApi::production_with_client(http_client)
+        } else {
+            InfoApi::testnet_with_client(http_client)
+        };
+
         Self {
             hyperliquid_perps_asset_info: HashMap::new(),
             hyperliquid_spot_asset_info: HashMap::new(),
@@ -134,8 +137,7 @@ impl ExchangeMetadataManager {
             hyperliquid_funding_rates: Vec::new(),
             update_interval_secs,
             query_rx,
-            is_production,
-            requests_per_second,
+            info_api,
         }
     }
 
@@ -197,13 +199,8 @@ impl ExchangeMetadataManager {
     }
 
     async fn update_hyperliquid_perps_metadata(&mut self) -> Result<(), String> {
-        let info_api = if self.is_production {
-            InfoApi::production(self.requests_per_second)
-        } else {
-            InfoApi::testnet(self.requests_per_second)
-        };
-
-        let asset_info = info_api
+        let asset_info = self
+            .info_api
             .get_info()
             .await
             .map_err(|e| format!("Failed to fetch Hyperliquid perps metadata: {}", e))?;
@@ -272,14 +269,9 @@ impl ExchangeMetadataManager {
     }
 
     async fn update_hyperliquid_spot_metadata(&mut self) -> Result<(), String> {
-        let info_api = if self.is_production {
-            InfoApi::production(self.requests_per_second)
-        } else {
-            InfoApi::testnet(self.requests_per_second)
-        };
-
         // Get raw data directly from API - single call gives us everything
-        let meta = info_api
+        let meta = self
+            .info_api
             .get_spot_meta_and_asset_ctxs()
             .await
             .map_err(|e| format!("Failed to fetch spot metadata: {}", e))?;

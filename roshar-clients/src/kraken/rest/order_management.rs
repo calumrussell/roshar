@@ -2,6 +2,7 @@
 
 use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 use super::auth::AuthApi;
 
@@ -201,14 +202,12 @@ pub struct KrakenEditEvent {
 
 /// Kraken Order Management API
 pub struct OrderManagementApi {
-    client: RateLimitedClient,
+    client: Arc<RateLimitedClient>,
 }
 
 impl OrderManagementApi {
-    pub fn new(requests_per_second: u32) -> Self {
-        Self {
-            client: RateLimitedClient::new(requests_per_second),
-        }
+    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
+        Self { client }
     }
 
     async fn make_request<T, R>(

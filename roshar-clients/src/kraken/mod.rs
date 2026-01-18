@@ -3,6 +3,7 @@ pub(crate) mod ws;
 
 use ws::MarketDataFeedHandle;
 
+use crate::http::RateLimitedClient;
 use rest::{ChartsApi, MarketApi};
 pub use rest::{
     KrakenGetLeverageResponse, KrakenLeveragePreference, KrakenLeverageSettingResponse,
@@ -38,11 +39,14 @@ impl KrakenClient {
             market_data_feed.run().await;
         });
 
+        // Create a single shared rate-limited HTTP client for ALL Kraken REST API calls
+        let http_client = Arc::new(RateLimitedClient::new(requests_per_second, 1));
+
         Self {
             market_data_handle,
             market_data_feed_handle,
-            charts_api: ChartsApi::new(requests_per_second),
-            market_api: MarketApi::new(requests_per_second),
+            charts_api: ChartsApi::new_with_client(http_client.clone()),
+            market_api: MarketApi::new_with_client(http_client),
         }
     }
 

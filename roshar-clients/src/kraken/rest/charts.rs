@@ -1,18 +1,17 @@
 use crate::http::RateLimitedClient;
 use chrono::DateTime;
 use roshar_types::Candle;
+use std::sync::Arc;
 
 use super::market::KrakenRestCandleResponse;
 
 pub struct ChartsApi {
-    client: RateLimitedClient,
+    client: Arc<RateLimitedClient>,
 }
 
 impl ChartsApi {
-    pub fn new(requests_per_second: u32) -> Self {
-        Self {
-            client: RateLimitedClient::new(requests_per_second),
-        }
+    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
+        Self { client }
     }
 
     pub async fn fetch_candle(

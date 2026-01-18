@@ -89,7 +89,7 @@ pub struct OrderManagementApi {
 impl OrderManagementApi {
     pub fn new(requests_per_second: u32) -> Self {
         Self {
-            client: RateLimitedClient::new(requests_per_second),
+            client: RateLimitedClient::new(requests_per_second, 1),
         }
     }
 

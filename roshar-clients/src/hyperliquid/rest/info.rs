@@ -12,25 +12,28 @@ use roshar_types::{
 
 pub struct InfoApi {
     base_url: String,
-    client: RateLimitedClient,
+    client: std::sync::Arc<RateLimitedClient>,
 }
 
 impl InfoApi {
-    pub fn new(base_url: Option<String>, requests_per_second: u32) -> Self {
+    /// Create a new InfoApi with a shared rate-limited client.
+    /// The client should be shared across all Hyperliquid API calls to ensure
+    /// rate limiting is coordinated.
+    pub fn new_with_client(base_url: Option<String>, client: std::sync::Arc<RateLimitedClient>) -> Self {
         Self {
             base_url: base_url.unwrap_or_else(|| "https://api.hyperliquid.xyz".to_string()),
-            client: RateLimitedClient::new(requests_per_second),
+            client,
         }
     }
 
-    pub fn production(requests_per_second: u32) -> Self {
-        Self::new(None, requests_per_second)
+    pub fn production_with_client(client: std::sync::Arc<RateLimitedClient>) -> Self {
+        Self::new_with_client(None, client)
     }
 
-    pub fn testnet(requests_per_second: u32) -> Self {
-        Self::new(
+    pub fn testnet_with_client(client: std::sync::Arc<RateLimitedClient>) -> Self {
+        Self::new_with_client(
             Some("https://api.hyperliquid-testnet.xyz".to_string()),
-            requests_per_second,
+            client,
         )
     }
 
@@ -471,9 +474,13 @@ impl InfoApi {
 mod tests {
     use super::*;
 
+    fn create_test_client() -> std::sync::Arc<RateLimitedClient> {
+        std::sync::Arc::new(RateLimitedClient::new(10, 1))
+    }
+
     #[tokio::test]
     async fn test_get_all_funding_rates_with_size() {
-        let info_api = InfoApi::production(10);
+        let info_api = InfoApi::production_with_client(create_test_client());
         let result = info_api.get_all_funding_rates_with_size().await;
 
         assert!(
@@ -506,7 +513,7 @@ mod tests {
         let user_address = std::env::var("HYPERLIQUID_WALLET_ADDRESS")
             .expect("HYPERLIQUID_WALLET_ADDRESS environment variable not set");
 
-        let info_api = InfoApi::testnet(10);
+        let info_api = InfoApi::testnet_with_client(create_test_client());
         let result = info_api.get_user_orders(&user_address).await;
 
         assert!(
@@ -538,7 +545,7 @@ mod tests {
         let user_address = std::env::var("HYPERLIQUID_WALLET_ADDRESS")
             .expect("HYPERLIQUID_WALLET_ADDRESS environment variable not set");
 
-        let info_api = InfoApi::testnet(10);
+        let info_api = InfoApi::testnet_with_client(create_test_client());
         let result = info_api.get_funding_history(&user_address).await;
 
         assert!(
@@ -573,7 +580,7 @@ mod tests {
             .parse()
             .expect("Invalid wallet address format");
 
-        let info_api = InfoApi::testnet(10);
+        let info_api = InfoApi::testnet_with_client(create_test_client());
         let result = info_api.open_orders(wallet_address).await;
 
         assert!(
@@ -609,7 +616,7 @@ mod tests {
             .parse()
             .expect("Invalid wallet address format");
 
-        let info_api = InfoApi::testnet(10);
+        let info_api = InfoApi::testnet_with_client(create_test_client());
         let result = info_api.user_perpetuals_state(wallet_address).await;
 
         assert!(
@@ -644,8 +651,8 @@ mod tests {
         let end_time = chrono::Utc::now().timestamp_millis();
         let start_time = end_time - (730 * 24 * 60 * 60 * 1000); // 2 years ago
 
-        let client = InfoApi::production(10);
-        let result = client
+        let info_api = InfoApi::production_with_client(create_test_client());
+        let result = info_api
             .get_historical_funding_rates("BTC", start_time as u64, Option::None)
             .await;
 

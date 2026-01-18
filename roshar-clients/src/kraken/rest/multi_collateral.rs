@@ -1,5 +1,6 @@
 use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 use super::auth::AuthApi;
 
@@ -39,14 +40,12 @@ pub struct KrakenGetLeverageResponse {
 
 /// Kraken Multi-Collateral API
 pub struct MultiCollateralApi {
-    client: RateLimitedClient,
+    client: Arc<RateLimitedClient>,
 }
 
 impl MultiCollateralApi {
-    pub fn new(requests_per_second: u32) -> Self {
-        Self {
-            client: RateLimitedClient::new(requests_per_second),
-        }
+    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
+        Self { client }
     }
 
     async fn make_get_request<R>(&self, endpoint: &str) -> Result<R, Box<dyn std::error::Error>>

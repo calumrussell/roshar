@@ -11,11 +11,13 @@ pub use rest::{ExchangeMetadataHandle, ExchangeMetadataManager};
 pub use validator::OrderValidator;
 pub use ws::MarketEvent;
 
+use crate::http::RateLimitedClient;
 use rest::{
     ExchangeApi, ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
     ModifyOrderParams,
 };
 use roshar_types::{AssetInfo, OrderBookState, SpotMarketData, UserPerpetualsState};
+use std::sync::Arc;
 use tokio::sync::mpsc;
 
 /// Result of creating an order
@@ -37,7 +39,8 @@ pub struct HyperliquidConfig {
     pub is_mainnet: bool,
     pub metadata_update_interval_secs: u64,
     pub wallet_address: Option<ethers::types::H160>, // Required for order operations
-    pub requests_per_second: u32,                    // Rate limit for REST API calls
+    pub rate_limit_refill: u32,                      // Number of tokens to add per interval
+    pub rate_limit_interval_secs: u64,               // Interval in seconds between token refills
 }
 
 /// Hyperliquid-specific client implementation
@@ -106,24 +109,33 @@ impl HyperliquidClient {
             ExchangeApi::new(config.is_mainnet)
         };
 
+        // Create a single shared rate-limited HTTP client for ALL Hyperliquid REST API calls.
+        // This ensures rate limiting is coordinated across metadata updates, position fetches,
+        // and all other API calls.
+        let http_client = Arc::new(RateLimitedClient::new(
+            config.rate_limit_refill,
+            config.rate_limit_interval_secs,
+        ));
+
         let (metadata_handle, metadata_manager_handle) = ExchangeMetadataManager::spawn(
             config.metadata_update_interval_secs,
             config.is_mainnet,
-            config.requests_per_second,
+            http_client.clone(),
         );
 
         let wallet_addr = config.wallet_address;
         let is_mainnet = config.is_mainnet;
-        let requests_per_second = config.requests_per_second;
+        let http_client_for_perp = http_client.clone();
+        let http_client_for_spot = http_client.clone();
 
         let perp_init = if wallet_addr.is_some() {
-            Some(move || Self::fetch_perp_positions(wallet_addr, is_mainnet, requests_per_second))
+            Some(move || Self::fetch_perp_positions(wallet_addr, is_mainnet, http_client_for_perp))
         } else {
             None
         };
 
         let spot_init = if wallet_addr.is_some() {
-            Some(move || Self::fetch_spot_positions(wallet_addr, is_mainnet, requests_per_second))
+            Some(move || Self::fetch_spot_positions(wallet_addr, is_mainnet, http_client_for_spot))
         } else {
             None
         };
@@ -183,11 +195,11 @@ impl HyperliquidClient {
             market_data_feed.run().await;
         });
 
-        // Create shared InfoApi for rate-limited REST calls
+        // Create InfoApi using the shared rate-limited client
         let info_api = if config.is_mainnet {
-            InfoApi::production(config.requests_per_second)
+            InfoApi::production_with_client(http_client)
         } else {
-            InfoApi::testnet(config.requests_per_second)
+            InfoApi::testnet_with_client(http_client)
         };
 
         Self {
@@ -419,15 +431,15 @@ impl HyperliquidClient {
     async fn fetch_perp_positions(
         wallet_address: Option<ethers::types::H160>,
         is_mainnet: bool,
-        requests_per_second: u32,
+        http_client: Arc<RateLimitedClient>,
     ) -> Result<std::collections::HashMap<String, f64>, String> {
         let wallet_addr = wallet_address
             .ok_or_else(|| "Wallet address required for fetching perp positions".to_string())?;
 
         let info_api = if is_mainnet {
-            InfoApi::production(requests_per_second)
+            InfoApi::production_with_client(http_client)
         } else {
-            InfoApi::testnet(requests_per_second)
+            InfoApi::testnet_with_client(http_client)
         };
 
         // Fetch perp positions
@@ -456,15 +468,15 @@ impl HyperliquidClient {
     async fn fetch_spot_positions(
         wallet_address: Option<ethers::types::H160>,
         is_mainnet: bool,
-        requests_per_second: u32,
+        http_client: Arc<RateLimitedClient>,
     ) -> Result<std::collections::HashMap<String, f64>, String> {
         let wallet_addr = wallet_address
             .ok_or_else(|| "Wallet address required for fetching spot positions".to_string())?;
 
         let info_api = if is_mainnet {
-            InfoApi::production(requests_per_second)
+            InfoApi::production_with_client(http_client)
         } else {
-            InfoApi::testnet(requests_per_second)
+            InfoApi::testnet_with_client(http_client)
         };
 
         // Fetch spot clearinghouse state and parse balances

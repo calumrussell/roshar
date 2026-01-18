@@ -1,5 +1,6 @@
 use crate::http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct KrakenTickerData {
@@ -52,14 +53,12 @@ pub struct KrakenRestCandleResponse {
 }
 
 pub struct MarketApi {
-    client: RateLimitedClient,
+    client: Arc<RateLimitedClient>,
 }
 
 impl MarketApi {
-    pub fn new(requests_per_second: u32) -> Self {
-        Self {
-            client: RateLimitedClient::new(requests_per_second),
-        }
+    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
+        Self { client }
     }
 
     pub async fn get_all_funding_rates_with_size(

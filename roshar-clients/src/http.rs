@@ -39,14 +39,16 @@ impl RateLimitedClient {
     /// Create a new rate-limited client.
     ///
     /// # Arguments
-    /// * `requests_per_second` - Maximum requests per second
+    /// * `refill_amount` - Number of tokens to add per interval
+    /// * `interval_secs` - Interval in seconds between token refills
     ///
     /// # Example
     /// ```ignore
-    /// let client = RateLimitedClient::new(10); // 10 req/sec
-    /// let response = client.get("https://api.example.com").await?;
+    /// let client = RateLimitedClient::new(1, 1); // 1 req per 1 sec
+    /// let client = RateLimitedClient::new(1, 2); // 1 req per 2 secs
+    /// let client = RateLimitedClient::new(10, 1); // 10 req per sec
     /// ```
-    pub fn new(requests_per_second: u32) -> Self {
+    pub fn new(refill_amount: u32, interval_secs: u64) -> Self {
         let client = Client::builder()
             .pool_idle_timeout(Duration::from_secs(90))
             .pool_max_idle_per_host(10)
@@ -54,11 +56,13 @@ impl RateLimitedClient {
             .build()
             .expect("Failed to create HTTP client");
 
+        // Configure rate limiter with specified refill amount and interval.
+        // IMPORTANT: initial(0) ensures no burst - every request waits for a token.
         let rate_limiter = RateLimiter::builder()
-            .initial(requests_per_second as usize)
-            .max(requests_per_second as usize)
-            .refill(requests_per_second as usize)
-            .interval(Duration::from_secs(1))
+            .initial(0)
+            .max(refill_amount as usize)
+            .refill(refill_amount as usize)
+            .interval(Duration::from_secs(interval_secs))
             .build();
 
         Self {

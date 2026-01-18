@@ -18,7 +18,7 @@ impl BinanceRestClient {
     /// * `requests_per_second` - Maximum requests per second
     pub fn new(requests_per_second: u32) -> Self {
         Self {
-            client: RateLimitedClient::new(requests_per_second),
+            client: RateLimitedClient::new(requests_per_second, 1),
         }
     }
 
