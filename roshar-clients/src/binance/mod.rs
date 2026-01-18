@@ -102,4 +102,19 @@ impl BinanceClient {
             .await
             .map_err(|e| format!("Failed to get 24hr ticker: {}", e))
     }
+
+    /// Get historical funding rates for a symbol
+    ///
+    /// Handles pagination internally - returns all funding rates in the time range.
+    pub async fn get_historical_funding_rates(
+        &self,
+        symbol: &str,
+        start_time: i64,
+        end_time: i64,
+    ) -> Result<Vec<roshar_types::BinanceHistoricalFundingRate>, String> {
+        BinanceRestClient::new()
+            .get_historical_funding_rates(symbol, start_time, end_time)
+            .await
+            .map_err(|e| format!("Failed to get historical funding rates: {}", e))
+    }
 }

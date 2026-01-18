@@ -1,4 +1,7 @@
-use roshar_types::{BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData, TickerData};
+use roshar_types::{
+    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
+    TickerData,
+};
 
 const BASE_URL: &str = "https://fapi.binance.com";
 
@@ -105,10 +108,107 @@ impl BinanceRestClient {
 
         Ok(snapshot)
     }
+
+    /// Fetch historical funding rates for a symbol
+    ///
+    /// Handles pagination internally - returns all funding rates in the time range.
+    ///
+    /// # Arguments
+    /// * `symbol` - Trading pair symbol (e.g., "BTCUSDT")
+    /// * `start_time` - Start time in milliseconds
+    /// * `end_time` - End time in milliseconds
+    pub async fn get_historical_funding_rates(
+        &self,
+        symbol: &str,
+        start_time: i64,
+        end_time: i64,
+    ) -> Result<Vec<BinanceHistoricalFundingRate>, Box<dyn std::error::Error + Send + Sync>> {
+        let client = crate::http::get_http_client();
+        let mut all_rates = Vec::new();
+        let mut current_start = start_time;
+        const LIMIT: u32 = 1000;
+
+        loop {
+            let url = format!(
+                "{}/fapi/v1/fundingRate?symbol={}&startTime={}&endTime={}&limit={}",
+                BASE_URL, symbol, current_start, end_time, LIMIT
+            );
+
+            let response = client.get(&url).send().await?;
+
+            if !response.status().is_success() {
+                let status = response.status();
+                let body = response.text().await.unwrap_or_default();
+                return Err(format!("Binance API error: HTTP {} - {}", status, body).into());
+            }
+
+            let response_text = response.text().await?;
+            let rates: Vec<BinanceHistoricalFundingRate> = serde_json::from_str(&response_text)
+                .map_err(|e| format!("Failed to parse Binance funding rates response: {e}"))?;
+
+            if rates.is_empty() {
+                break;
+            }
+
+            let last_time = rates.last().unwrap().funding_time;
+            let batch_size = rates.len();
+            all_rates.extend(rates);
+
+            // If we got less than limit, we've reached the end
+            if batch_size < LIMIT as usize || last_time >= end_time {
+                break;
+            }
+
+            current_start = last_time + 1;
+        }
+
+        Ok(all_rates)
+    }
 }
 
 impl Default for BinanceRestClient {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_get_historical_funding_rates_pagination() {
+        // Binance funding rates are every 8 hours, so 3 per day
+        // 1000 limit / 3 per day = ~333 days in one page
+        // Fetch 2 years of data to ensure we need multiple pages
+        let end_time = chrono::Utc::now().timestamp_millis();
+        let start_time = end_time - (730 * 24 * 60 * 60 * 1000); // 2 years ago
+
+        let client = BinanceRestClient::new();
+        let result = client
+            .get_historical_funding_rates("BTCUSDT", start_time, end_time)
+            .await;
+
+        assert!(result.is_ok(), "Failed to fetch funding rates: {:?}", result.err());
+
+        let rates = result.unwrap();
+
+        // Should have more than 1000 results (proving pagination worked)
+        // 2 years * 365 days * 3 per day = ~2190 funding rates
+        assert!(
+            rates.len() > 1000,
+            "Expected more than 1000 rates (pagination), got {}",
+            rates.len()
+        );
+
+        // Verify chronological order
+        for window in rates.windows(2) {
+            assert!(
+                window[0].funding_time <= window[1].funding_time,
+                "Rates not in chronological order"
+            );
+        }
+
+        println!("Fetched {} funding rates (pagination working)", rates.len());
     }
 }
