@@ -290,39 +290,70 @@ impl InfoApi {
         end_time: Option<u64>,
     ) -> Result<Vec<HistoricalFundingRate>> {
         let url = format!("{}/info", self.base_url);
+        let mut all_rates = Vec::new();
+        let mut current_start = start_time;
 
-        let mut request_body = serde_json::json!({
-            "type": "fundingHistory",
-            "coin": coin,
-            "startTime": start_time
-        });
+        loop {
+            let mut request_body = serde_json::json!({
+                "type": "fundingHistory",
+                "coin": coin,
+                "startTime": current_start
+            });
 
-        if let Some(end_time) = end_time {
-            request_body["endTime"] = serde_json::Value::Number(serde_json::Number::from(end_time));
+            if let Some(end_time) = end_time {
+                request_body["endTime"] =
+                    serde_json::Value::Number(serde_json::Number::from(end_time));
+            }
+
+            let response = self
+                .client
+                .post(&url)
+                .await
+                .json(&request_body)
+                .send()
+                .await
+                .context("Failed to request historical funding rates")?;
+
+            if !response.status().is_success() {
+                anyhow::bail!(
+                    "Historical funding rates endpoint failed (status: {})",
+                    response.status()
+                );
+            }
+
+            let funding_rates: Vec<HistoricalFundingRate> = response
+                .json()
+                .await
+                .context("Failed to parse historical funding rates response")?;
+
+            let num_results = funding_rates.len();
+
+            if funding_rates.is_empty() {
+                break;
+            }
+
+            // Get the last timestamp for pagination
+            let last_time = funding_rates.last().map(|r| r.time).unwrap_or(0);
+
+            all_rates.extend(funding_rates);
+
+            // If we got fewer than 500 results, we've reached the end
+            if num_results < 500 {
+                break;
+            }
+
+            // If we have an end_time and last result is at or past it, stop
+            if let Some(end) = end_time {
+                if last_time >= end {
+                    break;
+                }
+            }
+
+            // Move start time forward for next page (add 1ms to avoid duplicates)
+            current_start = last_time + 1;
         }
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request historical funding rates")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!(
-                "Historical funding rates endpoint failed (status: {})",
-                response.status()
-            );
-        }
-
-        let funding_rates: Vec<HistoricalFundingRate> = response
-            .json()
-            .await
-            .context("Failed to parse historical funding rates response")?;
-
-        Ok(funding_rates)
+        Ok(all_rates)
     }
 
     pub async fn user_perpetuals_account_summary(
@@ -606,5 +637,42 @@ mod tests {
 
         let formatted = format!("{:#x}", test_address);
         assert_eq!(formatted, "0x1234567890123456789012345678901234567890");
+    }
+
+    #[tokio::test]
+    async fn test_get_historical_funding_rates_pagination() {
+        let end_time = chrono::Utc::now().timestamp_millis();
+        let start_time = end_time - (730 * 24 * 60 * 60 * 1000); // 2 years ago
+
+        let client = InfoApi::production(10);
+        let result = client
+            .get_historical_funding_rates("BTC", start_time as u64, Option::None)
+            .await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch funding rates: {:?}",
+            result.err()
+        );
+
+        let rates = result.unwrap();
+
+        // Should have more than 1000 results (proving pagination worked)
+        // 2 years * 365 days * 3 per day = ~2190 funding rates
+        assert!(
+            rates.len() > 1000,
+            "Expected more than 1000 rates (pagination), got {}",
+            rates.len()
+        );
+
+        // Verify chronological order
+        for window in rates.windows(2) {
+            assert!(
+                window[0].time <= window[1].time,
+                "Rates not in chronological order"
+            );
+        }
+
+        println!("Fetched {} funding rates (pagination working)", rates.len());
     }
 }
