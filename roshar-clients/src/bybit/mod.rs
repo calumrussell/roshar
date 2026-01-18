@@ -4,9 +4,11 @@ pub(crate) mod ws;
 use ws::MarketDataFeedHandle;
 
 pub use rest::{
-    ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitOrderResult, ByBitTickerData,
-    ByBitTickersResponse,
+    ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitInstrumentInfo, ByBitLeverageFilter,
+    ByBitLotSizeFilter, ByBitOrderResult, ByBitPriceFilter, ByBitTickerData, ByBitTickersResponse,
+    MarketApi as ByBitMarketApi,
 };
+pub use roshar_types::ByBitHistoricalFundingRate;
 pub(crate) use ws::MarketDataFeed;
 pub use ws::MarketEvent;
 

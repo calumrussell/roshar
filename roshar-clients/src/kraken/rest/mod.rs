@@ -14,7 +14,6 @@ pub use multi_collateral::{
     MultiCollateralApi,
 };
 pub use order_management::{
-    KrakenModifyResponse,
-    KrakenOpenOrdersResponse, KrakenOrder, KrakenOrderResponse, KrakenOrderStatusResponse,
-    OrderManagementApi,
+    KrakenModifyResponse, KrakenOpenOrdersResponse, KrakenOrder, KrakenOrderResponse,
+    KrakenOrderStatusResponse, OrderManagementApi,
 };

@@ -19,7 +19,10 @@ impl InfoApi {
     /// Create a new InfoApi with a shared rate-limited client.
     /// The client should be shared across all Hyperliquid API calls to ensure
     /// rate limiting is coordinated.
-    pub fn new_with_client(base_url: Option<String>, client: std::sync::Arc<RateLimitedClient>) -> Self {
+    pub fn new_with_client(
+        base_url: Option<String>,
+        client: std::sync::Arc<RateLimitedClient>,
+    ) -> Self {
         Self {
             base_url: base_url.unwrap_or_else(|| "https://api.hyperliquid.xyz".to_string()),
             client,

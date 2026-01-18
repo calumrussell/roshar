@@ -392,12 +392,16 @@ impl OrderManagementApi {
 
 #[cfg(test)]
 mod tests {
-    use super::OrderManagementApi;
+    use super::*;
+
+    fn create_test_client() -> Arc<RateLimitedClient> {
+        Arc::new(RateLimitedClient::new(10, 1))
+    }
 
     #[tokio::test]
     #[ignore]
     async fn test_create_order() -> Result<(), Box<dyn std::error::Error>> {
-        let api = OrderManagementApi::new(10);
+        let api = OrderManagementApi::new_with_client(create_test_client());
 
         let order_result = api
             .create_order(
@@ -447,7 +451,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_dead_mans_switch() -> Result<(), Box<dyn std::error::Error>> {
-        let api = OrderManagementApi::new(10);
+        let api = OrderManagementApi::new_with_client(create_test_client());
 
         let dms_result = api.dead_mans_switch(60).await?;
         assert_eq!(dms_result.result, "success");

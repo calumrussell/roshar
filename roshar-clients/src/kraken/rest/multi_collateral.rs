@@ -125,12 +125,16 @@ impl MultiCollateralApi {
 
 #[cfg(test)]
 mod tests {
-    use super::MultiCollateralApi;
+    use super::*;
+
+    fn create_test_client() -> Arc<RateLimitedClient> {
+        Arc::new(RateLimitedClient::new(10, 1))
+    }
 
     #[tokio::test]
     #[ignore]
     async fn test_get_leverage() -> Result<(), Box<dyn std::error::Error>> {
-        let api = MultiCollateralApi::new(10);
+        let api = MultiCollateralApi::new_with_client(create_test_client());
         let leverage_response = api.get_leverage().await?;
 
         assert_eq!(leverage_response.result, "success");
@@ -140,7 +144,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_set_leverage() -> Result<(), Box<dyn std::error::Error>> {
-        let api = MultiCollateralApi::new(10);
+        let api = MultiCollateralApi::new_with_client(create_test_client());
 
         let set_response = api.set_leverage("PF_XBTUSD", "cross").await?;
 
