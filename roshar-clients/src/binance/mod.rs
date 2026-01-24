@@ -5,6 +5,7 @@ use rest::BinanceRestClient;
 use ws::MarketDataFeedHandle;
 
 pub(crate) use ws::MarketDataFeed;
+pub use roshar_types::BinancePremiumIndex;
 pub use ws::MarketEvent;
 
 use roshar_ws_mgr::Manager;
@@ -137,5 +138,16 @@ impl BinanceClient {
             .get_exchange_info()
             .await
             .map_err(|e| format!("Failed to get exchange info: {}", e))
+    }
+
+    /// Get premium index / funding rate data for all symbols or a specific symbol
+    pub async fn get_premium_index(
+        &self,
+        symbol: Option<&str>,
+    ) -> Result<Vec<BinancePremiumIndex>, String> {
+        self.rest_client
+            .get_premium_index(symbol)
+            .await
+            .map_err(|e| format!("Failed to get premium index: {}", e))
     }
 }
