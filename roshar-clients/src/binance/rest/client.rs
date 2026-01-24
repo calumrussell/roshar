@@ -1,7 +1,7 @@
 use crate::http::RateLimitedClient;
 use roshar_types::{
-    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
-    TickerData,
+    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, BinancePremiumIndex, ExchangeInfo,
+    OpenInterestData, TickerData,
 };
 
 const BASE_URL: &str = "https://fapi.binance.com";
@@ -173,6 +173,41 @@ impl BinanceRestClient {
         }
 
         Ok(all_rates)
+    }
+
+    /// Fetch real-time premium index / funding rate data
+    ///
+    /// # Arguments
+    /// * `symbol` - Optional trading pair symbol (e.g., "BTCUSDT"). If None, fetches all symbols.
+    pub async fn get_premium_index(
+        &self,
+        symbol: Option<&str>,
+    ) -> Result<Vec<BinancePremiumIndex>, Box<dyn std::error::Error + Send + Sync>> {
+        let mut url = format!("{}/fapi/v1/premiumIndex", BASE_URL);
+
+        if let Some(symbol) = symbol {
+            url.push_str(&format!("?symbol={symbol}"));
+        }
+
+        let response = self.get(&url).await?;
+
+        if !response.status().is_success() {
+            return Err(format!("Binance API error: HTTP {}", response.status()).into());
+        }
+
+        let response_text = response.text().await?;
+
+        if symbol.is_some() {
+            // Single symbol response
+            let premium_index: BinancePremiumIndex = serde_json::from_str(&response_text)
+                .map_err(|e| format!("Failed to parse Binance premium index response: {e}"))?;
+            Ok(vec![premium_index])
+        } else {
+            // Multiple symbols response
+            let premium_index: Vec<BinancePremiumIndex> = serde_json::from_str(&response_text)
+                .map_err(|e| format!("Failed to parse Binance premium index response: {e}"))?;
+            Ok(premium_index)
+        }
     }
 }
 
