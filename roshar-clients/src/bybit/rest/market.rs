@@ -425,10 +425,7 @@ mod tests {
         let tickers = result.unwrap();
 
         // Should return multiple tickers
-        assert!(
-            !tickers.is_empty(),
-            "Expected some ticker data, got none"
-        );
+        assert!(!tickers.is_empty(), "Expected some ticker data, got none");
 
         // Verify we got multiple symbols
         assert!(
@@ -464,7 +461,11 @@ mod tests {
         let api = MarketApi::new(10);
 
         let result = api.get_tickers().await;
-        assert!(result.is_ok(), "Failed to fetch tickers: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to fetch tickers: {:?}",
+            result.err()
+        );
 
         let tickers = result.unwrap();
 
@@ -473,11 +474,7 @@ mod tests {
 
         for symbol in major_symbols {
             let ticker = tickers.get(symbol);
-            assert!(
-                ticker.is_some(),
-                "Expected {} ticker to be present",
-                symbol
-            );
+            assert!(ticker.is_some(), "Expected {} ticker to be present", symbol);
 
             let ticker = ticker.unwrap();
 

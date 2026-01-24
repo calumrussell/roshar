@@ -4,8 +4,8 @@ pub(crate) mod ws;
 use rest::BinanceRestClient;
 use ws::MarketDataFeedHandle;
 
-pub(crate) use ws::MarketDataFeed;
 pub use roshar_types::BinancePremiumIndex;
+pub(crate) use ws::MarketDataFeed;
 pub use ws::MarketEvent;
 
 use roshar_ws_mgr::Manager;

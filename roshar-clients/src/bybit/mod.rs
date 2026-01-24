@@ -4,12 +4,12 @@ pub(crate) mod ws;
 use std::collections::HashMap;
 use ws::MarketDataFeedHandle;
 
+use rest::MarketApi;
 pub use rest::{
     ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitInstrumentInfo, ByBitLeverageFilter,
     ByBitLotSizeFilter, ByBitOrderResult, ByBitPriceFilter, ByBitTickerData, ByBitTickersResponse,
     MarketApi as ByBitMarketApi,
 };
-use rest::MarketApi;
 pub use roshar_types::ByBitHistoricalFundingRate;
 pub(crate) use ws::MarketDataFeed;
 pub use ws::MarketEvent;
