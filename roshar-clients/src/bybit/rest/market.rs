@@ -256,6 +256,48 @@ impl MarketApi {
         Ok(tickers_map)
     }
 
+    /// Get all funding rates with size information for perpetual contracts.
+    ///
+    /// Returns a vector of tuples: (symbol, funding_rate, open_interest_usd, daily_volume_usd)
+    /// Only includes perpetual contracts (identified by having a funding rate and next funding time).
+    pub async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, Box<dyn std::error::Error + Send + Sync>> {
+        let tickers = self.get_tickers().await?;
+
+        let mut funding_rates = Vec::new();
+
+        for ticker in tickers.values() {
+            // Perpetual contracts have a next_funding_time set (non-empty and not "0")
+            // Delivery/futures contracts have delivery_time set instead
+            let is_perpetual = !ticker.next_funding_time.is_empty()
+                && ticker.next_funding_time != "0"
+                && (ticker.delivery_time.is_empty() || ticker.delivery_time == "0");
+
+            if !is_perpetual {
+                continue;
+            }
+
+            // Parse funding_rate as f64
+            let funding_rate: f64 = ticker.funding_rate.parse().unwrap_or(0.0);
+
+            // open_interest_value is already in USD
+            let open_interest_usd: f64 = ticker.open_interest_value.parse().unwrap_or(0.0);
+
+            // turnover_24h is already in USD (quote currency volume)
+            let daily_volume_usd: f64 = ticker.turnover_24h.parse().unwrap_or(0.0);
+
+            funding_rates.push((
+                ticker.symbol.clone(),
+                funding_rate,
+                open_interest_usd,
+                daily_volume_usd,
+            ));
+        }
+
+        Ok(funding_rates)
+    }
+
     /// Fetch historical funding rates for a symbol
     ///
     /// Handles pagination internally - returns all funding rates in the time range.
@@ -408,5 +450,77 @@ mod tests {
         );
 
         println!("Fetched {} funding rates (pagination working)", rates.len());
+    }
+
+    #[tokio::test]
+    async fn test_get_all_funding_rates_with_size() {
+        let api = MarketApi::new(10);
+        let result = api.get_all_funding_rates_with_size().await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch funding rates with size: {:?}",
+            result.err()
+        );
+
+        let rates = result.unwrap();
+
+        // Should have many perpetual contracts
+        assert!(
+            !rates.is_empty(),
+            "Expected some funding rates, got none"
+        );
+
+        // Verify BTCUSDT is in the results (it's always available)
+        let btc_rate = rates.iter().find(|(symbol, _, _, _)| symbol == "BTCUSDT");
+        assert!(
+            btc_rate.is_some(),
+            "Expected BTCUSDT in funding rates"
+        );
+
+        let (symbol, funding_rate, open_interest_usd, daily_volume_usd) = btc_rate.unwrap();
+        println!(
+            "BTCUSDT - funding_rate: {}, open_interest_usd: {}, daily_volume_usd: {}",
+            funding_rate, open_interest_usd, daily_volume_usd
+        );
+
+        // Verify values are reasonable (BTC should have significant OI and volume)
+        assert!(
+            *open_interest_usd > 0.0,
+            "Expected positive open interest for BTCUSDT"
+        );
+        assert!(
+            *daily_volume_usd > 0.0,
+            "Expected positive daily volume for BTCUSDT"
+        );
+
+        // Verify all returned entries are perpetuals (have valid data)
+        for (sym, fr, oi, vol) in &rates {
+            // Funding rate can be negative, zero, or positive
+            assert!(
+                fr.is_finite(),
+                "Expected finite funding rate for {}, got {}",
+                sym,
+                fr
+            );
+            // OI and volume should be non-negative
+            assert!(
+                *oi >= 0.0,
+                "Expected non-negative open interest for {}, got {}",
+                sym,
+                oi
+            );
+            assert!(
+                *vol >= 0.0,
+                "Expected non-negative volume for {}, got {}",
+                sym,
+                vol
+            );
+        }
+
+        println!(
+            "Fetched {} perpetual contracts with funding rates",
+            rates.len()
+        );
     }
 }
