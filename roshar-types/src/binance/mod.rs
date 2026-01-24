@@ -27,6 +27,6 @@ pub struct BinancePremiumIndex {
     pub symbol: String,
     pub mark_price: String,
     pub index_price: String,
-    pub funding_rate: String,
+    pub last_funding_rate: String,
     pub next_funding_time: i64,
 }

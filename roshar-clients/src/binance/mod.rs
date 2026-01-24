@@ -7,7 +7,9 @@ use ws::MarketDataFeedHandle;
 pub(crate) use ws::MarketDataFeed;
 pub use ws::MarketEvent;
 
+use roshar_types::BinancePremiumIndex;
 use roshar_ws_mgr::Manager;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
@@ -137,5 +139,84 @@ impl BinanceClient {
             .get_exchange_info()
             .await
             .map_err(|e| format!("Failed to get exchange info: {}", e))
+    }
+
+    /// Get real-time funding rates for all perpetual contracts
+    ///
+    /// Returns a HashMap keyed by symbol for easy lookup of funding rate data.
+    /// Each entry contains mark price, index price, current funding rate, and next funding time.
+    pub async fn get_realtime_funding_rates(
+        &self,
+    ) -> Result<HashMap<String, BinancePremiumIndex>, String> {
+        let premium_index_list = self
+            .rest_client
+            .get_premium_index()
+            .await
+            .map_err(|e| format!("Failed to get premium index: {}", e))?;
+
+        let mut funding_rates = HashMap::new();
+        for premium_index in premium_index_list {
+            funding_rates.insert(premium_index.symbol.clone(), premium_index);
+        }
+
+        Ok(funding_rates)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_get_realtime_funding_rates() {
+        let ws_manager: Arc<Manager> = Manager::new();
+        let client = BinanceClient::new(ws_manager, 100, 10);
+
+        let result = client.get_realtime_funding_rates().await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch realtime funding rates: {:?}",
+            result.err()
+        );
+
+        let funding_rates = result.unwrap();
+
+        // Binance has many perpetual contracts, should have data
+        assert!(
+            !funding_rates.is_empty(),
+            "Expected funding rates data, got empty HashMap"
+        );
+
+        // Check that BTCUSDT exists (it's always available)
+        assert!(
+            funding_rates.contains_key("BTCUSDT"),
+            "Expected BTCUSDT in funding rates"
+        );
+
+        // Verify the structure of a funding rate entry
+        if let Some(btc_data) = funding_rates.get("BTCUSDT") {
+            assert_eq!(btc_data.symbol, "BTCUSDT");
+            // Mark price should be parseable as a float
+            btc_data
+                .mark_price
+                .parse::<f64>()
+                .expect("mark_price should be a valid number");
+            // Funding rate should be parseable as a float
+            btc_data
+                .last_funding_rate
+                .parse::<f64>()
+                .expect("last_funding_rate should be a valid number");
+            // Next funding time should be in the future (or very recent past)
+            assert!(
+                btc_data.next_funding_time > 0,
+                "next_funding_time should be positive"
+            );
+        }
+
+        println!(
+            "Fetched {} funding rates (lookup working)",
+            funding_rates.len()
+        );
     }
 }
