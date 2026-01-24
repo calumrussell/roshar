@@ -18,3 +18,17 @@ pub struct BinanceHistoricalFundingRate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mark_price: Option<String>,
 }
+
+/// Premium index data from Binance Futures API /fapi/v1/premiumIndex endpoint
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BinancePremiumIndexData {
+    pub symbol: String,
+    pub mark_price: String,
+    pub index_price: String,
+    pub estimated_settle_price: String,
+    pub last_funding_rate: String,
+    pub next_funding_time: i64,
+    pub interest_rate: String,
+    pub time: i64,
+}
