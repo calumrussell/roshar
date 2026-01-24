@@ -374,6 +374,105 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    async fn test_get_all_funding_rates_with_size() {
+        let api = MarketApi::new(10);
+        let result = api.get_all_funding_rates_with_size().await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to get funding rates with size: {:?}",
+            result.err()
+        );
+
+        let funding_rates = result.unwrap();
+        assert!(
+            !funding_rates.is_empty(),
+            "Funding rates should not be empty"
+        );
+
+        // Check structure of first entry
+        if let Some((symbol, rate, open_interest, volume)) = funding_rates.first() {
+            assert!(!symbol.is_empty(), "Symbol should not be empty");
+            assert!(rate.is_finite(), "Funding rate should be a finite number");
+            assert!(
+                open_interest >= &0.0,
+                "Open interest should be non-negative"
+            );
+            assert!(volume >= &0.0, "Volume should be non-negative");
+        }
+
+        // Verify we have expected major symbols
+        let symbols: Vec<&String> = funding_rates.iter().map(|(s, _, _, _)| s).collect();
+        assert!(
+            symbols.iter().any(|s| *s == "BTCUSDT"),
+            "Should contain BTCUSDT"
+        );
+        assert!(
+            symbols.iter().any(|s| *s == "ETHUSDT"),
+            "Should contain ETHUSDT"
+        );
+
+        // Verify all symbols have valid funding rate data
+        for (symbol, rate, open_interest, volume) in &funding_rates {
+            assert!(!symbol.is_empty(), "Symbol should not be empty for all entries");
+            assert!(rate.is_finite(), "Funding rate should be finite for {}", symbol);
+            assert!(
+                *open_interest >= 0.0,
+                "Open interest should be non-negative for {}",
+                symbol
+            );
+            assert!(
+                *volume >= 0.0,
+                "Volume should be non-negative for {}",
+                symbol
+            );
+        }
+
+        println!(
+            "Fetched {} funding rates with size data",
+            funding_rates.len()
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_all_funding_rates_with_size_data_parsing() {
+        let api = MarketApi::new(10);
+        let result = api.get_all_funding_rates_with_size().await;
+
+        assert!(result.is_ok(), "API call should succeed");
+        let funding_rates = result.unwrap();
+
+        // Verify data parsing is correct by checking that numeric values are reasonable
+        for (symbol, rate, open_interest, volume) in &funding_rates {
+            // Funding rates are typically small decimals (e.g., 0.0001 = 0.01%)
+            // They should be between -1 and 1 (i.e., -100% to 100%)
+            assert!(
+                *rate >= -1.0 && *rate <= 1.0,
+                "Funding rate {} for {} seems unreasonable (should be between -1 and 1)",
+                rate,
+                symbol
+            );
+
+            // Open interest in USD should be reasonable (not negative, not astronomical)
+            // ByBit provides open_interest_value which is already in USD
+            assert!(
+                *open_interest >= 0.0,
+                "Open interest {} for {} is negative",
+                open_interest,
+                symbol
+            );
+
+            // Volume should be non-negative
+            assert!(
+                *volume >= 0.0,
+                "Volume {} for {} is negative",
+                volume,
+                symbol
+            );
+        }
+    }
+
+    #[tokio::test]
     async fn test_get_historical_funding_rates() {
         // Fetch 30 days of funding rates for BTCUSDT
         let end_time = chrono::Utc::now().timestamp_millis();
