@@ -138,4 +138,16 @@ impl BinanceClient {
             .await
             .map_err(|e| format!("Failed to get exchange info: {}", e))
     }
+
+    /// Get current funding rates for all perpetual futures contracts.
+    ///
+    /// Returns Vec of (symbol, funding_rate, open_interest_usd, volume_usd)
+    pub async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, String> {
+        self.rest_client
+            .get_all_funding_rates_with_size()
+            .await
+            .map_err(|e| format!("Failed to get funding rates: {}", e))
+    }
 }
