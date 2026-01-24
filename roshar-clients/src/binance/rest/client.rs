@@ -1,8 +1,9 @@
 use crate::http::RateLimitedClient;
 use roshar_types::{
-    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
-    TickerData,
+    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, BinancePremiumIndexData, ExchangeInfo,
+    OpenInterestData, TickerData,
 };
+use std::collections::HashMap;
 
 const BASE_URL: &str = "https://fapi.binance.com";
 
@@ -116,6 +117,71 @@ impl BinanceRestClient {
         Ok(snapshot)
     }
 
+    /// Fetch premium index data for all symbols
+    ///
+    /// Returns funding rates and mark prices for all perpetual symbols.
+    pub async fn get_premium_index(
+        &self,
+    ) -> Result<Vec<BinancePremiumIndexData>, Box<dyn std::error::Error + Send + Sync>> {
+        let url = format!("{}/fapi/v1/premiumIndex", BASE_URL);
+        let response = self.get(&url).await?;
+
+        if !response.status().is_success() {
+            return Err(format!("Binance API error: HTTP {}", response.status()).into());
+        }
+
+        let response_text = response.text().await?;
+        let premium_index: Vec<BinancePremiumIndexData> = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse Binance premium index response: {e}"))?;
+
+        Ok(premium_index)
+    }
+
+    /// Fetch all funding rates with size information
+    ///
+    /// Returns a vector of tuples containing:
+    /// - symbol: Trading pair symbol (e.g., "BTCUSDT")
+    /// - funding_rate: Current funding rate as f64
+    /// - open_interest_usd: Open interest in USD (not available in bulk, returns 0.0)
+    /// - volume_24h_usd: 24-hour trading volume in USD
+    ///
+    /// Fetches data concurrently from /fapi/v1/premiumIndex and /fapi/v1/ticker/24hr
+    pub async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, Box<dyn std::error::Error + Send + Sync>> {
+        // Fetch both endpoints concurrently using tokio::join!
+        let (premium_index_result, ticker_result) =
+            tokio::join!(self.get_premium_index(), self.get_24hr_ticker(None));
+
+        let premium_index = premium_index_result?;
+        let tickers = ticker_result?;
+
+        // Build a map of symbol -> ticker data for efficient lookup
+        let ticker_map: HashMap<String, &TickerData> =
+            tickers.iter().map(|t| (t.symbol.clone(), t)).collect();
+
+        let mut funding_rates = Vec::new();
+
+        for premium in premium_index {
+            // Parse funding rate
+            let funding_rate = premium.last_funding_rate.parse::<f64>().unwrap_or(0.0);
+
+            // Get volume from ticker data
+            let volume_24h_usd = ticker_map
+                .get(&premium.symbol)
+                .and_then(|t| t.quote_volume.parse::<f64>().ok())
+                .unwrap_or(0.0);
+
+            // Open interest is not available in bulk from Binance API
+            // Would require per-symbol requests to /fapi/v1/openInterest
+            let open_interest_usd = 0.0;
+
+            funding_rates.push((premium.symbol, funding_rate, open_interest_usd, volume_24h_usd));
+        }
+
+        Ok(funding_rates)
+    }
+
     /// Fetch historical funding rates for a symbol
     ///
     /// Handles pagination internally - returns all funding rates in the time range.
@@ -179,6 +245,51 @@ impl BinanceRestClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn test_get_all_funding_rates_with_size() {
+        let client = BinanceRestClient::new(10);
+        let result = client.get_all_funding_rates_with_size().await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to get funding rates with size: {:?}",
+            result.err()
+        );
+
+        let funding_rates = result.unwrap();
+        assert!(
+            !funding_rates.is_empty(),
+            "Funding rates should not be empty"
+        );
+
+        // Check structure of first entry
+        if let Some((symbol, rate, open_interest, volume)) = funding_rates.first() {
+            assert!(!symbol.is_empty(), "Symbol should not be empty");
+            assert!(rate.is_finite(), "Funding rate should be a finite number");
+            assert!(
+                open_interest >= &0.0,
+                "Open interest should be non-negative"
+            );
+            assert!(volume >= &0.0, "Volume should be non-negative");
+        }
+
+        // Verify we have expected major symbols
+        let symbols: Vec<&String> = funding_rates.iter().map(|(s, _, _, _)| s).collect();
+        assert!(
+            symbols.iter().any(|s| *s == "BTCUSDT"),
+            "Should contain BTCUSDT"
+        );
+        assert!(
+            symbols.iter().any(|s| *s == "ETHUSDT"),
+            "Should contain ETHUSDT"
+        );
+
+        println!(
+            "Fetched {} funding rates with size data",
+            funding_rates.len()
+        );
+    }
 
     #[tokio::test]
     async fn test_get_historical_funding_rates_pagination() {
