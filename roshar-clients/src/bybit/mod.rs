@@ -1,6 +1,7 @@
 pub(crate) mod rest;
 pub(crate) mod ws;
 
+use std::collections::HashMap;
 use ws::MarketDataFeedHandle;
 
 pub use rest::{
@@ -8,6 +9,7 @@ pub use rest::{
     ByBitLotSizeFilter, ByBitOrderResult, ByBitPriceFilter, ByBitTickerData, ByBitTickersResponse,
     MarketApi as ByBitMarketApi,
 };
+use rest::MarketApi;
 pub use roshar_types::ByBitHistoricalFundingRate;
 pub(crate) use ws::MarketDataFeed;
 pub use ws::MarketEvent;
@@ -16,15 +18,24 @@ use roshar_ws_mgr::Manager;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
-/// ByBit client that manages WebSocket feeds
+/// Simplified funding rate information extracted from ticker data
+#[derive(Debug, Clone)]
+pub struct FundingRateInfo {
+    pub symbol: String,
+    pub funding_rate: String,
+    pub next_funding_time: String,
+}
+
+/// ByBit client that manages WebSocket feeds and REST API access
 pub struct ByBitClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
+    market_api: MarketApi,
 }
 
 impl ByBitClient {
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
+    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, market_api: MarketApi) -> Self {
         let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
@@ -34,6 +45,7 @@ impl ByBitClient {
         Self {
             market_data_handle,
             market_data_feed_handle,
+            market_api,
         }
     }
 
@@ -98,5 +110,37 @@ impl ByBitClient {
                 e
             );
         }
+    }
+
+    /// Get all linear perpetual tickers
+    /// Returns a map of symbol -> ticker data
+    pub async fn get_tickers(
+        &self,
+    ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>> {
+        self.market_api.get_tickers().await
+    }
+
+    /// Get real-time funding rates for all linear perpetuals
+    /// Returns a simplified map of symbol -> funding rate info
+    pub async fn get_funding_rates(
+        &self,
+    ) -> Result<HashMap<String, FundingRateInfo>, Box<dyn std::error::Error + Send + Sync>> {
+        let tickers = self.market_api.get_tickers().await?;
+
+        let funding_rates: HashMap<String, FundingRateInfo> = tickers
+            .into_iter()
+            .map(|(symbol, ticker)| {
+                (
+                    symbol.clone(),
+                    FundingRateInfo {
+                        symbol,
+                        funding_rate: ticker.funding_rate,
+                        next_funding_time: ticker.next_funding_time,
+                    },
+                )
+            })
+            .collect();
+
+        Ok(funding_rates)
     }
 }

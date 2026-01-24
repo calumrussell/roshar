@@ -24,7 +24,8 @@ pub use binance::MarketEvent as BinanceMarketEvent;
 // Re-export ByBit types
 pub use bybit::{
     ByBitClient, ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitHistoricalFundingRate,
-    ByBitMarketApi, ByBitTickerData, ByBitTickersResponse, MarketEvent as ByBitMarketEvent,
+    ByBitMarketApi, ByBitTickerData, ByBitTickersResponse, FundingRateInfo as ByBitFundingRateInfo,
+    MarketEvent as ByBitMarketEvent,
 };
 
 // Re-export Kraken types
