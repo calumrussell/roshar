@@ -1,6 +1,8 @@
 pub(crate) mod rest;
 pub(crate) mod ws;
 
+use crate::http::RateLimitedClient;
+use rest::MarketApi;
 use ws::MarketDataFeedHandle;
 
 pub use rest::{
@@ -16,24 +18,30 @@ use roshar_ws_mgr::Manager;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
-/// ByBit client that manages WebSocket feeds
+/// ByBit client that manages WebSocket feeds and REST API calls
 pub struct ByBitClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
+    // REST APIs
+    market_api: MarketApi,
 }
 
 impl ByBitClient {
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
+    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, requests_per_second: u32) -> Self {
         let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
         });
 
+        // Create a single shared rate-limited HTTP client for ALL ByBit REST API calls
+        let http_client = Arc::new(RateLimitedClient::new(requests_per_second, 1));
+
         Self {
             market_data_handle,
             market_data_feed_handle,
+            market_api: MarketApi::new_with_client(http_client),
         }
     }
 
@@ -98,5 +106,16 @@ impl ByBitClient {
                 e
             );
         }
+    }
+
+    /// Get all funding rates with size data
+    /// Returns Vec of (symbol, funding_rate, open_interest_usd, volume_usd)
+    pub async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, String> {
+        self.market_api
+            .get_all_funding_rates_with_size()
+            .await
+            .map_err(|e| format!("Failed to get funding rates: {}", e))
     }
 }
