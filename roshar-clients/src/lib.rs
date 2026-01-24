@@ -19,6 +19,7 @@ pub use state_manager::{PendingOrderInfo, PositionState};
 
 // Re-export Binance types
 pub use binance::BinanceClient;
+pub use binance::BinancePremiumIndex;
 pub use binance::MarketEvent as BinanceMarketEvent;
 
 // Re-export ByBit types
