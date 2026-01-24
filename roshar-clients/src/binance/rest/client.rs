@@ -1,7 +1,7 @@
 use crate::http::RateLimitedClient;
 use roshar_types::{
-    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
-    TickerData,
+    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, BinancePremiumIndex, ExchangeInfo,
+    OpenInterestData, TickerData,
 };
 
 const BASE_URL: &str = "https://fapi.binance.com";
@@ -114,6 +114,29 @@ impl BinanceRestClient {
             .map_err(|e| format!("Failed to parse Binance depth snapshot response: {e}"))?;
 
         Ok(snapshot)
+    }
+
+    /// Fetch real-time premium index data for all perpetual contracts
+    ///
+    /// Returns mark price, index price, and funding rate information.
+    /// This endpoint provides funding rates for ALL symbols in a single call.
+    pub async fn get_premium_index(
+        &self,
+    ) -> Result<Vec<BinancePremiumIndex>, Box<dyn std::error::Error + Send + Sync>> {
+        let url = format!("{}/fapi/v1/premiumIndex", BASE_URL);
+        let response = self.get(&url).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(format!("Premium index endpoint failed (status: {status}): {body}").into());
+        }
+
+        let response_text = response.text().await?;
+        let premium_index: Vec<BinancePremiumIndex> = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse Binance premium index response: {e}"))?;
+
+        Ok(premium_index)
     }
 
     /// Fetch historical funding rates for a symbol
