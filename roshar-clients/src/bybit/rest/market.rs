@@ -409,4 +409,100 @@ mod tests {
 
         println!("Fetched {} funding rates (pagination working)", rates.len());
     }
+
+    #[tokio::test]
+    async fn test_get_tickers() {
+        let api = MarketApi::new(10);
+
+        let result = api.get_tickers().await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch tickers: {:?}",
+            result.err()
+        );
+
+        let tickers = result.unwrap();
+
+        // Should return multiple tickers
+        assert!(
+            !tickers.is_empty(),
+            "Expected some ticker data, got none"
+        );
+
+        // Verify we got multiple symbols
+        assert!(
+            tickers.len() > 10,
+            "Expected many tickers, got only {}",
+            tickers.len()
+        );
+
+        // Verify BTCUSDT exists (a known perpetual)
+        assert!(
+            tickers.contains_key("BTCUSDT"),
+            "Expected BTCUSDT ticker to be present"
+        );
+
+        // Verify ticker data fields are populated
+        let btc_ticker = tickers.get("BTCUSDT").unwrap();
+        assert_eq!(btc_ticker.symbol, "BTCUSDT", "Symbol mismatch");
+        assert!(
+            !btc_ticker.last_price.is_empty(),
+            "Last price should not be empty"
+        );
+        assert!(
+            !btc_ticker.funding_rate.is_empty(),
+            "Funding rate should not be empty"
+        );
+
+        println!("Fetched {} tickers", tickers.len());
+    }
+
+    #[tokio::test]
+    async fn test_get_tickers_funding_rate_data() {
+        // Test that tickers contain valid funding rate data
+        let api = MarketApi::new(10);
+
+        let result = api.get_tickers().await;
+        assert!(result.is_ok(), "Failed to fetch tickers: {:?}", result.err());
+
+        let tickers = result.unwrap();
+
+        // Check a few major perpetuals have funding rate data
+        let major_symbols = ["BTCUSDT", "ETHUSDT"];
+
+        for symbol in major_symbols {
+            let ticker = tickers.get(symbol);
+            assert!(
+                ticker.is_some(),
+                "Expected {} ticker to be present",
+                symbol
+            );
+
+            let ticker = ticker.unwrap();
+
+            // Funding rate should be a parseable number
+            let funding_rate: Result<f64, _> = ticker.funding_rate.parse();
+            assert!(
+                funding_rate.is_ok(),
+                "Funding rate for {} should be a valid number, got: {}",
+                symbol,
+                ticker.funding_rate
+            );
+
+            // Next funding time should be a parseable timestamp
+            let next_funding_time: Result<i64, _> = ticker.next_funding_time.parse();
+            assert!(
+                next_funding_time.is_ok(),
+                "Next funding time for {} should be a valid timestamp, got: {}",
+                symbol,
+                ticker.next_funding_time
+            );
+
+            println!(
+                "{}: funding_rate={}, next_funding_time={}",
+                symbol, ticker.funding_rate, ticker.next_funding_time
+            );
+        }
+    }
 }

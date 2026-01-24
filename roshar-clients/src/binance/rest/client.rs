@@ -254,4 +254,77 @@ mod tests {
 
         println!("Fetched {} funding rates (pagination working)", rates.len());
     }
+
+    #[tokio::test]
+    async fn test_get_premium_index_all_symbols() {
+        let client = BinanceRestClient::new(10);
+
+        // Fetch premium index for all symbols (no symbol filter)
+        let result = client.get_premium_index(None).await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch premium index: {:?}",
+            result.err()
+        );
+
+        let premium_indices = result.unwrap();
+
+        // Should return multiple symbols
+        assert!(
+            !premium_indices.is_empty(),
+            "Expected some premium index data, got none"
+        );
+
+        // Verify we got multiple symbols (not just one)
+        assert!(
+            premium_indices.len() > 10,
+            "Expected many symbols, got only {}",
+            premium_indices.len()
+        );
+
+        // Verify each entry has required fields populated
+        for premium_index in &premium_indices {
+            assert!(
+                !premium_index.symbol.is_empty(),
+                "Symbol should not be empty"
+            );
+        }
+
+        println!(
+            "Fetched premium index for {} symbols",
+            premium_indices.len()
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_premium_index_single_symbol() {
+        let client = BinanceRestClient::new(10);
+
+        // Fetch premium index for a specific symbol
+        let result = client.get_premium_index(Some("BTCUSDT")).await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch premium index for BTCUSDT: {:?}",
+            result.err()
+        );
+
+        let premium_indices = result.unwrap();
+
+        // Should return exactly one result
+        assert_eq!(
+            premium_indices.len(),
+            1,
+            "Expected exactly 1 result, got {}",
+            premium_indices.len()
+        );
+
+        assert_eq!(
+            premium_indices[0].symbol, "BTCUSDT",
+            "Expected BTCUSDT symbol"
+        );
+
+        println!("Fetched premium index for BTCUSDT successfully");
+    }
 }
