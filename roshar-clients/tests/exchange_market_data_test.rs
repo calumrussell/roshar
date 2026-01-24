@@ -301,10 +301,7 @@ mod funding_rates {
                     .mark_price
                     .parse()
                     .expect("[Binance] mark_price should be a valid number");
-                assert!(
-                    mark_price > 0.0,
-                    "[Binance] mark_price should be positive"
-                );
+                assert!(mark_price > 0.0, "[Binance] mark_price should be positive");
 
                 // Funding rate should be parseable as a float
                 let _funding_rate: f64 = btc_data
@@ -446,23 +443,29 @@ mod funding_rates {
             // Check structure of entries
             let mut found_btc = false;
             for (symbol, rate, open_interest, volume) in &funding_rates {
-                assert!(!symbol.is_empty(), "[Hyperliquid] Symbol should not be empty");
-                assert!(rate.is_finite(), "[Hyperliquid] Funding rate should be a finite number");
+                assert!(
+                    !symbol.is_empty(),
+                    "[Hyperliquid] Symbol should not be empty"
+                );
+                assert!(
+                    rate.is_finite(),
+                    "[Hyperliquid] Funding rate should be a finite number"
+                );
                 assert!(
                     *open_interest >= 0.0,
                     "[Hyperliquid] Open interest should be non-negative"
                 );
-                assert!(*volume >= 0.0, "[Hyperliquid] Volume should be non-negative");
+                assert!(
+                    *volume >= 0.0,
+                    "[Hyperliquid] Volume should be non-negative"
+                );
 
                 if symbol == "BTC" {
                     found_btc = true;
                 }
             }
 
-            assert!(
-                found_btc,
-                "[Hyperliquid] Expected BTC in funding rates"
-            );
+            assert!(found_btc, "[Hyperliquid] Expected BTC in funding rates");
 
             // Find BTC entry for logging
             if let Some((_, rate, oi, vol)) = funding_rates.iter().find(|(s, _, _, _)| s == "BTC") {
