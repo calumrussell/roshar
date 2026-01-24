@@ -256,6 +256,36 @@ impl MarketApi {
         Ok(tickers_map)
     }
 
+    /// Get all funding rates with size data for perpetual contracts
+    ///
+    /// Returns a vector of (symbol, funding_rate, open_interest_usd, volume_24h_usd)
+    /// Uses the existing tickers API which contains all required data.
+    pub async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, Box<dyn std::error::Error + Send + Sync>> {
+        let tickers = self.get_tickers().await?;
+
+        let mut funding_rates = Vec::new();
+
+        for (symbol, ticker) in tickers {
+            // Parse funding rate from string to f64
+            let funding_rate: f64 = ticker.funding_rate.parse().unwrap_or(0.0);
+
+            // Parse open interest value (already in USD)
+            let open_interest_usd: f64 = ticker.open_interest_value.parse().unwrap_or(0.0);
+
+            // Parse turnover_24h (already in USD for linear contracts)
+            let volume_24h_usd: f64 = ticker.turnover_24h.parse().unwrap_or(0.0);
+
+            // Only include if we have a valid funding rate or open interest
+            if funding_rate != 0.0 || open_interest_usd > 0.0 {
+                funding_rates.push((symbol, funding_rate, open_interest_usd, volume_24h_usd));
+            }
+        }
+
+        Ok(funding_rates)
+    }
+
     /// Fetch historical funding rates for a symbol
     ///
     /// Handles pagination internally - returns all funding rates in the time range.
