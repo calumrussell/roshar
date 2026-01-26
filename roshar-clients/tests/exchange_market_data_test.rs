@@ -13,7 +13,7 @@ mod binance {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let client = BinanceClient::new(ws_manager, 1000, 10);
+        let client = BinanceClient::new(ws_manager, 1000, 10, 300);
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
@@ -54,7 +54,7 @@ mod binance {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let client = BinanceClient::new(ws_manager, 1000, 10);
+        let client = BinanceClient::new(ws_manager, 1000, 10, 300);
         let mut event_rx = client
             .take_event_receiver()
             .await
@@ -133,7 +133,7 @@ mod bybit {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let client = ByBitClient::new(ws_manager, 1000);
+        let client = ByBitClient::new(ws_manager, 1000, 300, 10);
 
         tokio::time::sleep(Duration::from_secs(2)).await;
 
@@ -174,7 +174,7 @@ mod bybit {
         let _ = env_logger::try_init();
 
         let ws_manager: Arc<Manager> = Manager::new();
-        let client = ByBitClient::new(ws_manager, 1000);
+        let client = ByBitClient::new(ws_manager, 1000, 300, 10);
         let mut event_rx = client
             .take_event_receiver()
             .await
