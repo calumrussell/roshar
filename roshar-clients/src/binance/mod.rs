@@ -1,7 +1,7 @@
 pub(crate) mod rest;
 pub(crate) mod ws;
 
-use rest::BinanceRestClient;
+use rest::{BinanceRestClient, ExchangeMetadataHandle, ExchangeMetadataManager};
 use ws::MarketDataFeedHandle;
 
 pub(crate) use ws::MarketDataFeed;
@@ -17,6 +17,9 @@ pub struct BinanceClient {
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
     rest_client: BinanceRestClient,
+    metadata_handle: ExchangeMetadataHandle,
+    #[allow(dead_code)]
+    metadata_manager_handle: tokio::task::JoinHandle<()>,
 }
 
 impl BinanceClient {
@@ -26,17 +29,28 @@ impl BinanceClient {
     /// * `ws_manager` - WebSocket manager
     /// * `channel_size` - Channel size for market data
     /// * `requests_per_second` - Maximum REST API requests per second
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, requests_per_second: u32) -> Self {
+    /// * `metadata_update_interval_secs` - Interval in seconds for metadata cache updates
+    pub fn new(
+        ws_manager: Arc<Manager>,
+        channel_size: usize,
+        requests_per_second: u32,
+        metadata_update_interval_secs: u64,
+    ) -> Self {
         let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
         });
 
+        let (metadata_handle, metadata_manager_handle) =
+            ExchangeMetadataManager::spawn(metadata_update_interval_secs, requests_per_second);
+
         Self {
             market_data_handle,
             market_data_feed_handle,
             rest_client: BinanceRestClient::new(requests_per_second),
+            metadata_handle,
+            metadata_manager_handle,
         }
     }
 
@@ -103,15 +117,26 @@ impl BinanceClient {
         self.market_data_handle.get_latest_depth(symbol).await
     }
 
-    /// Get 24hr ticker data for all symbols or a specific symbol
+    /// Get 24hr ticker data for all symbols or a specific symbol (from cache)
     pub async fn get_24hr_ticker(
         &self,
         symbol: Option<&str>,
     ) -> Result<Vec<roshar_types::TickerData>, String> {
-        self.rest_client
-            .get_24hr_ticker(symbol)
-            .await
-            .map_err(|e| format!("Failed to get 24hr ticker: {}", e))
+        let ticker_map = self.metadata_handle.get_ticker_data().await?;
+        match symbol {
+            Some(sym) => {
+                // Filter to the specific symbol
+                Ok(ticker_map
+                    .into_iter()
+                    .filter(|(s, _)| s == sym)
+                    .map(|(_, v)| v)
+                    .collect())
+            }
+            None => {
+                // Return all tickers
+                Ok(ticker_map.into_values().collect())
+            }
+        }
     }
 
     /// Get historical funding rates for a symbol
@@ -131,11 +156,8 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get historical funding rates: {}", e))
     }
 
-    /// Get exchange info including all available symbols
+    /// Get exchange info including all available symbols (from cache)
     pub async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
-        self.rest_client
-            .get_exchange_info()
-            .await
-            .map_err(|e| format!("Failed to get exchange info: {}", e))
+        self.metadata_handle.get_exchange_info().await
     }
 }
