@@ -1,11 +1,14 @@
 pub(crate) mod rest;
 pub(crate) mod ws;
 
+use rest::{ExchangeMetadataHandle, ExchangeMetadataManager};
+use std::collections::HashMap;
 use ws::MarketDataFeedHandle;
 
 pub use rest::{
     ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitInstrumentInfo, ByBitLeverageFilter,
     ByBitLotSizeFilter, ByBitOrderResult, ByBitPriceFilter, ByBitTickerData, ByBitTickersResponse,
+    ExchangeMetadataHandle as ByBitMetadataHandle, ExchangeMetadataManager as ByBitMetadataManager,
     MarketApi as ByBitMarketApi,
 };
 pub use roshar_types::ByBitHistoricalFundingRate;
@@ -21,20 +24,45 @@ pub struct ByBitClient {
     market_data_handle: MarketDataFeedHandle,
     #[allow(dead_code)]
     market_data_feed_handle: tokio::task::JoinHandle<()>,
+    metadata_handle: ExchangeMetadataHandle,
+    #[allow(dead_code)]
+    metadata_manager_handle: tokio::task::JoinHandle<()>,
 }
 
 impl ByBitClient {
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
+    pub fn new(
+        ws_manager: Arc<Manager>,
+        channel_size: usize,
+        metadata_update_interval_secs: u64,
+        requests_per_second: u32,
+    ) -> Self {
         let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
         let market_data_handle = market_data_feed.get_handle();
         let market_data_feed_handle = tokio::spawn(async move {
             market_data_feed.run().await;
         });
 
+        let (metadata_handle, metadata_manager_handle) =
+            ExchangeMetadataManager::spawn(metadata_update_interval_secs, requests_per_second);
+
         Self {
             market_data_handle,
             market_data_feed_handle,
+            metadata_handle,
+            metadata_manager_handle,
         }
+    }
+
+    /// Get cached instruments info from metadata manager
+    /// Returns HashMap of symbol -> ByBitInstrumentInfo
+    pub async fn get_instruments_info(&self) -> Result<HashMap<String, ByBitInstrumentInfo>, String> {
+        self.metadata_handle.get_instruments_info().await
+    }
+
+    /// Get cached ticker data from metadata manager
+    /// Returns HashMap of symbol -> ByBitTickerData
+    pub async fn get_ticker_data(&self) -> Result<HashMap<String, ByBitTickerData>, String> {
+        self.metadata_handle.get_ticker_data().await
     }
 
     /// Get the event receiver for reactive market data consumption
