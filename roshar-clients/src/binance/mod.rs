@@ -154,6 +154,8 @@ impl BinanceClient {
             .get_klines(symbol, interval, start_time, end_time, limit)
             .await
             .map_err(|e| format!("Failed to get klines: {}", e))
+    }
+
     /// Get real-time funding rates for all perpetual contracts
     ///
     /// Returns a HashMap keyed by symbol for easy lookup of funding rate data.

@@ -1,8 +1,7 @@
 use crate::http::RateLimitedClient;
 use roshar_types::{
-    BinanceHistoricalFundingRate, BinanceKline, BinanceOrderBookSnapshot, ExchangeInfo,
-    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, BinancePremiumIndex, ExchangeInfo,
-    OpenInterestData, TickerData,
+    BinanceHistoricalFundingRate, BinanceKline, BinanceOrderBookSnapshot, BinancePremiumIndex,
+    ExchangeInfo, OpenInterestData, TickerData,
 };
 
 const BASE_URL: &str = "https://fapi.binance.com";
@@ -159,6 +158,8 @@ impl BinanceRestClient {
             .map_err(|e| format!("Failed to parse Binance klines response: {e}"))?;
 
         Ok(klines)
+    }
+
     /// Fetch real-time premium index data for all perpetual contracts
     ///
     /// Returns mark price, index price, and funding rate information.
