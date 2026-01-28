@@ -138,4 +138,19 @@ impl BinanceClient {
             .await
             .map_err(|e| format!("Failed to get exchange info: {}", e))
     }
+
+    /// Get klines (candlestick) data for a symbol
+    pub async fn get_klines(
+        &self,
+        symbol: &str,
+        interval: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::BinanceKline>, String> {
+        self.rest_client
+            .get_klines(symbol, interval, start_time, end_time, limit)
+            .await
+            .map_err(|e| format!("Failed to get klines: {}", e))
+    }
 }
