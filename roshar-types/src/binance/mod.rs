@@ -1,3 +1,4 @@
+mod kline;
 mod ws;
 
 pub use ws::{
@@ -5,6 +6,8 @@ pub use ws::{
     BinanceOrderBookSnapshot, BinanceTradeMessage, BinanceWssMessage, ExchangeInfo,
     OpenInterestData, SymbolInfo, TickerData,
 };
+
+pub use self::kline::BinanceKline;
 
 use serde::{Deserialize, Serialize};
 
