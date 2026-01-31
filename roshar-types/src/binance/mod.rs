@@ -18,3 +18,22 @@ pub struct BinanceHistoricalFundingRate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mark_price: Option<String>,
 }
+
+/// Aggregate trade data from Binance API
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BinanceAggTrade {
+    #[serde(rename = "a")]
+    pub agg_trade_id: i64,
+    #[serde(rename = "p")]
+    pub price: String,
+    #[serde(rename = "q")]
+    pub quantity: String,
+    #[serde(rename = "f")]
+    pub first_trade_id: i64,
+    #[serde(rename = "l")]
+    pub last_trade_id: i64,
+    #[serde(rename = "T")]
+    pub timestamp: i64,
+    #[serde(rename = "m")]
+    pub is_buyer_maker: bool,
+}
