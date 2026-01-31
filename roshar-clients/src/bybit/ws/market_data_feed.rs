@@ -461,9 +461,7 @@ impl MarketDataFeed {
             }
             SubscriptionCommand::GetEventChannel { response } => {
                 self.raw_mode = false;
-                log::info!(
-                    "Event channel requested for ByBit market data feed, raw_mode disabled"
-                );
+                log::info!("Event channel requested for ByBit market data feed, raw_mode disabled");
                 let _ = response.send(self.event_tx.subscribe());
             }
             SubscriptionCommand::GetRawChannel { response } => {

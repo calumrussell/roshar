@@ -78,7 +78,7 @@ mod binance {
 
         let timeout = tokio::time::timeout(Duration::from_secs(30), async {
             while depth_count < target_events {
-                if let Some(event) = event_rx.recv().await {
+                if let Ok(event) = event_rx.recv().await {
                     match event {
                         MarketEvent::DepthUpdate { symbol, book } => {
                             depth_count += 1;
@@ -198,7 +198,7 @@ mod bybit {
 
         let timeout = tokio::time::timeout(Duration::from_secs(30), async {
             while depth_count < target_events {
-                if let Some(event) = event_rx.recv().await {
+                if let Ok(event) = event_rx.recv().await {
                     match event {
                         MarketEvent::DepthUpdate { symbol, book } => {
                             depth_count += 1;
@@ -318,7 +318,7 @@ mod kraken {
 
         let timeout = tokio::time::timeout(Duration::from_secs(30), async {
             while depth_count < target_events {
-                if let Some(event) = event_rx.recv().await {
+                if let Ok(event) = event_rx.recv().await {
                     match event {
                         MarketEvent::DepthUpdate { symbol, book } => {
                             depth_count += 1;
