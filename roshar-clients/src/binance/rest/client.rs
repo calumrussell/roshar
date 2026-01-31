@@ -1,7 +1,7 @@
 use crate::http::RateLimitedClient;
 use roshar_types::{
-    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
-    TickerData,
+    BinanceAggTrade, BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo,
+    OpenInterestData, TickerData,
 };
 
 const BASE_URL: &str = "https://fapi.binance.com";
@@ -173,6 +173,55 @@ impl BinanceRestClient {
         }
 
         Ok(all_rates)
+    }
+
+    /// Fetch aggregate trades for a symbol
+    ///
+    /// # Arguments
+    /// * `symbol` - Trading pair symbol (e.g., "BTCUSDT")
+    /// * `start_time` - Optional start time in milliseconds
+    /// * `end_time` - Optional end time in milliseconds
+    /// * `from_id` - Optional aggregate trade ID to fetch from
+    /// * `limit` - Optional number of results (max 1000)
+    pub async fn get_agg_trades(
+        &self,
+        symbol: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        from_id: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<BinanceAggTrade>, Box<dyn std::error::Error + Send + Sync>> {
+        let mut url = format!("{}/fapi/v1/aggTrades?symbol={}", BASE_URL, symbol);
+
+        if let Some(start) = start_time {
+            url.push_str(&format!("&startTime={}", start));
+        }
+        if let Some(end) = end_time {
+            url.push_str(&format!("&endTime={}", end));
+        }
+        if let Some(id) = from_id {
+            url.push_str(&format!("&fromId={}", id));
+        }
+        if let Some(lim) = limit {
+            let lim = lim.min(1000);
+            url.push_str(&format!("&limit={}", lim));
+        }
+
+        let response = self.get(&url).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(
+                format!("Aggregate trades endpoint failed (status: {status}): {body}").into(),
+            );
+        }
+
+        let response_text = response.text().await?;
+        let agg_trades: Vec<BinanceAggTrade> = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse Binance aggregate trades response: {e}"))?;
+
+        Ok(agg_trades)
     }
 }
 
