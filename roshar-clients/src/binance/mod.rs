@@ -141,6 +141,28 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get exchange info: {}", e))
     }
 
+    /// Get aggregate trades for a symbol
+    ///
+    /// # Arguments
+    /// * `symbol` - Trading pair symbol (e.g., "BTCUSDT")
+    /// * `start_time` - Optional start time in milliseconds
+    /// * `end_time` - Optional end time in milliseconds
+    /// * `from_id` - Optional aggregate trade ID to fetch from
+    /// * `limit` - Optional number of results (max 1000)
+    pub async fn get_agg_trades(
+        &self,
+        symbol: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        from_id: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::BinanceAggTrade>, String> {
+        self.rest_client
+            .get_agg_trades(symbol, start_time, end_time, from_id, limit)
+            .await
+            .map_err(|e| format!("Failed to get aggregate trades: {}", e))
+    }
+
     /// Get klines (candlestick) data for a symbol
     pub async fn get_klines(
         &self,
