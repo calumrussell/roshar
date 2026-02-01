@@ -11,7 +11,7 @@ use roshar_types::BinancePremiumIndex;
 use roshar_ws_mgr::Manager;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::mpsc;
+use tokio::sync::{broadcast, mpsc};
 
 /// Binance client that manages WebSocket feeds and REST API calls
 pub struct BinanceClient {
@@ -43,9 +43,9 @@ impl BinanceClient {
     }
 
     /// Get the event receiver for reactive market data consumption
-    /// Can only be called once - subsequent calls will return an error
+    /// Can be called multiple times to create multiple subscribers
     /// Automatically disables raw mode
-    pub async fn take_event_receiver(&self) -> Result<mpsc::Receiver<MarketEvent>, String> {
+    pub async fn take_event_receiver(&self) -> Result<broadcast::Receiver<MarketEvent>, String> {
         self.market_data_handle.get_event_channel().await
     }
 
