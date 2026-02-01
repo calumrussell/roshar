@@ -680,9 +680,8 @@ impl HyperliquidClient {
         self.market_data_handle.remove_trades(coin).await
     }
 
-    /// Take the event receiver for reactive market data consumption
     /// Get the event receiver for reactive market data consumption
-    /// Can only be called once - subsequent calls will return an error
+    /// Can be called multiple times to create multiple subscribers
     /// Automatically disables raw mode
     pub async fn take_event_receiver(&self) -> Result<broadcast::Receiver<MarketEvent>, String> {
         self.market_data_handle.get_event_channel().await
