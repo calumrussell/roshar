@@ -1,0 +1,23 @@
+[package]
+name = "one-time-jobs"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "One-time data backfill jobs for Roshar"
+repository = "https://github.com/calumrussell/roshar"
+
+[[bin]]
+name = "one-time-jobs"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive", "env"] }
+chrono = "0.4"
+clickhouse = "0.12"
+log = "0.4"
+env_logger = "0.11"
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
