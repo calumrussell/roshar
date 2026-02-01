@@ -1,7 +1,7 @@
 use crate::http::RateLimitedClient;
 use roshar_types::{
-    BinanceHistoricalFundingRate, BinanceOrderBookSnapshot, ExchangeInfo, OpenInterestData,
-    TickerData,
+    BinanceHistoricalFundingRate, BinanceKline, BinanceOrderBookSnapshot, BinancePremiumIndex,
+    ExchangeInfo, OpenInterestData, TickerData,
 };
 
 const BASE_URL: &str = "https://fapi.binance.com";
@@ -114,6 +114,73 @@ impl BinanceRestClient {
             .map_err(|e| format!("Failed to parse Binance depth snapshot response: {e}"))?;
 
         Ok(snapshot)
+    }
+
+    /// Fetch kline/candlestick data for a symbol
+    ///
+    /// # Arguments
+    /// * `symbol` - Trading pair symbol (e.g., "BTCUSDT")
+    /// * `interval` - Kline interval (e.g., "1m", "5m", "1h", "1d")
+    /// * `start_time` - Optional start time in milliseconds
+    /// * `end_time` - Optional end time in milliseconds
+    /// * `limit` - Optional number of results (default 500, max 1500)
+    pub async fn get_klines(
+        &self,
+        symbol: &str,
+        interval: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<BinanceKline>, Box<dyn std::error::Error + Send + Sync>> {
+        let mut url = format!(
+            "{}/fapi/v1/klines?symbol={}&interval={}",
+            BASE_URL, symbol, interval
+        );
+
+        if let Some(start) = start_time {
+            url.push_str(&format!("&startTime={}", start));
+        }
+        if let Some(end) = end_time {
+            url.push_str(&format!("&endTime={}", end));
+        }
+        if let Some(lim) = limit {
+            url.push_str(&format!("&limit={}", lim));
+        }
+
+        let response = self.get(&url).await?;
+
+        if !response.status().is_success() {
+            return Err(format!("Binance API error: HTTP {}", response.status()).into());
+        }
+
+        let response_text = response.text().await?;
+        let klines: Vec<BinanceKline> = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse Binance klines response: {e}"))?;
+
+        Ok(klines)
+    }
+
+    /// Fetch real-time premium index data for all perpetual contracts
+    ///
+    /// Returns mark price, index price, and funding rate information.
+    /// This endpoint provides funding rates for ALL symbols in a single call.
+    pub async fn get_premium_index(
+        &self,
+    ) -> Result<Vec<BinancePremiumIndex>, Box<dyn std::error::Error + Send + Sync>> {
+        let url = format!("{}/fapi/v1/premiumIndex", BASE_URL);
+        let response = self.get(&url).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(format!("Premium index endpoint failed (status: {status}): {body}").into());
+        }
+
+        let response_text = response.text().await?;
+        let premium_index: Vec<BinancePremiumIndex> = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse Binance premium index response: {e}"))?;
+
+        Ok(premium_index)
     }
 
     /// Fetch historical funding rates for a symbol

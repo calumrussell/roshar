@@ -1,3 +1,4 @@
+mod kline;
 mod ws;
 
 pub use ws::{
@@ -5,6 +6,8 @@ pub use ws::{
     BinanceOrderBookSnapshot, BinanceTradeMessage, BinanceWssMessage, ExchangeInfo,
     OpenInterestData, SymbolInfo, TickerData,
 };
+
+pub use self::kline::BinanceKline;
 
 use serde::{Deserialize, Serialize};
 
@@ -17,4 +20,16 @@ pub struct BinanceHistoricalFundingRate {
     pub funding_time: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mark_price: Option<String>,
+}
+
+/// Real-time premium index data from Binance Futures API
+/// Contains mark price, index price, and funding rate information for perpetual contracts
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BinancePremiumIndex {
+    pub symbol: String,
+    pub mark_price: String,
+    pub index_price: String,
+    pub last_funding_rate: String,
+    pub next_funding_time: i64,
 }
