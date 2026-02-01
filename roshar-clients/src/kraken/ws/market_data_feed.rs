@@ -6,7 +6,7 @@ use roshar_types::{
     KrakenTradeSnapshotMessage, KrakenWssMessage, OrderBookState, SupportedMessages, Trade, Venue,
 };
 use roshar_ws_mgr::Manager;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::{broadcast, mpsc, oneshot};
 
 use crate::KRAKEN_WSS_URL;
 
@@ -40,7 +40,7 @@ pub enum SubscriptionCommand {
         response: oneshot::Sender<Option<OrderBookState>>,
     },
     GetEventChannel {
-        response: oneshot::Sender<mpsc::Receiver<MarketEvent>>,
+        response: oneshot::Sender<broadcast::Receiver<MarketEvent>>,
     },
     GetRawChannel {
         response: oneshot::Sender<mpsc::Receiver<String>>,
@@ -105,7 +105,7 @@ impl MarketDataFeedHandle {
             .map_err(|e| format!("Failed to receive depth response: {}", e))
     }
 
-    pub async fn get_event_channel(&self) -> Result<mpsc::Receiver<MarketEvent>, String> {
+    pub async fn get_event_channel(&self) -> Result<broadcast::Receiver<MarketEvent>, String> {
         let (response_tx, response_rx) = oneshot::channel();
         self.command_tx
             .send(SubscriptionCommand::GetEventChannel {
@@ -146,8 +146,7 @@ pub struct MarketDataFeed {
     conn_name: String,
 
     order_books: HashMap<String, KrakenOrderBook>,
-    event_tx: mpsc::Sender<MarketEvent>,
-    event_rx: Option<mpsc::Receiver<MarketEvent>>,
+    event_tx: broadcast::Sender<MarketEvent>,
     raw_tx: mpsc::Sender<String>,
     raw_rx: Option<mpsc::Receiver<String>>,
 
@@ -167,7 +166,7 @@ pub struct MarketDataFeed {
 impl MarketDataFeed {
     pub fn new(ws_manager: Arc<Manager>, channel_size: usize) -> Self {
         let (command_tx, command_rx) = mpsc::channel(100);
-        let (event_tx, event_rx) = mpsc::channel(channel_size);
+        let (event_tx, _event_rx) = broadcast::channel(channel_size);
         let (raw_tx, raw_rx) = mpsc::channel(channel_size);
 
         Self {
@@ -175,7 +174,6 @@ impl MarketDataFeed {
             conn_name: "kraken-market-data".to_string(),
             order_books: HashMap::new(),
             event_tx,
-            event_rx: Some(event_rx),
             raw_tx,
             raw_rx: Some(raw_rx),
             command_rx,
@@ -402,15 +400,11 @@ impl MarketDataFeed {
                 let _ = response.send(result);
             }
             SubscriptionCommand::GetEventChannel { response } => {
-                if let Some(event_rx) = self.event_rx.take() {
-                    self.raw_mode = false;
-                    log::info!(
-                        "Event channel requested for Kraken market data feed, raw_mode disabled"
-                    );
-                    let _ = response.send(event_rx);
-                } else {
-                    log::warn!("Event channel already taken for Kraken market data feed");
-                }
+                self.raw_mode = false;
+                log::info!(
+                    "Event channel requested for Kraken market data feed, raw_mode disabled"
+                );
+                let _ = response.send(self.event_tx.subscribe());
             }
             SubscriptionCommand::GetRawChannel { response } => {
                 if let Some(raw_rx) = self.raw_rx.take() {
@@ -474,13 +468,11 @@ impl MarketDataFeed {
         };
 
         if let Some(book) = book_state {
-            let _ = self
-                .event_tx
-                .send(MarketEvent::DepthUpdate {
-                    symbol,
-                    book: Arc::new(book),
-                })
-                .await;
+            // broadcast::send is sync and returns error if no receivers - this is expected
+            let _ = self.event_tx.send(MarketEvent::DepthUpdate {
+                symbol,
+                book: Arc::new(book),
+            });
         }
     }
 
@@ -498,13 +490,11 @@ impl MarketDataFeed {
         };
 
         if let Some(book) = book_state {
-            let _ = self
-                .event_tx
-                .send(MarketEvent::DepthUpdate {
-                    symbol,
-                    book: Arc::new(book),
-                })
-                .await;
+            // broadcast::send is sync and returns error if no receivers - this is expected
+            let _ = self.event_tx.send(MarketEvent::DepthUpdate {
+                symbol,
+                book: Arc::new(book),
+            });
         }
     }
 
@@ -513,13 +503,11 @@ impl MarketDataFeed {
         let trades = msg.to_trades();
 
         if !trades.is_empty() {
-            let _ = self
-                .event_tx
-                .send(MarketEvent::TradeUpdate {
-                    symbol,
-                    trades: Arc::new(trades),
-                })
-                .await;
+            // broadcast::send is sync and returns error if no receivers - this is expected
+            let _ = self.event_tx.send(MarketEvent::TradeUpdate {
+                symbol,
+                trades: Arc::new(trades),
+            });
         }
     }
 
@@ -527,12 +515,10 @@ impl MarketDataFeed {
         let symbol = msg.product_id.clone();
         let trade = msg.to_trade();
 
-        let _ = self
-            .event_tx
-            .send(MarketEvent::TradeUpdate {
-                symbol,
-                trades: Arc::new(vec![trade]),
-            })
-            .await;
+        // broadcast::send is sync and returns error if no receivers - this is expected
+        let _ = self.event_tx.send(MarketEvent::TradeUpdate {
+            symbol,
+            trades: Arc::new(vec![trade]),
+        });
     }
 }

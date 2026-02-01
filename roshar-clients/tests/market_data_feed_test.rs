@@ -106,7 +106,7 @@ async fn test_pattern_b_reactive() {
 
     let timeout = tokio::time::timeout(Duration::from_secs(30), async {
         while depth_count < target_events {
-            if let Some(event) = rx.recv().await {
+            if let Ok(event) = rx.recv().await {
                 match event {
                     MarketEvent::DepthUpdate { coin, book } => {
                         depth_count += 1;
@@ -192,7 +192,7 @@ async fn test_multiple_coins() {
 
     let timeout = tokio::time::timeout(Duration::from_secs(30), async {
         while seen_coins.len() < coins.len() {
-            if let Some(event) = rx.recv().await {
+            if let Ok(event) = rx.recv().await {
                 if let MarketEvent::DepthUpdate { coin, book } = event {
                     if !seen_coins.contains(&coin) {
                         let view = book.as_view();
