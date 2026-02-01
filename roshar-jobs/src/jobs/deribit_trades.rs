@@ -4,12 +4,14 @@
 //!
 //! # Usage
 //! ```
-//! cargo run --bin deribit_trades -- --currency BTC --start 20240101 --end 20240131
+//! cargo run --bin roshar-jobs deribit-trades --currency BTC --start 20240101 --end 20240131
 //! ```
 
-use chrono::{Datelike, NaiveDate};
+use chrono::{Datelike, NaiveDate, Utc};
 use clickhouse::{Client as ClickhouseClient, Row};
-use log::{error, info, warn};
+use log::{info, warn};
+use anyhow::{anyhow, Result};
+use crate::Config;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -19,65 +21,8 @@ use tokio::sync::Mutex;
 use tokio::time::{sleep, Instant};
 
 // ============================================================================
-// CLI Arguments
+// Date Parsing
 // ============================================================================
-
-/// CLI arguments for the deribit_trades job
-pub struct Args {
-    /// Currency to fetch trades for (BTC or ETH)
-    pub currency: String,
-    /// Start date in YYYYMMDD or YYYY-MM-DD format
-    pub start_date: String,
-    /// End date in YYYYMMDD or YYYY-MM-DD format
-    pub end_date: String,
-}
-
-impl Args {
-    /// Parse CLI arguments
-    pub fn parse() -> Result<Self, String> {
-        let args: Vec<String> = std::env::args().collect();
-
-        let mut currency = None;
-        let mut start_date = None;
-        let mut end_date = None;
-
-        let mut i = 1;
-        while i < args.len() {
-            match args[i].as_str() {
-                "--currency" | "-c" => {
-                    i += 1;
-                    if i < args.len() {
-                        let c = args[i].to_uppercase();
-                        if c != "BTC" && c != "ETH" {
-                            return Err(format!("Invalid currency: {}. Must be BTC or ETH", c));
-                        }
-                        currency = Some(c);
-                    }
-                }
-                "--start" | "-s" => {
-                    i += 1;
-                    if i < args.len() {
-                        start_date = Some(args[i].clone());
-                    }
-                }
-                "--end" | "-e" => {
-                    i += 1;
-                    if i < args.len() {
-                        end_date = Some(args[i].clone());
-                    }
-                }
-                _ => {}
-            }
-            i += 1;
-        }
-
-        Ok(Args {
-            currency: currency.ok_or("Missing required argument: --currency")?,
-            start_date: start_date.ok_or("Missing required argument: --start")?,
-            end_date: end_date.ok_or("Missing required argument: --end")?,
-        })
-    }
-}
 
 /// Parse date string in YYYYMMDD or YYYY-MM-DD format to NaiveDate
 fn parse_date(s: &str) -> Result<NaiveDate, String> {
@@ -513,21 +458,34 @@ fn date_to_end_timestamp_ms(date: NaiveDate) -> i64 {
 // ============================================================================
 
 /// Run the Deribit trades fetcher job
-pub async fn run() -> Result<(), String> {
-    // Parse CLI arguments
-    let args = Args::parse()?;
+pub async fn run(
+    config: Config,
+    currency: String,
+    start: String,
+    end: Option<String>,
+) -> Result<()> {
+    // Validate currency
+    let currency = currency.to_uppercase();
+    if currency != "BTC" && currency != "ETH" {
+        return Err(anyhow!("Invalid currency: {}. Must be BTC or ETH", currency));
+    }
+
+    // Use current date if end is not specified
+    let end_date_str = end.unwrap_or_else(|| {
+        Utc::now().format("%Y%m%d").to_string()
+    });
 
     info!(
         "Starting Deribit trades fetch: currency={}, start={}, end={}",
-        args.currency, args.start_date, args.end_date
+        currency, start, end_date_str
     );
 
     // Parse dates
-    let start_date = parse_date(&args.start_date)?;
-    let end_date = parse_date(&args.end_date)?;
+    let start_date = parse_date(&start).map_err(|e| anyhow!(e))?;
+    let end_date = parse_date(&end_date_str).map_err(|e| anyhow!(e))?;
 
     if start_date > end_date {
-        return Err("Start date must be before or equal to end date".to_string());
+        return Err(anyhow!("Start date must be before or equal to end date"));
     }
 
     // Create rate limiter (10 requests per second, 60s window, 30s pause on 429)
@@ -537,10 +495,8 @@ pub async fn run() -> Result<(), String> {
     let deribit_client = DeribitClient::new(rate_limiter);
 
     // Create ClickHouse client
-    let clickhouse_url = std::env::var("CLICKHOUSE_URL")
-        .unwrap_or_else(|_| "http://localhost:8123".to_string());
     let clickhouse_client = ClickhouseClient::default()
-        .with_url(&clickhouse_url);
+        .with_url(&config.clickhouse_url);
 
     // Generate month ranges
     let month_ranges = generate_month_ranges(start_date, end_date);
@@ -563,7 +519,7 @@ pub async fn run() -> Result<(), String> {
         );
 
         match deribit_client
-            .fetch_all_trades_in_range(&args.currency, start_ts, end_ts)
+            .fetch_all_trades_in_range(&currency, start_ts, end_ts)
             .await
         {
             Ok(trades) => {
@@ -577,7 +533,7 @@ pub async fn run() -> Result<(), String> {
                 // Convert to ClickHouse rows
                 let ch_trades: Vec<DeribitHistoricalTrade> = trades
                     .into_iter()
-                    .map(|t| DeribitHistoricalTrade::from_api_trade(t, &args.currency))
+                    .map(|t| DeribitHistoricalTrade::from_api_trade(t, &currency))
                     .collect();
 
                 match trades_to_clickhouse(&clickhouse_client, ch_trades).await {

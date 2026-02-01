@@ -5,6 +5,7 @@ members = [
     "roshar-bt",
     "roshar-types",
     "roshar-clients",
+    "roshar-jobs",
 ]
 resolver = "2"
 
