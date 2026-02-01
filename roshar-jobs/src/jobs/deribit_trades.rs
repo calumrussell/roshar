@@ -7,11 +7,11 @@
 //! cargo run --bin roshar-jobs deribit-trades --currency BTC --start 20240101 --end 20240131
 //! ```
 
+use crate::Config;
+use anyhow::{anyhow, Result};
 use chrono::{Datelike, NaiveDate, Utc};
 use clickhouse::{Client as ClickhouseClient, Row};
 use log::{info, warn};
-use anyhow::{anyhow, Result};
-use crate::Config;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -34,7 +34,10 @@ fn parse_date(s: &str) -> Result<NaiveDate, String> {
     if let Ok(date) = NaiveDate::parse_from_str(s, "%Y-%m-%d") {
         return Ok(date);
     }
-    Err(format!("Invalid date format: {}. Use YYYYMMDD or YYYY-MM-DD", s))
+    Err(format!(
+        "Invalid date format: {}. Use YYYYMMDD or YYYY-MM-DD",
+        s
+    ))
 }
 
 // ============================================================================
@@ -84,7 +87,10 @@ impl RateLimiter {
         loop {
             // Check if we're in a global pause
             if self.is_paused.load(Ordering::SeqCst) {
-                info!("Rate limiter paused, waiting {}ms...", self.pause_duration_ms);
+                info!(
+                    "Rate limiter paused, waiting {}ms...",
+                    self.pause_duration_ms
+                );
                 sleep(Duration::from_millis(self.pause_duration_ms)).await;
                 self.is_paused.store(false, Ordering::SeqCst);
             }
@@ -111,7 +117,10 @@ impl RateLimiter {
             drop(current);
             drop(window_start);
 
-            info!("Rate limit reached, waiting {}ms for window reset...", wait_time);
+            info!(
+                "Rate limit reached, waiting {}ms for window reset...",
+                wait_time
+            );
             sleep(Duration::from_millis(wait_time + 100)).await;
         }
     }
@@ -229,7 +238,8 @@ impl DeribitHistoricalTrade {
 // Deribit Client
 // ============================================================================
 
-const DERIBIT_HISTORY_API_URL: &str = "https://history.deribit.com/api/v2/public/get_last_trades_by_currency_and_time";
+const DERIBIT_HISTORY_API_URL: &str =
+    "https://history.deribit.com/api/v2/public/get_last_trades_by_currency_and_time";
 
 /// Deribit API client for fetching historical trades
 pub struct DeribitClient {
@@ -276,9 +286,12 @@ impl DeribitClient {
             DERIBIT_HISTORY_API_URL, currency, start_timestamp, end_timestamp, count
         );
 
-        let response = self.client.get(&url).send().await.map_err(|e| {
-            format!("HTTP request failed: {}", e)
-        })?;
+        let response = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| format!("HTTP request failed: {}", e))?;
 
         let status = response.status();
 
@@ -323,7 +336,8 @@ impl DeribitClient {
                     }
 
                     // Get the last trade's timestamp for pagination
-                    let last_timestamp = trades.last().map(|t| t.timestamp).unwrap_or(end_timestamp);
+                    let last_timestamp =
+                        trades.last().map(|t| t.timestamp).unwrap_or(end_timestamp);
 
                     all_trades.extend(trades);
 
@@ -392,7 +406,10 @@ pub async fn trades_to_clickhouse(
             .map_err(|e| format!("Failed to finish insert: {}", e))?;
 
         inserted += chunk.len();
-        info!("Inserted {}/{} trades to ClickHouse", inserted, total_trades);
+        info!(
+            "Inserted {}/{} trades to ClickHouse",
+            inserted, total_trades
+        );
     }
 
     Ok(inserted)
@@ -467,13 +484,14 @@ pub async fn run(
     // Validate currency
     let currency = currency.to_uppercase();
     if currency != "BTC" && currency != "ETH" {
-        return Err(anyhow!("Invalid currency: {}. Must be BTC or ETH", currency));
+        return Err(anyhow!(
+            "Invalid currency: {}. Must be BTC or ETH",
+            currency
+        ));
     }
 
     // Use current date if end is not specified
-    let end_date_str = end.unwrap_or_else(|| {
-        Utc::now().format("%Y%m%d").to_string()
-    });
+    let end_date_str = end.unwrap_or_else(|| Utc::now().format("%Y%m%d").to_string());
 
     info!(
         "Starting Deribit trades fetch: currency={}, start={}, end={}",
@@ -495,8 +513,7 @@ pub async fn run(
     let deribit_client = DeribitClient::new(rate_limiter);
 
     // Create ClickHouse client
-    let clickhouse_client = ClickhouseClient::default()
-        .with_url(&config.clickhouse_url);
+    let clickhouse_client = ClickhouseClient::default().with_url(&config.clickhouse_url);
 
     // Generate month ranges
     let month_ranges = generate_month_ranges(start_date, end_date);
@@ -571,7 +588,14 @@ pub async fn run(
     if !failed_ranges.is_empty() {
         warn!("Failed ranges ({}):", failed_ranges.len());
         for (start, end, err) in &failed_ranges {
-            warn!("  {}-{:02} to {}-{:02}: {}", start.year(), start.month(), end.year(), end.month(), err);
+            warn!(
+                "  {}-{:02} to {}-{:02}: {}",
+                start.year(),
+                start.month(),
+                end.year(),
+                end.month(),
+                err
+            );
         }
     }
 

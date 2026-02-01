@@ -56,7 +56,11 @@ async fn main() -> anyhow::Result<()> {
     let config = Config::default();
 
     match cli.job {
-        JobType::DeribitTrades { currency, start, end } => {
+        JobType::DeribitTrades {
+            currency,
+            start,
+            end,
+        } => {
             jobs::deribit_trades::run(config, currency, start, end).await?;
         }
     }
