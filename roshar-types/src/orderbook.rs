@@ -268,6 +268,31 @@ impl<'a> LocalOrderBook<'a> {
             venue,
         }
     }
+
+    /// Convert the view to a DepthSnapshotData with a specific timestamp.
+    /// Use this when the message contains a timestamp that should be preserved.
+    pub fn to_depth_snapshot_data_with_time(
+        &self,
+        venue: crate::Venue,
+        ticker: String,
+        time_ms: u64,
+    ) -> crate::DepthSnapshotData {
+        use chrono::{TimeZone, Utc};
+        let time_ts = Utc
+            .timestamp_millis_opt(time_ms as i64)
+            .single()
+            .unwrap_or_else(Utc::now);
+        crate::DepthSnapshotData {
+            bid_prices: self.bid_prices(),
+            bid_sizes: self.bid_sizes(),
+            ask_prices: self.ask_prices(),
+            ask_sizes: self.ask_sizes(),
+            time: time_ms,
+            time_ts,
+            ticker,
+            venue,
+        }
+    }
 }
 
 #[cfg(test)]
