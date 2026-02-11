@@ -457,6 +457,49 @@ impl InfoApi {
         Ok(meta_data)
     }
 
+    pub async fn get_candle_snapshot(
+        &self,
+        coin: &str,
+        interval: &str,
+        start_time: u64,
+        end_time: u64,
+    ) -> Result<Vec<roshar_types::HyperliquidCandleData>> {
+        let url = format!("{}/info", self.base_url);
+
+        let request_body = serde_json::json!({
+            "type": "candleSnapshot",
+            "req": {
+                "coin": coin,
+                "interval": interval,
+                "startTime": start_time,
+                "endTime": end_time
+            }
+        });
+
+        let response = self
+            .client
+            .post(&url)
+            .await
+            .json(&request_body)
+            .send()
+            .await
+            .context("Failed to request candle snapshot")?;
+
+        if !response.status().is_success() {
+            anyhow::bail!(
+                "Candle snapshot endpoint failed (status: {})",
+                response.status()
+            );
+        }
+
+        let candles: Vec<roshar_types::HyperliquidCandleData> = response
+            .json()
+            .await
+            .context("Failed to parse candle snapshot response")?;
+
+        Ok(candles)
+    }
+
     /// Get open orders for a wallet address
     pub async fn open_orders(&self, wallet_address: ethers::types::H160) -> Result<Vec<UserOrder>> {
         let address_str = format!("{:#x}", wallet_address);
