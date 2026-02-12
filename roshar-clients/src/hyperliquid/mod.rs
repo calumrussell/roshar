@@ -626,6 +626,20 @@ impl HyperliquidClient {
         self.market_data_handle.remove_candles(coin).await
     }
 
+    /// Get candle snapshot for a coin
+    pub async fn get_candle_snapshot(
+        &self,
+        coin: &str,
+        interval: &str,
+        start_time: u64,
+        end_time: u64,
+    ) -> Result<Vec<roshar_types::HyperliquidCandleData>, String> {
+        self.info_api
+            .get_candle_snapshot(coin, interval, start_time, end_time)
+            .await
+            .map_err(|e| format!("Failed to fetch candle snapshot: {:?}", e))
+    }
+
     /// Get historical funding rates for a coin
     /// Returns funding rate history from start_time to end_time (or now if None)
     pub async fn get_historical_funding_rates(
