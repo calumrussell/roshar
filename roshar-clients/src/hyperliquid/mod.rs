@@ -31,6 +31,13 @@ pub enum OrderResult {
         filled_qty: f64,
         avg_price: f64,
     },
+    /// Order partially filled on placement, remainder is resting on the book
+    PartialFill {
+        order_id: String,
+        filled_qty: f64,
+        avg_price: f64,
+        remaining_qty: f64,
+    },
 }
 
 /// Configuration for Hyperliquid client
@@ -288,11 +295,22 @@ impl HyperliquidClient {
                             let filled_qty = order.total_sz.parse::<f64>().unwrap_or(0.0);
                             let avg_price = order.avg_px.parse::<f64>().unwrap_or(0.0);
 
-                            Ok(OrderResult::Filled {
-                                order_id: order.oid.to_string(),
-                                filled_qty,
-                                avg_price,
-                            })
+                            let remaining_qty = sz - filled_qty;
+                            if remaining_qty > 1e-10 {
+                                // GTC order partially filled, remainder resting on book
+                                Ok(OrderResult::PartialFill {
+                                    order_id: order.oid.to_string(),
+                                    filled_qty,
+                                    avg_price,
+                                    remaining_qty,
+                                })
+                            } else {
+                                Ok(OrderResult::Filled {
+                                    order_id: order.oid.to_string(),
+                                    filled_qty,
+                                    avg_price,
+                                })
+                            }
                         }
                         ExchangeDataStatus::WaitingForFill => {
                             Err("Order waiting for fill".to_string())
