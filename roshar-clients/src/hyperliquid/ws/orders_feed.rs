@@ -115,8 +115,13 @@ impl OrdersFeedHandler {
                 }
                 roshar_ws_mgr::Message::WriteError(_name, err) => {
                     log::error!("Websocket write error in orders feed: {}", err);
-                    // Write errors on already closed connection don't need reconnect trigger
-                    // as ReadError or CloseMessage should have already triggered it
+                    if let Err(e) = self
+                        .ws_manager
+                        .reconnect_with_close(&conn_name, false)
+                        .await
+                    {
+                        log::error!("Failed to trigger reconnect after write error: {}", e);
+                    }
                 }
                 roshar_ws_mgr::Message::CloseMessage(_name, reason) => {
                     if let Some(close_reason) = reason.as_ref() {
