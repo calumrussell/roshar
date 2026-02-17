@@ -291,7 +291,12 @@ impl MarketDataFeed {
                         }
                         Ok(roshar_ws_mgr::Message::WriteError(_name, err)) => {
                             log::error!("Websocket write error in market data feed: {}", err);
-                            // Don't reconnect - ReadError or CloseMessage should trigger it
+                            if self.is_connected {
+                                self.is_connected = false;
+                                if let Err(e) = self.ws_manager.reconnect_with_close(&self.conn_name, false).await {
+                                    log::error!("Failed to trigger reconnect after write error: {}", e);
+                                }
+                            }
                         }
                         Ok(roshar_ws_mgr::Message::CloseMessage(_name, reason)) => {
                             if let Some(close_reason) = reason.as_ref() {
