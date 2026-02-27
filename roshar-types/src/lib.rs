@@ -253,8 +253,8 @@ pub enum Venue {
     ByBit = 0,
     Kraken = 1,
     Hyperliquid = 2,
-    Okx = 3,
     Binance = 4,
+    Okx = 5,
 }
 
 impl serde::Serialize for Venue {
@@ -276,8 +276,8 @@ impl<'de> serde::Deserialize<'de> for Venue {
             0 => Ok(Venue::ByBit),
             1 => Ok(Venue::Kraken),
             2 => Ok(Venue::Hyperliquid),
-            3 => Ok(Venue::Okx),
             4 => Ok(Venue::Binance),
+            5 => Ok(Venue::Okx),
             _ => Err(serde::de::Error::custom(format!(
                 "Invalid venue value: {}",
                 value
