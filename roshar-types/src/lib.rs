@@ -9,6 +9,7 @@ pub mod binance;
 pub mod bybit;
 pub mod hyperliquid;
 pub mod kraken;
+pub mod okx;
 pub mod orderbook;
 pub mod polymarket;
 
@@ -19,6 +20,7 @@ pub use binance::*;
 pub use bybit::*;
 pub use hyperliquid::*;
 pub use kraken::*;
+pub use okx::*;
 pub use orderbook::*;
 pub use polymarket::*;
 
@@ -251,6 +253,7 @@ pub enum Venue {
     ByBit = 0,
     Kraken = 1,
     Hyperliquid = 2,
+    Okx = 3,
     Binance = 4,
 }
 
@@ -273,6 +276,7 @@ impl<'de> serde::Deserialize<'de> for Venue {
             0 => Ok(Venue::ByBit),
             1 => Ok(Venue::Kraken),
             2 => Ok(Venue::Hyperliquid),
+            3 => Ok(Venue::Okx),
             4 => Ok(Venue::Binance),
             _ => Err(serde::de::Error::custom(format!(
                 "Invalid venue value: {}",
@@ -289,6 +293,7 @@ impl From<String> for Venue {
             "kraken" => Self::Kraken,
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
+            "okx" => Self::Okx,
             "binance" => Self::Binance,
             _ => panic!("Unknown exchange: {value:?}"),
         }
@@ -302,6 +307,7 @@ impl From<&str> for Venue {
             "kraken" => Self::Kraken,
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
+            "okx" => Self::Okx,
             "binance" => Self::Binance,
             _ => panic!("Unknown exchange: {value:?}"),
         }
@@ -316,6 +322,7 @@ impl Venue {
             Self::ByBit => "bybit",
             Self::Kraken => "kraken",
             Self::Hyperliquid => "hyperliquid",
+            Self::Okx => "okx",
             Self::Binance => "binance",
         }
     }
@@ -417,6 +424,11 @@ impl SupportedMessages {
                     err
                 })
                 .ok(),
+
+            Venue::Okx => {
+                debug!("OKX message parsing not yet implemented: {json}");
+                None
+            }
 
             Venue::Binance => serde_json::from_str::<BinanceDepthDiffMessage>(json)
                 .map(SupportedMessages::BinanceDepthDiffMessage)
