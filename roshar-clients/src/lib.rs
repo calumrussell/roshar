@@ -39,7 +39,7 @@ pub use kraken::{
 };
 
 // Re-export OKX types
-pub use okx::{OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse};
+pub use okx::{OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse, MarketEvent as OkxMarketEvent};
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;

@@ -353,6 +353,8 @@ pub enum SupportedMessages {
     BinanceDepthDiffMessage(BinanceDepthDiffMessage),
     BinanceTradeMessage(BinanceTradeMessage),
     BinanceOrderBookSnapshot(BinanceOrderBookSnapshot),
+    OkxDepthMessage(OkxDepthMessage),
+    OkxTradesMessage(OkxTradesMessage),
 
     // Internal normalized types
     DepthUpdateData(DepthUpdateData),
@@ -425,10 +427,17 @@ impl SupportedMessages {
                 })
                 .ok(),
 
-            Venue::Okx => {
-                debug!("OKX message parsing not yet implemented: {json}");
-                None
-            }
+            Venue::Okx => serde_json::from_str::<OkxDepthMessage>(json)
+                .map(SupportedMessages::OkxDepthMessage)
+                .or_else(|_| {
+                    serde_json::from_str::<OkxTradesMessage>(json)
+                        .map(SupportedMessages::OkxTradesMessage)
+                })
+                .map_err(|err| {
+                    debug!("Unrecognized OKX message format: {json} - Error: {err}");
+                    err
+                })
+                .ok(),
 
             Venue::Binance => serde_json::from_str::<BinanceDepthDiffMessage>(json)
                 .map(SupportedMessages::BinanceDepthDiffMessage)

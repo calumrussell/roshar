@@ -1,3 +1,7 @@
+pub mod ws;
+
+pub use ws::*;
+
 use serde::{Deserialize, Serialize};
 
 /// OKX instrument information for SWAP (perpetual) contracts.

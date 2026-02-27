@@ -4,6 +4,7 @@ pub enum WebsocketSupportedExchanges {
     ByBit,
     Kraken,
     Binance,
+    Okx,
 }
 
 impl WebsocketSupportedExchanges {
@@ -19,6 +20,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Binance => {
                 crate::binance::BinanceWssMessage::ping().to_json()
             }
+            WebsocketSupportedExchanges::Okx => crate::okx::OkxWssMessage::ping(),
         }
     }
 
@@ -36,6 +38,9 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Binance => {
                 crate::binance::BinanceWssMessage::batch_depth(&[coin.to_string()]).to_json()
             }
+            WebsocketSupportedExchanges::Okx => {
+                crate::okx::OkxWssMessage::depth(coin).to_json()
+            }
         }
     }
 
@@ -52,6 +57,9 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Binance => {
                 crate::binance::BinanceWssMessage::batch_trades(&[coin.to_string()]).to_json()
+            }
+            WebsocketSupportedExchanges::Okx => {
+                crate::okx::OkxWssMessage::trades(coin).to_json()
             }
         }
     }
@@ -100,6 +108,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBit => "wss://stream.bybit.com/v5/public/linear",
             WebsocketSupportedExchanges::Kraken => "wss://futures.kraken.com/ws/v1",
             WebsocketSupportedExchanges::Binance => "wss://fstream.binance.com/ws",
+            WebsocketSupportedExchanges::Okx => "wss://ws.okx.com:8443/ws/v5/public",
         }
     }
 
@@ -110,6 +119,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBit => 20,
             WebsocketSupportedExchanges::Kraken => 30,
             WebsocketSupportedExchanges::Binance => 30,
+            WebsocketSupportedExchanges::Okx => 20,
         }
     }
 
@@ -120,6 +130,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBit => 10,
             WebsocketSupportedExchanges::Kraken => 15,
             WebsocketSupportedExchanges::Binance => 15,
+            WebsocketSupportedExchanges::Okx => 10,
         }
     }
 
@@ -130,6 +141,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::ByBit => 5000,
             WebsocketSupportedExchanges::Kraken => 10000,
             WebsocketSupportedExchanges::Binance => 5000,
+            WebsocketSupportedExchanges::Okx => 5000,
         }
     }
 }
