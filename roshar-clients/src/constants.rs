@@ -16,5 +16,9 @@ pub const KRAKEN_SPOT_WSS_URL: &str = "wss://ws.kraken.com/v2";
 pub const BINANCE_WSS_URL: &str = "wss://fstream.binance.com/ws";
 pub const BINANCE_SPOT_WSS_URL: &str = "wss://stream.binance.com:9443/ws";
 
+// OKX
+pub const OKX_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/public";
+pub const OKX_PRIVATE_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/private";
+
 // MEXC
 pub const MEX_WSS_URL: &str = "wss://wbs.mexc.com/ws";
