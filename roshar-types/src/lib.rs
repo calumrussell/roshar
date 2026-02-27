@@ -7,6 +7,7 @@ use clickhouse::Row;
 
 pub mod binance;
 pub mod bybit;
+pub mod coinbase;
 pub mod hyperliquid;
 pub mod kraken;
 pub mod orderbook;
@@ -17,6 +18,7 @@ pub use websocket_supported_exchanges::WebsocketSupportedExchanges;
 
 pub use binance::*;
 pub use bybit::*;
+pub use coinbase::*;
 pub use hyperliquid::*;
 pub use kraken::*;
 pub use orderbook::*;
@@ -252,6 +254,7 @@ pub enum Venue {
     Kraken = 1,
     Hyperliquid = 2,
     Binance = 4,
+    Coinbase = 5,
 }
 
 impl serde::Serialize for Venue {
@@ -274,6 +277,7 @@ impl<'de> serde::Deserialize<'de> for Venue {
             1 => Ok(Venue::Kraken),
             2 => Ok(Venue::Hyperliquid),
             4 => Ok(Venue::Binance),
+            5 => Ok(Venue::Coinbase),
             _ => Err(serde::de::Error::custom(format!(
                 "Invalid venue value: {}",
                 value
@@ -290,6 +294,7 @@ impl From<String> for Venue {
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
             "binance" => Self::Binance,
+            "coinbase" => Self::Coinbase,
             _ => panic!("Unknown exchange: {value:?}"),
         }
     }
@@ -303,6 +308,7 @@ impl From<&str> for Venue {
             "hl" => Self::Hyperliquid,
             "hyperliquid" => Self::Hyperliquid,
             "binance" => Self::Binance,
+            "coinbase" => Self::Coinbase,
             _ => panic!("Unknown exchange: {value:?}"),
         }
     }
@@ -317,6 +323,7 @@ impl Venue {
             Self::Kraken => "kraken",
             Self::Hyperliquid => "hyperliquid",
             Self::Binance => "binance",
+            Self::Coinbase => "coinbase",
         }
     }
 }
@@ -430,6 +437,11 @@ impl SupportedMessages {
                     err
                 })
                 .ok(),
+
+            Venue::Coinbase => {
+                debug!("Coinbase websocket message parsing not yet implemented: {json}");
+                None
+            }
         }
     }
 

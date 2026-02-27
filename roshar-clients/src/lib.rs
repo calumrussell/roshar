@@ -1,5 +1,6 @@
 pub mod binance;
 pub mod bybit;
+pub mod coinbase;
 pub mod constants;
 pub mod http;
 pub mod hyperliquid;
@@ -36,6 +37,9 @@ pub use kraken::{
     KrakenTickerData, MarketEvent as KrakenMarketEvent,
     MultiCollateralApi as KrakenMultiCollateralApi, OrderManagementApi as KrakenOrderManagementApi,
 };
+
+// Re-export Coinbase types
+pub use coinbase::CoinbaseClient;
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;
