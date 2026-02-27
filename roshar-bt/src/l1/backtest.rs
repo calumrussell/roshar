@@ -1,46 +1,41 @@
 use std::collections::VecDeque;
 
 use anyhow::{anyhow, Result};
-use log::warn;
 use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
 use rust_decimal::Decimal;
 
 use crate::chart::ChartData;
 use crate::performance::PerformanceMetrics;
-use crate::source::{CandleProducer, EventProducer, EventSrc, EventSrcState};
+use crate::source::{EventFeed, FeedState};
 use crate::types::{Candle, Event, OrderRequest, EVENT_CANDLE};
 
 use super::exchange::{Exchange, OrderId};
 use super::{L1Config, L1Order};
 
-pub struct Backtest<S: EventSrc, P: EventProducer + CandleProducer> {
-    pub src: S,
+pub struct Backtest<F: EventFeed> {
+    pub feed: F,
     pub exch: Exchange,
     pub curr_ts: i64,
     pub ev_queue: VecDeque<Event>,
     pub line_chunk: usize,
     pub performance: PerformanceMetrics,
     pub position: Decimal,
-    pub parser: P,
-    pub buf: String,
     pub last_candle: Option<Candle>,
     pub candle_queue: VecDeque<Candle>,
 }
 
-impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
-    pub fn new(config: &L1Config<P>, src: S) -> Self {
+impl<F: EventFeed> Backtest<F> {
+    pub fn new(config: &L1Config, feed: F) -> Self {
         let performance = PerformanceMetrics::new(config.risk_free_rate, config.return_window);
 
         Self {
-            src,
+            feed,
             exch: Exchange::new(config),
             curr_ts: config.start_ts,
             ev_queue: VecDeque::with_capacity(1_024),
             line_chunk: config.lines_read_per_tick,
             performance,
             position: Decimal::ZERO,
-            parser: config.parser.clone(),
-            buf: String::with_capacity(1_024),
             last_candle: None,
             candle_queue: VecDeque::with_capacity(1_024),
         }
@@ -118,32 +113,17 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
     }
 }
 
-impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
+impl<F: EventFeed> Backtest<F> {
     //For L1, the dataset sets the time so we step over each event
     pub fn step(&mut self) -> Result<()> {
         if self.ev_queue.front().is_none() {
-            for _i in 0..self.line_chunk {
-                if let Some(src_state) = self.src.pop(&mut self.buf) {
-                    match src_state {
-                        EventSrcState::Empty => {
-                            if self.ev_queue.is_empty() {
-                                return Err(anyhow!("No more events"));
-                            }
-                        }
-                        EventSrcState::Active => {
-                            //TODO: state is shared between thse two parsers
-                            if let Err(e) =
-                                self.parser.parse_candle(&self.buf, &mut self.candle_queue)
-                            {
-                                warn!("Failed to parse line: {}", e);
-                            }
-
-                            if let Err(e) = self.parser.parse_line(&self.buf, &mut self.ev_queue) {
-                                warn!("Failed to parse line: {}", e);
-                            }
-                        }
+            match self.feed.fill(&mut self.ev_queue, &mut self.candle_queue, self.line_chunk) {
+                FeedState::Empty => {
+                    if self.ev_queue.is_empty() {
+                        return Err(anyhow!("No more events"));
                     }
                 }
+                FeedState::Active => {}
             }
         }
 
@@ -185,17 +165,11 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> Backtest<S, P> {
                     return Err(anyhow!("No more events"));
                 }
 
-                for _i in 0..self.line_chunk {
-                    if let Some(src_state) = self.src.pop(&mut self.buf) {
-                        match src_state {
-                            EventSrcState::Empty => {
-                                sim_ended = true;
-                            }
-                            EventSrcState::Active => {
-                                let _ = self.parser.parse_line(&self.buf, &mut self.ev_queue);
-                            }
-                        }
+                match self.feed.fill(&mut self.ev_queue, &mut self.candle_queue, self.line_chunk) {
+                    FeedState::Empty => {
+                        sim_ended = true;
                     }
+                    FeedState::Active => {}
                 }
             }
         }
@@ -208,28 +182,28 @@ mod tests {
     use crate::{
         exchanges::hyperliquid::HyperliquidCandleParser,
         l1::L1ConfigBuilder,
-        source::EventVecSource,
+        source::{EventVecSource, ParsedCandleFeed},
         types::{OrderStatus, Side},
     };
 
     use super::*;
 
-    fn setup() -> Backtest<EventVecSource, HyperliquidCandleParser> {
+    fn setup() -> Backtest<ParsedCandleFeed<EventVecSource, HyperliquidCandleParser>> {
         let ev0 = r#"1000000000000000000 {"channel":"candle","data":{"T":100,"c":"100.0","h":"100.0","i":"1m","l":"100.0","n":1,"o":"100.0","s":"AAVE","t":100,"v":"0.21"}}"#.to_string();
         let ev1 = r#"1010000000000000000 {"channel":"candle","data":{"T":101,"c":"104.0","h":"104.0","i":"1m","l":"104.0","n":1,"o":"104.0","s":"AAVE","t":101,"v":"0.21"}}"#.to_string();
         let ev2 = r#"1020000000000000000 {"channel":"candle","data":{"T":102,"c":"106.0","h":"106.0","i":"1m","l":"106.0","n":1,"o":"106.0","s":"AAVE","t":102,"v":"0.21"}}"#.to_string();
 
         let evs = vec![ev0, ev1, ev2];
         let src = EventVecSource::new(evs);
+        let feed = ParsedCandleFeed::new(src, HyperliquidCandleParser::new());
         let cfg = L1ConfigBuilder::new()
             .set_tick_size(0.1)
             .set_start_ts(100)
             .set_return_window(1)
-            .set_parser(HyperliquidCandleParser::new())
             .build()
             .unwrap();
 
-        Backtest::new(&cfg, src)
+        Backtest::new(&cfg, feed)
     }
 
     #[test]

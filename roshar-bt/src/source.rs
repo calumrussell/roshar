@@ -24,6 +24,151 @@ pub trait EventSrc: Send {
     fn pop(&mut self, buf: &mut String) -> Option<EventSrcState>;
 }
 
+#[derive(Clone, Debug)]
+pub enum FeedState {
+    Active,
+    Empty,
+}
+
+/// Unified abstraction over data sources for backtesting.
+///
+/// Combines both event and candle production into a single trait, replacing the
+/// separate `EventSrc` + `EventProducer` pair.
+pub trait EventFeed: Send {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState;
+}
+
+/// Wraps an `EventSrc` + `EventProducer` into an `EventFeed` (events only, no candles).
+pub struct ParsedFeed<S: EventSrc, P: EventProducer> {
+    src: S,
+    parser: P,
+    buf: String,
+}
+
+impl<S: EventSrc, P: EventProducer> ParsedFeed<S, P> {
+    pub fn new(src: S, parser: P) -> Self {
+        Self {
+            src,
+            parser,
+            buf: String::with_capacity(1_024),
+        }
+    }
+}
+
+impl<S: EventSrc, P: EventProducer> EventFeed for ParsedFeed<S, P> {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        _candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        for _ in 0..count {
+            if let Some(src_state) = self.src.pop(&mut self.buf) {
+                match src_state {
+                    EventSrcState::Empty => return FeedState::Empty,
+                    EventSrcState::Active => {
+                        if let Err(e) = self.parser.parse_line(&self.buf, events) {
+                            warn!("Failed to parse line: {}", e);
+                        }
+                    }
+                }
+            }
+        }
+        FeedState::Active
+    }
+}
+
+/// Wraps an `EventSrc` + `EventProducer + CandleProducer` into an `EventFeed` (events + candles).
+pub struct ParsedCandleFeed<S: EventSrc, P: EventProducer + CandleProducer> {
+    src: S,
+    parser: P,
+    buf: String,
+}
+
+impl<S: EventSrc, P: EventProducer + CandleProducer> ParsedCandleFeed<S, P> {
+    pub fn new(src: S, parser: P) -> Self {
+        Self {
+            src,
+            parser,
+            buf: String::with_capacity(1_024),
+        }
+    }
+}
+
+impl<S: EventSrc, P: EventProducer + CandleProducer> EventFeed for ParsedCandleFeed<S, P> {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        for _ in 0..count {
+            if let Some(src_state) = self.src.pop(&mut self.buf) {
+                match src_state {
+                    EventSrcState::Empty => return FeedState::Empty,
+                    EventSrcState::Active => {
+                        if let Err(e) = self.parser.parse_candle(&self.buf, candles) {
+                            warn!("Failed to parse candle: {}", e);
+                        }
+                        if let Err(e) = self.parser.parse_line(&self.buf, events) {
+                            warn!("Failed to parse line: {}", e);
+                        }
+                    }
+                }
+            }
+        }
+        FeedState::Active
+    }
+}
+
+/// Direct event feed from pre-built event and candle vectors.
+pub struct VecEventFeed {
+    events: VecDeque<Event>,
+    candles: VecDeque<Candle>,
+}
+
+impl VecEventFeed {
+    pub fn new(events: Vec<Event>) -> Self {
+        Self {
+            events: events.into(),
+            candles: VecDeque::new(),
+        }
+    }
+
+    pub fn with_candles(events: Vec<Event>, candles: Vec<Candle>) -> Self {
+        Self {
+            events: events.into(),
+            candles: candles.into(),
+        }
+    }
+}
+
+impl EventFeed for VecEventFeed {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        for _ in 0..count {
+            if let Some(event) = self.events.pop_front() {
+                events.push_back(event);
+            } else {
+                return FeedState::Empty;
+            }
+        }
+        while let Some(candle) = self.candles.pop_front() {
+            candles.push_back(candle);
+        }
+        FeedState::Active
+    }
+}
+
 pub struct EventVecSource {
     pub evs: VecDeque<String>,
 }

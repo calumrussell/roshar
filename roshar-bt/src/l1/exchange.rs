@@ -3,7 +3,6 @@ use std::{collections::HashMap, str::FromStr};
 use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::Decimal;
 
-use crate::source::EventProducer;
 use crate::types::{price_to_tick, Event, OrderRequest, OrderStatus, Side};
 
 use super::orderbook::OrderBook;
@@ -20,7 +19,7 @@ pub struct Exchange {
 }
 
 impl Exchange {
-    pub fn new<P: EventProducer>(config: &L1Config<P>) -> Self {
+    pub fn new(config: &L1Config) -> Self {
         Self {
             tick_size: config.tick_size,
             orderbook: OrderBook::new(config.tick_size),

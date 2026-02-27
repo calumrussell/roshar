@@ -2,7 +2,6 @@ use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 
-use crate::source::EventProducer;
 use crate::types::{tick_to_price, Side};
 
 use super::exchange::Price;
@@ -22,7 +21,7 @@ pub struct L2OrderBook {
 pub type L2OrderBookCell = Rc<RefCell<L2OrderBook>>;
 
 impl L2OrderBook {
-    pub fn new<P: EventProducer>(config: &L2Config<P>) -> Self {
+    pub fn new(config: &L2Config) -> Self {
         Self {
             ask_depth: BTreeMap::new(),
             bid_depth: BTreeMap::new(),
@@ -30,7 +29,7 @@ impl L2OrderBook {
         }
     }
 
-    pub fn new_refcell<P: EventProducer>(config: &L2Config<P>) -> Rc<RefCell<Self>> {
+    pub fn new_refcell(config: &L2Config) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self::new(config)))
     }
 

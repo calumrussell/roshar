@@ -3,7 +3,6 @@ use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
 use rust_decimal::Decimal;
 use std::time::Duration;
 
-use crate::source::EventProducer;
 use crate::types::{OrderStatus, Side};
 
 pub mod backtest;
@@ -54,16 +53,15 @@ impl From<L1OrderInternal> for L1Order {
     }
 }
 
-pub struct L1ConfigBuilder<P: EventProducer> {
+pub struct L1ConfigBuilder {
     tick_size: Option<f64>,
     lines_read_per_tick: usize,
     start_ts: Option<i64>,
     risk_free_rate: f64,
     return_window: Option<Duration>,
-    parser: Option<P>,
 }
 
-impl<P: EventProducer> L1ConfigBuilder<P> {
+impl L1ConfigBuilder {
     pub fn new() -> Self {
         Self {
             tick_size: None,
@@ -71,13 +69,7 @@ impl<P: EventProducer> L1ConfigBuilder<P> {
             start_ts: None,
             risk_free_rate: 0.02,
             return_window: None,
-            parser: None,
         }
-    }
-
-    pub fn set_parser(&mut self, parser: P) -> &mut Self {
-        self.parser = Some(parser);
-        self
     }
 
     pub fn set_tick_size(&mut self, tick_size: f64) -> &mut Self {
@@ -105,11 +97,10 @@ impl<P: EventProducer> L1ConfigBuilder<P> {
         self
     }
 
-    pub fn build(&mut self) -> Result<L1Config<P>> {
+    pub fn build(&mut self) -> Result<L1Config> {
         if self.tick_size.is_none()
             || self.start_ts.is_none()
             || self.return_window.is_none()
-            || self.parser.is_none()
         {
             return Err(anyhow!("Missing required argument"));
         }
@@ -119,38 +110,34 @@ impl<P: EventProducer> L1ConfigBuilder<P> {
         let risk_free_rate_decimal = Decimal::from_f64(self.risk_free_rate)
             .expect("Unable to parse risk_free_rate as Decimal");
 
-        let parser = self.parser.take().unwrap();
-
         let config = L1Config {
             tick_size: tick_size_decimal,
             lines_read_per_tick: self.lines_read_per_tick,
             start_ts: self.start_ts.unwrap(),
             risk_free_rate: risk_free_rate_decimal,
             return_window: self.return_window.unwrap(),
-            parser,
         };
 
         Ok(config)
     }
 }
 
-impl<P: EventProducer> Default for L1ConfigBuilder<P> {
+impl Default for L1ConfigBuilder {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[derive(Debug)]
-pub struct L1Config<P: EventProducer> {
+pub struct L1Config {
     pub tick_size: Decimal,
     pub lines_read_per_tick: usize,
     pub start_ts: i64,
     pub risk_free_rate: Decimal,
     pub return_window: Duration,
-    pub parser: P,
 }
 
-impl<P: EventProducer> L1Config<P> {
+impl L1Config {
     pub fn get_tick_size(&self) -> f64 {
         self.tick_size.to_f64().unwrap()
     }

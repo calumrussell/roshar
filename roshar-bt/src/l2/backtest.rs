@@ -1,14 +1,13 @@
 use std::collections::VecDeque;
 
 use anyhow::{anyhow, Ok, Result};
-use log::warn;
 use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
 use rust_decimal::Decimal;
 
 use crate::performance::PerformanceMetrics;
-use crate::source::{EventProducer, EventSrc, EventSrcState};
+use crate::source::{EventFeed, FeedState};
 use crate::types::{
-    Event, OrderRequest, EVENT_CLEAR_BOOK, EVENT_CLEAR_LEVEL_ASK, EVENT_CLEAR_LEVEL_BID,
+    Candle, Event, OrderRequest, EVENT_CLEAR_BOOK, EVENT_CLEAR_LEVEL_ASK, EVENT_CLEAR_LEVEL_BID,
     EVENT_CLEAR_SIDE_ASK, EVENT_CLEAR_SIDE_BID, EVENT_TRADE_BUY, EVENT_TRADE_SELL,
     EVENT_UPDATE_LEVEL_ASK, EVENT_UPDATE_LEVEL_BID,
 };
@@ -29,9 +28,9 @@ impl LatencyModel {
     }
 }
 
-pub struct Backtest<S: EventSrc, F: FillModel, P: EventProducer> {
-    pub src: S,
-    pub exch: Exchange<F>,
+pub struct Backtest<F: EventFeed, M: FillModel> {
+    pub feed: F,
+    pub exch: Exchange<M>,
     pub curr_ts: i64,
     pub ev_queue: VecDeque<Event>,
     pub line_chunk: usize,
@@ -39,17 +38,16 @@ pub struct Backtest<S: EventSrc, F: FillModel, P: EventProducer> {
     pub latency_model: LatencyModel,
     pub tick_fill_tracker: Vec<OrderId>,
     pub performance: PerformanceMetrics,
-    pub buf: String,
-    pub parser: P,
+    candle_sink: VecDeque<Candle>,
 }
 
-impl<S: EventSrc, P: EventProducer> Backtest<S, LevelChgFill, P> {
-    pub fn new_with_level_chg_fill(config: &L2Config<P>, src: S) -> Self {
+impl<F: EventFeed> Backtest<F, LevelChgFill> {
+    pub fn new_with_level_chg_fill(config: &L2Config, feed: F) -> Self {
         let exch = Exchange::new_with_level_chg_fill(config);
         let performance = PerformanceMetrics::new(config.risk_free_rate, config.return_window);
 
         Self {
-            src,
+            feed,
             exch,
             curr_ts: config.start_ts,
             ev_queue: VecDeque::with_capacity(1_024),
@@ -58,8 +56,7 @@ impl<S: EventSrc, P: EventProducer> Backtest<S, LevelChgFill, P> {
             latency_model: LatencyModel::Instant,
             tick_fill_tracker: Vec::with_capacity(config.tick_fill_tracker_start_size),
             performance,
-            buf: String::with_capacity(1_024),
-            parser: config.parser.clone(),
+            candle_sink: VecDeque::new(),
         }
     }
 
@@ -72,7 +69,7 @@ impl<S: EventSrc, P: EventProducer> Backtest<S, LevelChgFill, P> {
     }
 }
 
-impl<S: EventSrc, F: FillModel, P: EventProducer> Backtest<S, F, P> {
+impl<F: EventFeed, M: FillModel> Backtest<F, M> {
     pub fn current_timestamp(&self) -> i64 {
         self.curr_ts
     }
@@ -196,21 +193,11 @@ impl<S: EventSrc, F: FillModel, P: EventProducer> Backtest<S, F, P> {
                 }
 
                 //There are no events in the queue, so we need to fetch some more
-                for _i in 0..self.line_chunk {
-                    if let Some(src_state) = self.src.pop(&mut self.buf) {
-                        match src_state {
-                            EventSrcState::Empty => {
-                                sim_ended = true;
-                            }
-                            EventSrcState::Active => {
-                                if let Err(e) =
-                                    self.parser.parse_line(&self.buf, &mut self.ev_queue)
-                                {
-                                    warn!("Failed to parse line: {}", e);
-                                }
-                            }
-                        }
+                match self.feed.fill(&mut self.ev_queue, &mut self.candle_sink, self.line_chunk) {
+                    FeedState::Empty => {
+                        sim_ended = true;
                     }
+                    FeedState::Active => {}
                 }
             }
         }
