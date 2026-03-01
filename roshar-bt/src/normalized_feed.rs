@@ -71,13 +71,16 @@ impl VecEventFeed {
             events.push(trade.into());
         }
 
+        // Stable sort preserves insertion order: depth updates before trades
+        // at the same timestamp.
         events.sort_by_key(|e| e.ts);
         Self::new(events)
     }
 
     /// Create a feed from depth snapshots and trades.
     /// Each snapshot generates CLEAR_SIDE + UPDATE_LEVEL events.
-    /// All events are merged in timestamp order.
+    /// All events are merged in timestamp order. Depth events are sorted
+    /// before trades at the same timestamp.
     pub fn from_snapshots_and_trades(
         snapshots: Vec<DepthSnapshotData>,
         trades: Vec<TradeData>,
@@ -91,6 +94,8 @@ impl VecEventFeed {
             events.push(trade.into());
         }
 
+        // Stable sort preserves insertion order: snapshot events before trades
+        // at the same timestamp.
         events.sort_by_key(|e| e.ts);
         Self::new(events)
     }

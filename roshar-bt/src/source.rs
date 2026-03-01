@@ -68,13 +68,11 @@ impl<S: EventSrc, P: EventProducer> EventFeed for ParsedFeed<S, P> {
         count: usize,
     ) -> FeedState {
         for _ in 0..count {
-            if let Some(src_state) = self.src.pop(&mut self.buf) {
-                match src_state {
-                    EventSrcState::Empty => return FeedState::Empty,
-                    EventSrcState::Active => {
-                        if let Err(e) = self.parser.parse_line(&self.buf, events) {
-                            warn!("Failed to parse line: {}", e);
-                        }
+            match self.src.pop(&mut self.buf) {
+                Some(EventSrcState::Empty) | None => return FeedState::Empty,
+                Some(EventSrcState::Active) => {
+                    if let Err(e) = self.parser.parse_line(&self.buf, events) {
+                        warn!("Failed to parse line: {}", e);
                     }
                 }
             }
@@ -108,16 +106,14 @@ impl<S: EventSrc, P: EventProducer + CandleProducer> EventFeed for ParsedCandleF
         count: usize,
     ) -> FeedState {
         for _ in 0..count {
-            if let Some(src_state) = self.src.pop(&mut self.buf) {
-                match src_state {
-                    EventSrcState::Empty => return FeedState::Empty,
-                    EventSrcState::Active => {
-                        if let Err(e) = self.parser.parse_candle(&self.buf, candles) {
-                            warn!("Failed to parse candle: {}", e);
-                        }
-                        if let Err(e) = self.parser.parse_line(&self.buf, events) {
-                            warn!("Failed to parse line: {}", e);
-                        }
+            match self.src.pop(&mut self.buf) {
+                Some(EventSrcState::Empty) | None => return FeedState::Empty,
+                Some(EventSrcState::Active) => {
+                    if let Err(e) = self.parser.parse_candle(&self.buf, candles) {
+                        warn!("Failed to parse candle: {}", e);
+                    }
+                    if let Err(e) = self.parser.parse_line(&self.buf, events) {
+                        warn!("Failed to parse line: {}", e);
                     }
                 }
             }
@@ -162,8 +158,12 @@ impl EventFeed for VecEventFeed {
                 return FeedState::Empty;
             }
         }
-        while let Some(candle) = self.candles.pop_front() {
-            candles.push_back(candle);
+        for _ in 0..count {
+            if let Some(candle) = self.candles.pop_front() {
+                candles.push_back(candle);
+            } else {
+                break;
+            }
         }
         FeedState::Active
     }
