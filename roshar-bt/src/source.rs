@@ -155,7 +155,7 @@ impl EventFeed for VecEventFeed {
             if let Some(event) = self.events.pop_front() {
                 events.push_back(event);
             } else {
-                return FeedState::Empty;
+                break;
             }
         }
         for _ in 0..count {
@@ -165,7 +165,11 @@ impl EventFeed for VecEventFeed {
                 break;
             }
         }
-        FeedState::Active
+        if self.events.is_empty() {
+            FeedState::Empty
+        } else {
+            FeedState::Active
+        }
     }
 }
 
