@@ -11,7 +11,6 @@ use crate::types::{
 
 use super::exchange::OrderId;
 use super::orderbook::{L2OrderBookCell, Qty};
-use super::L2Config;
 
 pub trait FillModel {
     fn update_trade(&mut self, event: Event, tick_orders: &[OrderId]) -> Vec<OrderId>;
@@ -34,11 +33,11 @@ pub struct LevelChgFill {
 }
 
 impl LevelChgFill {
-    pub fn new(config: &L2Config) -> Self {
+    pub fn new(tick_size: Decimal, lot_size: Decimal) -> Self {
         Self {
             orders_by_fill_data: HashMap::with_capacity(100),
-            tick_size: config.tick_size,
-            lot_size: config.lot_size,
+            tick_size,
+            lot_size,
         }
     }
 }

@@ -45,12 +45,13 @@ impl From<HyperliquidCandleMessage> for Candle {
 
 impl CandleWriter for HyperliquidCandleMessage {
     fn write_to_candle_queue(&self, candles: &mut VecDeque<Candle>) {
-        let candle = Candle::from_str(
+        let candle = Candle::from_str_with_symbol(
             &self.data.h,
             &self.data.l,
             &self.data.o,
             &self.data.c,
             &self.data.t_end,
+            &self.data.s,
         );
         candles.push_back(candle);
     }
@@ -58,11 +59,12 @@ impl CandleWriter for HyperliquidCandleMessage {
 
 impl EventWriter for HyperliquidCandleMessage {
     fn write_to_queue(&self, evs: &mut VecDeque<Event>) {
-        evs.push_back(Event::new(
+        evs.push_back(Event::new_with_symbol(
             EVENT_CANDLE,
             self.data.t_start,
             self.data.c.as_str(),
             "0.0",
+            self.data.s.as_str(),
         ));
     }
 }
@@ -89,34 +91,39 @@ pub struct HyperliquidBookMessage {
 
 impl EventWriter for HyperliquidBookMessage {
     fn write_to_queue(&self, evs: &mut VecDeque<Event>) {
-        evs.push_back(Event::new(
+        let symbol = self.data.coin.as_str();
+        evs.push_back(Event::new_with_symbol(
             EVENT_CLEAR_SIDE_ASK,
             self.data.time as i64,
             "0.0",
             "0.0",
+            symbol,
         ));
-        evs.push_back(Event::new(
+        evs.push_back(Event::new_with_symbol(
             EVENT_CLEAR_SIDE_BID,
             self.data.time as i64,
             "0.0",
             "0.0",
+            symbol,
         ));
 
         for level in &self.data.levels[0] {
-            evs.push_back(Event::new(
+            evs.push_back(Event::new_with_symbol(
                 EVENT_UPDATE_LEVEL_BID,
                 self.data.time as i64,
                 level.px.as_str(),
                 level.sz.as_str(),
+                symbol,
             ));
         }
 
         for level in &self.data.levels[1] {
-            evs.push_back(Event::new(
+            evs.push_back(Event::new_with_symbol(
                 EVENT_UPDATE_LEVEL_ASK,
                 self.data.time as i64,
                 level.px.as_str(),
                 level.sz.as_str(),
+                symbol,
             ));
         }
     }
@@ -149,11 +156,12 @@ impl EventWriter for HyperliquidTradesMessage {
                 EVENT_TRADE_SELL
             };
 
-            evs.push_back(Event::new(
+            evs.push_back(Event::new_with_symbol(
                 event_type,
                 trade.time as i64,
                 trade.px.as_str(),
                 trade.sz.as_str(),
+                trade.coin.as_str(),
             ));
         }
     }

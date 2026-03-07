@@ -42,6 +42,7 @@ pub struct Event {
     pub ts: i64,
     pub px: String,
     pub qty: String,
+    pub symbol: String,
 }
 
 impl Event {
@@ -51,6 +52,17 @@ impl Event {
             ts,
             px: px.to_string(),
             qty: qty.to_string(),
+            symbol: String::new(),
+        }
+    }
+
+    pub fn new_with_symbol(typ: u64, ts: i64, px: &str, qty: &str, symbol: &str) -> Self {
+        Self {
+            typ,
+            ts,
+            px: px.to_string(),
+            qty: qty.to_string(),
+            symbol: symbol.to_string(),
         }
     }
 }
@@ -137,6 +149,7 @@ pub struct Candle {
     pub open: Decimal,
     pub close: Decimal,
     pub time: i64,
+    pub symbol: String,
 }
 
 impl Candle {
@@ -148,6 +161,25 @@ impl Candle {
             low: Decimal::from_str(low).unwrap(),
             open: Decimal::from_str(open).unwrap(),
             time: *time,
+            symbol: String::new(),
+        }
+    }
+
+    pub fn from_str_with_symbol(
+        high: &str,
+        low: &str,
+        open: &str,
+        close: &str,
+        time: &i64,
+        symbol: &str,
+    ) -> Self {
+        Self {
+            high: Decimal::from_str(high).unwrap(),
+            close: Decimal::from_str(close).unwrap(),
+            low: Decimal::from_str(low).unwrap(),
+            open: Decimal::from_str(open).unwrap(),
+            time: *time,
+            symbol: symbol.to_string(),
         }
     }
 }

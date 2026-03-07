@@ -11,7 +11,7 @@ use super::{
     exchange::OrderId,
     fill::{FillModel, LevelChgFill},
     orderbook::{L2OrderBookCell, Qty, Tick},
-    L2Config, L2OrderInternal,
+    L2OrderInternal,
 };
 
 pub struct OrderManager<F: FillModel> {
@@ -25,15 +25,15 @@ pub struct OrderManager<F: FillModel> {
 }
 
 impl OrderManager<LevelChgFill> {
-    pub fn new_with_level_chg_fill(config: &L2Config) -> Self {
-        let fill_model = LevelChgFill::new(config);
+    pub fn new_with_level_chg_fill(tick_size: Decimal, lot_size: Decimal) -> Self {
+        let fill_model = LevelChgFill::new(tick_size, lot_size);
         Self {
             fill_model,
             orders: HashMap::with_capacity(100),
             orders_by_level: HashMap::with_capacity(100),
             order_id_counter: 0,
-            tick_size: config.tick_size,
-            lot_size: config.lot_size,
+            tick_size,
+            lot_size,
             position: Decimal::ZERO,
         }
     }
@@ -203,33 +203,27 @@ mod tests {
 
     use crate::l2::manager::OrderManager;
     use crate::l2::orderbook::{L2OrderBook, L2OrderBookCell};
-    use crate::l2::{L2Config, L2ConfigBuilder};
     use crate::types::{
         Event, OrderRequest, OrderStatus, Side, EVENT_TRADE_BUY, EVENT_TRADE_SELL,
         EVENT_UPDATE_LEVEL_ASK, EVENT_UPDATE_LEVEL_BID,
     };
 
-    fn l2_orderbook() -> (L2OrderBookCell, L2Config) {
-        let config = L2ConfigBuilder::new()
-            .set_lot_size(1.0)
-            .set_tick_size(1.0)
-            .set_start_ts(100)
-            .set_return_window(1)
-            .build()
-            .unwrap();
+    fn l2_orderbook() -> (L2OrderBookCell, Decimal, Decimal) {
+        let tick_size = Decimal::ONE;
+        let lot_size = Decimal::ONE;
 
-        let ob = L2OrderBook::new_refcell(&config);
+        let ob = L2OrderBook::new_refcell(tick_size);
         ob.borrow_mut()
             .update_level(Side::Buy, 100, Decimal::from(100));
         ob.borrow_mut()
             .update_level(Side::Sell, 101, Decimal::from(100));
 
-        (ob, config)
+        (ob, tick_size, lot_size)
     }
 
     #[test]
     fn trade_increases_q_position() {
-        let (ob, config) = l2_orderbook();
+        let (ob, tick_size, lot_size) = l2_orderbook();
         let mut fill_tracker = Vec::new();
 
         let buy_order = OrderRequest::new(
@@ -246,7 +240,7 @@ mod tests {
             crate::types::OrderType::Limit,
         );
 
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
         mgr.new_order(buy_order);
         mgr.new_order(sell_order);
 
@@ -270,7 +264,7 @@ mod tests {
 
     #[test]
     fn cancel_increases_q_position() {
-        let (ob, config) = l2_orderbook();
+        let (ob, tick_size, lot_size) = l2_orderbook();
         let mut fill_tracker = Vec::new();
 
         let buy_order = OrderRequest::new(
@@ -287,7 +281,7 @@ mod tests {
             crate::types::OrderType::Limit,
         );
 
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
         mgr.new_order(buy_order);
         mgr.new_order(sell_order);
 
@@ -305,7 +299,7 @@ mod tests {
 
     #[test]
     fn order_fills_with_big_trade() {
-        let (ob, config) = l2_orderbook();
+        let (ob, tick_size, lot_size) = l2_orderbook();
         let mut fill_tracker = Vec::new();
 
         let buy_order = OrderRequest::new(
@@ -322,7 +316,7 @@ mod tests {
             crate::types::OrderType::Limit,
         );
 
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
         mgr.new_order(buy_order);
         mgr.new_order(sell_order);
 
@@ -343,7 +337,7 @@ mod tests {
 
     #[test]
     fn cancel_order() {
-        let (_ob, config) = l2_orderbook();
+        let (_ob, tick_size, lot_size) = l2_orderbook();
 
         let buy_order = OrderRequest::new(
             Side::Buy,
@@ -352,7 +346,7 @@ mod tests {
             crate::types::OrderType::Limit,
         );
 
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
         let oid = mgr.new_order(buy_order);
 
         assert!(mgr.cancel_order(&oid).is_ok());
@@ -366,7 +360,7 @@ mod tests {
 
     #[test]
     fn cancel_order_at_same_level() {
-        let (_ob, config) = l2_orderbook();
+        let (_ob, tick_size, lot_size) = l2_orderbook();
 
         let buy_order_0 = OrderRequest::new(
             Side::Buy,
@@ -382,7 +376,7 @@ mod tests {
             crate::types::OrderType::Limit,
         );
 
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
         let oid_0 = mgr.new_order(buy_order_0);
         let oid_1 = mgr.new_order(buy_order_1);
 
@@ -401,7 +395,7 @@ mod tests {
 
     #[test]
     fn position_is_tracked() {
-        let (ob, config) = l2_orderbook();
+        let (ob, tick_size, lot_size) = l2_orderbook();
         let mut fill_tracker = Vec::new();
 
         let buy_order =
@@ -414,7 +408,7 @@ mod tests {
             crate::types::OrderType::Limit,
         );
 
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
 
         let _oid_buy = mgr.new_order(buy_order);
         let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "110.0");
@@ -435,7 +429,7 @@ mod tests {
 
     #[test]
     fn order_with_incorrect_lot_size_gets_rounded() {
-        let (ob, config) = l2_orderbook();
+        let (ob, tick_size, lot_size) = l2_orderbook();
         let mut fill_tracker = Vec::new();
 
         let buy_order = OrderRequest::new(
@@ -444,7 +438,7 @@ mod tests {
             Some(100.0),
             crate::types::OrderType::Limit,
         );
-        let mut mgr = OrderManager::new_with_level_chg_fill(&config);
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
         mgr.new_order(buy_order);
 
         let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "100.0");

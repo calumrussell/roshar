@@ -24,23 +24,26 @@ pub struct KrakenBookSnapshotMessage {
 impl From<KrakenBookSnapshotMessage> for Vec<Event> {
     fn from(val: KrakenBookSnapshotMessage) -> Self {
         let mut events = Vec::new();
+        let symbol = val.product_id.as_str();
 
         for bid in val.bids {
-            let event = Event::new(
+            let event = Event::new_with_symbol(
                 EVENT_UPDATE_LEVEL_BID,
                 val.timestamp,
                 bid.price.as_str(),
                 bid.qty.as_str(),
+                symbol,
             );
             events.push(event);
         }
 
         for ask in val.asks {
-            let event = Event::new(
+            let event = Event::new_with_symbol(
                 EVENT_UPDATE_LEVEL_ASK,
                 val.timestamp,
                 ask.price.as_str(),
                 ask.qty.as_str(),
+                symbol,
             );
             events.push(event);
         }
@@ -69,11 +72,12 @@ impl From<KrakenBookDeltaMessage> for Vec<Event> {
             EVENT_UPDATE_LEVEL_ASK
         };
 
-        let event = Event::new(
+        let event = Event::new_with_symbol(
             event_type,
             val.timestamp,
             val.price.as_str(),
             val.qty.as_str(),
+            val.product_id.as_str(),
         );
 
         events.push(event);
@@ -105,6 +109,7 @@ pub struct KrakenTradeSnapshotMessage {
 impl From<KrakenTradeSnapshotMessage> for Vec<Event> {
     fn from(val: KrakenTradeSnapshotMessage) -> Self {
         let mut events = Vec::new();
+        let symbol = val.product_id.as_str();
 
         for trade in val.trades {
             let event_type = if trade.side == "buy" {
@@ -113,11 +118,12 @@ impl From<KrakenTradeSnapshotMessage> for Vec<Event> {
                 EVENT_TRADE_SELL
             };
 
-            let event = Event::new(
+            let event = Event::new_with_symbol(
                 event_type,
                 trade.time,
                 trade.price.as_str(),
                 trade.qty.as_str(),
+                symbol,
             );
 
             events.push(event);

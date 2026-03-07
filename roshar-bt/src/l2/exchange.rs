@@ -12,7 +12,7 @@ use crate::types::{
 use super::fill::{FillModel, LevelChgFill};
 use super::manager::OrderManager;
 use super::orderbook::{L2OrderBook, L2OrderBookCell, Qty};
-use super::{L2Config, L2OrderInternal};
+use super::L2OrderInternal;
 
 pub type Price = Decimal;
 pub type OrderId = u64;
@@ -25,12 +25,12 @@ pub struct Exchange<F: FillModel> {
 }
 
 impl Exchange<LevelChgFill> {
-    pub fn new_with_level_chg_fill(config: &L2Config) -> Self {
-        let order_manager = OrderManager::new_with_level_chg_fill(config);
-        let orderbook = L2OrderBook::new_refcell(config);
+    pub fn new_with_level_chg_fill(tick_size: Decimal, lot_size: Decimal) -> Self {
+        let order_manager = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
+        let orderbook = L2OrderBook::new_refcell(tick_size);
         Self {
-            tick_size: config.tick_size,
-            lot_size: config.lot_size,
+            tick_size,
+            lot_size,
             orderbook,
             order_manager,
         }
@@ -182,26 +182,20 @@ impl<F: FillModel> Exchange<F> {
 #[cfg(test)]
 mod tests {
     use crate::l2::fill::LevelChgFill;
-    use crate::l2::L2ConfigBuilder;
     use crate::types::EVENT_CLEAR_LEVEL_ASK;
 
     use super::*;
 
     fn setup_basic_orderbook() -> Exchange<LevelChgFill> {
-        let config = L2ConfigBuilder::new()
-            .set_lot_size(1.0)
-            .set_tick_size(0.01)
-            .set_start_ts(100)
-            .set_return_window(1)
-            .build()
-            .unwrap();
+        let tick_size = dec!(0.01);
+        let lot_size = Decimal::ONE;
 
         let mut fill_tracker = Vec::new();
 
         let bid_event = Event::new(EVENT_UPDATE_LEVEL_BID, 100, "9.99", "100.0");
         let ask_event = Event::new(EVENT_UPDATE_LEVEL_ASK, 100, "10.01", "100.0");
 
-        let mut exchange = Exchange::new_with_level_chg_fill(&config);
+        let mut exchange = Exchange::new_with_level_chg_fill(tick_size, lot_size);
         exchange.update_level(bid_event, &mut fill_tracker);
         exchange.update_level(ask_event, &mut fill_tracker);
         exchange
@@ -258,15 +252,7 @@ mod tests {
 
     #[test]
     fn test_market_order_with_empty_orderbook() {
-        let config = L2ConfigBuilder::new()
-            .set_lot_size(1.0)
-            .set_tick_size(1.0)
-            .set_start_ts(100)
-            .set_return_window(1)
-            .build()
-            .unwrap();
-
-        let mut exchange = Exchange::new_with_level_chg_fill(&config);
+        let mut exchange = Exchange::new_with_level_chg_fill(Decimal::ONE, Decimal::ONE);
         let market_order = OrderRequest::new(Side::Buy, 100.0, None, OrderType::Market);
 
         exchange.execute_user_order(market_order);

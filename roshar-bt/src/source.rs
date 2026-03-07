@@ -14,7 +14,7 @@ use url::Url;
 
 use crate::types::{Candle, Event};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum EventSrcState {
     Active,
     Empty,
@@ -285,6 +285,114 @@ impl EventSrc for BufSource {
                 }
             }
             return Some(EventSrcState::Active);
+        }
+    }
+}
+
+// Internal per-feed state used by MultiplexedFeed.
+struct MuxFeedState {
+    feed: Box<dyn EventFeed>,
+    event_buf: VecDeque<Event>,
+    candle_buf: VecDeque<Candle>,
+    exhausted: bool,
+}
+
+impl MuxFeedState {
+    fn new(feed: Box<dyn EventFeed>) -> Self {
+        Self {
+            feed,
+            event_buf: VecDeque::new(),
+            candle_buf: VecDeque::new(),
+            exhausted: false,
+        }
+    }
+
+    /// Ensure at least one event is buffered (or mark exhausted).
+    fn ensure_buffered(&mut self) {
+        while self.event_buf.is_empty() && !self.exhausted {
+            match self.feed.fill(&mut self.event_buf, &mut self.candle_buf, 1) {
+                FeedState::Empty => self.exhausted = true,
+                FeedState::Active => {}
+            }
+        }
+    }
+
+    fn peek_ts(&mut self) -> Option<i64> {
+        self.ensure_buffered();
+        self.event_buf.front().map(|e| e.ts)
+    }
+
+    fn pop_event(&mut self) -> Option<Event> {
+        self.ensure_buffered();
+        self.event_buf.pop_front()
+    }
+
+    fn drain_candles(&mut self, out: &mut VecDeque<Candle>) {
+        out.extend(self.candle_buf.drain(..));
+    }
+}
+
+/// Merges multiple per-symbol [`EventFeed`]s in timestamp order.
+///
+/// Each call to [`EventFeed::fill`] pops events with the smallest timestamps
+/// across all sub-feeds. Sub-feeds are exhausted lazily.
+///
+/// # Example
+/// ```ignore
+/// let feed_aave = ParsedCandleFeed::new(BufSource::new_file("aave.log"), HyperliquidCandleParser::new());
+/// let feed_btc  = ParsedCandleFeed::new(BufSource::new_file("btc.log"),  HyperliquidCandleParser::new());
+/// let mut mux = MultiplexedFeed::new(vec![Box::new(feed_aave), Box::new(feed_btc)]);
+/// ```
+pub struct MultiplexedFeed {
+    feeds: Vec<MuxFeedState>,
+}
+
+impl MultiplexedFeed {
+    pub fn new(feeds: Vec<Box<dyn EventFeed>>) -> Self {
+        Self {
+            feeds: feeds.into_iter().map(MuxFeedState::new).collect(),
+        }
+    }
+}
+
+impl EventFeed for MultiplexedFeed {
+    fn fill(
+        &mut self,
+        evs: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        let mut produced = 0;
+        for _ in 0..count {
+            // Find the feed with the smallest next event timestamp.
+            let mut min_ts = i64::MAX;
+            let mut min_idx: Option<usize> = None;
+
+            for (i, feed) in self.feeds.iter_mut().enumerate() {
+                if let Some(ts) = feed.peek_ts() {
+                    if ts < min_ts {
+                        min_ts = ts;
+                        min_idx = Some(i);
+                    }
+                }
+            }
+
+            match min_idx {
+                None => break, // all feeds exhausted
+                Some(idx) => {
+                    if let Some(event) = self.feeds[idx].pop_event() {
+                        evs.push_back(event);
+                        produced += 1;
+                    }
+                    self.feeds[idx].drain_candles(candles);
+                }
+            }
+        }
+
+        if produced > 0 {
+            FeedState::Active
+        } else {
+            FeedState::Empty
         }
     }
 }

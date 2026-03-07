@@ -5,7 +5,6 @@ use rust_decimal::{prelude::FromPrimitive, Decimal};
 use crate::types::{tick_to_price, Side};
 
 use super::exchange::Price;
-use super::L2Config;
 
 pub type Tick = i64;
 pub type Qty = Decimal;
@@ -21,16 +20,16 @@ pub struct L2OrderBook {
 pub type L2OrderBookCell = Rc<RefCell<L2OrderBook>>;
 
 impl L2OrderBook {
-    pub fn new(config: &L2Config) -> Self {
+    pub fn new(tick_size: Decimal) -> Self {
         Self {
             ask_depth: BTreeMap::new(),
             bid_depth: BTreeMap::new(),
-            tick_size: config.tick_size,
+            tick_size,
         }
     }
 
-    pub fn new_refcell(config: &L2Config) -> Rc<RefCell<Self>> {
-        Rc::new(RefCell::new(Self::new(config)))
+    pub fn new_refcell(tick_size: Decimal) -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(Self::new(tick_size)))
     }
 
     pub fn get_best_ask(&self) -> Price {
