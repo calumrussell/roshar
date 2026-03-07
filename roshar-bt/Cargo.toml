@@ -28,7 +28,7 @@ url = "2.5"
 bytes = "1"
 async-trait = "0.1"
 plotters = "0.3"
-roshar-types = { path = "../roshar-types", optional = true }
+roshar-types = { version = "0.1.20", path = "../roshar-types", optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
