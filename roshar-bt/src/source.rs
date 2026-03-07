@@ -783,4 +783,37 @@ mod tests {
         let timestamps: Vec<i64> = out_events.iter().map(|e| e.ts).collect();
         assert_eq!(timestamps, vec![1, 2, 3, 4, 5, 6]);
     }
+
+    #[test]
+    fn test_multiplexed_feed_continues_after_one_feed_exhausted() {
+        use super::{EventFeed, FeedState, MultiplexedFeed, VecEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        // Feed A: only 1 event
+        let feed_a: Box<dyn EventFeed> = Box::new(VecEventFeed::new(vec![
+            Event::new(EVENT_TRADE_BUY, 2, "100.0", "1.0"),
+        ]));
+
+        // Feed B: 4 events spanning before and after feed A
+        let feed_b: Box<dyn EventFeed> = Box::new(VecEventFeed::new(vec![
+            Event::new(EVENT_TRADE_BUY, 1, "200.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 3, "201.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 4, "202.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 5, "203.0", "1.0"),
+        ]));
+
+        let mut mux = MultiplexedFeed::new(vec![feed_a, feed_b]);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        loop {
+            match mux.fill(&mut out_events, &mut out_candles, 1) {
+                FeedState::Active => {}
+                FeedState::Empty => break,
+            }
+        }
+
+        let timestamps: Vec<i64> = out_events.iter().map(|e| e.ts).collect();
+        assert_eq!(timestamps, vec![1, 2, 3, 4, 5]);
+    }
 }
