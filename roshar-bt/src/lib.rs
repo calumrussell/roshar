@@ -2,6 +2,8 @@ pub mod chart;
 pub mod exchanges;
 pub mod l1;
 pub mod l2;
+#[cfg(feature = "roshar-types")]
+pub mod normalized_feed;
 pub mod performance;
 pub mod source;
 pub mod types;

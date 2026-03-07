@@ -24,6 +24,157 @@ pub trait EventSrc: Send {
     fn pop(&mut self, buf: &mut String) -> Option<EventSrcState>;
 }
 
+#[derive(Clone, Debug)]
+pub enum FeedState {
+    Active,
+    Empty,
+}
+
+/// Unified abstraction over data sources for backtesting.
+///
+/// Combines both event and candle production into a single trait, replacing the
+/// separate `EventSrc` + `EventProducer` pair.
+pub trait EventFeed: Send {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState;
+}
+
+/// Wraps an `EventSrc` + `EventProducer` into an `EventFeed` (events only, no candles).
+pub struct ParsedFeed<S: EventSrc, P: EventProducer> {
+    src: S,
+    parser: P,
+    buf: String,
+}
+
+impl<S: EventSrc, P: EventProducer> ParsedFeed<S, P> {
+    pub fn new(src: S, parser: P) -> Self {
+        Self {
+            src,
+            parser,
+            buf: String::with_capacity(1_024),
+        }
+    }
+}
+
+impl<S: EventSrc, P: EventProducer> EventFeed for ParsedFeed<S, P> {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        _candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        for _ in 0..count {
+            match self.src.pop(&mut self.buf) {
+                Some(EventSrcState::Empty) | None => return FeedState::Empty,
+                Some(EventSrcState::Active) => {
+                    if let Err(e) = self.parser.parse_line(&self.buf, events) {
+                        warn!("Failed to parse line: {}", e);
+                    }
+                }
+            }
+        }
+        FeedState::Active
+    }
+}
+
+/// Wraps an `EventSrc` + `EventProducer + CandleProducer` into an `EventFeed` (events + candles).
+pub struct ParsedCandleFeed<S: EventSrc, P: EventProducer + CandleProducer> {
+    src: S,
+    parser: P,
+    buf: String,
+}
+
+impl<S: EventSrc, P: EventProducer + CandleProducer> ParsedCandleFeed<S, P> {
+    pub fn new(src: S, parser: P) -> Self {
+        Self {
+            src,
+            parser,
+            buf: String::with_capacity(1_024),
+        }
+    }
+}
+
+impl<S: EventSrc, P: EventProducer + CandleProducer> EventFeed for ParsedCandleFeed<S, P> {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        for _ in 0..count {
+            match self.src.pop(&mut self.buf) {
+                Some(EventSrcState::Empty) | None => return FeedState::Empty,
+                Some(EventSrcState::Active) => {
+                    if let Err(e) = self.parser.parse_candle(&self.buf, candles) {
+                        warn!("Failed to parse candle: {}", e);
+                    }
+                    if let Err(e) = self.parser.parse_line(&self.buf, events) {
+                        warn!("Failed to parse line: {}", e);
+                    }
+                }
+            }
+        }
+        FeedState::Active
+    }
+}
+
+/// Direct event feed from pre-built event and candle vectors.
+pub struct VecEventFeed {
+    events: VecDeque<Event>,
+    candles: VecDeque<Candle>,
+}
+
+impl VecEventFeed {
+    pub fn new(events: Vec<Event>) -> Self {
+        Self {
+            events: events.into(),
+            candles: VecDeque::new(),
+        }
+    }
+
+    pub fn with_candles(events: Vec<Event>, candles: Vec<Candle>) -> Self {
+        Self {
+            events: events.into(),
+            candles: candles.into(),
+        }
+    }
+}
+
+impl EventFeed for VecEventFeed {
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        let start_events = events.len();
+        let start_candles = candles.len();
+        for _ in 0..count {
+            if let Some(event) = self.events.pop_front() {
+                events.push_back(event);
+            } else {
+                break;
+            }
+        }
+        for _ in 0..count {
+            if let Some(candle) = self.candles.pop_front() {
+                candles.push_back(candle);
+            } else {
+                break;
+            }
+        }
+        if events.len() > start_events || candles.len() > start_candles {
+            FeedState::Active
+        } else {
+            FeedState::Empty
+        }
+    }
+}
+
 pub struct EventVecSource {
     pub evs: VecDeque<String>,
 }
@@ -379,6 +530,67 @@ mod tests {
             }
         }
         assert_eq!(count, 4)
+    }
+
+    #[test]
+    fn test_vec_event_feed_returns_active_when_last_events_delivered() {
+        // When fill() drains the last events from its internal buffer, it should
+        // return Active (not Empty) because events were produced in this call.
+        // Empty should only be returned when zero events were produced.
+        use super::{EventFeed, FeedState, VecEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        let events = vec![
+            Event::new(EVENT_TRADE_BUY, 1000, "100.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 2000, "101.0", "2.0"),
+            Event::new(EVENT_TRADE_BUY, 3000, "102.0", "3.0"),
+        ];
+
+        let mut feed = VecEventFeed::new(events);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        // Request exactly 3 events (matches the total count).
+        // All 3 are delivered, so the result should be Active.
+        let state = feed.fill(&mut out_events, &mut out_candles, 3);
+        assert_eq!(out_events.len(), 3, "All 3 events should be delivered");
+        assert!(
+            matches!(state, FeedState::Active),
+            "Feed should return Active when events were delivered"
+        );
+
+        // Now the feed is truly exhausted — no events produced, returns Empty.
+        let state2 = feed.fill(&mut out_events, &mut out_candles, 3);
+        assert_eq!(out_events.len(), 3, "No new events should be added");
+        assert!(
+            matches!(state2, FeedState::Empty),
+            "Feed should return Empty only when no events were produced"
+        );
+    }
+
+    #[test]
+    fn test_vec_event_feed_returns_active_when_events_remain() {
+        // When the feed has more events than requested, it returns Active.
+        use super::{EventFeed, FeedState, VecEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        let events = vec![
+            Event::new(EVENT_TRADE_BUY, 1000, "100.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 2000, "101.0", "2.0"),
+            Event::new(EVENT_TRADE_BUY, 3000, "102.0", "3.0"),
+        ];
+
+        let mut feed = VecEventFeed::new(events);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        // Request only 2 of 3 events.
+        let state = feed.fill(&mut out_events, &mut out_candles, 2);
+        assert_eq!(out_events.len(), 2);
+        assert!(
+            matches!(state, FeedState::Active),
+            "Feed should return Active when events remain"
+        );
     }
 
     #[test]

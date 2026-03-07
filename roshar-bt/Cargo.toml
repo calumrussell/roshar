@@ -6,6 +6,10 @@ license = "MIT"
 description = "Backtesting framework for trading strategies"
 repository = "https://github.com/calumrussell/roshar"
 
+[features]
+default = []
+roshar-types = ["dep:roshar-types"]
+
 [dependencies]
 anyhow = "1.0.95"
 chrono = "0.4"
@@ -24,6 +28,7 @@ url = "2.5"
 bytes = "1"
 async-trait = "0.1"
 plotters = "0.3"
+roshar-types = { path = "../roshar-types", optional = true }
 
 [dev-dependencies]
 criterion = "0.5"

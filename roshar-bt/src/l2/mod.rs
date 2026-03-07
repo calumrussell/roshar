@@ -3,7 +3,6 @@ use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
 use rust_decimal::Decimal;
 use std::time::Duration;
 
-use crate::source::EventProducer;
 use crate::types::{OrderStatus, OrderType, Side};
 
 pub mod backtest;
@@ -74,7 +73,7 @@ impl From<L2OrderInternal> for L2Order {
     }
 }
 
-pub struct L2ConfigBuilder<P: EventProducer> {
+pub struct L2ConfigBuilder {
     tick_size: Option<f64>,
     lot_size: Option<f64>,
     lines_read_per_tick: usize,
@@ -83,10 +82,9 @@ pub struct L2ConfigBuilder<P: EventProducer> {
     tick_fill_tracker_start_size: usize,
     risk_free_rate: f64,
     return_window: Option<Duration>,
-    parser: Option<P>,
 }
 
-impl<P: EventProducer> L2ConfigBuilder<P> {
+impl L2ConfigBuilder {
     pub fn new() -> Self {
         Self {
             tick_size: None,
@@ -97,13 +95,7 @@ impl<P: EventProducer> L2ConfigBuilder<P> {
             tick_fill_tracker_start_size: 10,
             risk_free_rate: 0.02,
             return_window: None,
-            parser: None,
         }
-    }
-
-    pub fn set_parser(&mut self, parser: P) -> &mut Self {
-        self.parser = Some(parser);
-        self
     }
 
     pub fn set_tick_size(&mut self, tick_size: f64) -> &mut Self {
@@ -149,12 +141,11 @@ impl<P: EventProducer> L2ConfigBuilder<P> {
         self
     }
 
-    pub fn build(&mut self) -> Result<L2Config<P>> {
+    pub fn build(&mut self) -> Result<L2Config> {
         if self.lot_size.is_none()
             || self.tick_size.is_none()
             || self.start_ts.is_none()
             || self.return_window.is_none()
-            || self.parser.is_none()
         {
             return Err(anyhow!("Missing required argument"));
         }
@@ -166,8 +157,6 @@ impl<P: EventProducer> L2ConfigBuilder<P> {
         let risk_free_rate_decimal = Decimal::from_f64(self.risk_free_rate)
             .expect("Unable to parse risk_free_rate as Decimal");
 
-        let parser = self.parser.take().unwrap();
-
         let config = L2Config {
             tick_size: tick_size_decimal,
             lot_size: lot_size_decimal,
@@ -177,21 +166,20 @@ impl<P: EventProducer> L2ConfigBuilder<P> {
             tick_fill_tracker_start_size: self.tick_fill_tracker_start_size,
             risk_free_rate: risk_free_rate_decimal,
             return_window: self.return_window.unwrap(),
-            parser,
         };
 
         Ok(config)
     }
 }
 
-impl<P: EventProducer> Default for L2ConfigBuilder<P> {
+impl Default for L2ConfigBuilder {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[derive(Debug)]
-pub struct L2Config<P: EventProducer> {
+pub struct L2Config {
     pub tick_size: Decimal,
     pub lot_size: Decimal,
     pub lines_read_per_tick: usize,
@@ -200,10 +188,9 @@ pub struct L2Config<P: EventProducer> {
     pub tick_fill_tracker_start_size: usize,
     pub risk_free_rate: Decimal,
     pub return_window: Duration,
-    pub parser: P,
 }
 
-impl<P: EventProducer> L2Config<P> {
+impl L2Config {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         tick_size: Decimal,
@@ -214,7 +201,6 @@ impl<P: EventProducer> L2Config<P> {
         tick_fill_tracker_start_size: usize,
         risk_free_rate: Decimal,
         return_window: Duration,
-        parser: P,
     ) -> Self {
         L2Config {
             tick_size,
@@ -225,7 +211,6 @@ impl<P: EventProducer> L2Config<P> {
             tick_fill_tracker_start_size,
             risk_free_rate,
             return_window,
-            parser,
         }
     }
 

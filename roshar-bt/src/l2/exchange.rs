@@ -4,7 +4,6 @@ use std::str::FromStr;
 use anyhow::Result;
 use rust_decimal::{dec, Decimal};
 
-use crate::source::EventProducer;
 use crate::types::{
     arbitrary_f64_qty_to_lot_size, price_to_tick, Event, OrderRequest, OrderStatus, OrderType,
     Side, EVENT_UPDATE_LEVEL_ASK, EVENT_UPDATE_LEVEL_BID,
@@ -26,7 +25,7 @@ pub struct Exchange<F: FillModel> {
 }
 
 impl Exchange<LevelChgFill> {
-    pub fn new_with_level_chg_fill<P: EventProducer>(config: &L2Config<P>) -> Self {
+    pub fn new_with_level_chg_fill(config: &L2Config) -> Self {
         let order_manager = OrderManager::new_with_level_chg_fill(config);
         let orderbook = L2OrderBook::new_refcell(config);
         Self {
@@ -182,7 +181,6 @@ impl<F: FillModel> Exchange<F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::exchanges::hyperliquid::HyperliquidParser;
     use crate::l2::fill::LevelChgFill;
     use crate::l2::L2ConfigBuilder;
     use crate::types::EVENT_CLEAR_LEVEL_ASK;
@@ -190,12 +188,11 @@ mod tests {
     use super::*;
 
     fn setup_basic_orderbook() -> Exchange<LevelChgFill> {
-        let config: L2Config<HyperliquidParser> = L2ConfigBuilder::new()
+        let config = L2ConfigBuilder::new()
             .set_lot_size(1.0)
             .set_tick_size(0.01)
             .set_start_ts(100)
             .set_return_window(1)
-            .set_parser(HyperliquidParser)
             .build()
             .unwrap();
 
@@ -261,12 +258,11 @@ mod tests {
 
     #[test]
     fn test_market_order_with_empty_orderbook() {
-        let config: L2Config<HyperliquidParser> = L2ConfigBuilder::new()
+        let config = L2ConfigBuilder::new()
             .set_lot_size(1.0)
             .set_tick_size(1.0)
             .set_start_ts(100)
             .set_return_window(1)
-            .set_parser(HyperliquidParser)
             .build()
             .unwrap();
 

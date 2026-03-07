@@ -4,7 +4,6 @@ use std::str::FromStr;
 use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::{Decimal, MathematicalOps};
 
-use crate::source::EventProducer;
 use crate::types::{
     arbitrary_f64_qty_to_lot_size, price_to_tick, Event, EVENT_UPDATE_LEVEL_ASK,
     EVENT_UPDATE_LEVEL_BID,
@@ -35,7 +34,7 @@ pub struct LevelChgFill {
 }
 
 impl LevelChgFill {
-    pub fn new<P: EventProducer>(config: &L2Config<P>) -> Self {
+    pub fn new(config: &L2Config) -> Self {
         Self {
             orders_by_fill_data: HashMap::with_capacity(100),
             tick_size: config.tick_size,
