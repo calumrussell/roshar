@@ -1,7 +1,7 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
-use crate::{OrderBookState, Trade, Venue};
+use crate::{LocalOrderBookError, OrderBookState, Trade, Venue};
 
 // --- Subscribe/Unsubscribe message types ---
 
@@ -244,6 +244,65 @@ pub struct OkxTradeData {
     pub sz: String,
     pub side: String,
     pub ts: String,
+}
+
+// --- Order book management ---
+
+pub struct OkxOrderBook {
+    pub symbol: String,
+    pub book: Option<OrderBookState>,
+}
+
+impl OkxOrderBook {
+    pub fn new(symbol: String) -> Self {
+        Self { symbol, book: None }
+    }
+
+    pub fn new_snapshot(&mut self, msg: &OkxDepthMessage) {
+        self.book = Some(msg.to_order_book_state());
+    }
+
+    pub fn new_update(&mut self, msg: &OkxDepthMessage) -> Result<(), LocalOrderBookError> {
+        let coin = msg.inst_id().to_string();
+
+        if self.symbol != coin {
+            return Err(LocalOrderBookError::WrongSymbol(
+                self.symbol.clone(),
+                coin,
+            ));
+        }
+
+        if let Some(ref mut book) = self.book {
+            msg.apply_delta(book);
+        } else {
+            return Err(LocalOrderBookError::BookUpdateBeforeSnapshot(
+                Venue::Okx.to_string(),
+                coin,
+            ));
+        }
+
+        // Validate BBO: if bid > ask the book has become corrupted, reset it
+        let validation_result = if let Some(ref book) = self.book {
+            let (bid, ask) = book.get_bbo();
+            match (bid, ask) {
+                (Some(b), Some(a)) if b > a => Err(LocalOrderBookError::BidAboveAsk(
+                    b.to_string(),
+                    a.to_string(),
+                    Venue::Okx.to_string(),
+                    coin,
+                )),
+                _ => Ok(()),
+            }
+        } else {
+            Ok(())
+        };
+
+        if validation_result.is_err() {
+            self.book = None;
+        }
+
+        validation_result
+    }
 }
 
 #[cfg(test)]

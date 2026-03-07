@@ -2,8 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use roshar_types::{
-    OkxDepthMessage, OkxTradesMessage, OkxWssMessage, OrderBookState, SupportedMessages, Trade,
-    Venue,
+    OkxDepthMessage, OkxOrderBook, OkxTradesMessage, OkxWssMessage, OrderBookState,
+    SupportedMessages, Trade, Venue,
 };
 use roshar_ws_mgr::Manager;
 use tokio::sync::{broadcast, mpsc, oneshot};
@@ -146,7 +146,7 @@ pub struct MarketDataFeed {
     conn_name: String,
 
     // books feed: snapshot on first message, then incremental delta updates
-    order_books: HashMap<String, OrderBookState>,
+    order_books: HashMap<String, OkxOrderBook>,
     event_tx: broadcast::Sender<MarketEvent>,
     raw_tx: mpsc::Sender<String>,
     raw_rx: Option<mpsc::Receiver<String>>,
@@ -408,7 +408,10 @@ impl MarketDataFeed {
                 }
             }
             SubscriptionCommand::GetDepth { symbol, response } => {
-                let result = self.order_books.get(&symbol).cloned();
+                let result = self
+                    .order_books
+                    .get(&symbol)
+                    .and_then(|ob| ob.book.clone());
                 let _ = response.send(result);
             }
             SubscriptionCommand::GetEventChannel { response } => {
@@ -467,21 +470,30 @@ impl MarketDataFeed {
         let symbol = msg.inst_id().to_string();
 
         if msg.is_snapshot() {
-            // Full snapshot: replace the entire order book
-            let book = msg.to_order_book_state();
-            self.order_books.insert(symbol.clone(), book.clone());
-            let _ = self.event_tx.send(MarketEvent::DepthUpdate {
-                symbol,
-                book: Arc::new(book),
-            });
-        } else if let Some(book) = self.order_books.get_mut(&symbol) {
-            // Delta update: apply in place, then broadcast a clone
-            msg.apply_delta(book);
-            let snapshot = book.clone();
-            let _ = self.event_tx.send(MarketEvent::DepthUpdate {
-                symbol,
-                book: Arc::new(snapshot),
-            });
+            let order_book = self
+                .order_books
+                .entry(symbol.clone())
+                .or_insert_with(|| OkxOrderBook::new(symbol.clone()));
+            order_book.new_snapshot(&msg);
+
+            if let Some(book) = &order_book.book {
+                let _ = self.event_tx.send(MarketEvent::DepthUpdate {
+                    symbol,
+                    book: Arc::new(book.clone()),
+                });
+            }
+        } else if let Some(order_book) = self.order_books.get_mut(&symbol) {
+            if let Err(e) = order_book.new_update(&msg) {
+                log::error!("OKX: order book update failed for {}: {:?}", symbol, e);
+                return;
+            }
+
+            if let Some(book) = &order_book.book {
+                let _ = self.event_tx.send(MarketEvent::DepthUpdate {
+                    symbol,
+                    book: Arc::new(book.clone()),
+                });
+            }
         } else {
             log::warn!(
                 "OKX: received delta update for {} before initial snapshot, dropping",
