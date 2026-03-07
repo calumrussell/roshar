@@ -145,7 +145,7 @@ pub struct MarketDataFeed {
     ws_manager: Arc<Manager>,
     conn_name: String,
 
-    // books5 is a full snapshot channel, so we just store the latest OrderBookState directly
+    // books feed: snapshot on first message, then incremental delta updates
     order_books: HashMap<String, OrderBookState>,
     event_tx: broadcast::Sender<MarketEvent>,
     raw_tx: mpsc::Sender<String>,
@@ -466,14 +466,28 @@ impl MarketDataFeed {
     async fn handle_depth(&mut self, msg: OkxDepthMessage) {
         let symbol = msg.inst_id().to_string();
 
-        // books5 is always a full snapshot — just replace
-        let book = msg.to_order_book_state();
-        self.order_books.insert(symbol.clone(), book.clone());
-
-        let _ = self.event_tx.send(MarketEvent::DepthUpdate {
-            symbol,
-            book: Arc::new(book),
-        });
+        if msg.is_snapshot() {
+            // Full snapshot: replace the entire order book
+            let book = msg.to_order_book_state();
+            self.order_books.insert(symbol.clone(), book.clone());
+            let _ = self.event_tx.send(MarketEvent::DepthUpdate {
+                symbol,
+                book: Arc::new(book),
+            });
+        } else if let Some(book) = self.order_books.get_mut(&symbol) {
+            // Delta update: apply in place, then broadcast a clone
+            msg.apply_delta(book);
+            let snapshot = book.clone();
+            let _ = self.event_tx.send(MarketEvent::DepthUpdate {
+                symbol,
+                book: Arc::new(snapshot),
+            });
+        } else {
+            log::warn!(
+                "OKX: received delta update for {} before initial snapshot, dropping",
+                symbol
+            );
+        }
     }
 
     async fn handle_trades(&self, msg: OkxTradesMessage) {
