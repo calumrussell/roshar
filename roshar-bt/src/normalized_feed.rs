@@ -157,6 +157,7 @@ mod tests {
 
     #[test]
     fn test_trade_conversion() {
+        // side=true means buy
         let trade = make_trade("100.5", "1.0", 1000, true);
         let event: Event = (&trade).into();
         assert_eq!(event.typ, EVENT_TRADE_BUY);
@@ -164,6 +165,7 @@ mod tests {
         assert_eq!(event.px, "100.5");
         assert_eq!(event.qty, "1.0");
 
+        // side=false means sell
         let sell_trade = make_trade("99.5", "2.0", 2000, false);
         let sell_event: Event = (&sell_trade).into();
         assert_eq!(sell_event.typ, EVENT_TRADE_SELL);
@@ -171,10 +173,12 @@ mod tests {
 
     #[test]
     fn test_depth_update_conversion() {
+        // side=true means bid (buy side of book)
         let bid = make_depth_update("100.0", "50.0", 1000, true);
         let event: Event = (&bid).into();
         assert_eq!(event.typ, EVENT_UPDATE_LEVEL_BID);
 
+        // side=false means ask (sell side of book)
         let ask = make_depth_update("101.0", "50.0", 1000, false);
         let event: Event = (&ask).into();
         assert_eq!(event.typ, EVENT_UPDATE_LEVEL_ASK);
