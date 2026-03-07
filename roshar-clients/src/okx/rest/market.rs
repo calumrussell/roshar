@@ -1,5 +1,5 @@
 use crate::http::RateLimitedClient;
-use roshar_types::OkxInstrumentInfo;
+use roshar_types::{OkxCandle, OkxInstrumentInfo};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -61,6 +61,8 @@ pub struct OkxTickerData {
 }
 
 pub type OkxTickersResponse = OkxResponse<Vec<OkxTickerData>>;
+
+pub type OkxCandlesResponse = OkxResponse<Vec<OkxCandle>>;
 
 /// OKX Market API for public data endpoints
 pub struct MarketApi {
@@ -148,6 +150,63 @@ impl MarketApi {
 
         Ok(tickers_map)
     }
+
+    /// Fetch candlestick data for an instrument.
+    ///
+    /// Uses GET /api/v5/market/candles (public, no auth).
+    /// Rate limit: 40 requests per 2 seconds (IP-based).
+    ///
+    /// # Arguments
+    /// * `inst_id` - Instrument ID (e.g. "BTC-USDT-SWAP")
+    /// * `bar` - Bar size (e.g. "1m", "5m", "1H", "1D"). Default "1m"
+    /// * `after` - Pagination: return records older than this timestamp (ms)
+    /// * `before` - Pagination: return records newer than this timestamp (ms)
+    /// * `limit` - Number of results per request (max 100, default 100)
+    pub async fn get_candles(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        let mut url = format!(
+            "{}/api/v5/market/candles?instId={}&bar={}",
+            super::OKX_REST_URL,
+            inst_id,
+            bar
+        );
+
+        if let Some(after) = after {
+            url.push_str(&format!("&after={}", after));
+        }
+        if let Some(before) = before {
+            url.push_str(&format!("&before={}", before));
+        }
+        if let Some(limit) = limit {
+            url.push_str(&format!("&limit={}", limit));
+        }
+
+        let response = self.client.get(&url).await?;
+
+        if !response.status().is_success() {
+            return Err(format!(
+                "OKX API request failed with status: {}",
+                response.status()
+            )
+            .into());
+        }
+
+        let response_text = response.text().await?;
+        let candles_response: OkxCandlesResponse = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse OKX candles response: {e}"))?;
+
+        if candles_response.code != "0" {
+            return Err(format!("OKX API error: {}", candles_response.msg).into());
+        }
+
+        Ok(candles_response.data)
+    }
 }
 
 #[cfg(test)]
@@ -189,6 +248,46 @@ mod tests {
             btc.ct_val,
             btc.tick_sz,
             btc.lot_sz
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_candles() {
+        let api = MarketApi::new(10);
+        let result = api
+            .get_candles("BTC-USDT-SWAP", "1m", None, None, Some(5))
+            .await;
+
+        assert!(
+            result.is_ok(),
+            "Failed to fetch candles: {:?}",
+            result.err()
+        );
+
+        let candles = result.unwrap();
+
+        assert!(
+            !candles.is_empty(),
+            "Expected some candles, got none"
+        );
+
+        assert!(candles.len() <= 5, "Expected at most 5 candles");
+
+        let first = &candles[0];
+        assert!(first.ts > 0, "Expected positive timestamp");
+        assert!(first.open > 0.0, "Expected positive open price");
+        assert!(first.high >= first.low, "High should be >= low");
+        assert!(first.confirm <= 1, "Confirm should be 0 or 1");
+
+        println!(
+            "Fetched {} OKX candles. First: ts={}, o={}, h={}, l={}, c={}, vol={}",
+            candles.len(),
+            first.ts,
+            first.open,
+            first.high,
+            first.low,
+            first.close,
+            first.vol
         );
     }
 
