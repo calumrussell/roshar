@@ -1,7 +1,7 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
-use crate::{OrderBookState, Trade, Venue};
+use crate::{LocalOrderBookError, OrderBookState, Trade, Venue};
 
 // --- Subscribe/Unsubscribe message types ---
 
@@ -32,7 +32,7 @@ impl OkxWssMessage {
         Self {
             op: "subscribe".to_string(),
             args: vec![OkxWssArg {
-                channel: "books5".to_string(),
+                channel: "books".to_string(),
                 inst_id: coin.to_string(),
             }],
         }
@@ -42,7 +42,7 @@ impl OkxWssMessage {
         Self {
             op: "unsubscribe".to_string(),
             args: vec![OkxWssArg {
-                channel: "books5".to_string(),
+                channel: "books".to_string(),
                 inst_id: coin.to_string(),
             }],
         }
@@ -69,11 +69,13 @@ impl OkxWssMessage {
     }
 }
 
-// --- Depth (books5) push data ---
+// --- Depth (books) push data ---
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OkxDepthMessage {
     pub arg: OkxWssArg,
+    /// "snapshot" for the initial full book, "update" for incremental deltas
+    pub action: String,
     pub data: Vec<OkxDepthBookData>,
 }
 
@@ -83,10 +85,14 @@ impl OkxDepthMessage {
         &self.arg.inst_id
     }
 
-    /// Convert the books5 snapshot to an OrderBookState.
-    /// books5 is always a full 5-level snapshot, no delta management needed.
+    /// Returns true if this message is a full snapshot (not a delta update)
+    pub fn is_snapshot(&self) -> bool {
+        self.action == "snapshot"
+    }
+
+    /// Build a fresh OrderBookState from a snapshot message.
     pub fn to_order_book_state(&self) -> OrderBookState {
-        let mut book = OrderBookState::new(5);
+        let mut book = OrderBookState::new(400);
 
         if let Some(data) = self.data.first() {
             for level in &data.bids {
@@ -120,6 +126,42 @@ impl OkxDepthMessage {
         }
 
         book
+    }
+
+    /// Apply a delta update to an existing OrderBookState in place.
+    /// Levels with size "0" are removed; all others are set/updated.
+    pub fn apply_delta(&self, book: &mut OrderBookState) {
+        if let Some(data) = self.data.first() {
+            for level in &data.bids {
+                if let Ok(price) = level[0].parse::<f64>() {
+                    if level[1] == "0" {
+                        book.remove_bid(price);
+                    } else if let Err(e) = book.set_bid(price, &level[1]) {
+                        log::error!(
+                            "OKX: failed to update bid for {} at price {}: {}",
+                            self.arg.inst_id,
+                            price,
+                            e
+                        );
+                    }
+                }
+            }
+
+            for level in &data.asks {
+                if let Ok(price) = level[0].parse::<f64>() {
+                    if level[1] == "0" {
+                        book.remove_ask(price);
+                    } else if let Err(e) = book.set_ask(price, &level[1]) {
+                        log::error!(
+                            "OKX: failed to update ask for {} at price {}: {}",
+                            self.arg.inst_id,
+                            price,
+                            e
+                        );
+                    }
+                }
+            }
+        }
     }
 
     pub fn to_depth_snapshot_data(&self) -> Option<crate::DepthSnapshotData> {
@@ -204,6 +246,65 @@ pub struct OkxTradeData {
     pub ts: String,
 }
 
+// --- Order book management ---
+
+pub struct OkxOrderBook {
+    pub symbol: String,
+    pub book: Option<OrderBookState>,
+}
+
+impl OkxOrderBook {
+    pub fn new(symbol: String) -> Self {
+        Self { symbol, book: None }
+    }
+
+    pub fn new_snapshot(&mut self, msg: &OkxDepthMessage) {
+        self.book = Some(msg.to_order_book_state());
+    }
+
+    pub fn new_update(&mut self, msg: &OkxDepthMessage) -> Result<(), LocalOrderBookError> {
+        let coin = msg.inst_id().to_string();
+
+        if self.symbol != coin {
+            return Err(LocalOrderBookError::WrongSymbol(
+                self.symbol.clone(),
+                coin,
+            ));
+        }
+
+        if let Some(ref mut book) = self.book {
+            msg.apply_delta(book);
+        } else {
+            return Err(LocalOrderBookError::BookUpdateBeforeSnapshot(
+                Venue::Okx.to_string(),
+                coin,
+            ));
+        }
+
+        // Validate BBO: if bid > ask the book has become corrupted, reset it
+        let validation_result = if let Some(ref book) = self.book {
+            let (bid, ask) = book.get_bbo();
+            match (bid, ask) {
+                (Some(b), Some(a)) if b > a => Err(LocalOrderBookError::BidAboveAsk(
+                    b.to_string(),
+                    a.to_string(),
+                    Venue::Okx.to_string(),
+                    coin,
+                )),
+                _ => Ok(()),
+            }
+        } else {
+            Ok(())
+        };
+
+        if validation_result.is_err() {
+            self.book = None;
+        }
+
+        validation_result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,7 +321,7 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["op"], "subscribe");
-        assert_eq!(parsed["args"][0]["channel"], "books5");
+        assert_eq!(parsed["args"][0]["channel"], "books");
         assert_eq!(parsed["args"][0]["instId"], "BTC-USDT-SWAP");
     }
 
@@ -231,7 +332,7 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["op"], "unsubscribe");
-        assert_eq!(parsed["args"][0]["channel"], "books5");
+        assert_eq!(parsed["args"][0]["channel"], "books");
         assert_eq!(parsed["args"][0]["instId"], "BTC-USDT-SWAP");
     }
 
@@ -249,7 +350,8 @@ mod tests {
     #[test]
     fn test_okx_depth_message_parsing() {
         let json = r#"{
-            "arg": {"channel": "books5", "instId": "BTC-USDT-SWAP"},
+            "arg": {"channel": "books", "instId": "BTC-USDT-SWAP"},
+            "action": "snapshot",
             "data": [{
                 "asks": [["41006.8", "0.60038921", "0", "1"], ["41007.0", "0.5", "0", "2"]],
                 "bids": [["41006.3", "0.20572000", "0", "1"], ["41006.0", "1.0", "0", "3"]],
@@ -259,6 +361,7 @@ mod tests {
 
         let msg: OkxDepthMessage = serde_json::from_str(json).unwrap();
         assert_eq!(msg.inst_id(), "BTC-USDT-SWAP");
+        assert!(msg.is_snapshot());
         assert_eq!(msg.data[0].asks.len(), 2);
         assert_eq!(msg.data[0].bids.len(), 2);
 
@@ -266,6 +369,41 @@ mod tests {
         let (bid, ask) = book.get_bbo();
         assert!(bid.is_some());
         assert!(ask.is_some());
+    }
+
+    #[test]
+    fn test_okx_depth_message_delta_apply() {
+        // Build initial snapshot
+        let snapshot_json = r#"{
+            "arg": {"channel": "books", "instId": "BTC-USDT-SWAP"},
+            "action": "snapshot",
+            "data": [{
+                "asks": [["41006.8", "0.6", "0", "1"], ["41007.0", "0.5", "0", "2"]],
+                "bids": [["41006.3", "0.2", "0", "1"], ["41006.0", "1.0", "0", "3"]],
+                "ts": "1597026383085"
+            }]
+        }"#;
+        let snapshot: OkxDepthMessage = serde_json::from_str(snapshot_json).unwrap();
+        let mut book = snapshot.to_order_book_state();
+
+        // Apply a delta: remove one ask, update one bid, add a new bid
+        let delta_json = r#"{
+            "arg": {"channel": "books", "instId": "BTC-USDT-SWAP"},
+            "action": "update",
+            "data": [{
+                "asks": [["41006.8", "0", "0", "1"]],
+                "bids": [["41006.3", "0.5", "0", "1"]],
+                "ts": "1597026383090"
+            }]
+        }"#;
+        let delta: OkxDepthMessage = serde_json::from_str(delta_json).unwrap();
+        assert!(!delta.is_snapshot());
+        delta.apply_delta(&mut book);
+
+        // ask at 41006.8 should be removed, 41007.0 should remain
+        let (bid, ask) = book.get_bbo();
+        assert!(bid.is_some());
+        assert_eq!(ask, Some(41007.0));
     }
 
     #[test]
