@@ -61,23 +61,26 @@ pub struct ByBitTradesData {
 impl From<ByBitDepthMessage> for Vec<Event> {
     fn from(val: ByBitDepthMessage) -> Self {
         let mut events = Vec::new();
+        let symbol = val.data.s.as_str();
 
         for bid in val.data.b {
-            let event = Event::new(
+            let event = Event::new_with_symbol(
                 EVENT_UPDATE_LEVEL_BID,
                 val.ts as i64,
                 bid[0].as_str(),
                 bid[1].as_str(),
+                symbol,
             );
             events.push(event);
         }
 
         for ask in val.data.a {
-            let event = Event::new(
+            let event = Event::new_with_symbol(
                 EVENT_UPDATE_LEVEL_ASK,
                 val.ts as i64,
                 ask[0].as_str(),
                 ask[1].as_str(),
+                symbol,
             );
             events.push(event);
         }
@@ -91,7 +94,7 @@ impl From<ByBitTradesMessage> for Vec<Event> {
         let mut events = Vec::new();
 
         for trade in val.data {
-            let event = Event::new(
+            let event = Event::new_with_symbol(
                 if trade.side == "Buy" {
                     EVENT_TRADE_BUY
                 } else {
@@ -100,6 +103,7 @@ impl From<ByBitTradesMessage> for Vec<Event> {
                 val.ts as i64,
                 trade.p.as_str(),
                 trade.v.as_str(),
+                trade.s.as_str(),
             );
             events.push(event);
         }

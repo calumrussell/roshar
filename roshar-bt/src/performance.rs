@@ -1,7 +1,7 @@
 use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
 use rust_decimal::MathematicalOps;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 pub struct PerformanceMetrics {
@@ -14,6 +14,10 @@ pub struct PerformanceMetrics {
     last_position: Decimal,
     risk_free_rate: Decimal,
     return_window: Duration,
+    /// Per-symbol last prices for portfolio-level tracking.
+    last_prices: HashMap<String, Decimal>,
+    /// Per-symbol last positions for portfolio-level tracking.
+    last_positions: HashMap<String, Decimal>,
 }
 
 impl PerformanceMetrics {
@@ -28,7 +32,79 @@ impl PerformanceMetrics {
             last_position: Decimal::ZERO,
             risk_free_rate,
             return_window,
+            last_prices: HashMap::new(),
+            last_positions: HashMap::new(),
         }
+    }
+
+    /// Update portfolio-level performance metrics from per-symbol positions and mid-prices.
+    ///
+    /// Call this once per time step after updating all per-symbol exchanges.  The portfolio
+    /// return for each step is the sum of `last_position_i × price_return_i` across all
+    /// symbols that have a known prior price.
+    pub fn update_portfolio(
+        &mut self,
+        timestamp: i64,
+        positions: &HashMap<String, Decimal>,
+        prices: &HashMap<String, Decimal>,
+    ) {
+        if self.last_prices.is_empty() {
+            // First call – initialise state, record zero return.
+            for (sym, &price) in prices {
+                self.last_prices.insert(sym.clone(), price);
+            }
+            for (sym, &pos) in positions {
+                self.last_positions.insert(sym.clone(), pos);
+            }
+            let total_pos: Decimal = positions.values().copied().sum();
+            let avg_price = if prices.is_empty() {
+                Decimal::ZERO
+            } else {
+                prices.values().copied().sum::<Decimal>()
+                    / Decimal::from(prices.len() as i64)
+            };
+            self.prices.push_back((timestamp, avg_price));
+            self.positions.push_back((timestamp, total_pos));
+            self.cumulative_returns.push_back(Decimal::ZERO);
+            return;
+        }
+
+        // Compute portfolio return as sum of last_pos_i × price_return_i.
+        let mut portfolio_return = Decimal::ZERO;
+        for (sym, &price) in prices {
+            if let Some(&last_p) = self.last_prices.get(sym) {
+                if !last_p.is_zero() {
+                    let price_return = (price - last_p) / last_p;
+                    let pos = self
+                        .last_positions
+                        .get(sym)
+                        .copied()
+                        .unwrap_or(Decimal::ZERO);
+                    portfolio_return += pos * price_return;
+                }
+            }
+        }
+
+        // Persist new last prices / positions.
+        for (sym, &price) in prices {
+            self.last_prices.insert(sym.clone(), price);
+        }
+        for (sym, &pos) in positions {
+            self.last_positions.insert(sym.clone(), pos);
+        }
+
+        self.returns.push_back(portfolio_return);
+        self.cumulative_return += portfolio_return;
+        self.cumulative_returns.push_back(self.cumulative_return);
+
+        let total_pos: Decimal = positions.values().copied().sum();
+        let avg_price = if prices.is_empty() {
+            Decimal::ZERO
+        } else {
+            prices.values().copied().sum::<Decimal>() / Decimal::from(prices.len() as i64)
+        };
+        self.prices.push_back((timestamp, avg_price));
+        self.positions.push_back((timestamp, total_pos));
     }
 
     pub fn update(&mut self, timestamp: i64, position: Decimal, mid_price: Decimal) {

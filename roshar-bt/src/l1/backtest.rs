@@ -1,7 +1,7 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use anyhow::{anyhow, Result};
-use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
+use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
 
 use crate::chart::ChartData;
@@ -14,14 +14,18 @@ use super::{L1Config, L1Order};
 
 pub struct Backtest<F: EventFeed> {
     pub feed: F,
-    pub exch: Exchange,
+    /// Per-symbol exchanges (created on first event for that symbol).
+    pub exchanges: HashMap<String, Exchange>,
     pub curr_ts: i64,
     pub ev_queue: VecDeque<Event>,
     pub line_chunk: usize,
     pub performance: PerformanceMetrics,
-    pub position: Decimal,
-    pub last_candle: Option<Candle>,
+    /// Per-symbol positions.
+    pub positions: HashMap<String, Decimal>,
+    /// Per-symbol last received candle.
+    pub last_candles: HashMap<String, Candle>,
     pub candle_queue: VecDeque<Candle>,
+    tick_size: Decimal,
 }
 
 impl<F: EventFeed> Backtest<F> {
@@ -30,74 +34,101 @@ impl<F: EventFeed> Backtest<F> {
 
         Self {
             feed,
-            exch: Exchange::new(config),
+            exchanges: HashMap::new(),
             curr_ts: config.start_ts,
             ev_queue: VecDeque::with_capacity(1_024),
             line_chunk: config.lines_read_per_tick,
             performance,
-            position: Decimal::ZERO,
-            last_candle: None,
+            positions: HashMap::new(),
+            last_candles: HashMap::new(),
             candle_queue: VecDeque::with_capacity(1_024),
+            tick_size: config.tick_size,
         }
     }
 
-    pub fn last_candle(&self) -> &Option<Candle> {
-        &self.last_candle
+    /// Returns the last candle for the given symbol, if any.
+    pub fn last_candle(&self, symbol: &str) -> Option<&Candle> {
+        self.last_candles.get(symbol)
     }
 
     pub fn current_timestamp(&self) -> i64 {
         self.curr_ts
     }
 
-    pub fn get_order(&self, oid: &OrderId) -> Option<L1Order> {
-        if let Some(order) = self.exch.get_order(oid) {
-            return Some(order.clone().into());
+    pub fn get_order(&self, symbol: &str, oid: &OrderId) -> Option<L1Order> {
+        if let Some(exch) = self.exchanges.get(symbol) {
+            if let Some(order) = exch.get_order(oid) {
+                return Some(order.clone().into());
+            }
         }
         None
     }
 
-    pub fn bbo(&self) -> (f64, f64) {
-        let (decimal_bid, decimal_ask) = self.exch.bbo();
-        (
-            decimal_bid
-                .normalize()
-                .to_f64()
-                .expect("Failed to parse bid from Decimal to f64"),
-            decimal_ask
-                .normalize()
-                .to_f64()
-                .expect("Failed to parse ask from Decimal to f64"),
-        )
+    /// Returns `(bid, ask)` mid-price for the given symbol.
+    pub fn bbo(&self, symbol: &str) -> (f64, f64) {
+        if let Some(exch) = self.exchanges.get(symbol) {
+            let (decimal_bid, decimal_ask) = exch.bbo();
+            return (
+                decimal_bid
+                    .normalize()
+                    .to_f64()
+                    .expect("Failed to parse bid from Decimal to f64"),
+                decimal_ask
+                    .normalize()
+                    .to_f64()
+                    .expect("Failed to parse ask from Decimal to f64"),
+            );
+        }
+        (0.0, 0.0)
     }
 
-    pub fn execute_market_order(&mut self, order: OrderRequest) -> u64 {
-        let order_id = self.exch.execute_order(order);
-        if let Some(executed_order) = self.exch.get_order(&order_id) {
+    /// Execute a market order for the given symbol.  Returns the order id.
+    pub fn execute_market_order(&mut self, symbol: &str, order: OrderRequest) -> u64 {
+        let tick_size = self.tick_size;
+        let exch = self
+            .exchanges
+            .entry(symbol.to_string())
+            .or_insert_with(|| Exchange::new(tick_size));
+
+        let order_id = exch.execute_order(order);
+        if let Some(executed_order) = exch.get_order(&order_id) {
             let qty = executed_order.qty;
+            let position = self
+                .positions
+                .entry(symbol.to_string())
+                .or_insert(Decimal::ZERO);
             match executed_order.side {
-                crate::types::Side::Buy => self.position += qty,
-                crate::types::Side::Sell => self.position -= qty,
+                crate::types::Side::Buy => *position += qty,
+                crate::types::Side::Sell => *position -= qty,
             }
         }
         order_id
     }
 
     fn update_performance_metrics(&mut self) {
-        let (bid, ask) = self.bbo();
-
-        let mid_price = (bid + ask) / 2.0;
-        let mid_price_decimal = Decimal::from_f64(mid_price).unwrap();
-
+        // Collect current mid-prices per symbol.
+        let mut prices: HashMap<String, Decimal> = HashMap::new();
+        for (symbol, exch) in &self.exchanges {
+            let (bid, ask) = exch.bbo();
+            let mid = (bid + ask) / Decimal::TWO;
+            prices.insert(symbol.clone(), mid);
+        }
         self.performance
-            .update(self.curr_ts, self.position, mid_price_decimal);
+            .update_portfolio(self.curr_ts, &self.positions, &prices);
     }
 
     pub fn get_performance_metrics(&self) -> &PerformanceMetrics {
         &self.performance
     }
 
-    pub fn get_position(&self) -> f64 {
-        self.position.to_f64().unwrap()
+    /// Returns the position for the given symbol (0 if no position).
+    pub fn get_position(&self, symbol: &str) -> f64 {
+        self.positions
+            .get(symbol)
+            .copied()
+            .unwrap_or(Decimal::ZERO)
+            .to_f64()
+            .unwrap_or(0.0)
     }
 
     pub fn generate_chart(&self, output_path: &str) -> Result<()> {
@@ -117,7 +148,10 @@ impl<F: EventFeed> Backtest<F> {
     //For L1, the dataset sets the time so we step over each event
     pub fn step(&mut self) -> Result<()> {
         if self.ev_queue.front().is_none() {
-            match self.feed.fill(&mut self.ev_queue, &mut self.candle_queue, self.line_chunk) {
+            match self
+                .feed
+                .fill(&mut self.ev_queue, &mut self.candle_queue, self.line_chunk)
+            {
                 FeedState::Empty => {
                     if self.ev_queue.is_empty() {
                         return Err(anyhow!("No more events"));
@@ -130,12 +164,19 @@ impl<F: EventFeed> Backtest<F> {
         if let Some(event) = self.ev_queue.pop_front() {
             self.curr_ts = event.ts;
             if event.typ == EVENT_CANDLE {
-                self.exch.update_price(&event);
+                let symbol = event.symbol.clone();
+                let tick_size = self.tick_size;
+                let exch = self
+                    .exchanges
+                    .entry(symbol)
+                    .or_insert_with(|| Exchange::new(tick_size));
+                exch.update_price(&event);
             }
         }
 
         if let Some(candle) = self.candle_queue.pop_front() {
-            self.last_candle = Some(candle);
+            let symbol = candle.symbol.clone();
+            self.last_candles.insert(symbol, candle);
         }
 
         self.update_performance_metrics();
@@ -153,7 +194,13 @@ impl<F: EventFeed> Backtest<F> {
                     let event = self.ev_queue.pop_front().unwrap();
                     self.curr_ts = event.ts;
                     if event.typ == EVENT_CANDLE {
-                        self.exch.update_price(&event);
+                        let symbol = event.symbol.clone();
+                        let tick_size = self.tick_size;
+                        let exch = self
+                            .exchanges
+                            .entry(symbol)
+                            .or_insert_with(|| Exchange::new(tick_size));
+                        exch.update_price(&event);
                     }
                 } else {
                     //We have events in the queue but their timestamp is past elapse
@@ -165,11 +212,20 @@ impl<F: EventFeed> Backtest<F> {
                     return Err(anyhow!("No more events"));
                 }
 
-                match self.feed.fill(&mut self.ev_queue, &mut self.candle_queue, self.line_chunk) {
+                match self
+                    .feed
+                    .fill(&mut self.ev_queue, &mut self.candle_queue, self.line_chunk)
+                {
                     FeedState::Empty => {
                         sim_ended = true;
                     }
-                    FeedState::Active => {}
+                    FeedState::Active => {
+                        // Drain candles into last_candles map.
+                        while let Some(candle) = self.candle_queue.pop_front() {
+                            let sym = candle.symbol.clone();
+                            self.last_candles.insert(sym, candle);
+                        }
+                    }
                 }
             }
         }
@@ -215,11 +271,11 @@ mod tests {
 
         let _ = bt.elapse(1);
 
-        let id = bt.execute_market_order(market_order);
-        let order = bt.get_order(&id).unwrap();
+        let id = bt.execute_market_order("AAVE", market_order);
+        let order = bt.get_order("AAVE", &id).unwrap();
         assert_eq!(order.status, OrderStatus::Filled);
         assert_eq!(order.exec_px, 104.0);
-        assert_eq!(bt.get_position(), 50.0);
+        assert_eq!(bt.get_position("AAVE"), 50.0);
     }
 
     #[test]
@@ -231,11 +287,11 @@ mod tests {
 
         let _ = bt.elapse(1);
 
-        let id = bt.execute_market_order(market_order);
-        let order = bt.get_order(&id).unwrap();
+        let id = bt.execute_market_order("AAVE", market_order);
+        let order = bt.get_order("AAVE", &id).unwrap();
         assert_eq!(order.status, OrderStatus::Filled);
         assert_eq!(order.exec_px, 104.0);
-        assert_eq!(bt.get_position(), -30.0);
+        assert_eq!(bt.get_position("AAVE"), -30.0);
     }
 
     #[test]
@@ -245,20 +301,20 @@ mod tests {
         // Buy 50 units
         let buy_order = OrderRequest::new(Side::Buy, 50.0, None, crate::types::OrderType::Market);
         let _ = bt.elapse(1);
-        let _ = bt.execute_market_order(buy_order);
-        assert_eq!(bt.get_position(), 50.0);
+        let _ = bt.execute_market_order("AAVE", buy_order);
+        assert_eq!(bt.get_position("AAVE"), 50.0);
 
         // Sell 20 units
         let sell_order = OrderRequest::new(Side::Sell, 20.0, None, crate::types::OrderType::Market);
         let _ = bt.elapse(1);
-        let _ = bt.execute_market_order(sell_order);
-        assert_eq!(bt.get_position(), 30.0);
+        let _ = bt.execute_market_order("AAVE", sell_order);
+        assert_eq!(bt.get_position("AAVE"), 30.0);
 
         // Buy another 10 units
         let buy_order2 = OrderRequest::new(Side::Buy, 10.0, None, crate::types::OrderType::Market);
         let _ = bt.elapse(1);
-        let _ = bt.execute_market_order(buy_order2);
-        assert_eq!(bt.get_position(), 40.0);
+        let _ = bt.execute_market_order("AAVE", buy_order2);
+        assert_eq!(bt.get_position("AAVE"), 40.0);
     }
 
     #[test]
@@ -266,16 +322,62 @@ mod tests {
         let mut bt = setup();
 
         // Initial position should be 0
-        assert_eq!(bt.get_position(), 0.0);
+        assert_eq!(bt.get_position("AAVE"), 0.0);
 
         // Execute a buy order
         let buy_order = OrderRequest::new(Side::Buy, 25.0, None, crate::types::OrderType::Market);
         let _ = bt.elapse(1);
-        let _ = bt.execute_market_order(buy_order);
-        assert_eq!(bt.get_position(), 25.0);
+        let _ = bt.execute_market_order("AAVE", buy_order);
+        assert_eq!(bt.get_position("AAVE"), 25.0);
 
         // Position should remain the same after elapse
         let _ = bt.elapse(1);
-        assert_eq!(bt.get_position(), 25.0);
+        assert_eq!(bt.get_position("AAVE"), 25.0);
+    }
+
+    #[test]
+    fn test_multi_symbol_positions() {
+        // Two symbols with separate candle data interleaved by timestamp
+        let aave0 = r#"1000000000000000000 {"channel":"candle","data":{"T":100,"c":"100.0","h":"100.0","i":"1m","l":"100.0","n":1,"o":"100.0","s":"AAVE","t":100,"v":"0.21"}}"#.to_string();
+        let btc0 =  r#"1005000000000000000 {"channel":"candle","data":{"T":200,"c":"50000.0","h":"50000.0","i":"1m","l":"50000.0","n":1,"o":"50000.0","s":"BTC","t":200,"v":"1.0"}}"#.to_string();
+        let aave1 = r#"1010000000000000000 {"channel":"candle","data":{"T":101,"c":"104.0","h":"104.0","i":"1m","l":"104.0","n":1,"o":"104.0","s":"AAVE","t":101,"v":"0.21"}}"#.to_string();
+        let btc1 =  r#"1015000000000000000 {"channel":"candle","data":{"T":201,"c":"51000.0","h":"51000.0","i":"1m","l":"51000.0","n":1,"o":"51000.0","s":"BTC","t":201,"v":"1.0"}}"#.to_string();
+
+        use crate::source::MultiplexedFeed;
+
+        let src_aave = EventVecSource::new(vec![aave0, aave1]);
+        let src_btc = EventVecSource::new(vec![btc0, btc1]);
+
+        let feed_aave: Box<dyn EventFeed> =
+            Box::new(ParsedCandleFeed::new(src_aave, HyperliquidCandleParser::new()));
+        let feed_btc: Box<dyn EventFeed> =
+            Box::new(ParsedCandleFeed::new(src_btc, HyperliquidCandleParser::new()));
+
+        let mux = MultiplexedFeed::new(vec![feed_aave, feed_btc]);
+
+        let cfg = L1ConfigBuilder::new()
+            .set_tick_size(0.1)
+            .set_start_ts(0)
+            .set_return_window(1)
+            .build()
+            .unwrap();
+
+        let mut bt = Backtest::new(&cfg, mux);
+
+        // Process events; each symbol's price updates separately.
+        for _ in 0..4 {
+            let _ = bt.step();
+        }
+
+        // Trade on AAVE after prices have been seen
+        let aave_buy = OrderRequest::new(Side::Buy, 10.0, None, crate::types::OrderType::Market);
+        let _ = bt.execute_market_order("AAVE", aave_buy);
+        assert_eq!(bt.get_position("AAVE"), 10.0);
+        assert_eq!(bt.get_position("BTC"), 0.0);
+
+        let btc_sell = OrderRequest::new(Side::Sell, 2.0, None, crate::types::OrderType::Market);
+        let _ = bt.execute_market_order("BTC", btc_sell);
+        assert_eq!(bt.get_position("AAVE"), 10.0);
+        assert_eq!(bt.get_position("BTC"), -2.0);
     }
 }

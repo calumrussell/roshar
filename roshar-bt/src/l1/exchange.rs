@@ -6,7 +6,7 @@ use rust_decimal::Decimal;
 use crate::types::{price_to_tick, Event, OrderRequest, OrderStatus, Side};
 
 use super::orderbook::OrderBook;
-use super::{L1Config, L1OrderInternal};
+use super::L1OrderInternal;
 
 pub type Price = Decimal;
 pub type OrderId = u64;
@@ -19,10 +19,10 @@ pub struct Exchange {
 }
 
 impl Exchange {
-    pub fn new(config: &L1Config) -> Self {
+    pub fn new(tick_size: Decimal) -> Self {
         Self {
-            tick_size: config.tick_size,
-            orderbook: OrderBook::new(config.tick_size),
+            tick_size,
+            orderbook: OrderBook::new(tick_size),
             orders: HashMap::new(),
             order_id: 0,
         }
