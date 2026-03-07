@@ -748,4 +748,39 @@ mod tests {
             "Should read 3 events (parser holds last candle)"
         );
     }
+
+    #[test]
+    fn test_multiplexed_feed_returns_events_in_timestamp_order() {
+        use super::{EventFeed, FeedState, MultiplexedFeed, VecEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        // Feed A: timestamps 1, 3, 5
+        let feed_a: Box<dyn EventFeed> = Box::new(VecEventFeed::new(vec![
+            Event::new(EVENT_TRADE_BUY, 1, "100.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 3, "102.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 5, "104.0", "1.0"),
+        ]));
+
+        // Feed B: timestamps 2, 4, 6
+        let feed_b: Box<dyn EventFeed> = Box::new(VecEventFeed::new(vec![
+            Event::new(EVENT_TRADE_BUY, 2, "200.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 4, "202.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 6, "204.0", "1.0"),
+        ]));
+
+        let mut mux = MultiplexedFeed::new(vec![feed_a, feed_b]);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        // Drain all events
+        loop {
+            match mux.fill(&mut out_events, &mut out_candles, 1) {
+                FeedState::Active => {}
+                FeedState::Empty => break,
+            }
+        }
+
+        let timestamps: Vec<i64> = out_events.iter().map(|e| e.ts).collect();
+        assert_eq!(timestamps, vec![1, 2, 3, 4, 5, 6]);
+    }
 }
