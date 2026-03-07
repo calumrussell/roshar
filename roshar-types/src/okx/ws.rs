@@ -164,6 +164,42 @@ impl OkxDepthMessage {
         }
     }
 
+    pub fn to_depth_update_data(&self) -> Vec<crate::DepthUpdateData> {
+        let mut res = Vec::new();
+
+        if let Some(data) = self.data.first() {
+            let ts: u64 = data.ts.parse().unwrap_or(0);
+
+            for bid in &data.bids {
+                res.push(crate::DepthUpdateData {
+                    px: bid[0].clone(),
+                    qty: bid[1].clone(),
+                    time: ts,
+                    time_ts: DateTime::from_timestamp_millis(ts as i64).unwrap_or_default(),
+                    ticker: self.arg.inst_id.clone(),
+                    meta: String::new(),
+                    side: false, // bid side
+                    venue: Venue::Okx,
+                });
+            }
+
+            for ask in &data.asks {
+                res.push(crate::DepthUpdateData {
+                    px: ask[0].clone(),
+                    qty: ask[1].clone(),
+                    time: ts,
+                    time_ts: DateTime::from_timestamp_millis(ts as i64).unwrap_or_default(),
+                    ticker: self.arg.inst_id.clone(),
+                    meta: String::new(),
+                    side: true, // ask side
+                    venue: Venue::Okx,
+                });
+            }
+        }
+
+        res
+    }
+
     pub fn to_depth_snapshot_data(&self) -> Option<crate::DepthSnapshotData> {
         let data = self.data.first()?;
         let ts: u64 = data.ts.parse().unwrap_or(0);
@@ -404,6 +440,30 @@ mod tests {
         let (bid, ask) = book.get_bbo();
         assert!(bid.is_some());
         assert_eq!(ask, Some(41007.0));
+    }
+
+    #[test]
+    fn test_okx_depth_message_to_depth_update_data() {
+        let json = r#"{
+            "arg": {"channel": "books", "instId": "BTC-USDT-SWAP"},
+            "action": "update",
+            "data": [{
+                "asks": [["41006.8", "0.5", "0", "1"]],
+                "bids": [["41006.3", "0.2", "0", "1"], ["41005.0", "1.0", "0", "3"]],
+                "ts": "1597026383085"
+            }]
+        }"#;
+
+        let msg: OkxDepthMessage = serde_json::from_str(json).unwrap();
+        let updates = msg.to_depth_update_data();
+        assert_eq!(updates.len(), 3); // 2 bids + 1 ask
+        assert_eq!(updates[0].ticker, "BTC-USDT-SWAP");
+        assert!(!updates[0].side); // bid
+        assert_eq!(updates[0].px, "41006.3");
+        assert!(!updates[1].side); // bid
+        assert!(updates[2].side); // ask
+        assert_eq!(updates[2].px, "41006.8");
+        assert_eq!(updates[0].venue, Venue::Okx);
     }
 
     #[test]
