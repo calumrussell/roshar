@@ -151,6 +151,8 @@ impl EventFeed for VecEventFeed {
         candles: &mut VecDeque<Candle>,
         count: usize,
     ) -> FeedState {
+        let start_events = events.len();
+        let start_candles = candles.len();
         for _ in 0..count {
             if let Some(event) = self.events.pop_front() {
                 events.push_back(event);
@@ -165,10 +167,10 @@ impl EventFeed for VecEventFeed {
                 break;
             }
         }
-        if self.events.is_empty() {
-            FeedState::Empty
-        } else {
+        if events.len() > start_events || candles.len() > start_candles {
             FeedState::Active
+        } else {
+            FeedState::Empty
         }
     }
 }
@@ -528,6 +530,67 @@ mod tests {
             }
         }
         assert_eq!(count, 4)
+    }
+
+    #[test]
+    fn test_vec_event_feed_returns_active_when_last_events_delivered() {
+        // When fill() drains the last events from its internal buffer, it should
+        // return Active (not Empty) because events were produced in this call.
+        // Empty should only be returned when zero events were produced.
+        use super::{EventFeed, FeedState, VecEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        let events = vec![
+            Event::new(EVENT_TRADE_BUY, 1000, "100.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 2000, "101.0", "2.0"),
+            Event::new(EVENT_TRADE_BUY, 3000, "102.0", "3.0"),
+        ];
+
+        let mut feed = VecEventFeed::new(events);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        // Request exactly 3 events (matches the total count).
+        // All 3 are delivered, so the result should be Active.
+        let state = feed.fill(&mut out_events, &mut out_candles, 3);
+        assert_eq!(out_events.len(), 3, "All 3 events should be delivered");
+        assert!(
+            matches!(state, FeedState::Active),
+            "Feed should return Active when events were delivered"
+        );
+
+        // Now the feed is truly exhausted — no events produced, returns Empty.
+        let state2 = feed.fill(&mut out_events, &mut out_candles, 3);
+        assert_eq!(out_events.len(), 3, "No new events should be added");
+        assert!(
+            matches!(state2, FeedState::Empty),
+            "Feed should return Empty only when no events were produced"
+        );
+    }
+
+    #[test]
+    fn test_vec_event_feed_returns_active_when_events_remain() {
+        // When the feed has more events than requested, it returns Active.
+        use super::{EventFeed, FeedState, VecEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        let events = vec![
+            Event::new(EVENT_TRADE_BUY, 1000, "100.0", "1.0"),
+            Event::new(EVENT_TRADE_BUY, 2000, "101.0", "2.0"),
+            Event::new(EVENT_TRADE_BUY, 3000, "102.0", "3.0"),
+        ];
+
+        let mut feed = VecEventFeed::new(events);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        // Request only 2 of 3 events.
+        let state = feed.fill(&mut out_events, &mut out_candles, 2);
+        assert_eq!(out_events.len(), 2);
+        assert!(
+            matches!(state, FeedState::Active),
+            "Feed should return Active when events remain"
+        );
     }
 
     #[test]
