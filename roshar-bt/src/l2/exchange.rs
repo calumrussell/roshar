@@ -144,6 +144,14 @@ impl<F: FillModel> Exchange<F> {
             // Now we can use self again
             self.execute_market_order(&mut *order_ptr);
         }
+
+        if let Some(order) = self.order_manager.get_order(&oid) {
+            if order.status == OrderStatus::Filled {
+                let side = order.side.clone();
+                let filled_qty = order.filled_qty;
+                self.order_manager.adjust_position(&side, filled_qty);
+            }
+        }
     }
 
     pub fn cancel_order(&mut self, order_id: &OrderId) -> Result<()> {
@@ -297,6 +305,59 @@ mod tests {
         exchange.clear_ask_level(&ask_event_right);
         let level_after_right = exchange.get_level(dec!(10.01), Side::Sell);
         assert_eq!(level_after_right, Decimal::ZERO);
+    }
+
+    #[test]
+    fn test_market_buy_updates_position() {
+        let mut exchange = setup_basic_orderbook();
+        let market_order = OrderRequest::new(Side::Buy, 50.0, None, OrderType::Market);
+        exchange.execute_user_order(market_order);
+        assert_eq!(exchange.get_position(), dec!(50));
+    }
+
+    #[test]
+    fn test_market_sell_updates_position() {
+        let mut exchange = setup_basic_orderbook();
+        let market_order = OrderRequest::new(Side::Sell, 50.0, None, OrderType::Market);
+        exchange.execute_user_order(market_order);
+        assert_eq!(exchange.get_position(), dec!(-50));
+    }
+
+    #[test]
+    fn test_market_buy_then_sell_position_nets_out() {
+        let mut exchange = setup_basic_orderbook();
+        exchange.execute_user_order(OrderRequest::new(Side::Buy, 50.0, None, OrderType::Market));
+        exchange.execute_user_order(OrderRequest::new(Side::Sell, 50.0, None, OrderType::Market));
+        assert_eq!(exchange.get_position(), dec!(0));
+    }
+
+    #[test]
+    fn test_market_order_no_fill_does_not_change_position() {
+        let mut exchange = setup_basic_orderbook();
+        // Orderbook has 100 qty on each side, request 150 — should not fill
+        let market_order = OrderRequest::new(Side::Buy, 150.0, None, OrderType::Market);
+        exchange.execute_user_order(market_order);
+        let order = exchange.get_order(&0).unwrap();
+        assert_eq!(order.status, OrderStatus::Working);
+        assert_eq!(exchange.get_position(), dec!(0));
+    }
+
+    #[test]
+    fn test_market_order_with_empty_book_does_not_change_position() {
+        let mut exchange = Exchange::new_with_level_chg_fill(Decimal::ONE, Decimal::ONE);
+        let market_order = OrderRequest::new(Side::Buy, 50.0, None, OrderType::Market);
+        exchange.execute_user_order(market_order);
+        assert_eq!(exchange.get_position(), dec!(0));
+    }
+
+    #[test]
+    fn test_mixed_market_orders_accumulate_position() {
+        let mut exchange = setup_basic_orderbook();
+        exchange.execute_user_order(OrderRequest::new(Side::Buy, 30.0, None, OrderType::Market));
+        exchange.execute_user_order(OrderRequest::new(Side::Buy, 20.0, None, OrderType::Market));
+        assert_eq!(exchange.get_position(), dec!(50));
+        exchange.execute_user_order(OrderRequest::new(Side::Sell, 10.0, None, OrderType::Market));
+        assert_eq!(exchange.get_position(), dec!(40));
     }
 
     #[test]
