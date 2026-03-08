@@ -3,6 +3,7 @@ members = [
     "roshar-ws",
     "roshar-ws-mgr",
     "roshar-bt",
+    "roshar-bt-py",
     "roshar-types",
     "roshar-clients",
 ]

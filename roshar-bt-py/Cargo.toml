@@ -1,0 +1,15 @@
+[package]
+name = "roshar-bt-py"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Python bindings for roshar-bt backtesting framework"
+
+[lib]
+name = "roshar_bt"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+roshar-bt = { path = "../roshar-bt" }
+rust_decimal = { version = "1.37", features = ["maths"] }
