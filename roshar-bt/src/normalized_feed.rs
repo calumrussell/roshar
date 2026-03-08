@@ -27,9 +27,9 @@ impl From<&TradeData> for Event {
 impl From<&DepthUpdateData> for Event {
     fn from(update: &DepthUpdateData) -> Self {
         let typ = if update.side {
-            EVENT_UPDATE_LEVEL_BID
-        } else {
             EVENT_UPDATE_LEVEL_ASK
+        } else {
+            EVENT_UPDATE_LEVEL_BID
         };
         Event::new(typ, update.time as i64, &update.px, &update.qty)
     }
@@ -173,15 +173,64 @@ mod tests {
 
     #[test]
     fn test_depth_update_conversion() {
-        // side=true means bid (buy side of book)
-        let bid = make_depth_update("100.0", "50.0", 1000, true);
+        // side=false means bid in roshar-types
+        let bid = make_depth_update("100.0", "50.0", 1000, false);
         let event: Event = (&bid).into();
         assert_eq!(event.typ, EVENT_UPDATE_LEVEL_BID);
 
-        // side=false means ask (sell side of book)
-        let ask = make_depth_update("101.0", "50.0", 1000, false);
+        // side=true means ask in roshar-types
+        let ask = make_depth_update("101.0", "50.0", 1000, true);
         let event: Event = (&ask).into();
         assert_eq!(event.typ, EVENT_UPDATE_LEVEL_ASK);
+    }
+
+    #[test]
+    fn test_bid_depth_update_produces_bid_event() {
+        // side=false means bid in roshar-types
+        let update = make_depth_update("89500.0", "1.0", 1000, false);
+        let event: Event = (&update).into();
+        assert_eq!(event.typ, EVENT_UPDATE_LEVEL_BID);
+    }
+
+    #[test]
+    fn test_ask_depth_update_produces_ask_event() {
+        // side=true means ask in roshar-types
+        let update = make_depth_update("89501.0", "1.0", 1000, true);
+        let event: Event = (&update).into();
+        assert_eq!(event.typ, EVENT_UPDATE_LEVEL_ASK);
+    }
+
+    #[test]
+    fn test_depth_updates_produce_uncrossed_book() {
+        use crate::l2::backtest::Backtest;
+        use crate::l2::L2Config;
+        use rust_decimal::Decimal;
+        use std::time::Duration;
+
+        let depth_updates = vec![
+            make_depth_update("89500.0", "1.0", 1000, false), // bid
+            make_depth_update("89501.0", "1.0", 1000, true),  // ask
+        ];
+        let trades = vec![];
+
+        let feed = VecEventFeed::from_depth_updates_and_trades(depth_updates, trades);
+        let config = L2Config::new(
+            Decimal::new(1, 1),    // tick_size = 0.1
+            Decimal::new(1, 3),    // lot_size  = 0.001
+            1024,
+            0,
+            100,
+            10,
+            Decimal::new(2, 2),    // risk_free_rate = 0.02
+            Duration::from_secs(86400),
+        );
+        let mut bt = Backtest::new_with_level_chg_fill(&config, feed);
+        bt.elapse(1000).unwrap();
+
+        let (bid, ask) = bt.bbo("");
+        assert_eq!(bid, 89500.0, "best bid should be 89500.0");
+        assert_eq!(ask, 89501.0, "best ask should be 89501.0");
+        assert!(bid < ask, "book must not be crossed");
     }
 
     #[test]
