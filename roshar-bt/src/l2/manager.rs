@@ -138,6 +138,13 @@ impl<F: FillModel> OrderManager<F> {
         self.position
     }
 
+    pub fn adjust_position(&mut self, side: &crate::types::Side, qty: Qty) {
+        match side {
+            crate::types::Side::Buy => self.position += qty,
+            crate::types::Side::Sell => self.position -= qty,
+        }
+    }
+
     pub fn get_order_id_position(&self) -> OrderId {
         self.order_id_counter
     }
