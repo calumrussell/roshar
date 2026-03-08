@@ -197,7 +197,7 @@ where
         let mut sim_ended = false;
         let end_time = self.curr_ts + ts as i64;
 
-        while self.curr_ts < end_time {
+        loop {
             // Submit buffered orders that have cleared latency.
             while let Some(front) = self.order_buffer.front() {
                 if (front.1.get_time() + self.latency_model.calc_delay() as i64) <= self.curr_ts {
@@ -262,12 +262,27 @@ where
                         }
                         _ => (),
                     }
+
+                    // Exit once we've reached end_time and no further events at this
+                    // timestamp remain in the queue. This ensures that all same-timestamp
+                    // events (e.g. an entire depth snapshot batch) are fully processed
+                    // before returning, rather than stopping after the first one.
+                    if self.curr_ts >= end_time
+                        && self.ev_queue.front().map_or(true, |e| e.ts > end_time)
+                    {
+                        return Ok(());
+                    }
                 } else {
                     //We have events in the queue but their timestamp is past elapse
                     self.curr_ts = end_time;
                     return Ok(());
                 }
             } else {
+                // Queue is empty — if we've already reached end_time we're done.
+                if self.curr_ts >= end_time {
+                    return Ok(());
+                }
+
                 if sim_ended {
                     return Err(anyhow!("No more events"));
                 }
@@ -283,6 +298,150 @@ where
                 }
             }
         }
-        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use rust_decimal::Decimal;
+
+    use super::*;
+    use crate::source::VecEventFeed;
+    use crate::types::{
+        Event, EVENT_CLEAR_SIDE_ASK, EVENT_CLEAR_SIDE_BID, EVENT_TRADE_BUY, EVENT_UPDATE_LEVEL_ASK,
+        EVENT_UPDATE_LEVEL_BID,
+    };
+
+    fn make_config(start_ts: i64) -> L2Config {
+        L2Config::new(
+            Decimal::new(1, 1),  // tick_size = 0.1
+            Decimal::new(1, 2),  // lot_size  = 0.01
+            1024,
+            start_ts,
+            100,
+            10,
+            Decimal::new(2, 2),  // risk_free_rate = 0.02
+            Duration::from_secs(86400),
+        )
+    }
+
+    fn ev(typ: u64, ts: i64, px: &str, qty: &str) -> Event {
+        Event::new_with_symbol(typ, ts, px, qty, "BTC")
+    }
+
+    /// Core bug reproduction: multiple events sharing a timestamp that equals
+    /// `end_time` must all be processed in a single `elapse` call.
+    #[test]
+    fn test_elapse_processes_all_events_at_boundary_timestamp() {
+        let events = vec![
+            ev(EVENT_CLEAR_SIDE_BID, 100, "0.0", "0.0"),
+            ev(EVENT_CLEAR_SIDE_ASK, 100, "0.0", "0.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "5.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "5.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+
+        bt.elapse(100).unwrap();
+
+        let (bid, ask) = bt.bbo("BTC");
+        assert!(bid > 0.0, "bid should be non-zero after snapshot at boundary");
+        assert!(ask > 0.0, "ask should be non-zero after snapshot at boundary");
+    }
+
+    /// Events past `end_time` must not be processed; a subsequent `elapse` picks
+    /// them up.
+    #[test]
+    fn test_elapse_does_not_process_events_past_boundary() {
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "5.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "5.0"),
+            // ts=200 events — must remain unprocessed after the first elapse.
+            // Use a higher bid and lower ask so the BBO visibly shifts.
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "100.0", "3.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 200, "100.5", "3.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+
+        // First elapse: advance to ts=100
+        bt.elapse(100).unwrap();
+        let (bid, ask) = bt.bbo("BTC");
+        assert_eq!(bid, 99.0, "bid should reflect ts=100 data");
+        assert_eq!(ask, 101.0, "ask should reflect ts=100 data");
+        assert_eq!(bt.current_timestamp(), 100);
+
+        // Second elapse: advance to ts=200; new levels shift the BBO
+        bt.elapse(100).unwrap();
+        let (bid2, ask2) = bt.bbo("BTC");
+        assert_eq!(bid2, 100.0, "bid should reflect ts=200 data (new best bid)");
+        assert_eq!(ask2, 100.5, "ask should reflect ts=200 data (new best ask)");
+        assert_eq!(bt.current_timestamp(), 200);
+    }
+
+    /// Simulates two consecutive snapshots. After each `elapse` the book must
+    /// reflect exactly that snapshot's prices.
+    #[test]
+    fn test_elapse_with_snapshot_like_event_batch() {
+        let events = vec![
+            // Snapshot at ts=1000
+            ev(EVENT_CLEAR_SIDE_BID, 1000, "0.0", "0.0"),
+            ev(EVENT_CLEAR_SIDE_ASK, 1000, "0.0", "0.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 1000, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 1000, "101.0", "10.0"),
+            // Snapshot at ts=2000 (different prices)
+            ev(EVENT_CLEAR_SIDE_BID, 2000, "0.0", "0.0"),
+            ev(EVENT_CLEAR_SIDE_ASK, 2000, "0.0", "0.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 2000, "199.0", "20.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 2000, "201.0", "20.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+
+        bt.elapse(1000).unwrap();
+        let (bid, ask) = bt.bbo("BTC");
+        assert_eq!(bid, 99.0, "bid should match first snapshot");
+        assert_eq!(ask, 101.0, "ask should match first snapshot");
+
+        bt.elapse(1000).unwrap();
+        let (bid2, ask2) = bt.bbo("BTC");
+        assert_eq!(bid2, 199.0, "bid should match second snapshot");
+        assert_eq!(ask2, 201.0, "ask should match second snapshot");
+    }
+
+    /// A single event exactly at the boundary must not be dropped.
+    #[test]
+    fn test_elapse_with_single_event_at_boundary() {
+        let events = vec![ev(EVENT_UPDATE_LEVEL_BID, 100, "50.0", "1.0")];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+
+        bt.elapse(100).unwrap();
+
+        let (bid, _ask) = bt.bbo("BTC");
+        assert!(bid > 0.0, "single event at boundary should be processed");
+        assert_eq!(bt.current_timestamp(), 100);
+    }
+
+    /// All event types at the same timestamp must be processed together.
+    #[test]
+    fn test_elapse_processes_interleaved_trades_and_levels_at_same_timestamp() {
+        let ts = 500_i64;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, ts, "99.0", "5.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, ts, "101.0", "5.0"),
+            ev(EVENT_TRADE_BUY, ts, "101.0", "1.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+
+        bt.elapse(ts as u64).unwrap();
+
+        let (bid, ask) = bt.bbo("BTC");
+        assert!(bid > 0.0, "bid level should be set after processing");
+        assert!(ask > 0.0, "ask level should be set after processing");
+        assert_eq!(bt.current_timestamp(), ts, "all events at ts should be processed");
     }
 }
