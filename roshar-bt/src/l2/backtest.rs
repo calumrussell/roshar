@@ -18,12 +18,14 @@ use super::{L2Config, L2Order};
 
 pub enum LatencyModel {
     Instant,
+    Fixed(u64), // delay in milliseconds
 }
 
 impl LatencyModel {
     pub fn calc_delay(&self) -> u64 {
         match self {
             LatencyModel::Instant => 0,
+            LatencyModel::Fixed(ms) => *ms,
         }
     }
 }
@@ -78,6 +80,10 @@ impl<Feed: EventFeed> Backtest<Feed, LevelChgFill> {
             lot_size: config.lot_size,
             _fil: std::marker::PhantomData,
         }
+    }
+
+    pub fn set_latency_model(&mut self, model: LatencyModel) {
+        self.latency_model = model;
     }
 
     pub fn get_working_orders(&self, symbol: &str) -> Vec<OrderId> {
@@ -196,6 +202,9 @@ where
 
         let mut sim_ended = false;
         let end_time = self.curr_ts + ts as i64;
+        // When true, loop back once more to flush any orders that cleared latency
+        // at the final curr_ts, then return.
+        let mut should_return = false;
 
         loop {
             // Submit buffered orders that have cleared latency.
@@ -212,6 +221,10 @@ where
                 } else {
                     break;
                 }
+            }
+
+            if should_return {
+                return Ok(());
             }
 
             if let Some(peek_event) = self.ev_queue.front() {
@@ -263,24 +276,25 @@ where
                         _ => (),
                     }
 
-                    // Exit once we've reached end_time and no further events at this
-                    // timestamp remain in the queue. This ensures that all same-timestamp
-                    // events (e.g. an entire depth snapshot batch) are fully processed
-                    // before returning, rather than stopping after the first one.
+                    // Once we've reached end_time and no further events at this
+                    // timestamp remain in the queue, loop back one more time to
+                    // flush any buffered orders whose latency has now cleared.
                     if self.curr_ts >= end_time
                         && self.ev_queue.front().map_or(true, |e| e.ts > end_time)
                     {
-                        return Ok(());
+                        should_return = true;
                     }
                 } else {
-                    //We have events in the queue but their timestamp is past elapse
+                    // Next event is past elapse window — advance clock and loop
+                    // back once to flush any orders that cleared latency at end_time.
                     self.curr_ts = end_time;
-                    return Ok(());
+                    should_return = true;
                 }
             } else {
                 // Queue is empty — if we've already reached end_time we're done.
                 if self.curr_ts >= end_time {
-                    return Ok(());
+                    should_return = true;
+                    continue;
                 }
 
                 if sim_ended {
@@ -443,5 +457,124 @@ mod tests {
         assert!(bid > 0.0, "bid level should be set after processing");
         assert!(ask > 0.0, "ask level should be set after processing");
         assert_eq!(bt.current_timestamp(), ts, "all events at ts should be processed");
+    }
+
+    #[test]
+    fn test_fixed_latency_delays_order_execution() {
+        use crate::types::OrderType;
+        use crate::types::Side;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 200, "101.0", "10.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+        bt.set_latency_model(LatencyModel::Fixed(50));
+
+        bt.elapse(100).unwrap();
+
+        bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
+
+        bt.elapse(49).unwrap();
+        assert_eq!(bt.get_position("BTC"), 0.0, "order should not execute before latency elapses");
+
+        bt.elapse(1).unwrap();
+        assert!(bt.get_position("BTC") > 0.0, "order should execute after latency elapses");
+    }
+
+    #[test]
+    fn test_instant_latency_executes_on_next_elapse() {
+        use crate::types::OrderType;
+        use crate::types::Side;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "99.0", "10.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+
+        bt.elapse(100).unwrap();
+        bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
+
+        bt.elapse(1).unwrap();
+        assert!(bt.get_position("BTC") > 0.0);
+    }
+
+    #[test]
+    fn test_multiple_orders_respect_individual_latency() {
+        use crate::types::OrderType;
+        use crate::types::Side;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 200, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 300, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 300, "101.0", "10.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+        bt.set_latency_model(LatencyModel::Fixed(50));
+
+        bt.elapse(100).unwrap();
+        bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
+
+        bt.elapse(50).unwrap(); // ts=150
+        let pos_after_first = bt.get_position("BTC");
+        assert!(pos_after_first > 0.0, "first order should have executed");
+
+        bt.submit_order("BTC", OrderRequest::new(Side::Sell, 1.0, None, OrderType::Market));
+
+        bt.elapse(49).unwrap(); // ts=199
+        assert!(bt.get_position("BTC") > 0.0, "second order should not execute yet");
+
+        bt.elapse(1).unwrap(); // ts=200
+        assert_eq!(bt.get_position("BTC"), 0.0, "second order should have executed");
+    }
+
+    #[test]
+    fn test_order_fills_at_execution_time_price() {
+        use crate::types::OrderType;
+        use crate::types::Side;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "10.0"),
+            ev(EVENT_CLEAR_SIDE_ASK, 150, "0.0", "0.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 150, "102.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "99.0", "10.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+        bt.set_latency_model(LatencyModel::Fixed(100));
+
+        bt.elapse(100).unwrap();
+        bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
+
+        bt.elapse(100).unwrap(); // ts=200
+        let order = bt.get_order("BTC", &0).unwrap();
+        assert_eq!(order.exec_px, 102.0);
+    }
+
+    #[test]
+    fn test_fixed_zero_behaves_like_instant() {
+        use crate::types::OrderType;
+        use crate::types::Side;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "99.0", "10.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+        bt.set_latency_model(LatencyModel::Fixed(0));
+
+        bt.elapse(100).unwrap();
+        bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
+
+        bt.elapse(1).unwrap();
+        assert!(bt.get_position("BTC") > 0.0);
     }
 }
