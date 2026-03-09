@@ -1,15 +1,20 @@
+use std::collections::HashMap;
+
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use rust_decimal::prelude::ToPrimitive;
-use std::collections::HashMap;
+use rust_decimal::Decimal;
 
 use ::roshar_bt::chart::ChartData;
 use ::roshar_bt::exchanges::hyperliquid::HyperliquidParser;
 use ::roshar_bt::l2::backtest::{Backtest, LatencyModel};
 use ::roshar_bt::l2::fill::LevelChgFill;
 use ::roshar_bt::l2::L2ConfigBuilder;
-use ::roshar_bt::source::{BufSource, EventFeed, MultiplexedFeed, ParsedFeed};
-use ::roshar_bt::types::{OrderRequest, OrderStatus, OrderType, Side};
+use ::roshar_bt::source::{BufSource, EventFeed, MultiplexedFeed, ParsedFeed, VecEventFeed};
+use ::roshar_bt::types::{
+    Event, OrderRequest, OrderStatus, OrderType, Side, EVENT_CLEAR_SIDE_ASK, EVENT_CLEAR_SIDE_BID,
+    EVENT_TRADE_BUY, EVENT_TRADE_SELL, EVENT_UPDATE_LEVEL_ASK, EVENT_UPDATE_LEVEL_BID,
+};
 
 /// Configuration for an L2 (order-book level) backtest.
 ///
@@ -144,47 +149,65 @@ impl PerformanceMetrics {
     }
 }
 
+enum InnerBacktest {
+    Mux(Backtest<MultiplexedFeed, LevelChgFill>),
+    Vec(Backtest<VecEventFeed, LevelChgFill>),
+}
+
+/// Dispatch an immutable method call to whichever backtest variant is active.
+macro_rules! dispatch {
+    ($self:expr, $method:ident ( $($arg:expr),* )) => {
+        match &$self.inner {
+            InnerBacktest::Mux(bt) => bt.$method($($arg),*),
+            InnerBacktest::Vec(bt) => bt.$method($($arg),*),
+        }
+    };
+}
+
+/// Dispatch a mutable method call to whichever backtest variant is active.
+macro_rules! dispatch_mut {
+    ($self:expr, $method:ident ( $($arg:expr),* )) => {
+        match &mut $self.inner {
+            InnerBacktest::Mux(bt) => bt.$method($($arg),*),
+            InnerBacktest::Vec(bt) => bt.$method($($arg),*),
+        }
+    };
+}
+
 /// L2 backtest engine wrapping the Rust roshar-bt library.
 ///
 /// Provides order-book level backtesting with realistic queue-position fill
-/// simulation. Data is loaded from Hyperliquid websocket recordings.
+/// simulation.
 ///
-/// Args:
-///     config: L2Config with tick/lot sizes and timing parameters.
-///     data_paths: Dict mapping logical group names to lists of file paths.
-///         Files can be plain text or gzip-compressed (.gz). The symbol for
-///         each event is extracted from the data itself.
-///
-/// Example::
+/// Create from file paths (Hyperliquid format)::
 ///
 ///     config = roshar_bt.L2Config(tick_size=0.1, lot_size=0.001, start_ts=0, return_window=60)
-///     bt = roshar_bt.Backtest(config, {"btc": ["btc_book.log.gz"], "eth": ["eth_book.log.gz"]})
-///     while bt.elapse(60000):
-///         bid, ask = bt.bbo("BTC")
-///         bt.submit_order("BTC", "buy", 1.0, px=99.0)
-///         bt.update_performance_metrics()
-///     metrics = bt.get_performance_metrics()
+///     bt = roshar_bt.Backtest(config, {"btc": ["btc_book.log.gz"]})
+///
+/// Or from event data (e.g. fetched from ClickHouse)::
+///
+///     bt = roshar_bt.Backtest.from_events(
+///         config,
+///         snapshot={"bid_prices": [...], "bid_sizes": [...],
+///                   "ask_prices": [...], "ask_sizes": [...], "time": 123456},
+///         depth_updates=[("89500.0", "1.0", 123457, False), ...],
+///         trades=[("89500.5", "0.5", 123458, False), ...],
+///     )
 #[pyclass(unsendable)]
 struct PyBacktest {
-    inner: Backtest<MultiplexedFeed, LevelChgFill>,
+    inner: InnerBacktest,
 }
 
 #[pymethods]
 impl PyBacktest {
+    /// Create a backtest from Hyperliquid websocket recording files.
+    ///
+    /// Args:
+    ///     config: L2Config with tick/lot sizes and timing parameters.
+    ///     data_paths: Dict mapping logical group names to lists of file paths.
     #[new]
     fn new(config: &L2Config, data_paths: HashMap<String, Vec<String>>) -> PyResult<Self> {
-        let mut builder = L2ConfigBuilder::new();
-        builder
-            .set_tick_size(config.tick_size)
-            .set_lot_size(config.lot_size)
-            .set_start_ts(config.start_ts)
-            .set_return_window(config.return_window)
-            .set_lines_read_per_tick(config.lines_read_per_tick)
-            .set_risk_free_rate(config.risk_free_rate);
-
-        let l2_config = builder
-            .build()
-            .map_err(|e| PyValueError::new_err(e.to_string()))?;
+        let l2_config = build_l2_config(config)?;
 
         let mut feeds: Vec<Box<dyn EventFeed>> = Vec::new();
         for (_label, paths) in data_paths {
@@ -199,33 +222,167 @@ impl PyBacktest {
         let mux = MultiplexedFeed::new(feeds);
         let bt = Backtest::new_with_level_chg_fill(&l2_config, mux);
 
-        Ok(Self { inner: bt })
+        Ok(Self {
+            inner: InnerBacktest::Mux(bt),
+        })
+    }
+
+    /// Create a backtest from event data (snapshots, depth updates, trades).
+    ///
+    /// Args:
+    ///     config: L2Config with tick/lot sizes and timing parameters.
+    ///     snapshot: Optional dict with keys ``bid_prices``, ``bid_sizes``,
+    ///         ``ask_prices``, ``ask_sizes`` (lists of price/size strings) and
+    ///         ``time`` (timestamp in ms). Seeds the initial orderbook.
+    ///     depth_updates: List of ``(px, qty, time, is_ask)`` tuples. ``px``
+    ///         and ``qty`` are strings, ``time`` is ms timestamp, ``is_ask``
+    ///         is bool (True for ask side, False for bid side).
+    ///     trades: List of ``(px, qty, time, is_sell)`` tuples. ``is_sell``
+    ///         is True when the taker is selling, False when buying.
+    #[staticmethod]
+    #[pyo3(signature = (config, snapshot=None, depth_updates=None, trades=None))]
+    fn from_events(
+        config: &L2Config,
+        snapshot: Option<HashMap<String, PyObject>>,
+        depth_updates: Option<Vec<(String, String, i64, bool)>>,
+        trades: Option<Vec<(String, String, i64, bool)>>,
+    ) -> PyResult<Self> {
+        let l2_config = build_l2_config(config)?;
+
+        let mut events: Vec<Event> = Vec::new();
+
+        // Build snapshot events
+        if let Some(snap) = snapshot {
+            Python::with_gil(|py| -> PyResult<()> {
+                let time: i64 = snap
+                    .get("time")
+                    .ok_or_else(|| PyValueError::new_err("snapshot missing 'time'"))?
+                    .extract(py)?;
+
+                let bid_prices: Vec<String> = snap
+                    .get("bid_prices")
+                    .ok_or_else(|| PyValueError::new_err("snapshot missing 'bid_prices'"))?
+                    .extract(py)?;
+                let bid_sizes: Vec<String> = snap
+                    .get("bid_sizes")
+                    .ok_or_else(|| PyValueError::new_err("snapshot missing 'bid_sizes'"))?
+                    .extract(py)?;
+                let ask_prices: Vec<String> = snap
+                    .get("ask_prices")
+                    .ok_or_else(|| PyValueError::new_err("snapshot missing 'ask_prices'"))?
+                    .extract(py)?;
+                let ask_sizes: Vec<String> = snap
+                    .get("ask_sizes")
+                    .ok_or_else(|| PyValueError::new_err("snapshot missing 'ask_sizes'"))?
+                    .extract(py)?;
+
+                events.push(Event::new(EVENT_CLEAR_SIDE_BID, time, "0.0", "0.0"));
+                events.push(Event::new(EVENT_CLEAR_SIDE_ASK, time, "0.0", "0.0"));
+
+                for (px, qty) in bid_prices.iter().zip(bid_sizes.iter()) {
+                    events.push(Event::new(EVENT_UPDATE_LEVEL_BID, time, px, qty));
+                }
+                for (px, qty) in ask_prices.iter().zip(ask_sizes.iter()) {
+                    events.push(Event::new(EVENT_UPDATE_LEVEL_ASK, time, px, qty));
+                }
+                Ok(())
+            })?;
+        }
+
+        // Build depth update events
+        if let Some(updates) = depth_updates {
+            for (px, qty, time, is_ask) in &updates {
+                let typ = if *is_ask {
+                    EVENT_UPDATE_LEVEL_ASK
+                } else {
+                    EVENT_UPDATE_LEVEL_BID
+                };
+                events.push(Event::new(typ, *time, px, qty));
+            }
+        }
+
+        // Build trade events
+        if let Some(trade_list) = trades {
+            for (px, qty, time, is_sell) in &trade_list {
+                let typ = if *is_sell {
+                    EVENT_TRADE_SELL
+                } else {
+                    EVENT_TRADE_BUY
+                };
+                events.push(Event::new(typ, *time, px, qty));
+            }
+        }
+
+        // Stable sort: snapshot events before updates/trades at same timestamp
+        events.sort_by_key(|e| e.ts);
+        let feed = VecEventFeed::new(events);
+        let bt = Backtest::new_with_level_chg_fill(&l2_config, feed);
+
+        Ok(Self {
+            inner: InnerBacktest::Vec(bt),
+        })
     }
 
     /// Advance the simulation by ``ms`` milliseconds.
     ///
-    /// Processes all events within the time window and flushes any orders
-    /// that have cleared latency. Returns ``True`` on success, ``False``
-    /// when the data feed is exhausted.
+    /// Returns ``True`` on success, ``False`` when the data feed is exhausted.
     fn elapse(&mut self, ms: u64) -> bool {
-        self.inner.elapse(ms).is_ok()
+        dispatch_mut!(self, elapse(ms)).is_ok()
     }
 
     /// Current simulation timestamp in milliseconds.
     fn current_timestamp(&self) -> i64 {
-        self.inner.current_timestamp()
+        dispatch!(self, current_timestamp())
     }
 
     /// Best bid and ask prices for a symbol.
     ///
     /// Returns ``(0.0, 0.0)`` if the symbol has not been seen yet.
     fn bbo(&self, symbol: &str) -> (f64, f64) {
-        self.inner.bbo(symbol)
+        dispatch!(self, bbo(symbol))
     }
 
     /// Current position size for a symbol (positive = long, negative = short).
     fn get_position(&mut self, symbol: &str) -> f64 {
-        self.inner.get_position(symbol)
+        dispatch_mut!(self, get_position(symbol))
+    }
+
+    /// Get the quantity at a specific price level in the orderbook.
+    ///
+    /// Args:
+    ///     symbol: The trading symbol.
+    ///     price: The price level to query.
+    ///     side: ``"buy"`` (bid) or ``"sell"`` (ask).
+    ///
+    /// Returns:
+    ///     The quantity at that level, or 0.0 if the level does not exist.
+    fn get_level(&self, symbol: &str, price: f64, side: &str) -> PyResult<f64> {
+        let side = match side.to_lowercase().as_str() {
+            "buy" => Side::Buy,
+            "sell" => Side::Sell,
+            other => {
+                return Err(PyValueError::new_err(format!(
+                    "Invalid side '{}': expected 'buy' or 'sell'",
+                    other
+                )))
+            }
+        };
+        let price_dec = Decimal::try_from(price)
+            .map_err(|e| PyValueError::new_err(format!("Invalid price: {}", e)))?;
+
+        let qty = match &self.inner {
+            InnerBacktest::Mux(bt) => bt
+                .exchanges
+                .get(symbol)
+                .map(|e| e.get_level(price_dec, side))
+                .unwrap_or(Decimal::ZERO),
+            InnerBacktest::Vec(bt) => bt
+                .exchanges
+                .get(symbol)
+                .map(|e| e.get_level(price_dec, side))
+                .unwrap_or(Decimal::ZERO),
+        };
+        Ok(qty.to_f64().unwrap_or(0.0))
     }
 
     /// Submit a limit or market order.
@@ -260,59 +417,49 @@ impl PyBacktest {
         };
 
         let req = OrderRequest::new(side, qty, order_px, order_type);
-        self.inner.submit_order(symbol, req);
+        dispatch_mut!(self, submit_order(symbol, req));
         Ok(())
     }
 
     /// Cancel a working order.
-    ///
-    /// Raises ``ValueError`` if the symbol is unknown or the order cannot be
-    /// cancelled.
     fn cancel_order(&mut self, symbol: &str, order_id: u64) -> PyResult<()> {
-        self.inner
-            .cancel_order(symbol, &order_id)
+        dispatch_mut!(self, cancel_order(symbol, &order_id))
             .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     /// Order IDs that were filled during the most recent ``elapse`` call.
     fn last_trades(&self, symbol: &str) -> Vec<u64> {
-        self.inner.last_trades(symbol).to_vec()
+        dispatch!(self, last_trades(symbol)).to_vec()
     }
 
     /// IDs of all currently working (open) orders for a symbol.
     fn get_working_orders(&self, symbol: &str) -> Vec<u64> {
-        self.inner.get_working_orders(symbol)
+        dispatch!(self, get_working_orders(symbol))
     }
 
     /// Retrieve details of a specific order.
-    ///
-    /// Returns ``None`` if the symbol or order ID is unknown.
     fn get_order(&self, symbol: &str, order_id: u64) -> Option<Order> {
-        self.inner
-            .get_order(symbol, &order_id)
-            .map(|o| o.into())
+        dispatch!(self, get_order(symbol, &order_id)).map(|o| o.into())
     }
 
     /// Update portfolio-level performance metrics from current positions and prices.
-    ///
-    /// Call this after each ``elapse`` to track cumulative returns and Sharpe ratio.
     fn update_performance_metrics(&mut self) {
-        self.inner.update_performance_metrics();
+        dispatch_mut!(self, update_performance_metrics());
     }
 
     /// Compute and return performance metrics.
     fn get_performance_metrics(&self) -> PerformanceMetrics {
-        let perf = self.inner.get_performance_metrics();
+        let perf = dispatch!(self, get_performance_metrics());
         PerformanceMetrics {
             sharpe_ratio: perf.calculate_sharpe_ratio().to_f64().unwrap_or(0.0),
             cumulative_return: perf.get_cumulative_return().to_f64().unwrap_or(0.0),
         }
     }
 
-    /// Generate a multi-panel chart (price + cumulative return, position) and save to a file.
+    /// Generate a multi-panel chart and save to a file.
     fn generate_chart(&self, path: &str) -> PyResult<()> {
         let chart_data =
-            ChartData::from_performance_metrics(self.inner.get_performance_metrics());
+            ChartData::from_performance_metrics(dispatch!(self, get_performance_metrics()));
         chart_data
             .create_multi_chart(path)
             .map_err(|e| PyValueError::new_err(e.to_string()))
@@ -321,20 +468,22 @@ impl PyBacktest {
     /// Set the order latency model.
     ///
     /// Args:
-    ///     ms: Latency in milliseconds. ``0`` means instant execution on the
-    ///         next ``elapse`` call.
+    ///     ms: Latency in milliseconds. ``0`` means instant execution.
     fn set_latency(&mut self, ms: u64) {
-        if ms == 0 {
-            self.inner.set_latency_model(LatencyModel::Instant);
+        let model = if ms == 0 {
+            LatencyModel::Instant
         } else {
-            self.inner.set_latency_model(LatencyModel::Fixed(ms));
+            LatencyModel::Fixed(ms)
+        };
+        match &mut self.inner {
+            InnerBacktest::Mux(bt) => bt.set_latency_model(model),
+            InnerBacktest::Vec(bt) => bt.set_latency_model(model),
         }
     }
 
     /// Return the cumulative returns history as a list of floats.
     fn get_cumulative_returns_history(&self) -> Vec<f64> {
-        self.inner
-            .get_performance_metrics()
+        dispatch!(self, get_performance_metrics())
             .get_cumulative_returns_history()
             .iter()
             .map(|d| d.to_f64().unwrap_or(0.0))
@@ -343,8 +492,7 @@ impl PyBacktest {
 
     /// Return the per-period returns history as a list of floats.
     fn get_returns_history(&self) -> Vec<f64> {
-        self.inner
-            .get_performance_metrics()
+        dispatch!(self, get_performance_metrics())
             .get_returns_history()
             .iter()
             .map(|d| d.to_f64().unwrap_or(0.0))
@@ -353,8 +501,7 @@ impl PyBacktest {
 
     /// Return the price history as a list of ``(timestamp, price)`` tuples.
     fn get_price_history(&self) -> Vec<(i64, f64)> {
-        self.inner
-            .get_performance_metrics()
+        dispatch!(self, get_performance_metrics())
             .get_prices()
             .iter()
             .map(|(ts, d)| (*ts, d.to_f64().unwrap_or(0.0)))
@@ -363,13 +510,29 @@ impl PyBacktest {
 
     /// Return the position history as a list of ``(timestamp, position)`` tuples.
     fn get_position_history(&self) -> Vec<(i64, f64)> {
-        self.inner
-            .get_performance_metrics()
+        dispatch!(self, get_performance_metrics())
             .get_position_history()
             .iter()
             .map(|(ts, d)| (*ts, d.to_f64().unwrap_or(0.0)))
             .collect()
     }
+}
+
+fn build_l2_config(
+    config: &L2Config,
+) -> PyResult<::roshar_bt::l2::L2Config> {
+    let mut builder = L2ConfigBuilder::new();
+    builder
+        .set_tick_size(config.tick_size)
+        .set_lot_size(config.lot_size)
+        .set_start_ts(config.start_ts)
+        .set_return_window(config.return_window)
+        .set_lines_read_per_tick(config.lines_read_per_tick)
+        .set_risk_free_rate(config.risk_free_rate);
+
+    builder
+        .build()
+        .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
 #[pymodule]
