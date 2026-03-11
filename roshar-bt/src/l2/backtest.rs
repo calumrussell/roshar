@@ -7,9 +7,9 @@ use rust_decimal::Decimal;
 use crate::performance::PerformanceMetrics;
 use crate::source::{EventFeed, FeedState};
 use crate::types::{
-    Candle, Event, OrderRequest, EVENT_CLEAR_BOOK, EVENT_CLEAR_LEVEL_ASK, EVENT_CLEAR_LEVEL_BID,
-    EVENT_CLEAR_SIDE_ASK, EVENT_CLEAR_SIDE_BID, EVENT_TRADE_BUY, EVENT_TRADE_SELL,
-    EVENT_UPDATE_LEVEL_ASK, EVENT_UPDATE_LEVEL_BID,
+    Candle, Event, OrderRequest, OrderStatus, Side, EVENT_CLEAR_BOOK, EVENT_CLEAR_LEVEL_ASK,
+    EVENT_CLEAR_LEVEL_BID, EVENT_CLEAR_SIDE_ASK, EVENT_CLEAR_SIDE_BID, EVENT_TRADE_BUY,
+    EVENT_TRADE_SELL, EVENT_UPDATE_LEVEL_ASK, EVENT_UPDATE_LEVEL_BID,
 };
 
 use super::exchange::{Exchange, OrderId};
@@ -18,16 +18,28 @@ use super::{L2Config, L2Order};
 
 pub enum LatencyModel {
     Instant,
-    Fixed(u64), // delay in milliseconds
+    Fixed { entry_ms: u64, response_ms: u64 },
 }
 
 impl LatencyModel {
-    pub fn calc_delay(&self) -> u64 {
+    pub fn calc_entry_delay(&self) -> u64 {
         match self {
             LatencyModel::Instant => 0,
-            LatencyModel::Fixed(ms) => *ms,
+            LatencyModel::Fixed { entry_ms, .. } => *entry_ms,
         }
     }
+
+    pub fn calc_response_delay(&self) -> u64 {
+        match self {
+            LatencyModel::Instant => 0,
+            LatencyModel::Fixed { response_ms, .. } => *response_ms,
+        }
+    }
+}
+
+pub struct FillResponse {
+    pub side: Side,
+    pub qty: Decimal,
 }
 
 /// Factory trait so `Backtest` can create per-symbol exchanges on demand without
@@ -52,6 +64,11 @@ pub struct Backtest<Feed: EventFeed, Fil: FillModel> {
     /// Pending orders: (symbol, OrderRequest).
     pub order_buffer: VecDeque<(String, OrderRequest)>,
     pub latency_model: LatencyModel,
+    /// Pending fill responses: (delivery_ts, symbol, FillResponse).
+    pub fill_response_buffer: VecDeque<(i64, String, FillResponse)>,
+    /// Strategy-side positions (delayed view). `get_position()` and
+    /// `update_performance_metrics()` read from here.
+    pub strategy_positions: HashMap<String, Decimal>,
     /// Per-symbol fill trackers cleared each tick.
     pub tick_fill_tracker: HashMap<String, Vec<OrderId>>,
     pub performance: PerformanceMetrics,
@@ -73,6 +90,8 @@ impl<Feed: EventFeed> Backtest<Feed, LevelChgFill> {
             line_chunk: config.lines_read_per_tick,
             order_buffer: VecDeque::with_capacity(config.order_buffer_start_size),
             latency_model: LatencyModel::Instant,
+            fill_response_buffer: VecDeque::new(),
+            strategy_positions: HashMap::new(),
             tick_fill_tracker: HashMap::new(),
             performance,
             candle_sink: VecDeque::new(),
@@ -143,12 +162,11 @@ where
         Err(anyhow!("Unknown symbol: {}", symbol))
     }
 
-    pub fn get_position(&mut self, symbol: &str) -> f64 {
-        self.exchanges
-            .get_mut(symbol)
-            .map(|e| {
-                e.get_position()
-                    .normalize()
+    pub fn get_position(&self, symbol: &str) -> f64 {
+        self.strategy_positions
+            .get(symbol)
+            .map(|pos| {
+                pos.normalize()
                     .to_f64()
                     .expect("Unable to parse Decimal position to f64")
             })
@@ -159,8 +177,12 @@ where
         let mut positions: HashMap<String, Decimal> = HashMap::new();
         let mut prices: HashMap<String, Decimal> = HashMap::new();
 
-        for (symbol, exch) in self.exchanges.iter_mut() {
-            let pos = exch.get_position();
+        for (symbol, exch) in self.exchanges.iter() {
+            let pos = self
+                .strategy_positions
+                .get(symbol)
+                .copied()
+                .unwrap_or(Decimal::ZERO);
             positions.insert(symbol.clone(), pos);
             let (bid, ask) = exch.bbo();
             let mid = (bid + ask) / Decimal::TWO;
@@ -207,17 +229,53 @@ where
         let mut should_return = false;
 
         loop {
-            // Submit buffered orders that have cleared latency.
+            // Submit buffered orders that have cleared entry latency.
             while let Some(front) = self.order_buffer.front() {
-                if (front.1.get_time() + self.latency_model.calc_delay() as i64) <= self.curr_ts {
+                if (front.1.get_time() + self.latency_model.calc_entry_delay() as i64)
+                    <= self.curr_ts
+                {
                     let (symbol, order) = self.order_buffer.pop_front().unwrap();
                     let tick_size = self.tick_size;
                     let lot_size = self.lot_size;
+                    let symbol_clone = symbol.clone();
                     let exch = self
                         .exchanges
                         .entry(symbol)
                         .or_insert_with(|| Exchange::<Fil>::create(tick_size, lot_size));
+                    let next_oid = exch.get_order_id_position();
                     exch.execute_user_order(order);
+                    // If the order filled, buffer the fill response.
+                    if let Some(filled_order) = exch.get_order(&next_oid) {
+                        if filled_order.status == OrderStatus::Filled {
+                            let delivery_ts = self.curr_ts
+                                + self.latency_model.calc_response_delay() as i64;
+                            self.fill_response_buffer.push_back((
+                                delivery_ts,
+                                symbol_clone,
+                                FillResponse {
+                                    side: filled_order.side.clone(),
+                                    qty: filled_order.filled_qty,
+                                },
+                            ));
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            // Deliver fill responses that have cleared response latency.
+            while let Some(front) = self.fill_response_buffer.front() {
+                if front.0 <= self.curr_ts {
+                    let (_, symbol, fill) = self.fill_response_buffer.pop_front().unwrap();
+                    let pos = self
+                        .strategy_positions
+                        .entry(symbol)
+                        .or_insert(Decimal::ZERO);
+                    match fill.side {
+                        Side::Buy => *pos += fill.qty,
+                        Side::Sell => *pos -= fill.qty,
+                    }
                 } else {
                     break;
                 }
@@ -242,7 +300,7 @@ where
                         .or_insert_with(Vec::new);
                     let exch = self
                         .exchanges
-                        .entry(symbol)
+                        .entry(symbol.clone())
                         .or_insert_with(|| Exchange::<Fil>::create(tick_size, lot_size));
 
                     match event.typ {
@@ -255,16 +313,27 @@ where
                         EVENT_CLEAR_LEVEL_ASK => {
                             exch.clear_ask_level(&event);
                         }
-                        EVENT_UPDATE_LEVEL_BID => {
+                        EVENT_UPDATE_LEVEL_BID | EVENT_UPDATE_LEVEL_ASK => {
+                            let pre_len = fill_tracker.len();
                             exch.update_level(event, fill_tracker);
+                            // Buffer any new passive fills for response latency.
+                            let response_delay =
+                                self.latency_model.calc_response_delay() as i64;
+                            for i in pre_len..fill_tracker.len() {
+                                let oid = fill_tracker[i];
+                                if let Some(order) = exch.get_order(&oid) {
+                                    self.fill_response_buffer.push_back((
+                                        self.curr_ts + response_delay,
+                                        symbol.clone(),
+                                        FillResponse {
+                                            side: order.side.clone(),
+                                            qty: order.filled_qty,
+                                        },
+                                    ));
+                                }
+                            }
                         }
-                        EVENT_UPDATE_LEVEL_ASK => {
-                            exch.update_level(event, fill_tracker);
-                        }
-                        EVENT_TRADE_BUY => {
-                            exch.process_trade(event);
-                        }
-                        EVENT_TRADE_SELL => {
+                        EVENT_TRADE_BUY | EVENT_TRADE_SELL => {
                             exch.process_trade(event);
                         }
                         EVENT_CLEAR_SIDE_BID => {
@@ -471,7 +540,7 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        bt.set_latency_model(LatencyModel::Fixed(50));
+        bt.set_latency_model(LatencyModel::Fixed { entry_ms: 50, response_ms: 0 });
 
         bt.elapse(100).unwrap();
 
@@ -517,7 +586,7 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        bt.set_latency_model(LatencyModel::Fixed(50));
+        bt.set_latency_model(LatencyModel::Fixed { entry_ms: 50, response_ms: 0 });
 
         bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
@@ -548,7 +617,7 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        bt.set_latency_model(LatencyModel::Fixed(100));
+        bt.set_latency_model(LatencyModel::Fixed { entry_ms: 100, response_ms: 0 });
 
         bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
@@ -569,12 +638,57 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        bt.set_latency_model(LatencyModel::Fixed(0));
+        bt.set_latency_model(LatencyModel::Fixed { entry_ms: 0, response_ms: 0 });
 
         bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
 
         bt.elapse(1).unwrap();
         assert!(bt.get_position("BTC") > 0.0);
+    }
+
+    #[test]
+    fn test_response_latency_delays_position_visibility() {
+        use crate::types::OrderType;
+        use crate::types::Side;
+        let events = vec![
+            ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 200, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 200, "101.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_BID, 300, "99.0", "10.0"),
+            ev(EVENT_UPDATE_LEVEL_ASK, 300, "101.0", "10.0"),
+        ];
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
+        bt.set_latency_model(LatencyModel::Fixed {
+            entry_ms: 50,
+            response_ms: 50,
+        });
+
+        bt.elapse(100).unwrap();
+        // Submit at ts=100. entry_latency=50 → executes at ts=150.
+        // response_latency=50 → visible at ts=200.
+        bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
+
+        bt.elapse(50).unwrap(); // ts=150: order executes on exchange
+        assert_eq!(
+            bt.get_position("BTC"),
+            0.0,
+            "position should not be visible before response latency elapses"
+        );
+
+        bt.elapse(49).unwrap(); // ts=199
+        assert_eq!(
+            bt.get_position("BTC"),
+            0.0,
+            "position should not be visible before response latency elapses"
+        );
+
+        bt.elapse(1).unwrap(); // ts=200: response latency clears
+        assert!(
+            bt.get_position("BTC") > 0.0,
+            "position should be visible after response latency elapses"
+        );
     }
 }
