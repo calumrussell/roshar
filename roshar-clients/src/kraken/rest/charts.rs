@@ -1,9 +1,22 @@
 use crate::http::RateLimitedClient;
-use chrono::DateTime;
-use roshar_types::Candle;
+use chrono::{DateTime, Utc};
 use std::sync::Arc;
 
 use super::market::KrakenRestCandleResponse;
+
+/// Candle data from Kraken REST API
+#[derive(Clone, Debug)]
+pub struct Candle {
+    pub open: String,
+    pub high: String,
+    pub low: String,
+    pub close: String,
+    pub volume: String,
+    pub exchange: String,
+    pub time: DateTime<Utc>,
+    pub close_time: DateTime<Utc>,
+    pub coin: String,
+}
 
 pub struct ChartsApi {
     client: Arc<RateLimitedClient>,

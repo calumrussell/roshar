@@ -1,23 +1,12 @@
 pub(crate) mod rest;
-pub(crate) mod ws;
 
 use rest::BinanceRestClient;
-use ws::MarketDataFeedHandle;
-
-pub(crate) use ws::MarketDataFeed;
-pub use ws::MarketEvent;
 
 use roshar_types::BinancePremiumIndex;
-use roshar_ws_mgr::Manager;
 use std::collections::HashMap;
-use std::sync::Arc;
-use tokio::sync::{broadcast, mpsc};
 
-/// Binance client that manages WebSocket feeds and REST API calls
+/// Binance client for REST API calls
 pub struct BinanceClient {
-    market_data_handle: MarketDataFeedHandle,
-    #[allow(dead_code)]
-    market_data_feed_handle: tokio::task::JoinHandle<()>,
     rest_client: BinanceRestClient,
 }
 
@@ -25,84 +14,11 @@ impl BinanceClient {
     /// Create a new Binance client.
     ///
     /// # Arguments
-    /// * `ws_manager` - WebSocket manager
-    /// * `channel_size` - Channel size for market data
     /// * `requests_per_second` - Maximum REST API requests per second
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, requests_per_second: u32) -> Self {
-        let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
-        let market_data_handle = market_data_feed.get_handle();
-        let market_data_feed_handle = tokio::spawn(async move {
-            market_data_feed.run().await;
-        });
-
+    pub fn new(requests_per_second: u32) -> Self {
         Self {
-            market_data_handle,
-            market_data_feed_handle,
             rest_client: BinanceRestClient::new(requests_per_second),
         }
-    }
-
-    /// Get the event receiver for reactive market data consumption
-    /// Can be called multiple times to create multiple subscribers
-    /// Automatically disables raw mode
-    pub async fn take_event_receiver(&self) -> Result<broadcast::Receiver<MarketEvent>, String> {
-        self.market_data_handle.get_event_channel().await
-    }
-
-    /// Get the raw receiver for raw JSON message consumption
-    /// Can only be called once - subsequent calls will return an error
-    /// Automatically enables raw mode - no parsing will occur, only raw JSON forwarding
-    pub async fn take_raw_receiver(&self) -> Result<mpsc::Receiver<String>, String> {
-        self.market_data_handle.get_raw_channel().await
-    }
-
-    /// Trigger restart of market data feed
-    pub async fn restart_market_data(&self) {
-        if let Err(e) = self.market_data_handle.restart_feed().await {
-            log::error!(
-                "Failed to send restart command to Binance market data feed: {}",
-                e
-            );
-        }
-    }
-
-    /// Subscribe to depth updates for symbols (batch subscription)
-    pub async fn add_depth(&self, symbols: &[&str]) -> Result<(), String> {
-        self.market_data_handle.add_depth(symbols).await
-    }
-
-    /// Unsubscribe from depth updates for symbols
-    pub async fn remove_depth(&self, symbols: &[&str]) -> Result<(), String> {
-        self.market_data_handle.remove_depth(symbols).await
-    }
-
-    /// Subscribe to trade updates for symbols (batch subscription)
-    pub async fn add_trades(&self, symbols: &[&str]) -> Result<(), String> {
-        self.market_data_handle.add_trades(symbols).await
-    }
-
-    /// Unsubscribe from trade updates for symbols
-    pub async fn remove_trades(&self, symbols: &[&str]) -> Result<(), String> {
-        self.market_data_handle.remove_trades(symbols).await
-    }
-
-    /// Subscribe to candle updates for symbols (batch subscription)
-    pub async fn add_candles(&self, symbols: &[&str]) -> Result<(), String> {
-        self.market_data_handle.add_candles(symbols).await
-    }
-
-    /// Unsubscribe from candle updates for symbols
-    pub async fn remove_candles(&self, symbols: &[&str]) -> Result<(), String> {
-        self.market_data_handle.remove_candles(symbols).await
-    }
-
-    /// Get the latest depth for a symbol
-    /// Returns None if not subscribed or no data received yet
-    pub async fn get_latest_depth(
-        &self,
-        symbol: &str,
-    ) -> Result<Option<roshar_types::OrderBookState>, String> {
-        self.market_data_handle.get_latest_depth(symbol).await
     }
 
     /// Get 24hr ticker data for all symbols or a specific symbol
@@ -206,8 +122,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_realtime_funding_rates() {
-        let ws_manager: Arc<Manager> = Manager::new();
-        let client = BinanceClient::new(ws_manager, 100, 10);
+        let client = BinanceClient::new(10);
 
         let result = client.get_realtime_funding_rates().await;
 

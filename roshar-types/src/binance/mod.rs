@@ -2,7 +2,7 @@ mod kline;
 mod ws;
 
 pub use ws::{
-    BinanceCandleMessage, BinanceDepthDiffMessage, BinanceKlineData, BinanceOrderBook,
+    BinanceCandleMessage, BinanceDepthDiffMessage, BinanceKlineData,
     BinanceOrderBookSnapshot, BinanceTradeMessage, BinanceWssMessage, ExchangeInfo,
     OpenInterestData, SymbolInfo, TickerData,
 };

@@ -1,7 +1,4 @@
 pub(crate) mod rest;
-pub(crate) mod ws;
-
-use ws::MarketDataFeedHandle;
 
 use crate::http::RateLimitedClient;
 use rest::{ChartsApi, MarketApi};
@@ -11,87 +8,25 @@ pub use rest::{
     KrakenOrderStatusResponse, KrakenRestCandleData, KrakenRestCandleResponse, KrakenTickerData,
     MultiCollateralApi, OrderManagementApi,
 };
-pub(crate) use ws::MarketDataFeed;
-pub use ws::MarketEvent;
 
-use roshar_types::Candle;
-use roshar_ws_mgr::Manager;
+pub use rest::charts::Candle;
 use std::sync::Arc;
-use tokio::sync::{broadcast, mpsc};
 
-/// Kraken client that manages WebSocket feeds and REST API calls
+/// Kraken client for REST API calls
 pub struct KrakenClient {
-    // Market data feed (WebSocket)
-    market_data_handle: MarketDataFeedHandle,
-    #[allow(dead_code)]
-    market_data_feed_handle: tokio::task::JoinHandle<()>,
-    // REST APIs
     charts_api: ChartsApi,
     market_api: MarketApi,
 }
 
 impl KrakenClient {
-    pub fn new(ws_manager: Arc<Manager>, channel_size: usize, requests_per_second: u32) -> Self {
-        // Set up WebSocket market data feed
-        let market_data_feed = MarketDataFeed::new(ws_manager, channel_size);
-        let market_data_handle = market_data_feed.get_handle();
-        let market_data_feed_handle = tokio::spawn(async move {
-            market_data_feed.run().await;
-        });
-
+    pub fn new(requests_per_second: u32) -> Self {
         // Create a single shared rate-limited HTTP client for ALL Kraken REST API calls
         let http_client = Arc::new(RateLimitedClient::new(requests_per_second, 1));
 
         Self {
-            market_data_handle,
-            market_data_feed_handle,
             charts_api: ChartsApi::new_with_client(http_client.clone()),
             market_api: MarketApi::new_with_client(http_client),
         }
-    }
-
-    /// Get the event receiver for reactive market data consumption
-    /// Can be called multiple times to create multiple subscribers
-    /// Automatically disables raw mode
-    pub async fn take_event_receiver(&self) -> Result<broadcast::Receiver<MarketEvent>, String> {
-        self.market_data_handle.get_event_channel().await
-    }
-
-    /// Get the raw receiver for raw JSON message consumption
-    /// Can only be called once - subsequent calls will return an error
-    /// Automatically enables raw mode - no parsing will occur, only raw JSON forwarding
-    pub async fn take_raw_receiver(&self) -> Result<mpsc::Receiver<String>, String> {
-        self.market_data_handle.get_raw_channel().await
-    }
-
-    /// Trigger restart of market data feed
-    pub async fn restart_market_data(&self) {
-        if let Err(e) = self.market_data_handle.restart_feed().await {
-            log::error!(
-                "Failed to send restart command to Kraken market data feed: {}",
-                e
-            );
-        }
-    }
-
-    /// Subscribe to depth updates for a symbol
-    pub async fn add_depth(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.add_depth(symbol).await
-    }
-
-    /// Unsubscribe from depth updates for a symbol
-    pub async fn remove_depth(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.remove_depth(symbol).await
-    }
-
-    /// Subscribe to trade updates for a symbol
-    pub async fn add_trades(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.add_trades(symbol).await
-    }
-
-    /// Unsubscribe from trade updates for a symbol
-    pub async fn remove_trades(&self, symbol: &str) -> Result<(), String> {
-        self.market_data_handle.remove_trades(symbol).await
     }
 
     /// Fetch candles for a symbol directly from the exchange
@@ -101,15 +36,6 @@ impl KrakenClient {
             .fetch_candle(symbol)
             .await
             .map_err(|e| format!("Failed to fetch candles: {}", e))
-    }
-
-    /// Get the latest depth for a symbol
-    /// Returns None if not subscribed or no data received yet
-    pub async fn get_latest_depth(
-        &self,
-        symbol: &str,
-    ) -> Result<Option<roshar_types::OrderBookState>, String> {
-        self.market_data_handle.get_latest_depth(symbol).await
     }
 
     /// Get ticker data for all Kraken futures

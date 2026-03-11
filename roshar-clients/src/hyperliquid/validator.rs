@@ -1,6 +1,17 @@
 use super::rest::SpotAssetInfo;
-use roshar_types::{AssetInfo, Venue};
+use roshar_types::AssetInfo;
 use std::collections::HashMap;
+
+/// Exchange venue identifier
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[repr(u8)]
+pub enum Venue {
+    ByBit = 0,
+    Kraken = 1,
+    Hyperliquid = 2,
+    Binance = 4,
+    Okx = 5,
+}
 
 #[derive(Debug, Clone)]
 pub struct OrderRequest {

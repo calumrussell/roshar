@@ -6,27 +6,23 @@ pub mod hyperliquid;
 pub mod kraken;
 pub mod okx;
 pub mod polymarket;
-mod state_handle;
-mod state_manager;
 
 // Re-export URL constants
 pub use constants::*;
 
 // Re-export commonly used types
 pub use hyperliquid::rest::{ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType};
-pub use hyperliquid::validator::{OrderRequest, ValidatedOrder};
-pub use hyperliquid::{HyperliquidClient, HyperliquidConfig, MarketEvent};
-pub use state_manager::{PendingOrderInfo, PositionState};
+pub use hyperliquid::validator::{OrderRequest, ValidatedOrder, Venue};
+pub use hyperliquid::{HyperliquidClient, HyperliquidConfig};
 
 // Re-export Binance types
 pub use binance::BinanceClient;
-pub use binance::MarketEvent as BinanceMarketEvent;
 pub use roshar_types::BinancePremiumIndex;
 
 // Re-export ByBit types
 pub use bybit::{
     ByBitClient, ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitHistoricalFundingRate,
-    ByBitMarketApi, ByBitTickerData, ByBitTickersResponse, MarketEvent as ByBitMarketEvent,
+    ByBitMarketApi, ByBitTickerData, ByBitTickersResponse,
 };
 
 // Re-export Kraken types
@@ -34,12 +30,12 @@ pub use kraken::{
     KrakenClient, KrakenGetLeverageResponse, KrakenLeveragePreference,
     KrakenLeverageSettingResponse, KrakenModifyResponse, KrakenOpenOrdersResponse, KrakenOrder,
     KrakenOrderResponse, KrakenOrderStatusResponse, KrakenRestCandleData, KrakenRestCandleResponse,
-    KrakenTickerData, MarketEvent as KrakenMarketEvent,
+    KrakenTickerData,
     MultiCollateralApi as KrakenMultiCollateralApi, OrderManagementApi as KrakenOrderManagementApi,
 };
 
 // Re-export OKX types
-pub use okx::{OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse, MarketEvent as OkxMarketEvent};
+pub use okx::{OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse};
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;
