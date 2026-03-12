@@ -12,7 +12,7 @@ pub use constants::*;
 
 // Re-export commonly used types
 pub use hyperliquid::rest::{ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType};
-pub use hyperliquid::validator::{OrderRequest, ValidatedOrder, Venue};
+pub use hyperliquid::validator::{OrderRequest, ValidatedOrder};
 pub use hyperliquid::{HyperliquidClient, HyperliquidConfig};
 
 // Re-export Binance types
