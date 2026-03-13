@@ -468,12 +468,18 @@ impl PyBacktest {
     /// Set the order latency model.
     ///
     /// Args:
-    ///     ms: Latency in milliseconds. ``0`` means instant execution.
-    fn set_latency(&mut self, ms: u64) {
-        let model = if ms == 0 {
+    ///     entry_ms: Entry latency in milliseconds (delay for order to reach exchange).
+    ///     response_ms: Response latency in milliseconds (delay before strategy sees fill).
+    ///         Defaults to ``0``.
+    #[pyo3(signature = (entry_ms, response_ms=0))]
+    fn set_latency(&mut self, entry_ms: u64, response_ms: u64) {
+        let model = if entry_ms == 0 && response_ms == 0 {
             LatencyModel::Instant
         } else {
-            LatencyModel::Fixed(ms)
+            LatencyModel::Fixed {
+                entry_ms,
+                response_ms,
+            }
         };
         match &mut self.inner {
             InnerBacktest::Mux(bt) => bt.set_latency_model(model),
