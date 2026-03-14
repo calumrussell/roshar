@@ -207,6 +207,63 @@ impl MarketApi {
 
         Ok(candles_response.data)
     }
+
+    /// Fetch historical candlestick data for an instrument.
+    ///
+    /// Uses GET /api/v5/market/history-candles (public, no auth).
+    /// Rate limit: 40 requests per 2 seconds (IP-based).
+    ///
+    /// # Arguments
+    /// * `inst_id` - Instrument ID (e.g. "BTC-USDT-SWAP")
+    /// * `bar` - Bar size (e.g. "1m", "5m", "1H", "1D"). Default "1m"
+    /// * `after` - Pagination: return records older than this timestamp (ms)
+    /// * `before` - Pagination: return records newer than this timestamp (ms)
+    /// * `limit` - Number of results per request (max 100, default 100)
+    pub async fn get_candles_history(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        let mut url = format!(
+            "{}/api/v5/market/history-candles?instId={}&bar={}",
+            super::OKX_REST_URL,
+            inst_id,
+            bar
+        );
+
+        if let Some(after) = after {
+            url.push_str(&format!("&after={}", after));
+        }
+        if let Some(before) = before {
+            url.push_str(&format!("&before={}", before));
+        }
+        if let Some(limit) = limit {
+            url.push_str(&format!("&limit={}", limit));
+        }
+
+        let response = self.client.get(&url).await?;
+
+        if !response.status().is_success() {
+            return Err(format!(
+                "OKX API request failed with status: {}",
+                response.status()
+            )
+            .into());
+        }
+
+        let response_text = response.text().await?;
+        let candles_response: OkxCandlesResponse = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse OKX candles history response: {e}"))?;
+
+        if candles_response.code != "0" {
+            return Err(format!("OKX API error: {}", candles_response.msg).into());
+        }
+
+        Ok(candles_response.data)
+    }
 }
 
 #[cfg(test)]

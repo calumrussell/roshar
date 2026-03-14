@@ -131,6 +131,22 @@ impl OkxClient {
             .get_candles(inst_id, bar, after, before, limit)
             .await
     }
+
+    /// Fetch historical candlestick data for an instrument.
+    ///
+    /// Rate limit: 40 requests per 2 seconds (IP-based).
+    pub async fn get_candles_history(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        self.market_api
+            .get_candles_history(inst_id, bar, after, before, limit)
+            .await
+    }
 }
 
 #[cfg(test)]
