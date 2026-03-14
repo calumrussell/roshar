@@ -1,5 +1,5 @@
 use crate::state_manager::StateMessage;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use tokio::sync::mpsc;
 
 /// Handle for querying position state
@@ -112,6 +112,18 @@ impl StateHandle {
             .send(StateMessage::InitializePositions { positions })
             .await
             .map_err(|e| format!("Failed to send initialize positions message: {}", e))
+    }
+
+    /// Reconcile pending orders against the set of actually-open order IDs from the exchange.
+    /// Any pending orders not in the set are removed.
+    pub async fn reconcile_pending_orders(
+        &self,
+        open_order_ids: HashSet<String>,
+    ) -> Result<(), String> {
+        self.state_query_tx
+            .send(StateMessage::ReconcileOrders { open_order_ids })
+            .await
+            .map_err(|e| format!("Failed to send reconcile orders message: {}", e))
     }
 
     /// Get all pending orders across all tickers

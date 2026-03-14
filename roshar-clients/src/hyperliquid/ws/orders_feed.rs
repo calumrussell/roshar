@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use roshar_types::{
     HyperliquidOrderUpdatesMessage, HyperliquidWssMessage, SupportedMessages, Venue,
 };
@@ -5,6 +7,8 @@ use roshar_ws_mgr::Manager;
 use serde_json;
 use tokio::sync::mpsc;
 
+use crate::http::RateLimitedClient;
+use crate::hyperliquid::rest::InfoApi;
 use crate::hyperliquid::ExchangeMetadataHandle;
 use crate::state_manager::{OrderDirection, StateMessage};
 use crate::{HL_TESTNET_WSS_URL, HL_WSS_URL};
@@ -14,6 +18,7 @@ use crate::{HL_TESTNET_WSS_URL, HL_WSS_URL};
 /// - Subscribes to orderUpdates
 /// - Parses orderUpdates messages
 /// - Sends OrderPlaced/OrderCancelled messages to StateManager
+/// - Reconciles pending orders against exchange REST API on reconnect
 pub struct OrdersFeedHandler {
     wallet_address: String,
     perp_state_tx: mpsc::Sender<StateMessage>,
@@ -21,6 +26,7 @@ pub struct OrdersFeedHandler {
     ws_manager: std::sync::Arc<Manager>,
     metadata_handle: ExchangeMetadataHandle,
     is_testnet: bool,
+    info_api: InfoApi,
 }
 
 impl OrdersFeedHandler {
@@ -31,7 +37,14 @@ impl OrdersFeedHandler {
         ws_manager: std::sync::Arc<Manager>,
         metadata_handle: ExchangeMetadataHandle,
         is_testnet: bool,
+        http_client: std::sync::Arc<RateLimitedClient>,
     ) -> Self {
+        let info_api = if is_testnet {
+            InfoApi::testnet_with_client(http_client)
+        } else {
+            InfoApi::production_with_client(http_client)
+        };
+
         Self {
             wallet_address,
             perp_state_tx,
@@ -39,6 +52,50 @@ impl OrdersFeedHandler {
             ws_manager,
             metadata_handle,
             is_testnet,
+            info_api,
+        }
+    }
+
+    /// Query open orders from the REST API and reconcile against both state managers.
+    /// Removes any locally-pending orders that no longer exist on the exchange.
+    async fn reconcile_pending_orders(&self) {
+        let open_orders = match self.info_api.get_user_orders(&self.wallet_address).await {
+            Ok(orders) => orders,
+            Err(e) => {
+                log::error!("Failed to fetch open orders for reconciliation: {:?}", e);
+                return;
+            }
+        };
+
+        let open_ids: HashSet<String> = open_orders
+            .iter()
+            .map(|o| o.oid.to_string())
+            .collect();
+
+        log::info!(
+            "Reconciling pending orders against {} open orders from exchange",
+            open_ids.len()
+        );
+
+        // Send to both state managers — each will only evict its own stale orders
+        if let Err(e) = self
+            .perp_state_tx
+            .send(StateMessage::ReconcileOrders {
+                open_order_ids: open_ids.clone(),
+            })
+            .await
+        {
+            log::error!("Failed to send reconcile to perp StateManager: {}", e);
+        }
+
+        if let Err(e) = self
+            .spot_state_tx
+            .send(StateMessage::ReconcileOrders {
+                open_order_ids: open_ids,
+            })
+            .await
+        {
+            log::error!("Failed to send reconcile to spot StateManager: {}", e);
         }
     }
 
@@ -96,6 +153,10 @@ impl OrdersFeedHandler {
                         return;
                     }
                     log::info!("Subscribed to orderUpdates for {}", self.wallet_address);
+
+                    // Reconcile pending orders against exchange state to clean up
+                    // any orders that changed status during the WS gap.
+                    self.reconcile_pending_orders().await;
                 }
                 roshar_ws_mgr::Message::TextMessage(_name, content) => {
                     if let Err(e) = self.handle_message(&content).await {

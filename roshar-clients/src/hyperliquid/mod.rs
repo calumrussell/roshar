@@ -162,6 +162,7 @@ impl HyperliquidClient {
                 ws_manager.clone(),
                 metadata_handle.clone(),
                 !config.is_mainnet,
+                http_client.clone(),
             );
             tokio::spawn(async move {
                 orders_handler.run().await;

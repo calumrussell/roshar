@@ -64,6 +64,9 @@ pub enum StateMessage {
     InitializePositions {
         positions: HashMap<String, f64>,
     },
+    ReconcileOrders {
+        open_order_ids: HashSet<String>,
+    },
     GetAllPendingOrders {
         reply: tokio::sync::oneshot::Sender<Vec<PendingOrderInfo>>,
     },
@@ -297,6 +300,28 @@ impl StateManager {
                     );
                 } else {
                     log::debug!("Order {} not in pending_orders (already removed)", order_id);
+                }
+            }
+            StateMessage::ReconcileOrders { open_order_ids } => {
+                let stale: Vec<String> = self
+                    .pending_orders
+                    .keys()
+                    .filter(|id| !open_order_ids.contains(*id))
+                    .cloned()
+                    .collect();
+                for id in &stale {
+                    self.pending_orders.remove(id);
+                    log::warn!(
+                        "Reconcile: removed stale pending order {} (not in exchange open orders)",
+                        id
+                    );
+                }
+                if !stale.is_empty() {
+                    log::info!(
+                        "Reconcile: removed {} stale orders, {} pending remain",
+                        stale.len(),
+                        self.pending_orders.len()
+                    );
                 }
             }
             StateMessage::GetAllPositions { reply } => {
