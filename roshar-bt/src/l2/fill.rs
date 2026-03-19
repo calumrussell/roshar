@@ -76,15 +76,21 @@ impl FillModel for LevelChgFill {
                         continue;
                     }
 
-                    let front = order_fill_data.cum_qty_chg;
-                    let back = prev_qty - front;
+                    let front = order_fill_data.cum_qty_chg.max(Decimal::ZERO);
+                    let back = (prev_qty - front).max(Decimal::ZERO);
                     let prob_func = |x: Decimal| -> Decimal { x.powf(3.0) };
 
-                    let mut prob = prob_func(back) / (prob_func(back) + prob_func(front));
+                    let denom = prob_func(back) + prob_func(front);
+                    let mut prob = if denom.is_zero() {
+                        // Both front and back are zero — assume equal probability
+                        Decimal::from_str("0.5").unwrap()
+                    } else {
+                        prob_func(back) / denom
+                    };
                     let prob_f64 = prob
                         .to_f64()
                         .expect("Unable to parse prob to f64 from Decimal");
-                    if prob_f64.is_infinite() {
+                    if prob_f64.is_infinite() || prob_f64.is_nan() {
                         prob = Decimal::from(1);
                     }
 
@@ -132,5 +138,98 @@ impl FillModel for LevelChgFill {
             return Some(&order.cum_qty_chg);
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::l2::orderbook::L2OrderBook;
+    use crate::types::{Event, Side, EVENT_TRADE_BUY, EVENT_UPDATE_LEVEL_BID};
+    use rust_decimal::dec;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    fn make_event(typ: u64, px: &str, qty: &str, ts: i64) -> Event {
+        Event {
+            typ,
+            ts,
+            px: px.to_string(),
+            qty: qty.to_string(),
+            symbol: String::new(),
+        }
+    }
+
+    #[test]
+    fn test_update_level_zero_front_and_back_no_panic() {
+        // Regression: when both front (cum_qty_chg) and back (prev_qty - front)
+        // are zero, the probability calculation divided by zero.
+        let tick_size = dec!(0.01);
+        let lot_size = dec!(0.1);
+        let mut fill = LevelChgFill::new(tick_size, lot_size);
+
+        // Create an order with zero cum_qty_chg (front = 0)
+        let order_id: OrderId = 1;
+        fill.new_order(&order_id, Decimal::ZERO);
+
+        // Orderbook where the level has zero quantity (back = prev_qty - front = 0 - 0 = 0)
+        let orderbook_cell: L2OrderBookCell = Rc::new(RefCell::new(L2OrderBook::new(tick_size)));
+
+        // Level update that triggers the probability calculation (chg > 0 because
+        // prev_qty(0) - new_qty(1.0) = -1.0 which is <= 0, so it continues.
+        // Use a case where prev_qty > new_qty to get chg > 0:
+        // Set prev_qty to 2.0, new qty to 0.5 → chg = 2.0 - 0.5 = 1.5 > 0
+        orderbook_cell
+            .borrow_mut()
+            .update_level(Side::Buy, price_to_tick(dec!(100.00), tick_size), dec!(2.0));
+
+        // But order has front=0, so back = prev_qty(2) - front(0) = 2.
+        // That's not the zero case. To get both zero, prev_qty must be 0 AND front must be 0.
+        // With prev_qty=0, chg = 0 - new_qty which is <= 0, so the `continue` triggers.
+        // The zero/zero case only arises when prev_qty = front = 0 and chg > 0,
+        // which means trade_qty_tmp was negative (subtracted from chg making it positive).
+        // Simulate that:
+        let order_id2: OrderId = 2;
+        fill.new_order(&order_id2, Decimal::ZERO);
+        // Set trade_qty_tmp to -5 by calling update_trade
+        let trade_ev = make_event(EVENT_TRADE_BUY, "100.00", "5.0", 500);
+        fill.update_trade(trade_ev, &[order_id2]);
+        // Now cum_qty_chg = 0 - 5 = -5, trade_qty_tmp = 0 - 5 = -5
+
+        // Reset orderbook level to 0
+        let orderbook_cell2: L2OrderBookCell =
+            Rc::new(RefCell::new(L2OrderBook::new(tick_size)));
+
+        // Level update: prev_qty=0, new_qty=1.0, chg = 0 - 1.0 = -1.0
+        // Then chg -= trade_qty_tmp(-5) → chg = -1.0 - (-5) = 4.0 > 0
+        // front = cum_qty_chg = -5 → clamped to 0
+        // back = prev_qty(0) - front(0) = 0
+        // Both zero → previously panicked
+        let ev = make_event(EVENT_UPDATE_LEVEL_BID, "100.00", "1.0", 1000);
+        fill.update_level(&ev, &orderbook_cell2, &[order_id2]);
+    }
+
+    #[test]
+    fn test_update_level_negative_cum_qty_chg_no_panic() {
+        // cum_qty_chg can go negative via update_trade subtracting trade volume.
+        let tick_size = dec!(0.01);
+        let lot_size = dec!(0.1);
+        let mut fill = LevelChgFill::new(tick_size, lot_size);
+
+        let order_id: OrderId = 1;
+        fill.new_order(&order_id, dec!(5.0));
+
+        // Trades consume more than queue position
+        let trade_ev = make_event(EVENT_TRADE_BUY, "100.00", "10.0", 1000);
+        fill.update_trade(trade_ev, &[order_id]);
+        // cum_qty_chg = 5.0 - 10.0 = -5.0
+
+        let mut book = L2OrderBook::new(tick_size);
+        book.update_level(Side::Buy, price_to_tick(dec!(100.00), tick_size), dec!(2.0));
+        let orderbook_cell: L2OrderBookCell = Rc::new(RefCell::new(book));
+
+        let ev = make_event(EVENT_UPDATE_LEVEL_BID, "100.00", "0.5", 2000);
+        // This should not panic
+        fill.update_level(&ev, &orderbook_cell, &[order_id]);
     }
 }

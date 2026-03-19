@@ -115,6 +115,12 @@ impl PerformanceMetrics {
         if self.last_price.is_none() {
             self.cumulative_returns.push_back(Decimal::ZERO);
         } else if let Some(last_price) = self.last_price {
+            if last_price.is_zero() {
+                self.last_price = Some(mid_price);
+                self.last_position = position;
+                self.cumulative_returns.push_back(self.cumulative_return);
+                return;
+            }
             let price_return = (mid_price - last_price) / last_price;
             let position_return = self.last_position * price_return;
             self.returns.push_back(position_return);
@@ -277,6 +283,24 @@ mod tests {
         }
         let sharpe = metrics.calculate_sharpe_ratio();
         assert!(sharpe < Decimal::ZERO); // Should be negative with high volatility
+    }
+
+    #[test]
+    fn test_update_with_zero_last_price_no_panic() {
+        // Regression: if last_price is zero, the return calculation divided by zero.
+        let mut metrics =
+            PerformanceMetrics::new(Decimal::from_f64(0.02).unwrap(), Duration::from_secs(1));
+
+        // First update with zero price
+        metrics.update(1000, dec!(10), dec!(0));
+        // Second update should not panic (last_price is zero)
+        metrics.update(2000, dec!(10), dec!(100));
+        // Third update should work normally
+        metrics.update(3000, dec!(10), dec!(101));
+
+        let returns = metrics.get_returns_history();
+        // Should have 1 return (from update 2→3, skipping the 0→100 step)
+        assert_eq!(returns.len(), 1);
     }
 
     #[test]
