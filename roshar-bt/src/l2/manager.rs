@@ -164,7 +164,18 @@ impl<F: FillModel> OrderManager<F> {
             Decimal::from_str(&event.px).expect("Unable to parse event.px to Decimal");
         let event_tick = price_to_tick(ev_px_decimal, self.tick_size);
         if let Some(tick_orders) = self.orders_by_level.get(&event_tick) {
-            return self.fill_model.update_trade(event, tick_orders);
+            // Only pass working orders to fill model (cancelled orders have been
+            // removed from fill_data and would panic on unwrap)
+            let working: Vec<OrderId> = tick_orders
+                .iter()
+                .filter(|id| {
+                    self.orders
+                        .get(id)
+                        .map_or(false, |o| o.status == OrderStatus::Working)
+                })
+                .copied()
+                .collect();
+            return self.fill_model.update_trade(event, &working);
         }
         vec![]
     }
@@ -178,9 +189,21 @@ impl<F: FillModel> OrderManager<F> {
         let ev_px_decimal = Decimal::from_str(&ev.px).expect("Unable to parse event.px to Decimal");
         let event_tick = price_to_tick(ev_px_decimal, self.tick_size);
         if let Some(tick_orders) = self.orders_by_level.get(&event_tick) {
-            self.fill_model.update_level(ev, orderbook, tick_orders);
+            // Only pass working orders to fill model
+            let working: Vec<OrderId> = tick_orders
+                .iter()
+                .filter(|id| {
+                    self.orders
+                        .get(id)
+                        .map_or(false, |o| o.status == OrderStatus::Working)
+                })
+                .copied()
+                .collect();
+            self.fill_model.update_level(ev, orderbook, &working);
 
-            for order_id in tick_orders {
+            let mut filled_ids = Vec::new();
+
+            for order_id in &working {
                 if let Some(order_prio) = self.fill_model.get_prio(order_id) {
                     if *order_prio < Decimal::ZERO {
                         let order = self.orders.get_mut(order_id).unwrap();
@@ -197,8 +220,19 @@ impl<F: FillModel> OrderManager<F> {
                         }
 
                         fill_tracker.push(*order_id);
+                        filled_ids.push(*order_id);
                     }
                 }
+            }
+
+            // Remove filled orders from level tracking and fill model
+            for id in filled_ids {
+                if let Some(level) = self.orders_by_level.get_mut(&event_tick) {
+                    if let Some(index) = level.iter().position(|&x| x == id) {
+                        level.remove(index);
+                    }
+                }
+                self.fill_model.cancel_order(&id);
             }
         }
     }
@@ -459,5 +493,61 @@ mod tests {
         assert!(mgr.get_order(&0).unwrap().qty.eq(&Decimal::from(100)));
         //This is a higher level of coverage than mgr.tests but required as we need to check filled_qty format
         assert!(mgr.get_order(&0).unwrap().filled_qty.eq(&Decimal::from(90)));
+    }
+
+    #[test]
+    fn filled_order_not_refilled_on_subsequent_level_update() {
+        // Regression: filled orders stayed in orders_by_level and got their
+        // position added again on every subsequent level update.
+        let (ob, tick_size, lot_size) = l2_orderbook();
+        let mut fill_tracker = Vec::new();
+
+        let buy_order =
+            OrderRequest::new(Side::Buy, 10.0, Some(100.0), crate::types::OrderType::Limit);
+
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
+        mgr.new_order(buy_order);
+
+        // Fill the order: trade consumes the level, level update triggers fill
+        let trade = Event::new(EVENT_TRADE_SELL, 100, "100.0", "110.0");
+        mgr.update_trade(trade);
+        let update1 = Event::new(EVENT_UPDATE_LEVEL_BID, 100, "100.0", "10.0");
+        mgr.update_level(&update1, &mut fill_tracker, &ob);
+
+        assert_eq!(mgr.get_position(), Decimal::from(10));
+        assert_eq!(fill_tracker.len(), 1);
+
+        // Second level update at the same price — should NOT add to position
+        let update2 = Event::new(EVENT_UPDATE_LEVEL_BID, 200, "100.0", "5.0");
+        mgr.update_level(&update2, &mut fill_tracker, &ob);
+
+        // Position must still be 10, not 20
+        assert_eq!(mgr.get_position(), Decimal::from(10));
+        // fill_tracker should still have just 1 entry
+        assert_eq!(fill_tracker.len(), 1);
+    }
+
+    #[test]
+    fn cancelled_order_does_not_panic_on_trade_at_same_level() {
+        // Regression: cancelled orders were removed from fill_data but stayed
+        // in orders_by_level. A trade at that level would pass the cancelled
+        // order ID to the fill model which would unwrap() on missing data.
+        let (_ob, tick_size, lot_size) = l2_orderbook();
+
+        let buy_order =
+            OrderRequest::new(Side::Buy, 10.0, Some(100.0), crate::types::OrderType::Limit);
+
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
+        let oid = mgr.new_order(buy_order);
+
+        // Cancel the order
+        mgr.cancel_order(&oid).unwrap();
+
+        // Trade at the same level — should not panic
+        let trade = Event::new(EVENT_TRADE_SELL, 200, "100.0", "50.0");
+        mgr.update_trade(trade);
+
+        // Position should be unchanged
+        assert_eq!(mgr.get_position(), Decimal::ZERO);
     }
 }
