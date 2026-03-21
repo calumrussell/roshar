@@ -185,6 +185,18 @@ impl<F: EventFeed> Backtest<F> {
     }
 
     pub fn elapse(&mut self, ts: u64) -> Result<()> {
+        self.elapse_inner(ts, None)
+    }
+
+    pub fn elapse_with_buffer(&mut self, ts: u64, events_out: &mut Vec<Event>) -> Result<()> {
+        self.elapse_inner(ts, Some(events_out))
+    }
+
+    fn elapse_inner(&mut self, ts: u64, mut events_out: Option<&mut Vec<Event>>) -> Result<()> {
+        if let Some(buf) = events_out.as_deref_mut() {
+            buf.clear();
+        }
+
         let mut sim_ended = false;
         let end_time = self.curr_ts + ts as i64;
 
@@ -201,6 +213,9 @@ impl<F: EventFeed> Backtest<F> {
                             .entry(symbol)
                             .or_insert_with(|| Exchange::new(tick_size));
                         exch.update_price(&event);
+                    }
+                    if let Some(buf) = events_out.as_deref_mut() {
+                        buf.push(event);
                     }
                 } else {
                     //We have events in the queue but their timestamp is past elapse

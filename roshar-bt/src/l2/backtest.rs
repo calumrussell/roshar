@@ -195,6 +195,18 @@ where
     }
 
     pub fn elapse(&mut self, ts: u64) -> Result<()> {
+        self.elapse_inner(ts, None)
+    }
+
+    pub fn elapse_with_buffer(&mut self, ts: u64, events_out: &mut Vec<Event>) -> Result<()> {
+        self.elapse_inner(ts, Some(events_out))
+    }
+
+    fn elapse_inner(&mut self, ts: u64, mut events_out: Option<&mut Vec<Event>>) -> Result<()> {
+        if let Some(buf) = events_out.as_deref_mut() {
+            buf.clear();
+        }
+
         // Clear per-symbol fill trackers.
         for tracker in self.tick_fill_tracker.values_mut() {
             tracker.clear();
@@ -245,35 +257,71 @@ where
                         .entry(symbol)
                         .or_insert_with(|| Exchange::<Fil>::create(tick_size, lot_size));
 
-                    match event.typ {
-                        EVENT_CLEAR_BOOK => {
-                            exch.clear();
+                    if events_out.is_some() {
+                        match event.typ {
+                            EVENT_CLEAR_BOOK => {
+                                exch.clear();
+                            }
+                            EVENT_CLEAR_LEVEL_BID => {
+                                exch.clear_bid_level(&event);
+                            }
+                            EVENT_CLEAR_LEVEL_ASK => {
+                                exch.clear_ask_level(&event);
+                            }
+                            EVENT_UPDATE_LEVEL_BID => {
+                                exch.update_level(event.clone(), fill_tracker);
+                            }
+                            EVENT_UPDATE_LEVEL_ASK => {
+                                exch.update_level(event.clone(), fill_tracker);
+                            }
+                            EVENT_TRADE_BUY => {
+                                exch.process_trade(event.clone());
+                            }
+                            EVENT_TRADE_SELL => {
+                                exch.process_trade(event.clone());
+                            }
+                            EVENT_CLEAR_SIDE_BID => {
+                                exch.clear_bid();
+                            }
+                            EVENT_CLEAR_SIDE_ASK => {
+                                exch.clear_ask();
+                            }
+                            _ => (),
                         }
-                        EVENT_CLEAR_LEVEL_BID => {
-                            exch.clear_bid_level(&event);
+                        if let Some(buf) = events_out.as_deref_mut() {
+                            buf.push(event);
                         }
-                        EVENT_CLEAR_LEVEL_ASK => {
-                            exch.clear_ask_level(&event);
+                    } else {
+                        match event.typ {
+                            EVENT_CLEAR_BOOK => {
+                                exch.clear();
+                            }
+                            EVENT_CLEAR_LEVEL_BID => {
+                                exch.clear_bid_level(&event);
+                            }
+                            EVENT_CLEAR_LEVEL_ASK => {
+                                exch.clear_ask_level(&event);
+                            }
+                            EVENT_UPDATE_LEVEL_BID => {
+                                exch.update_level(event, fill_tracker);
+                            }
+                            EVENT_UPDATE_LEVEL_ASK => {
+                                exch.update_level(event, fill_tracker);
+                            }
+                            EVENT_TRADE_BUY => {
+                                exch.process_trade(event);
+                            }
+                            EVENT_TRADE_SELL => {
+                                exch.process_trade(event);
+                            }
+                            EVENT_CLEAR_SIDE_BID => {
+                                exch.clear_bid();
+                            }
+                            EVENT_CLEAR_SIDE_ASK => {
+                                exch.clear_ask();
+                            }
+                            _ => (),
                         }
-                        EVENT_UPDATE_LEVEL_BID => {
-                            exch.update_level(event, fill_tracker);
-                        }
-                        EVENT_UPDATE_LEVEL_ASK => {
-                            exch.update_level(event, fill_tracker);
-                        }
-                        EVENT_TRADE_BUY => {
-                            exch.process_trade(event);
-                        }
-                        EVENT_TRADE_SELL => {
-                            exch.process_trade(event);
-                        }
-                        EVENT_CLEAR_SIDE_BID => {
-                            exch.clear_bid();
-                        }
-                        EVENT_CLEAR_SIDE_ASK => {
-                            exch.clear_ask();
-                        }
-                        _ => (),
                     }
 
                     // Once we've reached end_time and no further events at this

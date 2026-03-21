@@ -196,10 +196,19 @@ macro_rules! dispatch_mut {
 #[pyclass(unsendable)]
 struct PyBacktest {
     inner: InnerBacktest,
+    ev_buf: Vec<Event>,
 }
 
 #[pymethods]
 impl PyBacktest {
+    /// Pre-allocate the internal event buffer to hold ``n`` events.
+    ///
+    /// Call this once before the main loop to avoid repeated resizing
+    /// during ``elapse`` calls.
+    fn reserve_event_buffer(&mut self, n: usize) {
+        self.ev_buf.reserve(n);
+    }
+
     /// Create a backtest from Hyperliquid websocket recording files.
     ///
     /// Args:
@@ -224,6 +233,7 @@ impl PyBacktest {
 
         Ok(Self {
             inner: InnerBacktest::Mux(bt),
+            ev_buf: Vec::new(),
         })
     }
 
@@ -320,14 +330,29 @@ impl PyBacktest {
 
         Ok(Self {
             inner: InnerBacktest::Vec(bt),
+            ev_buf: Vec::new(),
         })
     }
 
     /// Advance the simulation by ``ms`` milliseconds.
     ///
-    /// Returns ``True`` on success, ``False`` when the data feed is exhausted.
-    fn elapse(&mut self, ms: u64) -> bool {
-        dispatch_mut!(self, elapse(ms)).is_ok()
+    /// Returns a list of ``(typ, ts, px, qty, symbol)`` tuples for the events
+    /// processed during this tick, or ``None`` when the data feed is exhausted.
+    fn elapse(&mut self, ms: u64) -> Option<Vec<(u64, i64, String, String, String)>> {
+        let result = match &mut self.inner {
+            InnerBacktest::Mux(bt) => bt.elapse_with_buffer(ms, &mut self.ev_buf),
+            InnerBacktest::Vec(bt) => bt.elapse_with_buffer(ms, &mut self.ev_buf),
+        };
+        if result.is_ok() {
+            Some(
+                self.ev_buf
+                    .iter()
+                    .map(|e| (e.typ, e.ts, e.px.clone(), e.qty.clone(), e.symbol.clone()))
+                    .collect(),
+            )
+        } else {
+            None
+        }
     }
 
     /// Current simulation timestamp in milliseconds.
