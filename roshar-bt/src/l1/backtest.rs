@@ -184,7 +184,9 @@ impl<F: EventFeed> Backtest<F> {
         Ok(())
     }
 
-    pub fn elapse(&mut self, ts: u64) -> Result<()> {
+    pub fn elapse(&mut self, ts: u64, events_out: &mut Vec<Event>) -> Result<()> {
+        events_out.clear();
+
         let mut sim_ended = false;
         let end_time = self.curr_ts + ts as i64;
 
@@ -202,6 +204,7 @@ impl<F: EventFeed> Backtest<F> {
                             .or_insert_with(|| Exchange::new(tick_size));
                         exch.update_price(&event);
                     }
+                    events_out.push(event);
                 } else {
                     //We have events in the queue but their timestamp is past elapse
                     self.curr_ts = end_time;
@@ -265,11 +268,12 @@ mod tests {
     #[test]
     fn test_market_buy() {
         let mut bt = setup();
+        let mut events = Vec::new();
 
         let market_order =
             OrderRequest::new(Side::Buy, 50.0, None, crate::types::OrderType::Market);
 
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
 
         let id = bt.execute_market_order("AAVE", market_order);
         let order = bt.get_order("AAVE", &id).unwrap();
@@ -281,11 +285,12 @@ mod tests {
     #[test]
     fn test_market_sell() {
         let mut bt = setup();
+        let mut events = Vec::new();
 
         let market_order =
             OrderRequest::new(Side::Sell, 30.0, None, crate::types::OrderType::Market);
 
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
 
         let id = bt.execute_market_order("AAVE", market_order);
         let order = bt.get_order("AAVE", &id).unwrap();
@@ -297,22 +302,23 @@ mod tests {
     #[test]
     fn test_multiple_orders() {
         let mut bt = setup();
+        let mut events = Vec::new();
 
         // Buy 50 units
         let buy_order = OrderRequest::new(Side::Buy, 50.0, None, crate::types::OrderType::Market);
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
         let _ = bt.execute_market_order("AAVE", buy_order);
         assert_eq!(bt.get_position("AAVE"), 50.0);
 
         // Sell 20 units
         let sell_order = OrderRequest::new(Side::Sell, 20.0, None, crate::types::OrderType::Market);
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
         let _ = bt.execute_market_order("AAVE", sell_order);
         assert_eq!(bt.get_position("AAVE"), 30.0);
 
         // Buy another 10 units
         let buy_order2 = OrderRequest::new(Side::Buy, 10.0, None, crate::types::OrderType::Market);
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
         let _ = bt.execute_market_order("AAVE", buy_order2);
         assert_eq!(bt.get_position("AAVE"), 40.0);
     }
@@ -320,18 +326,19 @@ mod tests {
     #[test]
     fn test_position_after_elapse() {
         let mut bt = setup();
+        let mut events = Vec::new();
 
         // Initial position should be 0
         assert_eq!(bt.get_position("AAVE"), 0.0);
 
         // Execute a buy order
         let buy_order = OrderRequest::new(Side::Buy, 25.0, None, crate::types::OrderType::Market);
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
         let _ = bt.execute_market_order("AAVE", buy_order);
         assert_eq!(bt.get_position("AAVE"), 25.0);
 
         // Position should remain the same after elapse
-        let _ = bt.elapse(1);
+        let _ = bt.elapse(1, &mut events);
         assert_eq!(bt.get_position("AAVE"), 25.0);
     }
 
