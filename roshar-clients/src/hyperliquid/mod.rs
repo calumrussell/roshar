@@ -130,6 +130,76 @@ impl HyperliquidClient {
         Ok(())
     }
 
+    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::l2_book_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::trades_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_candles(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::candle_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_bbo(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::bbo_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_user_fills(
+        &self,
+        manager: &Arc<Manager>,
+        user_address: &str,
+    ) -> Result<()> {
+        let msg = HyperliquidWssMessage::user_fills_unsub(user_address).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn unsubscribe_order_updates(
+        &self,
+        manager: &Arc<Manager>,
+        user_address: &str,
+    ) -> Result<()> {
+        let msg = HyperliquidWssMessage::order_updates_unsub(user_address).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
     /// Query spot asset info from metadata manager (for validation/mapping)
     async fn query_spot_asset_info(
         &self,

@@ -89,6 +89,28 @@ impl ByBitClient {
         Ok(())
     }
 
+    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = ByBitWssMessage::depth_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = ByBitWssMessage::trades_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
     pub async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>> {

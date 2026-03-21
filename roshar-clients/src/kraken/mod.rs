@@ -78,6 +78,28 @@ impl KrakenClient {
         Ok(())
     }
 
+    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = KrakenWssMessage::depth_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = KrakenWssMessage::trades_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
     pub async fn fetch_candles(&self, symbol: &str) -> Result<Vec<Candle>, String> {
         self.charts_api
             .fetch_candle(symbol)
