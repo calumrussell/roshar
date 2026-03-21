@@ -9,6 +9,7 @@ pub use rest::{
 };
 pub use roshar_types::ByBitHistoricalFundingRate;
 
+use async_trait::async_trait;
 use anyhow::Result;
 use roshar_types::ByBitWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
@@ -111,7 +112,18 @@ impl ByBitClient {
         Ok(())
     }
 
-    pub async fn get_realtime_funding_rates(
+}
+
+#[async_trait]
+pub trait ByBitApi {
+    async fn get_realtime_funding_rates(
+        &self,
+    ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>>;
+}
+
+#[async_trait]
+impl ByBitApi for ByBitClient {
+    async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>> {
         self.market_api.get_tickers().await

@@ -5,6 +5,7 @@ use rest::MarketApi;
 pub use rest::{OkxInstrumentsResponse, OkxTickerData, OkxTickersResponse};
 pub use rest::MarketApi as OkxMarketApi;
 
+use async_trait::async_trait;
 use anyhow::Result;
 use roshar_types::OkxWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
@@ -96,7 +97,32 @@ impl OkxClient {
         Ok(())
     }
 
-    pub async fn get_instruments_info(
+}
+
+#[async_trait]
+pub trait OkxApi {
+    async fn get_instruments_info(
+        &self,
+    ) -> Result<
+        HashMap<String, roshar_types::OkxInstrumentInfo>,
+        Box<dyn std::error::Error + Send + Sync>,
+    >;
+    async fn get_tickers(
+        &self,
+    ) -> Result<HashMap<String, OkxTickerData>, Box<dyn std::error::Error + Send + Sync>>;
+    async fn get_candles(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
+}
+
+#[async_trait]
+impl OkxApi for OkxClient {
+    async fn get_instruments_info(
         &self,
     ) -> Result<
         HashMap<String, roshar_types::OkxInstrumentInfo>,
@@ -105,13 +131,13 @@ impl OkxClient {
         self.market_api.get_instruments_info().await
     }
 
-    pub async fn get_tickers(
+    async fn get_tickers(
         &self,
     ) -> Result<HashMap<String, OkxTickerData>, Box<dyn std::error::Error + Send + Sync>> {
         self.market_api.get_tickers().await
     }
 
-    pub async fn get_candles(
+    async fn get_candles(
         &self,
         inst_id: &str,
         bar: &str,

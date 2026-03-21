@@ -10,6 +10,7 @@ use rest::{
     ModifyOrderParams,
 };
 
+use async_trait::async_trait;
 use anyhow::Result;
 use roshar_types::{AssetInfo, HyperliquidWssMessage, SpotMarketData, UserOrder, UserPerpetualsState};
 use roshar_ws_mgr::{Manager, Message};
@@ -287,8 +288,75 @@ impl HyperliquidClient {
         }
     }
 
+}
+
+#[async_trait]
+pub trait HyperliquidApi {
+    async fn validate_order(
+        &self,
+        request: validator::OrderRequest,
+    ) -> Result<validator::ValidatedOrder, String>;
+    async fn get_usdc_ticker_from_coin(
+        &self,
+        perp_name: &str,
+    ) -> Result<Option<String>, String>;
+    async fn create_order(
+        &self,
+        ticker: &str,
+        is_buy: bool,
+        limit_px: f64,
+        sz: f64,
+        reduce_only: bool,
+        order_type: HyperliquidOrderType,
+    ) -> Result<OrderResult, String>;
+    async fn cancel_order(&self, asset: &str, oid: u64) -> Result<(), String>;
+    async fn modify_order(
+        &self,
+        oid: u64,
+        asset: &str,
+        is_buy: bool,
+        limit_px: f64,
+        sz: f64,
+    ) -> Result<(), String>;
+    async fn get_all_funding_rates_with_size(
+        &self,
+    ) -> Result<Vec<(String, f64, f64, f64)>, String>;
+    async fn get_perp_asset_info(
+        &self,
+    ) -> Result<std::collections::HashMap<String, AssetInfo>, String>;
+    async fn get_spot_market_data(
+        &self,
+    ) -> Result<std::collections::HashMap<String, SpotMarketData>, String>;
+    async fn get_perp_prices(&self) -> Result<std::collections::HashMap<String, f64>, String>;
+    async fn get_spot_prices(&self) -> Result<std::collections::HashMap<String, f64>, String>;
+    async fn get_user_perpetuals_state(&self) -> Result<UserPerpetualsState, String>;
+    async fn get_max_leverage(&self, coin: &str) -> Result<u32, String>;
+    async fn update_leverage(
+        &self,
+        leverage: u32,
+        coin: &str,
+        is_cross: bool,
+    ) -> Result<(), String>;
+    async fn get_candle_snapshot(
+        &self,
+        coin: &str,
+        interval: &str,
+        start_time: u64,
+        end_time: u64,
+    ) -> Result<Vec<roshar_types::HyperliquidCandleData>, String>;
+    async fn get_historical_funding_rates(
+        &self,
+        coin: &str,
+        start_time: u64,
+        end_time: Option<u64>,
+    ) -> Result<Vec<roshar_types::HistoricalFundingRate>, String>;
+    async fn get_open_orders(&self) -> Result<Vec<UserOrder>, String>;
+}
+
+#[async_trait]
+impl HyperliquidApi for HyperliquidClient {
     /// Validate and round an order request
-    pub async fn validate_order(
+    async fn validate_order(
         &self,
         request: validator::OrderRequest,
     ) -> Result<validator::ValidatedOrder, String> {
@@ -309,7 +377,7 @@ impl HyperliquidClient {
     /// Get spot ticker for a given perp name
     /// For example: "HYPE" -> Some("@107")
     /// Returns None if no USDC-quoted spot pair exists for the perp
-    pub async fn get_usdc_ticker_from_coin(
+    async fn get_usdc_ticker_from_coin(
         &self,
         perp_name: &str,
     ) -> Result<Option<String>, String> {
@@ -326,7 +394,7 @@ impl HyperliquidClient {
 
     /// Create a new order
     /// Returns OrderResult on success indicating whether order is resting or filled
-    pub async fn create_order(
+    async fn create_order(
         &self,
         ticker: &str,
         is_buy: bool,
@@ -392,7 +460,7 @@ impl HyperliquidClient {
     }
 
     /// Cancel an order by order ID
-    pub async fn cancel_order(&self, asset: &str, oid: u64) -> Result<(), String> {
+    async fn cancel_order(&self, asset: &str, oid: u64) -> Result<(), String> {
         match self.api.cancel_order(asset, oid).await {
             Ok(ExchangeResponseStatus::Ok(_)) => Ok(()),
             Ok(ExchangeResponseStatus::Err(err)) => {
@@ -403,7 +471,7 @@ impl HyperliquidClient {
     }
 
     /// Modify an existing order
-    pub async fn modify_order(
+    async fn modify_order(
         &self,
         oid: u64,
         asset: &str,
@@ -431,7 +499,7 @@ impl HyperliquidClient {
 
     /// Get all funding rates with size data from metadata manager (cached)
     /// Returns Vec of (coin, funding_rate, open_interest, daily_volume)
-    pub async fn get_all_funding_rates_with_size(
+    async fn get_all_funding_rates_with_size(
         &self,
     ) -> Result<Vec<(String, f64, f64, f64)>, String> {
         self.query_funding_rates().await
@@ -439,7 +507,7 @@ impl HyperliquidClient {
 
     /// Get perp asset info from cached metadata
     /// Returns HashMap of perp ticker -> AssetInfo (includes market_data with open_interest, mark_price, day_notional_volume)
-    pub async fn get_perp_asset_info(
+    async fn get_perp_asset_info(
         &self,
     ) -> Result<std::collections::HashMap<String, AssetInfo>, String> {
         self.query_perp_asset_info().await
@@ -447,7 +515,7 @@ impl HyperliquidClient {
 
     /// Get spot market data from cached metadata
     /// Returns HashMap of spot ticker -> SpotMarketData
-    pub async fn get_spot_market_data(
+    async fn get_spot_market_data(
         &self,
     ) -> Result<std::collections::HashMap<String, SpotMarketData>, String> {
         self.query_spot_market_data().await
@@ -455,7 +523,7 @@ impl HyperliquidClient {
 
     /// Get perp mark prices from cached metadata (no REST API call)
     /// Returns HashMap of perp ticker -> mark price
-    pub async fn get_perp_prices(&self) -> Result<std::collections::HashMap<String, f64>, String> {
+    async fn get_perp_prices(&self) -> Result<std::collections::HashMap<String, f64>, String> {
         let asset_info = self.query_perp_asset_info().await?;
         let mut prices = std::collections::HashMap::with_capacity(asset_info.len());
 
@@ -472,7 +540,7 @@ impl HyperliquidClient {
 
     /// Get spot mark prices from cached metadata (no REST API call)
     /// Returns HashMap of spot ticker -> mark price
-    pub async fn get_spot_prices(&self) -> Result<std::collections::HashMap<String, f64>, String> {
+    async fn get_spot_prices(&self) -> Result<std::collections::HashMap<String, f64>, String> {
         let spot_market_data = self.query_spot_market_data().await?;
         let mut prices = std::collections::HashMap::with_capacity(spot_market_data.len());
 
@@ -487,7 +555,7 @@ impl HyperliquidClient {
 
     /// Get full user perpetuals state from exchange (REST API call)
     /// Returns complete UserPerpetualsState including positions, margin, and liquidation info
-    pub async fn get_user_perpetuals_state(&self) -> Result<UserPerpetualsState, String> {
+    async fn get_user_perpetuals_state(&self) -> Result<UserPerpetualsState, String> {
         let wallet_address = self
             .wallet_address
             .ok_or_else(|| "Wallet address required for get_user_perpetuals_state".to_string())?;
@@ -501,7 +569,7 @@ impl HyperliquidClient {
 
     /// Get maximum leverage allowed for a specific coin
     /// Returns the maxLeverage from exchange metadata
-    pub async fn get_max_leverage(&self, coin: &str) -> Result<u32, String> {
+    async fn get_max_leverage(&self, coin: &str) -> Result<u32, String> {
         let asset_info = self.query_perp_asset_info().await?;
 
         asset_info
@@ -512,7 +580,7 @@ impl HyperliquidClient {
 
     /// Update leverage for a specific asset
     /// Returns Ok(()) if successful, Err if failed
-    pub async fn update_leverage(
+    async fn update_leverage(
         &self,
         leverage: u32,
         coin: &str,
@@ -531,7 +599,7 @@ impl HyperliquidClient {
     }
 
     /// Get candle snapshot for a coin
-    pub async fn get_candle_snapshot(
+    async fn get_candle_snapshot(
         &self,
         coin: &str,
         interval: &str,
@@ -546,7 +614,7 @@ impl HyperliquidClient {
 
     /// Get historical funding rates for a coin
     /// Returns funding rate history from start_time to end_time (or now if None)
-    pub async fn get_historical_funding_rates(
+    async fn get_historical_funding_rates(
         &self,
         coin: &str,
         start_time: u64,
@@ -558,7 +626,7 @@ impl HyperliquidClient {
             .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
     }
 
-    pub async fn get_open_orders(&self) -> Result<Vec<UserOrder>, String> {
+    async fn get_open_orders(&self) -> Result<Vec<UserOrder>, String> {
         let wallet_address = self
             .wallet_address
             .ok_or_else(|| "Wallet address required for get_open_orders".to_string())?;

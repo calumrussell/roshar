@@ -2,6 +2,7 @@ pub(crate) mod rest;
 
 use rest::BinanceRestClient;
 
+use async_trait::async_trait;
 use anyhow::Result;
 use roshar_types::{BinancePremiumIndex, BinanceWssMessage};
 use roshar_ws_mgr::{Config, Manager, Message};
@@ -107,7 +108,45 @@ impl BinanceClient {
         Ok(())
     }
 
-    pub async fn get_24hr_ticker(
+}
+
+#[async_trait]
+pub trait BinanceApi {
+    async fn get_24hr_ticker(
+        &self,
+        symbol: Option<&str>,
+    ) -> Result<Vec<roshar_types::TickerData>, String>;
+    async fn get_historical_funding_rates(
+        &self,
+        symbol: &str,
+        start_time: i64,
+        end_time: i64,
+    ) -> Result<Vec<roshar_types::BinanceHistoricalFundingRate>, String>;
+    async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String>;
+    async fn get_agg_trades(
+        &self,
+        symbol: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        from_id: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::BinanceAggTrade>, String>;
+    async fn get_klines(
+        &self,
+        symbol: &str,
+        interval: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::BinanceKline>, String>;
+    async fn get_realtime_funding_rates(
+        &self,
+    ) -> Result<HashMap<String, BinancePremiumIndex>, String>;
+}
+
+#[async_trait]
+impl BinanceApi for BinanceClient {
+    async fn get_24hr_ticker(
         &self,
         symbol: Option<&str>,
     ) -> Result<Vec<roshar_types::TickerData>, String> {
@@ -117,7 +156,7 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get 24hr ticker: {}", e))
     }
 
-    pub async fn get_historical_funding_rates(
+    async fn get_historical_funding_rates(
         &self,
         symbol: &str,
         start_time: i64,
@@ -129,14 +168,14 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get historical funding rates: {}", e))
     }
 
-    pub async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
+    async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
         self.rest_client
             .get_exchange_info()
             .await
             .map_err(|e| format!("Failed to get exchange info: {}", e))
     }
 
-    pub async fn get_agg_trades(
+    async fn get_agg_trades(
         &self,
         symbol: &str,
         start_time: Option<i64>,
@@ -150,7 +189,7 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get aggregate trades: {}", e))
     }
 
-    pub async fn get_klines(
+    async fn get_klines(
         &self,
         symbol: &str,
         interval: &str,
@@ -164,7 +203,7 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get klines: {}", e))
     }
 
-    pub async fn get_realtime_funding_rates(
+    async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, BinancePremiumIndex>, String> {
         let premium_index_list = self
