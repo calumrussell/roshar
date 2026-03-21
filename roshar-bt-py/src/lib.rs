@@ -201,6 +201,14 @@ struct PyBacktest {
 
 #[pymethods]
 impl PyBacktest {
+    /// Pre-allocate the internal event buffer to hold ``n`` events.
+    ///
+    /// Call this once before the main loop to avoid repeated resizing
+    /// during ``elapse`` calls.
+    fn reserve_event_buffer(&mut self, n: usize) {
+        self.ev_buf.reserve(n);
+    }
+
     /// Create a backtest from Hyperliquid websocket recording files.
     ///
     /// Args:
