@@ -2,6 +2,7 @@
 mod funding_rates {
     mod binance {
         use roshar_clients::binance::BinanceClient;
+        use roshar_clients::BinanceApi;
 
         #[tokio::test]
         async fn test_get_realtime_funding_rates() {
@@ -77,6 +78,7 @@ mod funding_rates {
 
     mod bybit {
         use roshar_clients::bybit::ByBitClient;
+        use roshar_clients::ByBitApi;
 
         #[tokio::test]
         async fn test_get_realtime_funding_rates() {
@@ -146,7 +148,7 @@ mod funding_rates {
     }
 
     mod hyperliquid {
-        use roshar_clients::{HyperliquidClient, HyperliquidConfig};
+        use roshar_clients::{HyperliquidApi, HyperliquidClient, HyperliquidConfig};
         use std::time::Duration;
 
         #[tokio::test]
