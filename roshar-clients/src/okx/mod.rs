@@ -2,18 +2,18 @@ pub(crate) mod rest;
 
 use rest::MarketApi;
 
-pub use rest::{OkxInstrumentsResponse, OkxTickerData, OkxTickersResponse};
 pub use rest::MarketApi as OkxMarketApi;
+pub use rest::{OkxInstrumentsResponse, OkxTickerData, OkxTickersResponse};
 
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 use roshar_types::OkxWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::OKX_WSS_URL;
 use crate::ws::ws_config_methods;
+use crate::OKX_WSS_URL;
 
 pub struct OkxClient {
     market_api: MarketApi,
@@ -96,7 +96,6 @@ impl OkxClient {
         }
         Ok(())
     }
-
 }
 
 #[async_trait]

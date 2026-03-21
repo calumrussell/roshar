@@ -9,15 +9,15 @@ pub use rest::{
 };
 pub use roshar_types::ByBitHistoricalFundingRate;
 
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 use roshar_types::ByBitWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::BYBIT_WSS_URL;
 use crate::ws::ws_config_methods;
+use crate::BYBIT_WSS_URL;
 
 pub struct ByBitClient {
     market_api: MarketApi,
@@ -111,7 +111,6 @@ impl ByBitClient {
         }
         Ok(())
     }
-
 }
 
 #[async_trait]

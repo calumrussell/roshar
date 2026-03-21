@@ -11,14 +11,14 @@ pub use rest::{
 
 pub use rest::charts::Candle;
 
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 use roshar_types::KrakenWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::sync::Arc;
 
-use crate::KRAKEN_WSS_URL;
 use crate::ws::ws_config_methods;
+use crate::KRAKEN_WSS_URL;
 
 pub struct KrakenClient {
     charts_api: ChartsApi,
@@ -100,7 +100,6 @@ impl KrakenClient {
         }
         Ok(())
     }
-
 }
 
 #[async_trait]
@@ -109,9 +108,8 @@ pub trait KrakenApi {
     async fn get_tickers(
         &self,
     ) -> Result<std::collections::HashMap<String, KrakenTickerData>, String>;
-    async fn get_all_funding_rates_with_size(
-        &self,
-    ) -> Result<Vec<(String, f64, f64, f64)>, String>;
+    async fn get_all_funding_rates_with_size(&self)
+        -> Result<Vec<(String, f64, f64, f64)>, String>;
 }
 
 #[async_trait]

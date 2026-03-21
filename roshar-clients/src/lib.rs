@@ -31,8 +31,8 @@ pub use kraken::{
     KrakenApi, KrakenClient, KrakenGetLeverageResponse, KrakenLeveragePreference,
     KrakenLeverageSettingResponse, KrakenModifyResponse, KrakenOpenOrdersResponse, KrakenOrder,
     KrakenOrderResponse, KrakenOrderStatusResponse, KrakenRestCandleData, KrakenRestCandleResponse,
-    KrakenTickerData,
-    MultiCollateralApi as KrakenMultiCollateralApi, OrderManagementApi as KrakenOrderManagementApi,
+    KrakenTickerData, MultiCollateralApi as KrakenMultiCollateralApi,
+    OrderManagementApi as KrakenOrderManagementApi,
 };
 
 // Re-export OKX types

@@ -10,9 +10,11 @@ use rest::{
     ModifyOrderParams,
 };
 
-use async_trait::async_trait;
 use anyhow::Result;
-use roshar_types::{AssetInfo, HyperliquidWssMessage, SpotMarketData, UserOrder, UserPerpetualsState};
+use async_trait::async_trait;
+use roshar_types::{
+    AssetInfo, HyperliquidWssMessage, SpotMarketData, UserOrder, UserPerpetualsState,
+};
 use roshar_ws_mgr::{Manager, Message};
 use std::sync::Arc;
 
@@ -175,11 +177,7 @@ impl HyperliquidClient {
         Ok(())
     }
 
-    pub fn unsubscribe_user_fills(
-        &self,
-        manager: &Arc<Manager>,
-        user_address: &str,
-    ) -> Result<()> {
+    pub fn unsubscribe_user_fills(&self, manager: &Arc<Manager>, user_address: &str) -> Result<()> {
         let msg = HyperliquidWssMessage::user_fills_unsub(user_address).to_json();
         manager.write(
             &self.ws_config.name,
@@ -287,7 +285,6 @@ impl HyperliquidClient {
             },
         }
     }
-
 }
 
 #[async_trait]
@@ -296,10 +293,7 @@ pub trait HyperliquidApi {
         &self,
         request: validator::OrderRequest,
     ) -> Result<validator::ValidatedOrder, String>;
-    async fn get_usdc_ticker_from_coin(
-        &self,
-        perp_name: &str,
-    ) -> Result<Option<String>, String>;
+    async fn get_usdc_ticker_from_coin(&self, perp_name: &str) -> Result<Option<String>, String>;
     async fn create_order(
         &self,
         ticker: &str,
@@ -318,9 +312,8 @@ pub trait HyperliquidApi {
         limit_px: f64,
         sz: f64,
     ) -> Result<(), String>;
-    async fn get_all_funding_rates_with_size(
-        &self,
-    ) -> Result<Vec<(String, f64, f64, f64)>, String>;
+    async fn get_all_funding_rates_with_size(&self)
+        -> Result<Vec<(String, f64, f64, f64)>, String>;
     async fn get_perp_asset_info(
         &self,
     ) -> Result<std::collections::HashMap<String, AssetInfo>, String>;
@@ -377,10 +370,7 @@ impl HyperliquidApi for HyperliquidClient {
     /// Get spot ticker for a given perp name
     /// For example: "HYPE" -> Some("@107")
     /// Returns None if no USDC-quoted spot pair exists for the perp
-    async fn get_usdc_ticker_from_coin(
-        &self,
-        perp_name: &str,
-    ) -> Result<Option<String>, String> {
+    async fn get_usdc_ticker_from_coin(&self, perp_name: &str) -> Result<Option<String>, String> {
         let spot_assets = self.query_spot_asset_info().await?;
         const USDC_TOKEN_INDEX: u32 = 0;
 
