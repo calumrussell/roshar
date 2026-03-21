@@ -6,6 +6,7 @@ pub mod hyperliquid;
 pub mod kraken;
 pub mod okx;
 pub mod polymarket;
+pub(crate) mod ws;
 
 // Re-export URL constants
 pub use constants::*;

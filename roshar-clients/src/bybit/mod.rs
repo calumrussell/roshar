@@ -9,31 +9,86 @@ pub use rest::{
 };
 pub use roshar_types::ByBitHistoricalFundingRate;
 
+use anyhow::Result;
+use roshar_types::ByBitWssMessage;
+use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
+use std::sync::Arc;
 
-/// ByBit client for REST API
+use crate::BYBIT_WSS_URL;
+use crate::ws::ws_config_methods;
+
 pub struct ByBitClient {
     market_api: MarketApi,
+    ws_config: Config,
 }
 
 impl ByBitClient {
-    /// Default rate limit for REST API requests (10 requests per second)
     const DEFAULT_REQUESTS_PER_SECOND: u32 = 10;
+    const WS_CONN_NAME: &str = "bybit";
 
     pub fn new() -> Self {
         Self::new_with_rate_limit(Self::DEFAULT_REQUESTS_PER_SECOND)
     }
 
     pub fn new_with_rate_limit(requests_per_second: u32) -> Self {
-        let market_api = MarketApi::new(requests_per_second);
-
-        Self { market_api }
+        Self {
+            market_api: MarketApi::new(requests_per_second),
+            ws_config: Config {
+                name: Self::WS_CONN_NAME.to_string(),
+                url: BYBIT_WSS_URL.to_string(),
+                ping_duration: 20,
+                ping_message: ByBitWssMessage::ping().to_json(),
+                ping_timeout: 10,
+                reconnect_timeout: 5000,
+                use_text_ping: Some(true),
+                read_buffer_size: None,
+                write_buffer_size: None,
+                max_message_size: None,
+                max_frame_size: None,
+                tcp_recv_buffer_size: None,
+                tcp_send_buffer_size: None,
+                tcp_nodelay: None,
+                broadcast_channel_size: None,
+            },
+        }
     }
 
-    /// Get real-time funding rates for all linear perpetual symbols
-    ///
-    /// Returns ticker data containing funding_rate and next_funding_time for each symbol.
-    /// The data is fetched from ByBit's tickers endpoint which provides real-time funding rates.
+    ws_config_methods!();
+
+    pub fn subscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = ByBitWssMessage::depth(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn subscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = ByBitWssMessage::trades(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn subscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = ByBitWssMessage::candle(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
     pub async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>> {
@@ -58,16 +113,13 @@ mod tests {
 
         let tickers = result.unwrap();
 
-        // Should have some tickers
         assert!(!tickers.is_empty(), "Expected some tickers, got none");
 
-        // Check that BTCUSDT is present (a known perpetual)
         assert!(
             tickers.contains_key("BTCUSDT"),
             "Expected BTCUSDT ticker to be present"
         );
 
-        // Verify funding rate data is present
         let btc_ticker = tickers.get("BTCUSDT").unwrap();
         assert!(
             !btc_ticker.funding_rate.is_empty(),
