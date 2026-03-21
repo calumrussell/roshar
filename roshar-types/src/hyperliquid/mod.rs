@@ -8,7 +8,7 @@ pub use info::{
     SpotToken, Universe, UserOrder, UserPerpetualsState,
 };
 pub use ws::{
-    HlOrderBook, HyperliquidBbo, HyperliquidBboMessage, HyperliquidBook, HyperliquidBookLevel,
+    HyperliquidBbo, HyperliquidBboMessage, HyperliquidBook, HyperliquidBookLevel,
     HyperliquidBookMessage, HyperliquidCandleData, HyperliquidCandleMessage,
     HyperliquidOrderUpdatesMessage, HyperliquidTrade, HyperliquidTradesMessage,
     HyperliquidUserFill, HyperliquidUserFillsData, HyperliquidUserFillsMessage,

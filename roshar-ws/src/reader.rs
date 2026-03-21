@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
 use crate::frame::FrameRef;
-use bytes::BytesMut;
+use bytes::{Bytes, BytesMut};
 use tokio::io::{AsyncRead, AsyncReadExt};
 
 /// Internal reader type that can be either plain TCP or TLS
@@ -23,7 +23,7 @@ impl Reader {
     pub(crate) fn new(reader: ReaderType, max_frame_size: usize) -> Self {
         Self {
             reader,
-            read_buffer: BytesMut::with_capacity(262144), // 256KB buffer to reduce reallocations
+            read_buffer: BytesMut::with_capacity(2 * 1024 * 1024), // 2MB buffer: large enough that refills are rare, keeping P99 low
             max_frame_size,
         }
     }
@@ -46,6 +46,15 @@ impl Reader {
     /// Read bytes from the stream into the buffer until we have at least `needed` bytes
     async fn read_until(&mut self, needed: usize) -> Result<()> {
         while self.read_buffer.len() < needed {
+            // Ensure adequate spare capacity. Since the buffer is sole owner
+            // (no shared Bytes from split_to/freeze), reserve() compacts via
+            // memmove instead of reallocating.
+            let spare = self.read_buffer.capacity() - self.read_buffer.len();
+            let deficit = needed - self.read_buffer.len();
+            if spare < deficit {
+                self.read_buffer.reserve(deficit.max(65536));
+            }
+
             let n = match &mut self.reader {
                 ReaderType::Plain(r) => {
                     r.read_buf(&mut self.read_buffer).await.map_err(Error::Io)?
@@ -78,11 +87,6 @@ impl Reader {
         use crate::frame::parse_frame_header;
         use bytes::Buf;
 
-        // Ensure we have capacity
-        if self.read_buffer.capacity() - self.read_buffer.len() < 65536 {
-            self.read_buffer.reserve(131072);
-        }
-
         // Step 1: Read first 2 bytes to get basic header info
         self.read_until(2).await?;
 
@@ -106,59 +110,50 @@ impl Reader {
         // Now we can parse the full header
         let header = parse_frame_header(&self.read_buffer, self.max_frame_size)?;
 
-        // Step 3: Reserve space for payload + next frame header (14 bytes max)
-        // This allows read_buf to naturally read ahead and get the next frame header
-        // in the same syscall, reducing overhead for the next frame read
-        const MAX_HEADER_SIZE: usize = 14;
         let total_needed = header.header_len + header.payload_len;
-        let read_ahead_target = total_needed + MAX_HEADER_SIZE;
 
-        // Ensure we have capacity for read-ahead
-        if self.read_buffer.capacity() < read_ahead_target {
-            self.read_buffer.reserve(read_ahead_target);
-        }
-
-        // Step 4: Read the payload. read_buf will naturally read ahead if more data
-        // is available, potentially getting the next frame header in the same syscall.
-        // We read until we have at least total_needed, but read_buf may read more.
+        // Step 3: Read the payload
         self.read_until(total_needed).await?;
 
-        // Now we have the complete frame - extract it
-        let mut frame_data = self.read_buffer.split_to(total_needed);
+        // Extract payload by copying to an independent allocation. This keeps the
+        // read buffer as sole owner of its backing memory, so future reserve() calls
+        // compact via cheap memmove instead of reallocating the entire buffer.
+        // This trades a small per-frame memcpy for eliminating periodic reallocation
+        // spikes that dominate P99 latency.
+        let payload = if let Some(mask) = header.mask {
+            let masked_data = &self.read_buffer[header.header_len..total_needed];
+            let mut payload_bytes = Vec::with_capacity(header.payload_len);
+            // SAFETY: we immediately write all bytes below via XOR copy
+            unsafe { payload_bytes.set_len(header.payload_len) };
 
-        // Skip the header to get to the payload
-        frame_data.advance(header.header_len);
-
-        // Unmask if needed
-        if let Some(mask) = header.mask {
-            // Unmask the payload in place - optimized to avoid modulo and process in chunks
-            let payload = &mut frame_data[..header.payload_len];
-
-            // Process 8 bytes at a time for better performance
-            let chunks = payload.len() / 8;
-            let remainder = payload.len() % 8;
+            // Unmask using chunked processing for better performance
+            let chunks = header.payload_len / 8;
+            let remainder = header.payload_len % 8;
 
             for chunk_idx in 0..chunks {
                 let base = chunk_idx * 8;
-                payload[base] ^= mask[0];
-                payload[base + 1] ^= mask[1];
-                payload[base + 2] ^= mask[2];
-                payload[base + 3] ^= mask[3];
-                payload[base + 4] ^= mask[0];
-                payload[base + 5] ^= mask[1];
-                payload[base + 6] ^= mask[2];
-                payload[base + 7] ^= mask[3];
+                payload_bytes[base] = masked_data[base] ^ mask[0];
+                payload_bytes[base + 1] = masked_data[base + 1] ^ mask[1];
+                payload_bytes[base + 2] = masked_data[base + 2] ^ mask[2];
+                payload_bytes[base + 3] = masked_data[base + 3] ^ mask[3];
+                payload_bytes[base + 4] = masked_data[base + 4] ^ mask[0];
+                payload_bytes[base + 5] = masked_data[base + 5] ^ mask[1];
+                payload_bytes[base + 6] = masked_data[base + 6] ^ mask[2];
+                payload_bytes[base + 7] = masked_data[base + 7] ^ mask[3];
             }
 
-            // Handle remaining bytes
             let base = chunks * 8;
             for i in 0..remainder {
-                payload[base + i] ^= mask[i & 3];
+                payload_bytes[base + i] = masked_data[base + i] ^ mask[i & 3];
             }
-        }
 
-        // Extract the payload as Bytes (zero-copy if possible)
-        let payload = frame_data.freeze();
+            Bytes::from(payload_bytes)
+        } else {
+            Bytes::copy_from_slice(&self.read_buffer[header.header_len..total_needed])
+        };
+
+        // Advance past consumed frame - buffer remains sole owner of its allocation
+        self.read_buffer.advance(total_needed);
 
         Ok(FrameRef::new(header.opcode, header.fin, payload))
     }

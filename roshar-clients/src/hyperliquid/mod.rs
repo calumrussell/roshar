@@ -1,24 +1,16 @@
 pub(crate) mod rest;
 pub mod validator;
-pub(crate) mod ws;
-
-use ws::{
-    BboFeed, BboFeedHandle, FillsFeedHandler, MarketDataFeed, MarketDataFeedHandle,
-    OrdersFeedHandler,
-};
 
 pub use rest::{ExchangeMetadataHandle, ExchangeMetadataManager};
 pub use validator::OrderValidator;
-pub use ws::MarketEvent;
 
 use crate::http::RateLimitedClient;
 use rest::{
     ExchangeApi, ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
     ModifyOrderParams,
 };
-use roshar_types::{AssetInfo, OrderBookState, SpotMarketData, UserPerpetualsState};
+use roshar_types::{AssetInfo, SpotMarketData, UserPerpetualsState};
 use std::sync::Arc;
-use tokio::sync::{broadcast, mpsc};
 
 /// Result of creating an order
 #[derive(Debug, Clone)]
@@ -58,20 +50,6 @@ pub struct HyperliquidClient {
     #[allow(dead_code)] // Kept to prevent metadata manager task from being dropped
     metadata_manager_handle: tokio::task::JoinHandle<()>,
     metadata_handle: ExchangeMetadataHandle,
-    #[allow(dead_code)] // Kept to prevent state manager tasks from being dropped
-    perp_state_manager_handle: tokio::task::JoinHandle<()>,
-    #[allow(dead_code)] // Kept to prevent state manager tasks from being dropped
-    spot_state_manager_handle: tokio::task::JoinHandle<()>,
-    perp_state_handle: crate::state_handle::StateHandle,
-    spot_state_handle: crate::state_handle::StateHandle,
-    // Market data feed
-    market_data_handle: MarketDataFeedHandle,
-    #[allow(dead_code)] // Kept to prevent market data feed task from being dropped
-    market_data_feed_handle: tokio::task::JoinHandle<()>,
-    // BBO feed
-    bbo_handle: BboFeedHandle,
-    #[allow(dead_code)] // Kept to prevent BBO feed task from being dropped
-    bbo_feed_handle: tokio::task::JoinHandle<()>,
     // REST API client (shared for rate limiting)
     info_api: InfoApi,
 }
@@ -103,11 +81,7 @@ impl HyperliquidClient {
         self.metadata_handle.get_funding_rates().await
     }
 
-    pub fn new(
-        config: HyperliquidConfig,
-        ws_manager: std::sync::Arc<roshar_ws_mgr::Manager>,
-        channel_size: usize,
-    ) -> Self {
+    pub fn new(config: HyperliquidConfig) -> Self {
         let validator = OrderValidator::new();
 
         let api = if let Some(vault_addr) = config.wallet_address.as_ref() {
@@ -117,8 +91,6 @@ impl HyperliquidClient {
         };
 
         // Create a single shared rate-limited HTTP client for ALL Hyperliquid REST API calls.
-        // This ensures rate limiting is coordinated across metadata updates, position fetches,
-        // and all other API calls.
         let http_client = Arc::new(RateLimitedClient::new(
             config.rate_limit_refill,
             config.rate_limit_interval_secs,
@@ -129,78 +101,6 @@ impl HyperliquidClient {
             config.is_mainnet,
             http_client.clone(),
         );
-
-        let wallet_addr = config.wallet_address;
-        let is_mainnet = config.is_mainnet;
-        let http_client_for_perp = http_client.clone();
-        let http_client_for_spot = http_client.clone();
-
-        let perp_init = if wallet_addr.is_some() {
-            Some(move || Self::fetch_perp_positions(wallet_addr, is_mainnet, http_client_for_perp))
-        } else {
-            None
-        };
-
-        let spot_init = if wallet_addr.is_some() {
-            Some(move || Self::fetch_spot_positions(wallet_addr, is_mainnet, http_client_for_spot))
-        } else {
-            None
-        };
-
-        let (perp_state_handle, perp_state_manager_handle) =
-            crate::state_manager::StateManager::spawn_with_init(perp_init);
-        let (spot_state_handle, spot_state_manager_handle) =
-            crate::state_manager::StateManager::spawn_with_init(spot_init);
-
-        if let Some(wallet_addr) = config.wallet_address.as_ref() {
-            let wallet_address_str = format!("{:?}", wallet_addr);
-
-            let orders_handler = OrdersFeedHandler::new(
-                wallet_address_str.clone(),
-                perp_state_handle.sender(),
-                spot_state_handle.sender(),
-                ws_manager.clone(),
-                metadata_handle.clone(),
-                !config.is_mainnet,
-            );
-            tokio::spawn(async move {
-                orders_handler.run().await;
-            });
-
-            // Spawn Fills WebSocket feed handler (routes to both perp and spot managers)
-            let fills_handler = FillsFeedHandler::new(
-                wallet_address_str,
-                perp_state_handle.sender(),
-                spot_state_handle.sender(),
-                ws_manager.clone(),
-                metadata_handle.clone(),
-                !config.is_mainnet,
-            );
-            tokio::spawn(async move {
-                fills_handler.run().await;
-            });
-
-            log::info!(
-                "Spawned Hyperliquid WebSocket feed handlers for wallet: {:?}",
-                wallet_addr
-            );
-        } else {
-            log::info!("No wallet address provided - WebSocket feeds not started");
-        }
-
-        // Set up BBO feed
-        let bbo_feed = BboFeed::new(ws_manager.clone(), !config.is_mainnet);
-        let bbo_handle = bbo_feed.get_handle();
-        let bbo_feed_handle = tokio::spawn(async move {
-            bbo_feed.run().await;
-        });
-
-        // Set up market data feed
-        let market_data_feed = MarketDataFeed::new(ws_manager, !config.is_mainnet, channel_size);
-        let market_data_handle = market_data_feed.get_handle();
-        let market_data_feed_handle = tokio::spawn(async move {
-            market_data_feed.run().await;
-        });
 
         // Create InfoApi using the shared rate-limited client
         let info_api = if config.is_mainnet {
@@ -215,14 +115,6 @@ impl HyperliquidClient {
             validator,
             metadata_manager_handle,
             metadata_handle,
-            perp_state_manager_handle,
-            spot_state_manager_handle,
-            perp_state_handle,
-            spot_state_handle,
-            market_data_handle,
-            market_data_feed_handle,
-            bbo_handle,
-            bbo_feed_handle,
             info_api,
         }
     }
@@ -369,152 +261,6 @@ impl HyperliquidClient {
         Ok(())
     }
 
-    /// Query current position for a ticker from StateManager
-    /// Returns actual position and pending orders impact
-    pub async fn get_position(
-        &self,
-        ticker: &str,
-    ) -> Result<crate::state_manager::PositionState, String> {
-        // Try perp first, then spot
-        let perp_state = self.perp_state_handle.get_position(ticker).await?;
-
-        if perp_state.actual.abs() > 1e-10 || perp_state.pending.abs() > 1e-10 {
-            Ok(perp_state)
-        } else {
-            // Try spot
-            self.spot_state_handle.get_position(ticker).await
-        }
-    }
-
-    /// Query perpetual positions only from StateManager
-    /// Returns HashMap of perp ticker -> quantity (positive = long, negative = short)
-    pub async fn get_perp_positions(
-        &self,
-    ) -> Result<std::collections::HashMap<String, f64>, String> {
-        self.perp_state_handle.get_positions().await
-    }
-
-    /// Query spot positions only from StateManager
-    /// Returns HashMap of token name -> quantity
-    pub async fn get_spot_positions(
-        &self,
-    ) -> Result<std::collections::HashMap<String, f64>, String> {
-        self.spot_state_handle.get_positions().await
-    }
-
-    /// Query perp order status by order_id
-    pub async fn get_perp_order(
-        &self,
-        order_id: &str,
-    ) -> Result<Option<crate::state_manager::OrderStatus>, String> {
-        self.perp_state_handle.get_order(order_id).await
-    }
-
-    /// Query spot order status by order_id
-    pub async fn get_spot_order(
-        &self,
-        order_id: &str,
-    ) -> Result<Option<crate::state_manager::OrderStatus>, String> {
-        self.spot_state_handle.get_order(order_id).await
-    }
-
-    /// Check if a perp order is completed (fully filled)
-    pub async fn is_perp_order_completed(&self, order_id: &str) -> Result<bool, String> {
-        self.perp_state_handle.is_order_completed(order_id).await
-    }
-
-    /// Check if a spot order is completed (fully filled)
-    pub async fn is_spot_order_completed(&self, order_id: &str) -> Result<bool, String> {
-        self.spot_state_handle.is_order_completed(order_id).await
-    }
-
-    /// Get pending orders for a perp ticker
-    pub async fn get_perp_pending_orders(
-        &self,
-        ticker: &str,
-    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
-        self.perp_state_handle.get_pending_orders(ticker).await
-    }
-
-    /// Get pending orders for a spot ticker
-    pub async fn get_spot_pending_orders(
-        &self,
-        ticker: &str,
-    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
-        self.spot_state_handle.get_pending_orders(ticker).await
-    }
-
-    /// Fetch perp positions from exchange
-    /// Internal helper function used for StateManager initialization
-    async fn fetch_perp_positions(
-        wallet_address: Option<ethers::types::H160>,
-        is_mainnet: bool,
-        http_client: Arc<RateLimitedClient>,
-    ) -> Result<std::collections::HashMap<String, f64>, String> {
-        let wallet_addr = wallet_address
-            .ok_or_else(|| "Wallet address required for fetching perp positions".to_string())?;
-
-        let info_api = if is_mainnet {
-            InfoApi::production_with_client(http_client)
-        } else {
-            InfoApi::testnet_with_client(http_client)
-        };
-
-        // Fetch perp positions
-        let perp_state = info_api
-            .user_perpetuals_state(wallet_addr)
-            .await
-            .map_err(|e| format!("Failed to fetch perpetuals state: {:?}", e))?;
-
-        let mut perp_positions = std::collections::HashMap::new();
-        for position in &perp_state.asset_positions {
-            let size = position
-                .position
-                .szi
-                .parse::<f64>()
-                .map_err(|e| format!("Failed to parse position size: {}", e))?;
-            if size.abs() > 1e-10 {
-                perp_positions.insert(position.position.coin.clone(), size);
-            }
-        }
-
-        Ok(perp_positions)
-    }
-
-    /// Fetch spot positions from exchange
-    /// Internal helper function used for StateManager initialization
-    async fn fetch_spot_positions(
-        wallet_address: Option<ethers::types::H160>,
-        is_mainnet: bool,
-        http_client: Arc<RateLimitedClient>,
-    ) -> Result<std::collections::HashMap<String, f64>, String> {
-        let wallet_addr = wallet_address
-            .ok_or_else(|| "Wallet address required for fetching spot positions".to_string())?;
-
-        let info_api = if is_mainnet {
-            InfoApi::production_with_client(http_client)
-        } else {
-            InfoApi::testnet_with_client(http_client)
-        };
-
-        // Fetch spot clearinghouse state and parse balances
-        let spot_state = info_api
-            .user_spot_state(&format!("{:?}", wallet_addr))
-            .await
-            .map_err(|e| format!("Failed to fetch spot state: {:?}", e))?;
-
-        let mut spot_balances = std::collections::HashMap::new();
-        for balance in &spot_state.balances {
-            let balance_qty = balance
-                .total
-                .parse::<f64>()
-                .map_err(|e| format!("Failed to parse balance total: {}", e))?;
-            spot_balances.insert(balance.coin.clone(), balance_qty);
-        }
-
-        Ok(spot_balances)
-    }
-
     /// Get all funding rates with size data from metadata manager (cached)
     /// Returns Vec of (coin, funding_rate, open_interest, daily_volume)
     pub async fn get_all_funding_rates_with_size(
@@ -616,34 +362,6 @@ impl HyperliquidClient {
             })
     }
 
-    /// Start BBO subscription for a ticker (idempotent)
-    /// The BBO state will be maintained in the background
-    pub async fn create_bbo_subscription(&self, ticker: &str) -> Result<(), String> {
-        self.bbo_handle.add_subscription(ticker).await
-    }
-
-    /// Remove BBO subscription for a ticker
-    pub async fn remove_bbo_subscription(&self, ticker: &str) -> Result<(), String> {
-        self.bbo_handle.remove_subscription(ticker).await
-    }
-
-    /// Get the latest BBO (best bid/offer) for a ticker
-    /// Returns None if not subscribed or no data received yet
-    pub async fn get_latest_bbo(&self, ticker: &str) -> Result<Option<(f64, f64)>, String> {
-        self.bbo_handle.get_latest_bbo(ticker).await
-    }
-
-    /// Start candle subscription for a coin (idempotent)
-    /// Candle updates will be delivered via the MarketEvent receiver
-    pub async fn add_candles(&self, coin: &str) -> Result<(), String> {
-        self.market_data_handle.add_candles(coin).await
-    }
-
-    /// Remove candle subscription for a coin
-    pub async fn remove_candles(&self, coin: &str) -> Result<(), String> {
-        self.market_data_handle.remove_candles(coin).await
-    }
-
     /// Get candle snapshot for a coin
     pub async fn get_candle_snapshot(
         &self,
@@ -670,70 +388,5 @@ impl HyperliquidClient {
             .get_historical_funding_rates(coin, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
-    }
-
-    /// Get all pending perp orders across all tickers
-    pub async fn get_all_perp_pending_orders(
-        &self,
-    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
-        self.perp_state_handle.get_all_pending_orders().await
-    }
-
-    /// Get all pending spot orders across all tickers
-    pub async fn get_all_spot_pending_orders(
-        &self,
-    ) -> Result<Vec<crate::state_manager::PendingOrderInfo>, String> {
-        self.spot_state_handle.get_all_pending_orders().await
-    }
-
-    /// Start depth subscription for a coin (idempotent)
-    pub async fn add_depth(&self, coin: &str) -> Result<(), String> {
-        self.market_data_handle.add_depth(coin).await
-    }
-
-    /// Remove depth subscription for a coin
-    pub async fn remove_depth(&self, coin: &str) -> Result<(), String> {
-        self.market_data_handle.remove_depth(coin).await
-    }
-
-    /// Get the current order book state for a coin
-    /// Returns None if not subscribed or no data received yet
-    pub async fn get_latest_depth(&self, coin: &str) -> Result<Option<OrderBookState>, String> {
-        self.market_data_handle.get_latest_depth(coin).await
-    }
-
-    /// Start trades subscription for a coin (idempotent)
-    pub async fn add_trades(&self, coin: &str) -> Result<(), String> {
-        self.market_data_handle.add_trades(coin).await
-    }
-
-    /// Remove trades subscription for a coin
-    pub async fn remove_trades(&self, coin: &str) -> Result<(), String> {
-        self.market_data_handle.remove_trades(coin).await
-    }
-
-    /// Get the event receiver for reactive market data consumption
-    /// Can be called multiple times to create multiple subscribers
-    /// Automatically disables raw mode
-    pub async fn take_event_receiver(&self) -> Result<broadcast::Receiver<MarketEvent>, String> {
-        self.market_data_handle.get_event_channel().await
-    }
-
-    /// Get the raw receiver for raw JSON message consumption
-    /// Can only be called once - subsequent calls will return an error
-    /// Automatically enables raw mode - no parsing will occur, only raw JSON forwarding
-    /// This is useful for stream writers that need to forward messages to Redis/etc
-    pub async fn take_raw_receiver(&self) -> Result<mpsc::Receiver<String>, String> {
-        self.market_data_handle.get_raw_channel().await
-    }
-
-    /// Trigger restart of market data feed
-    pub async fn restart_market_data(&self) {
-        if let Err(e) = self.market_data_handle.restart_feed().await {
-            log::error!(
-                "Failed to send restart command to Hyperliquid market data feed: {}",
-                e
-            );
-        }
     }
 }

@@ -1,7 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
 mod auth;
-mod charts;
+pub mod charts;
 mod market;
 mod multi_collateral;
 mod order_management;

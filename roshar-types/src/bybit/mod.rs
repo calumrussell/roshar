@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 pub use ws::{
     ByBitCandleData, ByBitCandleMessage, ByBitDepthBookData, ByBitDepthMessage, ByBitMessage,
-    ByBitTradesData, ByBitTradesMessage, ByBitWssMessage, BybitOrderBook,
+    ByBitTradesData, ByBitTradesMessage, ByBitWssMessage,
 };
 
 /// Historical funding rate data from ByBit

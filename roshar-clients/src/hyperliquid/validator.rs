@@ -1,22 +1,19 @@
 use super::rest::SpotAssetInfo;
-use roshar_types::{AssetInfo, Venue};
+use roshar_types::AssetInfo;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct OrderRequest {
-    pub venue: Venue,
     pub asset: String,
     pub is_buy: bool,
     pub limit_px: f64,
     pub sz: f64,
     /// For Hyperliquid only: if true, treat as spot trading (use spot validation)
-    /// For other venues, this field is ignored
     pub hyperliquid_is_spot: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ValidatedOrder {
-    pub venue: Venue,
     pub asset: String,
     pub is_buy: bool,
     pub limit_px: f64,
@@ -151,7 +148,6 @@ impl OrderValidator {
         );
 
         Ok(ValidatedOrder {
-            venue: request.venue,
             asset: request.asset,
             is_buy: request.is_buy,
             limit_px: rounded_px,
@@ -233,7 +229,6 @@ impl OrderValidator {
         );
 
         Ok(ValidatedOrder {
-            venue: request.venue,
             asset: request.asset.clone(),
             is_buy: request.is_buy,
             limit_px: rounded_px,
@@ -253,7 +248,6 @@ mod tests {
 
         // Empty asset
         let request = OrderRequest {
-            venue: Venue::Hyperliquid,
             asset: "".to_string(),
             is_buy: true,
             limit_px: 100.0,
@@ -266,7 +260,6 @@ mod tests {
 
         // Zero size
         let request = OrderRequest {
-            venue: Venue::Hyperliquid,
             asset: "BTC".to_string(),
             is_buy: true,
             limit_px: 100.0,
@@ -279,7 +272,6 @@ mod tests {
 
         // Negative size
         let request = OrderRequest {
-            venue: Venue::Hyperliquid,
             asset: "ETH".to_string(),
             is_buy: true,
             limit_px: 2000.0,
@@ -292,7 +284,6 @@ mod tests {
 
         // Negative price
         let request = OrderRequest {
-            venue: Venue::Hyperliquid,
             asset: "BTC".to_string(),
             is_buy: false,
             limit_px: -1000.0,
