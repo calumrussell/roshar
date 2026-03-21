@@ -1,6 +1,6 @@
 [package]
 name = "roshar-bt"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2021"
 license = "MIT"
 description = "Backtesting framework for trading strategies"
@@ -28,7 +28,7 @@ url = "2.5"
 bytes = "1"
 async-trait = "0.1"
 plotters = "0.3"
-roshar-types = { version = "0.1.21", path = "../roshar-types", optional = true }
+roshar-types = { version = "0.1.24", path = "../roshar-types", optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
