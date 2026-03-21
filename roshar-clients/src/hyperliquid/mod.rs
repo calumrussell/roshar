@@ -9,8 +9,13 @@ use rest::{
     ExchangeApi, ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
     ModifyOrderParams,
 };
-use roshar_types::{AssetInfo, SpotMarketData, UserPerpetualsState};
+
+use anyhow::Result;
+use roshar_types::{AssetInfo, HyperliquidWssMessage, SpotMarketData, UserPerpetualsState};
+use roshar_ws_mgr::{Manager, Message};
 use std::sync::Arc;
+
+use crate::{HL_TESTNET_WSS_URL, HL_WSS_URL};
 
 /// Result of creating an order
 #[derive(Debug, Clone)]
@@ -50,11 +55,151 @@ pub struct HyperliquidClient {
     #[allow(dead_code)] // Kept to prevent metadata manager task from being dropped
     metadata_manager_handle: tokio::task::JoinHandle<()>,
     metadata_handle: ExchangeMetadataHandle,
-    // REST API client (shared for rate limiting)
     info_api: InfoApi,
+    ws_config: roshar_ws_mgr::Config,
 }
 
 impl HyperliquidClient {
+    const WS_CONN_NAME: &str = "hyperliquid";
+
+    crate::ws::ws_config_methods!();
+
+    pub fn subscribe_depth(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::l2_book(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn subscribe_trades(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::trades(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn subscribe_candles(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::candle(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn subscribe_bbo(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::bbo(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn subscribe_user_fills(&self, manager: &Arc<Manager>, user_address: &str) -> Result<()> {
+        let msg = HyperliquidWssMessage::user_fills(user_address).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn subscribe_order_updates(
+        &self,
+        manager: &Arc<Manager>,
+        user_address: &str,
+    ) -> Result<()> {
+        let msg = HyperliquidWssMessage::order_updates(user_address).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::l2_book_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::trades_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_candles(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::candle_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_bbo(&self, manager: &Arc<Manager>, coins: &[&str]) -> Result<()> {
+        for coin in coins {
+            let msg = HyperliquidWssMessage::bbo_unsub(coin).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_user_fills(
+        &self,
+        manager: &Arc<Manager>,
+        user_address: &str,
+    ) -> Result<()> {
+        let msg = HyperliquidWssMessage::user_fills_unsub(user_address).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn unsubscribe_order_updates(
+        &self,
+        manager: &Arc<Manager>,
+        user_address: &str,
+    ) -> Result<()> {
+        let msg = HyperliquidWssMessage::order_updates_unsub(user_address).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
     /// Query spot asset info from metadata manager (for validation/mapping)
     async fn query_spot_asset_info(
         &self,
@@ -109,6 +254,12 @@ impl HyperliquidClient {
             InfoApi::testnet_with_client(http_client)
         };
 
+        let ws_url = if config.is_mainnet {
+            HL_WSS_URL
+        } else {
+            HL_TESTNET_WSS_URL
+        };
+
         Self {
             api,
             wallet_address: config.wallet_address,
@@ -116,6 +267,23 @@ impl HyperliquidClient {
             metadata_manager_handle,
             metadata_handle,
             info_api,
+            ws_config: roshar_ws_mgr::Config {
+                name: Self::WS_CONN_NAME.to_string(),
+                url: ws_url.to_string(),
+                ping_duration: 20,
+                ping_message: HyperliquidWssMessage::ping().to_json(),
+                ping_timeout: 10,
+                reconnect_timeout: 5000,
+                use_text_ping: Some(true),
+                read_buffer_size: None,
+                write_buffer_size: None,
+                max_message_size: None,
+                max_frame_size: None,
+                tcp_recv_buffer_size: None,
+                tcp_send_buffer_size: None,
+                tcp_nodelay: None,
+                broadcast_channel_size: None,
+            },
         }
     }
 

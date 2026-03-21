@@ -2,26 +2,111 @@ pub(crate) mod rest;
 
 use rest::BinanceRestClient;
 
-use roshar_types::BinancePremiumIndex;
+use anyhow::Result;
+use roshar_types::{BinancePremiumIndex, BinanceWssMessage};
+use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
+use std::sync::Arc;
 
-/// Binance client for REST API calls
+use crate::BINANCE_WSS_URL;
+use crate::ws::ws_config_methods;
+
 pub struct BinanceClient {
     rest_client: BinanceRestClient,
+    ws_config: Config,
 }
 
 impl BinanceClient {
-    /// Create a new Binance client.
-    ///
-    /// # Arguments
-    /// * `requests_per_second` - Maximum REST API requests per second
+    const WS_CONN_NAME: &str = "binance";
+
     pub fn new(requests_per_second: u32) -> Self {
         Self {
             rest_client: BinanceRestClient::new(requests_per_second),
+            ws_config: Config {
+                name: Self::WS_CONN_NAME.to_string(),
+                url: BINANCE_WSS_URL.to_string(),
+                ping_duration: 10,
+                ping_message: BinanceWssMessage::ping().to_json(),
+                ping_timeout: 10,
+                reconnect_timeout: 90,
+                use_text_ping: Some(false),
+                read_buffer_size: Some(33554432),
+                write_buffer_size: Some(2097152),
+                max_message_size: Some(41943040),
+                max_frame_size: Some(20971520),
+                tcp_recv_buffer_size: Some(16777216),
+                tcp_send_buffer_size: Some(4194304),
+                tcp_nodelay: Some(true),
+                broadcast_channel_size: Some(131072),
+            },
         }
     }
 
-    /// Get 24hr ticker data for all symbols or a specific symbol
+    ws_config_methods!();
+
+    pub fn subscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        let symbols_owned: Vec<String> = symbols.iter().map(|s| s.to_string()).collect();
+        let msg = BinanceWssMessage::batch_depth(&symbols_owned).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn subscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        let symbols_owned: Vec<String> = symbols.iter().map(|s| s.to_string()).collect();
+        let msg = BinanceWssMessage::batch_trades(&symbols_owned).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn subscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        let symbols_owned: Vec<String> = symbols.iter().map(|s| s.to_string()).collect();
+        let msg = BinanceWssMessage::batch_candles(&symbols_owned).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = BinanceWssMessage::depth_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = BinanceWssMessage::trades_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn unsubscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        for symbol in symbols {
+            let msg = BinanceWssMessage::candle_unsub(symbol).to_json();
+            manager.write(
+                &self.ws_config.name,
+                Message::TextMessage(self.ws_config.name.clone(), msg),
+            )?;
+        }
+        Ok(())
+    }
+
     pub async fn get_24hr_ticker(
         &self,
         symbol: Option<&str>,
@@ -32,11 +117,6 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get 24hr ticker: {}", e))
     }
 
-    /// Get historical funding rates for a symbol
-    ///
-    /// Handles pagination internally - returns all funding rates in the time range.
-    /// If rate limiting is configured (via `with_rate_limit`), each page request
-    /// respects the rate limit.
     pub async fn get_historical_funding_rates(
         &self,
         symbol: &str,
@@ -49,7 +129,6 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get historical funding rates: {}", e))
     }
 
-    /// Get exchange info including all available symbols
     pub async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
         self.rest_client
             .get_exchange_info()
@@ -57,14 +136,6 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get exchange info: {}", e))
     }
 
-    /// Get aggregate trades for a symbol
-    ///
-    /// # Arguments
-    /// * `symbol` - Trading pair symbol (e.g., "BTCUSDT")
-    /// * `start_time` - Optional start time in milliseconds
-    /// * `end_time` - Optional end time in milliseconds
-    /// * `from_id` - Optional aggregate trade ID to fetch from
-    /// * `limit` - Optional number of results (max 1000)
     pub async fn get_agg_trades(
         &self,
         symbol: &str,
@@ -79,7 +150,6 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get aggregate trades: {}", e))
     }
 
-    /// Get klines (candlestick) data for a symbol
     pub async fn get_klines(
         &self,
         symbol: &str,
@@ -94,10 +164,6 @@ impl BinanceClient {
             .map_err(|e| format!("Failed to get klines: {}", e))
     }
 
-    /// Get real-time funding rates for all perpetual contracts
-    ///
-    /// Returns a HashMap keyed by symbol for easy lookup of funding rate data.
-    /// Each entry contains mark price, index price, current funding rate, and next funding time.
     pub async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, BinancePremiumIndex>, String> {
@@ -134,32 +200,26 @@ mod tests {
 
         let funding_rates = result.unwrap();
 
-        // Binance has many perpetual contracts, should have data
         assert!(
             !funding_rates.is_empty(),
             "Expected funding rates data, got empty HashMap"
         );
 
-        // Check that BTCUSDT exists (it's always available)
         assert!(
             funding_rates.contains_key("BTCUSDT"),
             "Expected BTCUSDT in funding rates"
         );
 
-        // Verify the structure of a funding rate entry
         if let Some(btc_data) = funding_rates.get("BTCUSDT") {
             assert_eq!(btc_data.symbol, "BTCUSDT");
-            // Mark price should be parseable as a float
             btc_data
                 .mark_price
                 .parse::<f64>()
                 .expect("mark_price should be a valid number");
-            // Funding rate should be parseable as a float
             btc_data
                 .last_funding_rate
                 .parse::<f64>()
                 .expect("last_funding_rate should be a valid number");
-            // Next funding time should be in the future (or very recent past)
             assert!(
                 btc_data.next_funding_time > 0,
                 "next_funding_time should be positive"
