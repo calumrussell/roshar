@@ -225,8 +225,7 @@ mod tests {
             Duration::from_secs(86400),
         );
         let mut bt = Backtest::new_with_level_chg_fill(&config, feed);
-        let mut ev_buf = Vec::new();
-        bt.elapse(1000, &mut ev_buf).unwrap();
+        bt.elapse(1000).unwrap();
 
         let (bid, ask) = bt.bbo("");
         assert_eq!(bid, 89500.0, "best bid should be 89500.0");

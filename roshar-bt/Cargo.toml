@@ -1,6 +1,6 @@
 [package]
 name = "roshar-bt"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 license = "MIT"
 description = "Backtesting framework for trading strategies"

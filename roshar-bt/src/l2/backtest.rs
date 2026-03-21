@@ -194,8 +194,18 @@ where
             .and_then(|e| e.get_orders_by_level(decimal_price))
     }
 
-    pub fn elapse(&mut self, ts: u64, events_out: &mut Vec<Event>) -> Result<()> {
-        events_out.clear();
+    pub fn elapse(&mut self, ts: u64) -> Result<()> {
+        self.elapse_inner(ts, None)
+    }
+
+    pub fn elapse_with_buffer(&mut self, ts: u64, events_out: &mut Vec<Event>) -> Result<()> {
+        self.elapse_inner(ts, Some(events_out))
+    }
+
+    fn elapse_inner(&mut self, ts: u64, mut events_out: Option<&mut Vec<Event>>) -> Result<()> {
+        if let Some(buf) = events_out.as_deref_mut() {
+            buf.clear();
+        }
 
         // Clear per-symbol fill trackers.
         for tracker in self.tick_fill_tracker.values_mut() {
@@ -247,38 +257,72 @@ where
                         .entry(symbol)
                         .or_insert_with(|| Exchange::<Fil>::create(tick_size, lot_size));
 
-                    match event.typ {
-                        EVENT_CLEAR_BOOK => {
-                            exch.clear();
+                    if events_out.is_some() {
+                        match event.typ {
+                            EVENT_CLEAR_BOOK => {
+                                exch.clear();
+                            }
+                            EVENT_CLEAR_LEVEL_BID => {
+                                exch.clear_bid_level(&event);
+                            }
+                            EVENT_CLEAR_LEVEL_ASK => {
+                                exch.clear_ask_level(&event);
+                            }
+                            EVENT_UPDATE_LEVEL_BID => {
+                                exch.update_level(event.clone(), fill_tracker);
+                            }
+                            EVENT_UPDATE_LEVEL_ASK => {
+                                exch.update_level(event.clone(), fill_tracker);
+                            }
+                            EVENT_TRADE_BUY => {
+                                exch.process_trade(event.clone());
+                            }
+                            EVENT_TRADE_SELL => {
+                                exch.process_trade(event.clone());
+                            }
+                            EVENT_CLEAR_SIDE_BID => {
+                                exch.clear_bid();
+                            }
+                            EVENT_CLEAR_SIDE_ASK => {
+                                exch.clear_ask();
+                            }
+                            _ => (),
                         }
-                        EVENT_CLEAR_LEVEL_BID => {
-                            exch.clear_bid_level(&event);
+                        if let Some(buf) = events_out.as_deref_mut() {
+                            buf.push(event);
                         }
-                        EVENT_CLEAR_LEVEL_ASK => {
-                            exch.clear_ask_level(&event);
+                    } else {
+                        match event.typ {
+                            EVENT_CLEAR_BOOK => {
+                                exch.clear();
+                            }
+                            EVENT_CLEAR_LEVEL_BID => {
+                                exch.clear_bid_level(&event);
+                            }
+                            EVENT_CLEAR_LEVEL_ASK => {
+                                exch.clear_ask_level(&event);
+                            }
+                            EVENT_UPDATE_LEVEL_BID => {
+                                exch.update_level(event, fill_tracker);
+                            }
+                            EVENT_UPDATE_LEVEL_ASK => {
+                                exch.update_level(event, fill_tracker);
+                            }
+                            EVENT_TRADE_BUY => {
+                                exch.process_trade(event);
+                            }
+                            EVENT_TRADE_SELL => {
+                                exch.process_trade(event);
+                            }
+                            EVENT_CLEAR_SIDE_BID => {
+                                exch.clear_bid();
+                            }
+                            EVENT_CLEAR_SIDE_ASK => {
+                                exch.clear_ask();
+                            }
+                            _ => (),
                         }
-                        EVENT_UPDATE_LEVEL_BID => {
-                            exch.update_level(event.clone(), fill_tracker);
-                        }
-                        EVENT_UPDATE_LEVEL_ASK => {
-                            exch.update_level(event.clone(), fill_tracker);
-                        }
-                        EVENT_TRADE_BUY => {
-                            exch.process_trade(event.clone());
-                        }
-                        EVENT_TRADE_SELL => {
-                            exch.process_trade(event.clone());
-                        }
-                        EVENT_CLEAR_SIDE_BID => {
-                            exch.clear_bid();
-                        }
-                        EVENT_CLEAR_SIDE_ASK => {
-                            exch.clear_ask();
-                        }
-                        _ => (),
                     }
-
-                    events_out.push(event);
 
                     // Once we've reached end_time and no further events at this
                     // timestamp remain in the queue, loop back one more time to
@@ -361,9 +405,8 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
 
         let (bid, ask) = bt.bbo("BTC");
         assert!(bid > 0.0, "bid should be non-zero after snapshot at boundary");
@@ -384,17 +427,16 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        let mut ev_buf = Vec::new();
 
         // First elapse: advance to ts=100
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
         let (bid, ask) = bt.bbo("BTC");
         assert_eq!(bid, 99.0, "bid should reflect ts=100 data");
         assert_eq!(ask, 101.0, "ask should reflect ts=100 data");
         assert_eq!(bt.current_timestamp(), 100);
 
         // Second elapse: advance to ts=200; new levels shift the BBO
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
         let (bid2, ask2) = bt.bbo("BTC");
         assert_eq!(bid2, 100.0, "bid should reflect ts=200 data (new best bid)");
         assert_eq!(ask2, 100.5, "ask should reflect ts=200 data (new best ask)");
@@ -419,14 +461,13 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(1000, &mut ev_buf).unwrap();
+        bt.elapse(1000).unwrap();
         let (bid, ask) = bt.bbo("BTC");
         assert_eq!(bid, 99.0, "bid should match first snapshot");
         assert_eq!(ask, 101.0, "ask should match first snapshot");
 
-        bt.elapse(1000, &mut ev_buf).unwrap();
+        bt.elapse(1000).unwrap();
         let (bid2, ask2) = bt.bbo("BTC");
         assert_eq!(bid2, 199.0, "bid should match second snapshot");
         assert_eq!(ask2, 201.0, "ask should match second snapshot");
@@ -438,9 +479,8 @@ mod tests {
         let events = vec![ev(EVENT_UPDATE_LEVEL_BID, 100, "50.0", "1.0")];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
 
         let (bid, _ask) = bt.bbo("BTC");
         assert!(bid > 0.0, "single event at boundary should be processed");
@@ -458,9 +498,8 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(ts as u64, &mut ev_buf).unwrap();
+        bt.elapse(ts as u64).unwrap();
 
         let (bid, ask) = bt.bbo("BTC");
         assert!(bid > 0.0, "bid level should be set after processing");
@@ -481,16 +520,15 @@ mod tests {
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
         bt.set_latency_model(LatencyModel::Fixed(50));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
 
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
 
-        bt.elapse(49, &mut ev_buf).unwrap();
+        bt.elapse(49).unwrap();
         assert_eq!(bt.get_position("BTC"), 0.0, "order should not execute before latency elapses");
 
-        bt.elapse(1, &mut ev_buf).unwrap();
+        bt.elapse(1).unwrap();
         assert!(bt.get_position("BTC") > 0.0, "order should execute after latency elapses");
     }
 
@@ -505,12 +543,11 @@ mod tests {
         ];
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
 
-        bt.elapse(1, &mut ev_buf).unwrap();
+        bt.elapse(1).unwrap();
         assert!(bt.get_position("BTC") > 0.0);
     }
 
@@ -529,21 +566,20 @@ mod tests {
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
         bt.set_latency_model(LatencyModel::Fixed(50));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
 
-        bt.elapse(50, &mut ev_buf).unwrap(); // ts=150
+        bt.elapse(50).unwrap(); // ts=150
         let pos_after_first = bt.get_position("BTC");
         assert!(pos_after_first > 0.0, "first order should have executed");
 
         bt.submit_order("BTC", OrderRequest::new(Side::Sell, 1.0, None, OrderType::Market));
 
-        bt.elapse(49, &mut ev_buf).unwrap(); // ts=199
+        bt.elapse(49).unwrap(); // ts=199
         assert!(bt.get_position("BTC") > 0.0, "second order should not execute yet");
 
-        bt.elapse(1, &mut ev_buf).unwrap(); // ts=200
+        bt.elapse(1).unwrap(); // ts=200
         assert_eq!(bt.get_position("BTC"), 0.0, "second order should have executed");
     }
 
@@ -561,12 +597,11 @@ mod tests {
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
         bt.set_latency_model(LatencyModel::Fixed(100));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
 
-        bt.elapse(100, &mut ev_buf).unwrap(); // ts=200
+        bt.elapse(100).unwrap(); // ts=200
         let order = bt.get_order("BTC", &0).unwrap();
         assert_eq!(order.exec_px, 102.0);
     }
@@ -583,12 +618,11 @@ mod tests {
         let config = make_config(0);
         let mut bt = Backtest::new_with_level_chg_fill(&config, VecEventFeed::new(events));
         bt.set_latency_model(LatencyModel::Fixed(0));
-        let mut ev_buf = Vec::new();
 
-        bt.elapse(100, &mut ev_buf).unwrap();
+        bt.elapse(100).unwrap();
         bt.submit_order("BTC", OrderRequest::new(Side::Buy, 1.0, None, OrderType::Market));
 
-        bt.elapse(1, &mut ev_buf).unwrap();
+        bt.elapse(1).unwrap();
         assert!(bt.get_position("BTC") > 0.0);
     }
 }

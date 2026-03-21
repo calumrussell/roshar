@@ -332,8 +332,8 @@ impl PyBacktest {
     /// processed during this tick, or ``None`` when the data feed is exhausted.
     fn elapse(&mut self, ms: u64) -> Option<Vec<(u64, i64, String, String, String)>> {
         let result = match &mut self.inner {
-            InnerBacktest::Mux(bt) => bt.elapse(ms, &mut self.ev_buf),
-            InnerBacktest::Vec(bt) => bt.elapse(ms, &mut self.ev_buf),
+            InnerBacktest::Mux(bt) => bt.elapse_with_buffer(ms, &mut self.ev_buf),
+            InnerBacktest::Vec(bt) => bt.elapse_with_buffer(ms, &mut self.ev_buf),
         };
         if result.is_ok() {
             Some(
