@@ -13,7 +13,8 @@ use rest::{
 use anyhow::Result;
 use async_trait::async_trait;
 use roshar_types::{
-    AssetInfo, HyperliquidWssMessage, SpotMarketData, UserOrder, UserPerpetualsState,
+    AssetInfo, HyperliquidWssMessage, SpotClearinghouseState, SpotMarketData, UserOrder,
+    UserPerpetualsState,
 };
 use roshar_ws_mgr::{Manager, Message};
 use std::sync::Arc;
@@ -323,6 +324,7 @@ pub trait HyperliquidApi {
     async fn get_perp_prices(&self) -> Result<std::collections::HashMap<String, f64>, String>;
     async fn get_spot_prices(&self) -> Result<std::collections::HashMap<String, f64>, String>;
     async fn get_user_perpetuals_state(&self) -> Result<UserPerpetualsState, String>;
+    async fn get_user_spot_state(&self) -> Result<SpotClearinghouseState, String>;
     async fn get_max_leverage(&self, coin: &str) -> Result<u32, String>;
     async fn update_leverage(
         &self,
@@ -614,6 +616,20 @@ impl HyperliquidApi for HyperliquidClient {
             .get_historical_funding_rates(coin, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
+    }
+
+    /// Get full user spot state from exchange (REST API call)
+    /// Returns complete SpotClearinghouseState including balances
+    async fn get_user_spot_state(&self) -> Result<SpotClearinghouseState, String> {
+        let wallet_address = self
+            .wallet_address
+            .ok_or_else(|| "Wallet address required for get_user_spot_state".to_string())?;
+
+        let address_str = format!("{:#x}", wallet_address);
+        self.info_api
+            .user_spot_state(&address_str)
+            .await
+            .map_err(|e| format!("Failed to fetch spot state: {:?}", e))
     }
 
     async fn get_open_orders(&self) -> Result<Vec<UserOrder>, String> {
