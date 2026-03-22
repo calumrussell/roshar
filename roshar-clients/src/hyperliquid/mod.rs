@@ -11,7 +11,7 @@ use rest::{
 };
 
 use anyhow::Result;
-use roshar_types::{AssetInfo, HyperliquidWssMessage, SpotMarketData, UserOrder, UserPerpetualsState};
+use roshar_types::{AssetInfo, HyperliquidWssMessage, SpotClearinghouseState, SpotMarketData, UserOrder, UserPerpetualsState};
 use roshar_ws_mgr::{Manager, Message};
 use std::sync::Arc;
 
@@ -556,6 +556,20 @@ impl HyperliquidClient {
             .get_historical_funding_rates(coin, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
+    }
+
+    /// Get full user spot state from exchange (REST API call)
+    /// Returns complete SpotClearinghouseState including balances
+    pub async fn get_user_spot_state(&self) -> Result<SpotClearinghouseState, String> {
+        let wallet_address = self
+            .wallet_address
+            .ok_or_else(|| "Wallet address required for get_user_spot_state".to_string())?;
+
+        let address_str = format!("{:#x}", wallet_address);
+        self.info_api
+            .user_spot_state(&address_str)
+            .await
+            .map_err(|e| format!("Failed to fetch spot state: {:?}", e))
     }
 
     pub async fn get_open_orders(&self) -> Result<Vec<UserOrder>, String> {
