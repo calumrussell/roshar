@@ -89,11 +89,9 @@ impl MarketApi {
         let response = self.client.get(&url).await?;
 
         if !response.status().is_success() {
-            return Err(format!(
-                "OKX API request failed with status: {}",
-                response.status()
-            )
-            .into());
+            return Err(
+                format!("OKX API request failed with status: {}", response.status()).into(),
+            );
         }
 
         let response_text = response.text().await?;
@@ -128,11 +126,9 @@ impl MarketApi {
         let response = self.client.get(&url).await?;
 
         if !response.status().is_success() {
-            return Err(format!(
-                "OKX API request failed with status: {}",
-                response.status()
-            )
-            .into());
+            return Err(
+                format!("OKX API request failed with status: {}", response.status()).into(),
+            );
         }
 
         let response_text = response.text().await?;
@@ -190,11 +186,9 @@ impl MarketApi {
         let response = self.client.get(&url).await?;
 
         if !response.status().is_success() {
-            return Err(format!(
-                "OKX API request failed with status: {}",
-                response.status()
-            )
-            .into());
+            return Err(
+                format!("OKX API request failed with status: {}", response.status()).into(),
+            );
         }
 
         let response_text = response.text().await?;
@@ -266,10 +260,7 @@ mod tests {
 
         let candles = result.unwrap();
 
-        assert!(
-            !candles.is_empty(),
-            "Expected some candles, got none"
-        );
+        assert!(!candles.is_empty(), "Expected some candles, got none");
 
         assert!(candles.len() <= 5, "Expected at most 5 candles");
 
@@ -312,7 +303,10 @@ mod tests {
         );
 
         let btc_ticker = tickers.get("BTC-USDT-SWAP").unwrap();
-        assert!(!btc_ticker.last.is_empty(), "Expected last price to be present");
+        assert!(
+            !btc_ticker.last.is_empty(),
+            "Expected last price to be present"
+        );
 
         println!(
             "Fetched {} OKX SWAP tickers. BTC-USDT-SWAP last: {}, bid: {}, ask: {}",

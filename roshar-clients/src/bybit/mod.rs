@@ -10,13 +10,14 @@ pub use rest::{
 pub use roshar_types::ByBitHistoricalFundingRate;
 
 use anyhow::Result;
+use async_trait::async_trait;
 use roshar_types::ByBitWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::BYBIT_WSS_URL;
 use crate::ws::ws_config_methods;
+use crate::BYBIT_WSS_URL;
 
 pub struct ByBitClient {
     market_api: MarketApi,
@@ -110,8 +111,18 @@ impl ByBitClient {
         }
         Ok(())
     }
+}
 
-    pub async fn get_realtime_funding_rates(
+#[async_trait]
+pub trait ByBitApi {
+    async fn get_realtime_funding_rates(
+        &self,
+    ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>>;
+}
+
+#[async_trait]
+impl ByBitApi for ByBitClient {
+    async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, ByBitTickerData>, Box<dyn std::error::Error + Send + Sync>> {
         self.market_api.get_tickers().await
