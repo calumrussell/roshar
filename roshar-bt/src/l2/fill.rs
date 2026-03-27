@@ -16,7 +16,7 @@ pub trait FillModel {
     fn update_trade(&mut self, event: Event, tick_orders: &[OrderId]) -> Vec<OrderId>;
     fn update_level(&mut self, ev: &Event, orderbook: &L2OrderBookCell, tick_orders: &[OrderId]);
     fn cancel_order(&mut self, id: &OrderId);
-    fn new_order(&mut self, id: &OrderId, qty: Qty);
+    fn new_order(&mut self, id: &OrderId, qty: Qty, level_qty: Qty);
     fn get_prio(&self, id: &OrderId) -> Option<&Qty>;
 }
 
@@ -60,29 +60,35 @@ impl FillModel for LevelChgFill {
                     _ => panic!("Called update_level with non-level event"),
                 };
                 let prev_qty = orderbook.borrow().get_level(side, event_tick);
-                //Theoretically not a user input so should be rounded but we double-check here in case exchange sends bad data
-                let event_qty_by_lot_size =
-                    arbitrary_f64_qty_to_lot_size(ev_qty_decimal, self.lot_size);
-                let mut chg = prev_qty - event_qty_by_lot_size;
+                let new_qty = arbitrary_f64_qty_to_lot_size(ev_qty_decimal, self.lot_size);
 
                 for tick_order in tick_orders {
                     let order_fill_data = self.orders_by_fill_data.get_mut(tick_order).unwrap();
-                    chg -= order_fill_data.trade_qty_tmp;
+
+                    // Isolate the cancellation portion of the level change by
+                    // subtracting accumulated trade volume (avoids double
+                    // counting with update_trade).  trade_qty_tmp is negative,
+                    // so adding it subtracts the trade volume.
+                    let mut chg = prev_qty - new_qty + order_fill_data.trade_qty_tmp;
                     order_fill_data.trade_qty_tmp = Decimal::ZERO;
 
                     if chg.le(&Decimal::ZERO) {
+                        // Level increased (new orders placed) or change was
+                        // entirely from trades — cap queue position at the
+                        // new level depth.
                         order_fill_data.cum_qty_chg =
-                            order_fill_data.cum_qty_chg.min(ev_qty_decimal);
+                            order_fill_data.cum_qty_chg.min(new_qty);
                         continue;
                     }
 
+                    // Probability estimation for queue advancement from
+                    // cancellations.
                     let front = order_fill_data.cum_qty_chg.max(Decimal::ZERO);
                     let back = (prev_qty - front).max(Decimal::ZERO);
                     let prob_func = |x: Decimal| -> Decimal { x.powf(3.0) };
 
                     let denom = prob_func(back) + prob_func(front);
                     let mut prob = if denom.is_zero() {
-                        // Both front and back are zero — assume equal probability
                         Decimal::from_str("0.5").unwrap()
                     } else {
                         prob_func(back) / denom
@@ -96,7 +102,7 @@ impl FillModel for LevelChgFill {
 
                     let est_front = front - (Decimal::from(1) - prob) * chg
                         + (back - prob * chg).min(Decimal::ZERO);
-                    order_fill_data.cum_qty_chg = est_front.min(event_qty_by_lot_size);
+                    order_fill_data.cum_qty_chg = est_front.min(new_qty);
                 }
             }
             _ => (),
@@ -111,7 +117,6 @@ impl FillModel for LevelChgFill {
         for tick_order in tick_orders {
             let user_fill_data = self.orders_by_fill_data.get_mut(tick_order).unwrap();
 
-            //Don't need convert this because, in theory, this isn't a user input and will be rounded for lot size
             user_fill_data.cum_qty_chg -= ev_qty_decimal;
             user_fill_data.trade_qty_tmp -= ev_qty_decimal;
 
@@ -125,10 +130,10 @@ impl FillModel for LevelChgFill {
         self.orders_by_fill_data.remove(id);
     }
 
-    fn new_order(&mut self, id: &OrderId, qty: Qty) {
+    fn new_order(&mut self, id: &OrderId, _qty: Qty, level_qty: Qty) {
         let data = LevelChgFillData {
             trade_qty_tmp: Decimal::from(0),
-            cum_qty_chg: qty,
+            cum_qty_chg: level_qty,
         };
         self.orders_by_fill_data.insert(*id, data);
     }
@@ -170,7 +175,7 @@ mod tests {
 
         // Create an order with zero cum_qty_chg (front = 0)
         let order_id: OrderId = 1;
-        fill.new_order(&order_id, Decimal::ZERO);
+        fill.new_order(&order_id, Decimal::ZERO, Decimal::ZERO);
 
         // Orderbook where the level has zero quantity (back = prev_qty - front = 0 - 0 = 0)
         let orderbook_cell: L2OrderBookCell = Rc::new(RefCell::new(L2OrderBook::new(tick_size)));
@@ -190,7 +195,7 @@ mod tests {
         // which means trade_qty_tmp was negative (subtracted from chg making it positive).
         // Simulate that:
         let order_id2: OrderId = 2;
-        fill.new_order(&order_id2, Decimal::ZERO);
+        fill.new_order(&order_id2, Decimal::ZERO, Decimal::ZERO);
         // Set trade_qty_tmp to -5 by calling update_trade
         let trade_ev = make_event(EVENT_TRADE_BUY, "100.00", "5.0", 500);
         fill.update_trade(trade_ev, &[order_id2]);
@@ -217,7 +222,7 @@ mod tests {
         let mut fill = LevelChgFill::new(tick_size, lot_size);
 
         let order_id: OrderId = 1;
-        fill.new_order(&order_id, dec!(5.0));
+        fill.new_order(&order_id, dec!(5.0), dec!(5.0));
 
         // Trades consume more than queue position
         let trade_ev = make_event(EVENT_TRADE_BUY, "100.00", "10.0", 1000);
