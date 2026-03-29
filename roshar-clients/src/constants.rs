@@ -22,3 +22,6 @@ pub const OKX_PRIVATE_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/private";
 
 // MEXC
 pub const MEX_WSS_URL: &str = "wss://wbs.mexc.com/ws";
+
+// Derive (formerly Lyra)
+pub const DERIVE_WSS_URL: &str = "wss://api.lyra.finance/ws";
