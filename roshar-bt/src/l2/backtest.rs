@@ -370,7 +370,7 @@ mod tests {
     use rust_decimal::Decimal;
 
     use super::*;
-    use crate::source::VecEventFeed;
+    use crate::source::{StreamingEventFeed, VecEventFeed};
     use crate::types::{
         Event, EVENT_CLEAR_SIDE_ASK, EVENT_CLEAR_SIDE_BID, EVENT_TRADE_BUY, EVENT_UPDATE_LEVEL_ASK,
         EVENT_UPDATE_LEVEL_BID,
@@ -624,5 +624,34 @@ mod tests {
 
         bt.elapse(1).unwrap();
         assert!(bt.get_position("BTC") > 0.0);
+    }
+
+    #[test]
+    fn test_l2_backtest_with_streaming_feed_boundary_timestamp() {
+        use crate::source::FeedState;
+        use std::collections::VecDeque;
+
+        let mut done = false;
+        let producer =
+            move |events: &mut VecDeque<Event>, _candles: &mut VecDeque<Candle>, _count| {
+                if done {
+                    FeedState::Empty
+                } else {
+                    events.push_back(ev(EVENT_CLEAR_SIDE_BID, 100, "0.0", "0.0"));
+                    events.push_back(ev(EVENT_CLEAR_SIDE_ASK, 100, "0.0", "0.0"));
+                    events.push_back(ev(EVENT_UPDATE_LEVEL_BID, 100, "99.0", "5.0"));
+                    events.push_back(ev(EVENT_UPDATE_LEVEL_ASK, 100, "101.0", "5.0"));
+                    done = true;
+                    FeedState::Active
+                }
+            };
+
+        let config = make_config(0);
+        let mut bt = Backtest::new_with_level_chg_fill(&config, StreamingEventFeed::new(producer));
+        bt.elapse(100).unwrap();
+
+        let (bid, ask) = bt.bbo("BTC");
+        assert_eq!(bid, 99.0);
+        assert_eq!(ask, 101.0);
     }
 }

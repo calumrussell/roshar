@@ -175,6 +175,119 @@ impl EventFeed for VecEventFeed {
     }
 }
 
+/// Refillable in-memory feed.
+///
+/// Backtests pull with [`EventFeed::fill`]; when this feed's internal queues run
+/// low, it asks the user-provided producer to flush more events/candles.
+///
+/// # Example
+/// ```ignore
+/// use std::collections::VecDeque;
+/// use roshar_bt::source::{FeedState, StreamingEventFeed};
+/// use roshar_bt::types::{Candle, Event};
+///
+/// let mut pages: VecDeque<Vec<Event>> = load_event_pages();
+/// let producer = move |events: &mut VecDeque<Event>, _candles: &mut VecDeque<Candle>, _count| {
+///     if let Some(page) = pages.pop_front() {
+///         events.extend(page);
+///         FeedState::Active
+///     } else {
+///         FeedState::Empty
+///     }
+/// };
+///
+/// let feed = StreamingEventFeed::new(producer);
+/// ```
+pub struct StreamingEventFeed<P>
+where
+    P: FnMut(&mut VecDeque<Event>, &mut VecDeque<Candle>, usize) -> FeedState + Send,
+{
+    events: VecDeque<Event>,
+    candles: VecDeque<Candle>,
+    producer: P,
+    exhausted: bool,
+}
+
+impl<P> StreamingEventFeed<P>
+where
+    P: FnMut(&mut VecDeque<Event>, &mut VecDeque<Candle>, usize) -> FeedState + Send,
+{
+    pub fn new(producer: P) -> Self {
+        Self {
+            events: VecDeque::new(),
+            candles: VecDeque::new(),
+            producer,
+            exhausted: false,
+        }
+    }
+}
+
+impl<P> EventFeed for StreamingEventFeed<P>
+where
+    P: FnMut(&mut VecDeque<Event>, &mut VecDeque<Candle>, usize) -> FeedState + Send,
+{
+    fn fill(
+        &mut self,
+        events: &mut VecDeque<Event>,
+        candles: &mut VecDeque<Candle>,
+        count: usize,
+    ) -> FeedState {
+        let mut produced_events = 0usize;
+        let mut produced_candles = 0usize;
+
+        loop {
+            while produced_events < count {
+                if let Some(event) = self.events.pop_front() {
+                    events.push_back(event);
+                    produced_events += 1;
+                } else {
+                    break;
+                }
+            }
+
+            while produced_candles < count {
+                if let Some(candle) = self.candles.pop_front() {
+                    candles.push_back(candle);
+                    produced_candles += 1;
+                } else {
+                    break;
+                }
+            }
+
+            if produced_events >= count && produced_candles >= count {
+                break;
+            }
+            if self.exhausted {
+                break;
+            }
+
+            let needs_more_events = produced_events < count && self.events.is_empty();
+            let needs_more_candles = produced_candles < count && self.candles.is_empty();
+            if !needs_more_events && !needs_more_candles {
+                break;
+            }
+
+            let before_events = self.events.len();
+            let before_candles = self.candles.len();
+            match (self.producer)(&mut self.events, &mut self.candles, count.max(1)) {
+                FeedState::Empty => self.exhausted = true,
+                FeedState::Active => {
+                    // Prevent tight loops on buggy producers that report Active but add nothing.
+                    if self.events.len() == before_events && self.candles.len() == before_candles {
+                        self.exhausted = true;
+                    }
+                }
+            }
+        }
+
+        if produced_events > 0 || produced_candles > 0 {
+            FeedState::Active
+        } else {
+            FeedState::Empty
+        }
+    }
+}
+
 pub struct EventVecSource {
     pub evs: VecDeque<String>,
 }
@@ -815,5 +928,76 @@ mod tests {
 
         let timestamps: Vec<i64> = out_events.iter().map(|e| e.ts).collect();
         assert_eq!(timestamps, vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_streaming_feed_refills_and_exhausts() {
+        use super::{EventFeed, FeedState, StreamingEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        let mut batches: VecDeque<Vec<Event>> = VecDeque::from(vec![
+            vec![
+                Event::new(EVENT_TRADE_BUY, 1000, "100.0", "1.0"),
+                Event::new(EVENT_TRADE_BUY, 2000, "101.0", "2.0"),
+            ],
+            vec![Event::new(EVENT_TRADE_BUY, 3000, "102.0", "3.0")],
+        ]);
+
+        let producer = move |evs: &mut VecDeque<Event>, _candles: &mut VecDeque<Candle>, _count| {
+            if let Some(batch) = batches.pop_front() {
+                evs.extend(batch);
+                FeedState::Active
+            } else {
+                FeedState::Empty
+            }
+        };
+
+        let mut feed = StreamingEventFeed::new(producer);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        let state1 = feed.fill(&mut out_events, &mut out_candles, 2);
+        assert!(matches!(state1, FeedState::Active));
+        assert_eq!(out_events.len(), 2);
+
+        let state2 = feed.fill(&mut out_events, &mut out_candles, 2);
+        assert!(matches!(state2, FeedState::Active));
+        assert_eq!(out_events.len(), 3);
+
+        let state3 = feed.fill(&mut out_events, &mut out_candles, 1);
+        assert!(matches!(state3, FeedState::Empty));
+        assert_eq!(out_events.len(), 3);
+    }
+
+    #[test]
+    fn test_streaming_feed_supports_events_and_candles() {
+        use super::{EventFeed, FeedState, StreamingEventFeed};
+        use crate::types::{Candle, Event, EVENT_TRADE_BUY};
+
+        let mut done = false;
+        let producer = move |evs: &mut VecDeque<Event>, candles: &mut VecDeque<Candle>, _count| {
+            if done {
+                FeedState::Empty
+            } else {
+                evs.push_back(Event::new(EVENT_TRADE_BUY, 1000, "100.0", "1.0"));
+                candles.push_back(Candle::from_str_with_symbol("101.0", "99.0", "100.0", "100.5", &1000, "BTC"));
+                done = true;
+                FeedState::Active
+            }
+        };
+
+        let mut feed = StreamingEventFeed::new(producer);
+        let mut out_events = VecDeque::new();
+        let mut out_candles: VecDeque<Candle> = VecDeque::new();
+
+        let state = feed.fill(&mut out_events, &mut out_candles, 1);
+        assert!(matches!(state, FeedState::Active));
+        assert_eq!(out_events.len(), 1);
+        assert_eq!(out_candles.len(), 1);
+
+        let state2 = feed.fill(&mut out_events, &mut out_candles, 1);
+        assert!(matches!(state2, FeedState::Empty));
+        assert_eq!(out_events.len(), 1);
+        assert_eq!(out_candles.len(), 1);
     }
 }
