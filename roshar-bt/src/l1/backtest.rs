@@ -253,7 +253,7 @@ mod tests {
     use crate::{
         exchanges::hyperliquid::HyperliquidCandleParser,
         l1::L1ConfigBuilder,
-        source::{EventVecSource, ParsedCandleFeed},
+        source::{EventVecSource, ParsedCandleFeed, StreamingEventFeed},
         types::{OrderStatus, Side},
     };
 
@@ -394,5 +394,40 @@ mod tests {
         let _ = bt.execute_market_order("BTC", btc_sell);
         assert_eq!(bt.get_position("AAVE"), 10.0);
         assert_eq!(bt.get_position("BTC"), -2.0);
+    }
+
+    #[test]
+    fn test_l1_backtest_with_streaming_feed_and_candles() {
+        use crate::source::FeedState;
+        use crate::types::{Candle, Event, EVENT_CANDLE};
+        use std::collections::VecDeque;
+
+        let mut done = false;
+        let producer = move |events: &mut VecDeque<Event>, candles: &mut VecDeque<Candle>, _count| {
+            if done {
+                FeedState::Empty
+            } else {
+                events.push_back(Event::new_with_symbol(EVENT_CANDLE, 100, "100.0", "1.0", "AAVE"));
+                events.push_back(Event::new_with_symbol(EVENT_CANDLE, 200, "101.0", "1.0", "AAVE"));
+                candles.push_back(Candle::from_str_with_symbol("100.0", "100.0", "100.0", "100.0", &100, "AAVE"));
+                candles.push_back(Candle::from_str_with_symbol("101.0", "99.0", "100.0", "101.0", &200, "AAVE"));
+                done = true;
+                FeedState::Active
+            }
+        };
+
+        let feed = StreamingEventFeed::new(producer);
+        let cfg = L1ConfigBuilder::new()
+            .set_tick_size(0.1)
+            .set_start_ts(0)
+            .set_lines_read_per_tick(2)
+            .set_return_window(1)
+            .build()
+            .unwrap();
+        let mut bt = Backtest::new(&cfg, feed);
+
+        bt.elapse(200).unwrap();
+        let last = bt.last_candle("AAVE");
+        assert!(last.is_some(), "last candle should be updated from streaming feed");
     }
 }
