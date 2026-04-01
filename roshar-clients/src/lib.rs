@@ -2,6 +2,7 @@ pub mod aster;
 pub mod binance;
 pub mod bybit;
 pub mod constants;
+pub mod derive;
 pub mod http;
 pub mod hyperliquid;
 pub mod kraken;
@@ -41,6 +42,12 @@ pub use kraken::{
 
 // Re-export OKX types
 pub use okx::{OkxApi, OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse};
+
+// Re-export Derive types
+pub use derive::{
+    DeriveApi, DeriveClient, DeriveFundingRate, DeriveInstrument, DeriveOptionPricing,
+    DerivePerpDetails, DeriveStats, DeriveTicker,
+};
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;

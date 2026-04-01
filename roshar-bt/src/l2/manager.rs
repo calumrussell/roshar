@@ -52,7 +52,7 @@ impl<F: FillModel> OrderManager<F> {
         self.fill_model.get_prio(id)
     }
 
-    pub fn new_order(&mut self, req: OrderRequest) -> OrderId {
+    pub fn new_order(&mut self, req: OrderRequest, level_qty: Qty) -> OrderId {
         let id = self.order_id_counter;
 
         let decimal_qty = Decimal::from_f64(req.qty).expect("Unable to parse f64 from order.qty");
@@ -104,7 +104,7 @@ impl<F: FillModel> OrderManager<F> {
             }
         }
 
-        self.fill_model.new_order(&id, qty_by_lot_size);
+        self.fill_model.new_order(&id, qty_by_lot_size, level_qty);
 
         self.order_id_counter += 1;
 
@@ -282,8 +282,8 @@ mod tests {
         );
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        mgr.new_order(buy_order);
-        mgr.new_order(sell_order);
+        mgr.new_order(buy_order, Decimal::from(100));
+        mgr.new_order(sell_order, Decimal::from(100));
 
         //Market is 100/101 with 100 each side
         //Trade comes in for 10 on each side
@@ -323,8 +323,8 @@ mod tests {
         );
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        mgr.new_order(buy_order);
-        mgr.new_order(sell_order);
+        mgr.new_order(buy_order, Decimal::from(100));
+        mgr.new_order(sell_order, Decimal::from(100));
 
         //Market is 100/101 with 100 each side
         //Update comes in taking away 10 implying cancel
@@ -358,18 +358,25 @@ mod tests {
         );
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        mgr.new_order(buy_order);
-        mgr.new_order(sell_order);
+        mgr.new_order(buy_order, Decimal::from(100));
+        mgr.new_order(sell_order, Decimal::from(100));
 
-        let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "100.0");
-        let buy_trade = Event::new(EVENT_TRADE_BUY, 101, "101.0", "100.0");
+        // Trade volume must exceed level depth for the order to fill.
+        let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "110.0");
+        let buy_trade = Event::new(EVENT_TRADE_BUY, 101, "101.0", "110.0");
         mgr.update_trade(sell_trade);
         mgr.update_trade(buy_trade);
 
+        // Fill model reads prev_qty, then orderbook is updated (matches Exchange::update_level)
         let update_bid = Event::new(EVENT_UPDATE_LEVEL_BID, 101, "100.0", "10.0");
-        let update_ask = Event::new(EVENT_UPDATE_LEVEL_ASK, 101, "101.0", "10.0");
         mgr.update_level(&update_bid, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Buy, 100, Decimal::from(10));
+
+        let update_ask = Event::new(EVENT_UPDATE_LEVEL_ASK, 101, "101.0", "10.0");
         mgr.update_level(&update_ask, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Sell, 101, Decimal::from(10));
 
         assert!(!fill_tracker.is_empty());
         assert!(mgr.get_order(&0).unwrap().status == OrderStatus::Filled);
@@ -388,7 +395,7 @@ mod tests {
         );
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        let oid = mgr.new_order(buy_order);
+        let oid = mgr.new_order(buy_order, Decimal::from(100));
 
         assert!(mgr.cancel_order(&oid).is_ok());
 
@@ -418,8 +425,8 @@ mod tests {
         );
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        let oid_0 = mgr.new_order(buy_order_0);
-        let oid_1 = mgr.new_order(buy_order_1);
+        let oid_0 = mgr.new_order(buy_order_0, Decimal::from(100));
+        let oid_1 = mgr.new_order(buy_order_1, Decimal::from(100));
 
         assert!(mgr.cancel_order(&oid_0).is_ok());
 
@@ -451,18 +458,22 @@ mod tests {
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
 
-        let _oid_buy = mgr.new_order(buy_order);
+        let _oid_buy = mgr.new_order(buy_order, Decimal::from(100));
         let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "110.0");
         mgr.update_trade(sell_trade);
         let update_bid = Event::new(EVENT_UPDATE_LEVEL_BID, 101, "100.0", "10.0");
         mgr.update_level(&update_bid, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Buy, 100, Decimal::from(10));
         assert!(mgr.get_position().eq(&Decimal::from(10)));
 
-        let _oid_sell = mgr.new_order(sell_order);
+        let _oid_sell = mgr.new_order(sell_order, Decimal::from(100));
         let buy_trade = Event::new(EVENT_TRADE_BUY, 101, "101.0", "120.0");
         mgr.update_trade(buy_trade);
         let update_ask = Event::new(EVENT_UPDATE_LEVEL_ASK, 101, "101.0", "10.00");
         mgr.update_level(&update_ask, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Sell, 101, Decimal::from(10));
         assert!(mgr.get_position().eq(&Decimal::from(-10)));
 
         assert!(!fill_tracker.is_empty());
@@ -475,24 +486,26 @@ mod tests {
 
         let buy_order = OrderRequest::new(
             Side::Buy,
-            100.890923,
+            10.890923,
             Some(100.0),
             crate::types::OrderType::Limit,
         );
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        mgr.new_order(buy_order);
+        mgr.new_order(buy_order, Decimal::from(100));
 
-        let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "100.0");
+        let sell_trade = Event::new(EVENT_TRADE_SELL, 101, "100.0", "120.0");
         mgr.update_trade(sell_trade);
 
         let update_bid = Event::new(EVENT_UPDATE_LEVEL_BID, 101, "100.0", "10.0");
         mgr.update_level(&update_bid, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Buy, 100, Decimal::from(10));
 
         assert!(!fill_tracker.is_empty());
         assert!(mgr.get_order(&0).unwrap().status == OrderStatus::Filled);
-        assert!(mgr.get_order(&0).unwrap().qty.eq(&Decimal::from(100)));
-        //This is a higher level of coverage than mgr.tests but required as we need to check filled_qty format
-        assert!(mgr.get_order(&0).unwrap().filled_qty.eq(&Decimal::from(90)));
+        // qty rounded from 10.890923 to 10 by lot_size=1
+        assert!(mgr.get_order(&0).unwrap().qty.eq(&Decimal::from(10)));
+        assert!(mgr.get_order(&0).unwrap().filled_qty.eq(&Decimal::from(10)));
     }
 
     #[test]
@@ -506,13 +519,15 @@ mod tests {
             OrderRequest::new(Side::Buy, 10.0, Some(100.0), crate::types::OrderType::Limit);
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        mgr.new_order(buy_order);
+        mgr.new_order(buy_order, Decimal::from(100));
 
         // Fill the order: trade consumes the level, level update triggers fill
         let trade = Event::new(EVENT_TRADE_SELL, 100, "100.0", "110.0");
         mgr.update_trade(trade);
         let update1 = Event::new(EVENT_UPDATE_LEVEL_BID, 100, "100.0", "10.0");
         mgr.update_level(&update1, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Buy, 100, Decimal::from(10));
 
         assert_eq!(mgr.get_position(), Decimal::from(10));
         assert_eq!(fill_tracker.len(), 1);
@@ -520,11 +535,45 @@ mod tests {
         // Second level update at the same price — should NOT add to position
         let update2 = Event::new(EVENT_UPDATE_LEVEL_BID, 200, "100.0", "5.0");
         mgr.update_level(&update2, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Buy, 100, Decimal::from(5));
 
         // Position must still be 10, not 20
         assert_eq!(mgr.get_position(), Decimal::from(10));
         // fill_tracker should still have just 1 entry
         assert_eq!(fill_tracker.len(), 1);
+    }
+
+    #[test]
+    fn small_order_does_not_fill_from_small_trade_without_cancellations() {
+        // Regression: cum_qty_chg was initialised to order qty (e.g. 1) instead
+        // of level qty (e.g. 100). A small trade at the level would push
+        // cum_qty_chg negative (1 − 2 = −1) and trigger a fill even though
+        // the order was at the back of a 100-deep queue.
+        //
+        // With the fix, cum_qty_chg starts at 100, so a trade of 2 leaves it
+        // at 98 — nowhere near filling.
+        let (ob, tick_size, lot_size) = l2_orderbook();
+        let mut fill_tracker = Vec::new();
+
+        let buy_order =
+            OrderRequest::new(Side::Buy, 1.0, Some(100.0), crate::types::OrderType::Limit);
+
+        let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
+        mgr.new_order(buy_order, Decimal::from(100));
+
+        // A small trade (2 out of 100) should not fill an order at the back.
+        let trade = Event::new(EVENT_TRADE_SELL, 200, "100.0", "2.0");
+        mgr.update_trade(trade);
+        let update = Event::new(EVENT_UPDATE_LEVEL_BID, 200, "100.0", "98.0");
+        mgr.update_level(&update, &mut fill_tracker, &ob);
+        ob.borrow_mut()
+            .update_level(Side::Buy, 100, Decimal::from(98));
+
+        assert!(
+            fill_tracker.is_empty(),
+            "order at the back of a 100-deep queue must not fill from 2 units of trade"
+        );
     }
 
     #[test]
@@ -538,7 +587,7 @@ mod tests {
             OrderRequest::new(Side::Buy, 10.0, Some(100.0), crate::types::OrderType::Limit);
 
         let mut mgr = OrderManager::new_with_level_chg_fill(tick_size, lot_size);
-        let oid = mgr.new_order(buy_order);
+        let oid = mgr.new_order(buy_order, Decimal::from(100));
 
         // Cancel the order
         mgr.cancel_order(&oid).unwrap();
