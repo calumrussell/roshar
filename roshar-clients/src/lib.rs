@@ -1,3 +1,4 @@
+pub mod aster;
 pub mod binance;
 pub mod bybit;
 pub mod constants;
@@ -5,7 +6,10 @@ pub mod derive;
 pub mod http;
 pub mod hyperliquid;
 pub mod kraken;
+pub mod lighter;
 pub mod okx;
+pub mod pacifica;
+pub mod paradex;
 pub mod polymarket;
 pub(crate) mod ws;
 
@@ -47,3 +51,29 @@ pub use derive::{
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;
+
+// Re-export Aster types
+pub use aster::{AsterApi, AsterClient, AsterMarketApi};
+pub use roshar_types::aster::{
+    AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr,
+};
+
+// Re-export Pacifica types
+pub use pacifica::{PacificaApi, PacificaClient, PacificaMarketApi};
+pub use roshar_types::pacifica::{
+    PacificaFundingRate, PacificaKline, PacificaMarket, PacificaOrderBook, PacificaTicker,
+    PacificaTrade,
+};
+
+// Re-export Lighter types
+pub use lighter::{LighterApi, LighterClient, LighterMarketApi};
+pub use roshar_types::lighter::{
+    LighterFundingRate, LighterMarket, LighterMarketDetail, LighterOrderBook, LighterTrade,
+};
+
+// Re-export Paradex types
+pub use paradex::{ParadexApi, ParadexClient, ParadexMarketApi};
+pub use roshar_types::paradex::{
+    ParadexFundingEntry, ParadexKline, ParadexMarket, ParadexMarketSummary, ParadexOrderBook,
+    ParadexTrade,
+};

@@ -5,6 +5,10 @@ pub enum WebsocketSupportedExchanges {
     Kraken,
     Binance,
     Okx,
+    Aster,
+    Pacifica,
+    Lighter,
+    Paradex,
 }
 
 impl WebsocketSupportedExchanges {
@@ -21,6 +25,18 @@ impl WebsocketSupportedExchanges {
                 crate::binance::BinanceWssMessage::ping().to_json()
             }
             WebsocketSupportedExchanges::Okx => crate::okx::OkxWssMessage::ping(),
+            WebsocketSupportedExchanges::Aster => {
+                crate::aster::AsterWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                crate::pacifica::PacificaWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Lighter => {
+                crate::lighter::LighterWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Paradex => {
+                crate::paradex::ParadexWssMessage::ping().to_json()
+            }
         }
     }
 
@@ -40,6 +56,20 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Okx => {
                 crate::okx::OkxWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Aster => {
+                crate::aster::AsterWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                crate::pacifica::PacificaWssMessage::depth(coin).to_json()
+            }
+            // Lighter uses integer market indices rather than symbol strings;
+            // callers should use LighterClient::subscribe_depth directly.
+            WebsocketSupportedExchanges::Lighter => {
+                crate::lighter::LighterWssMessage::depth(0).to_json()
+            }
+            WebsocketSupportedExchanges::Paradex => {
+                crate::paradex::ParadexWssMessage::depth(coin).to_json()
             }
         }
     }
@@ -61,6 +91,18 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Okx => {
                 crate::okx::OkxWssMessage::trades(coin).to_json()
             }
+            WebsocketSupportedExchanges::Aster => {
+                crate::aster::AsterWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                crate::pacifica::PacificaWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Lighter => {
+                crate::lighter::LighterWssMessage::trades(0).to_json()
+            }
+            WebsocketSupportedExchanges::Paradex => {
+                crate::paradex::ParadexWssMessage::trades(coin).to_json()
+            }
         }
     }
 
@@ -75,6 +117,12 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Binance => Some(
                 crate::binance::BinanceWssMessage::batch_candles(&[coin.to_string()]).to_json(),
             ),
+            WebsocketSupportedExchanges::Aster => {
+                Some(crate::aster::AsterWssMessage::klines(coin).to_json())
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                Some(crate::pacifica::PacificaWssMessage::candles(coin).to_json())
+            }
             _ => None,
         }
     }
@@ -109,6 +157,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => "wss://futures.kraken.com/ws/v1",
             WebsocketSupportedExchanges::Binance => "wss://fstream.binance.com/ws",
             WebsocketSupportedExchanges::Okx => "wss://ws.okx.com:8443/ws/v5/public",
+            WebsocketSupportedExchanges::Aster => "wss://fstream.asterdex.com",
+            WebsocketSupportedExchanges::Pacifica => "wss://ws.pacifica.fi/ws",
+            WebsocketSupportedExchanges::Lighter => "wss://mainnet.zklighter.elliot.ai/stream",
+            WebsocketSupportedExchanges::Paradex => "wss://ws.api.prod.paradex.trade/v1",
         }
     }
 
@@ -120,6 +172,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => 30,
             WebsocketSupportedExchanges::Binance => 30,
             WebsocketSupportedExchanges::Okx => 20,
+            WebsocketSupportedExchanges::Aster => 10,
+            WebsocketSupportedExchanges::Pacifica => 30,
+            WebsocketSupportedExchanges::Lighter => 90,
+            WebsocketSupportedExchanges::Paradex => 30,
         }
     }
 
@@ -131,6 +187,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => 15,
             WebsocketSupportedExchanges::Binance => 15,
             WebsocketSupportedExchanges::Okx => 10,
+            WebsocketSupportedExchanges::Aster => 10,
+            WebsocketSupportedExchanges::Pacifica => 10,
+            WebsocketSupportedExchanges::Lighter => 10,
+            WebsocketSupportedExchanges::Paradex => 10,
         }
     }
 
@@ -142,6 +202,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => 10000,
             WebsocketSupportedExchanges::Binance => 5000,
             WebsocketSupportedExchanges::Okx => 5000,
+            WebsocketSupportedExchanges::Aster => 5000,
+            WebsocketSupportedExchanges::Pacifica => 5000,
+            WebsocketSupportedExchanges::Lighter => 5000,
+            WebsocketSupportedExchanges::Paradex => 5000,
         }
     }
 }
