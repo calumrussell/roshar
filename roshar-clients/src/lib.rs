@@ -1,9 +1,12 @@
 pub mod binance;
+pub mod bitget;
 pub mod bybit;
+pub mod coinbase;
 pub mod constants;
 pub mod http;
 pub mod hyperliquid;
 pub mod kraken;
+pub mod kucoin;
 pub mod okx;
 pub mod polymarket;
 pub(crate) mod ws;
@@ -40,3 +43,17 @@ pub use okx::{OkxApi, OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;
+
+// Re-export KuCoin types
+pub use kucoin::{KuCoinApi, KuCoinClient, KuCoinContract, KuCoinFundingRate, KuCoinMarketApi};
+
+// Re-export Bitget types
+pub use bitget::{
+    BitgetApi, BitgetClient, BitgetContract, BitgetHistoricalFundingRate, BitgetMarketApi,
+    BitgetTickerData,
+};
+
+// Re-export Coinbase types
+pub use coinbase::{
+    CoinbaseApi, CoinbaseClient, CoinbaseMarketApi, CoinbaseProduct, CoinbaseProductsResponse,
+};
