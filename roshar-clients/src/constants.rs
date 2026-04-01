@@ -22,3 +22,17 @@ pub const OKX_PRIVATE_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/private";
 
 // MEXC
 pub const MEX_WSS_URL: &str = "wss://wbs.mexc.com/ws";
+
+// Aster (BNB Chain perp DEX — Binance Futures API compatible)
+pub const ASTER_WSS_URL: &str = "wss://fstream.asterdex.com";
+
+// Pacifica (Solana perp DEX — Hyperliquid-style CLOB)
+pub const PACIFICA_WSS_URL: &str = "wss://ws.pacifica.fi/ws";
+
+// Lighter (ZK-rollup perp DEX)
+pub const LIGHTER_WSS_URL: &str = "wss://mainnet.zklighter.elliot.ai/stream";
+pub const LIGHTER_TESTNET_WSS_URL: &str = "wss://testnet.zklighter.elliot.ai/stream";
+
+// Paradex (StarkNet Appchain perp DEX)
+pub const PARADEX_WSS_URL: &str = "wss://ws.api.prod.paradex.trade/v1";
+pub const PARADEX_TESTNET_WSS_URL: &str = "wss://ws.api.testnet.paradex.trade/v1";
