@@ -1,13 +1,18 @@
+pub mod aster;
 pub mod binance;
 pub mod bitget;
 pub mod bybit;
 pub mod coinbase;
 pub mod constants;
+pub mod derive;
 pub mod http;
 pub mod hyperliquid;
 pub mod kraken;
 pub mod kucoin;
+pub mod lighter;
 pub mod okx;
+pub mod pacifica;
+pub mod paradex;
 pub mod polymarket;
 pub(crate) mod ws;
 
@@ -41,6 +46,12 @@ pub use kraken::{
 // Re-export OKX types
 pub use okx::{OkxApi, OkxClient, OkxMarketApi, OkxTickerData, OkxTickersResponse};
 
+// Re-export Derive types
+pub use derive::{
+    DeriveApi, DeriveClient, DeriveFundingRate, DeriveInstrument, DeriveOptionPricing,
+    DerivePerpDetails, DeriveStats, DeriveTicker,
+};
+
 // Re-export Polymarket types
 pub use polymarket::GammaApi;
 
@@ -56,4 +67,30 @@ pub use bitget::{
 // Re-export Coinbase types
 pub use coinbase::{
     CoinbaseApi, CoinbaseClient, CoinbaseMarketApi, CoinbaseProduct, CoinbaseProductsResponse,
+};
+
+// Re-export Aster types
+pub use aster::{AsterApi, AsterClient, AsterMarketApi};
+pub use roshar_types::aster::{
+    AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr,
+};
+
+// Re-export Pacifica types
+pub use pacifica::{PacificaApi, PacificaClient, PacificaMarketApi};
+pub use roshar_types::pacifica::{
+    PacificaFundingRate, PacificaKline, PacificaMarket, PacificaOrderBook, PacificaTicker,
+    PacificaTrade,
+};
+
+// Re-export Lighter types
+pub use lighter::{LighterApi, LighterClient, LighterMarketApi};
+pub use roshar_types::lighter::{
+    LighterFundingRate, LighterMarket, LighterMarketDetail, LighterOrderBook, LighterTrade,
+};
+
+// Re-export Paradex types
+pub use paradex::{ParadexApi, ParadexClient, ParadexMarketApi};
+pub use roshar_types::paradex::{
+    ParadexFundingEntry, ParadexKline, ParadexMarket, ParadexMarketSummary, ParadexOrderBook,
+    ParadexTrade,
 };

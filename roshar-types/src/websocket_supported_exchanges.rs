@@ -8,6 +8,10 @@ pub enum WebsocketSupportedExchanges {
     KuCoin,
     Bitget,
     Coinbase,
+    Aster,
+    Pacifica,
+    Lighter,
+    Paradex,
 }
 
 impl WebsocketSupportedExchanges {
@@ -29,6 +33,18 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Bitget => crate::bitget::BitgetWssMessage::ping(),
             WebsocketSupportedExchanges::Coinbase => String::new(),
+            WebsocketSupportedExchanges::Aster => {
+                crate::aster::AsterWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                crate::pacifica::PacificaWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Lighter => {
+                crate::lighter::LighterWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Paradex => {
+                crate::paradex::ParadexWssMessage::ping().to_json()
+            }
         }
     }
 
@@ -57,6 +73,20 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Coinbase => {
                 crate::coinbase::CoinbaseWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Aster => {
+                crate::aster::AsterWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                crate::pacifica::PacificaWssMessage::depth(coin).to_json()
+            }
+            // Lighter uses integer market indices rather than symbol strings;
+            // callers should use LighterClient::subscribe_depth directly.
+            WebsocketSupportedExchanges::Lighter => {
+                crate::lighter::LighterWssMessage::depth(0).to_json()
+            }
+            WebsocketSupportedExchanges::Paradex => {
+                crate::paradex::ParadexWssMessage::depth(coin).to_json()
             }
         }
     }
@@ -87,6 +117,18 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Coinbase => {
                 crate::coinbase::CoinbaseWssMessage::trades(coin).to_json()
             }
+            WebsocketSupportedExchanges::Aster => {
+                crate::aster::AsterWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                crate::pacifica::PacificaWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Lighter => {
+                crate::lighter::LighterWssMessage::trades(0).to_json()
+            }
+            WebsocketSupportedExchanges::Paradex => {
+                crate::paradex::ParadexWssMessage::trades(coin).to_json()
+            }
         }
     }
 
@@ -101,11 +143,13 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Binance => Some(
                 crate::binance::BinanceWssMessage::batch_candles(&[coin.to_string()]).to_json(),
             ),
-            WebsocketSupportedExchanges::Kraken
-            | WebsocketSupportedExchanges::Okx
-            | WebsocketSupportedExchanges::KuCoin
-            | WebsocketSupportedExchanges::Bitget
-            | WebsocketSupportedExchanges::Coinbase => None,
+            WebsocketSupportedExchanges::Aster => {
+                Some(crate::aster::AsterWssMessage::klines(coin).to_json())
+            }
+            WebsocketSupportedExchanges::Pacifica => {
+                Some(crate::pacifica::PacificaWssMessage::candles(coin).to_json())
+            }
+            _ => None,
         }
     }
 
@@ -146,6 +190,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KuCoin => "wss://ws-api-futures.kucoin.com/endpoint",
             WebsocketSupportedExchanges::Bitget => "wss://ws.bitget.com/v2/ws/public",
             WebsocketSupportedExchanges::Coinbase => "wss://advanced-trade-ws.coinbase.com",
+            WebsocketSupportedExchanges::Aster => "wss://fstream.asterdex.com",
+            WebsocketSupportedExchanges::Pacifica => "wss://ws.pacifica.fi/ws",
+            WebsocketSupportedExchanges::Lighter => "wss://mainnet.zklighter.elliot.ai/stream",
+            WebsocketSupportedExchanges::Paradex => "wss://ws.api.prod.paradex.trade/v1",
         }
     }
 
@@ -161,6 +209,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KuCoin => 18,
             WebsocketSupportedExchanges::Bitget => 30,
             WebsocketSupportedExchanges::Coinbase => 30,
+            WebsocketSupportedExchanges::Aster => 10,
+            WebsocketSupportedExchanges::Pacifica => 30,
+            WebsocketSupportedExchanges::Lighter => 90,
+            WebsocketSupportedExchanges::Paradex => 30,
         }
     }
 
@@ -175,6 +227,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KuCoin => 10,
             WebsocketSupportedExchanges::Bitget => 15,
             WebsocketSupportedExchanges::Coinbase => 15,
+            WebsocketSupportedExchanges::Aster => 10,
+            WebsocketSupportedExchanges::Pacifica => 10,
+            WebsocketSupportedExchanges::Lighter => 10,
+            WebsocketSupportedExchanges::Paradex => 10,
         }
     }
 
@@ -189,6 +245,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::KuCoin => 5000,
             WebsocketSupportedExchanges::Bitget => 5000,
             WebsocketSupportedExchanges::Coinbase => 5000,
+            WebsocketSupportedExchanges::Aster => 5000,
+            WebsocketSupportedExchanges::Pacifica => 5000,
+            WebsocketSupportedExchanges::Lighter => 5000,
+            WebsocketSupportedExchanges::Paradex => 5000,
         }
     }
 }

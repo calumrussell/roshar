@@ -2,6 +2,7 @@ use std::panic;
 use std::str::FromStr;
 
 use anyhow::Result;
+use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::{dec, Decimal};
 
 use crate::types::{
@@ -119,16 +120,26 @@ impl<F: FillModel> Exchange<F> {
         let qty_by_lot_size = arbitrary_f64_qty_to_lot_size(decimal_qty, self.lot_size);
 
         let tick = price_to_tick(decimal_px, self.tick_size);
+        // Fill model must read prev_qty before the orderbook is updated.
+        self.order_manager
+            .update_level(&update, fill_tracker, &self.orderbook);
         self.orderbook
             .borrow_mut()
             .update_level(side, tick, qty_by_lot_size);
-        self.order_manager
-            .update_level(&update, fill_tracker, &self.orderbook);
     }
 
     pub fn execute_user_order(&mut self, req: OrderRequest) {
         //Lot size checks happen further down call stack in fill model
-        let oid = self.order_manager.new_order(req);
+        let level_qty = match (&req.typ, req.px) {
+            (OrderType::Limit, Some(px)) => {
+                let decimal_px =
+                    Decimal::from_f64(px).expect("Unable to parse order px to Decimal");
+                let tick = price_to_tick(decimal_px, self.tick_size);
+                self.orderbook.borrow().get_level(req.side.clone(), tick)
+            }
+            _ => Decimal::ZERO,
+        };
+        let oid = self.order_manager.new_order(req, level_qty);
 
         unsafe {
             let order_ptr = match self.order_manager.get_order_mut(&oid) {
