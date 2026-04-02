@@ -5,6 +5,9 @@ pub enum WebsocketSupportedExchanges {
     Kraken,
     Binance,
     Okx,
+    KuCoin,
+    Bitget,
+    Coinbase,
     Aster,
     Pacifica,
     Lighter,
@@ -25,6 +28,11 @@ impl WebsocketSupportedExchanges {
                 crate::binance::BinanceWssMessage::ping().to_json()
             }
             WebsocketSupportedExchanges::Okx => crate::okx::OkxWssMessage::ping(),
+            WebsocketSupportedExchanges::KuCoin => {
+                crate::kucoin::KuCoinWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Bitget => crate::bitget::BitgetWssMessage::ping(),
+            WebsocketSupportedExchanges::Coinbase => String::new(),
             WebsocketSupportedExchanges::Aster => {
                 crate::aster::AsterWssMessage::ping().to_json()
             }
@@ -56,6 +64,15 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Okx => {
                 crate::okx::OkxWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::KuCoin => {
+                crate::kucoin::KuCoinWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Bitget => {
+                crate::bitget::BitgetWssMessage::depth(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Coinbase => {
+                crate::coinbase::CoinbaseWssMessage::depth(coin).to_json()
             }
             WebsocketSupportedExchanges::Aster => {
                 crate::aster::AsterWssMessage::depth(coin).to_json()
@@ -90,6 +107,15 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Okx => {
                 crate::okx::OkxWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::KuCoin => {
+                crate::kucoin::KuCoinWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Bitget => {
+                crate::bitget::BitgetWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Coinbase => {
+                crate::coinbase::CoinbaseWssMessage::trades(coin).to_json()
             }
             WebsocketSupportedExchanges::Aster => {
                 crate::aster::AsterWssMessage::trades(coin).to_json()
@@ -149,7 +175,11 @@ impl WebsocketSupportedExchanges {
         }
     }
 
-    /// Get the websocket URL for this exchange
+    /// Get the websocket URL for this exchange.
+    ///
+    /// Note: KuCoin requires a short-lived token appended as a query parameter.
+    /// Use `KuCoinClient::get_ws_url()` to obtain the full authenticated URL.
+    /// The value returned here is the base server endpoint without a token.
     pub fn websocket_url(&self) -> &'static str {
         match self {
             WebsocketSupportedExchanges::Hyperliquid => "wss://api.hyperliquid.xyz/ws",
@@ -157,6 +187,9 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => "wss://futures.kraken.com/ws/v1",
             WebsocketSupportedExchanges::Binance => "wss://fstream.binance.com/ws",
             WebsocketSupportedExchanges::Okx => "wss://ws.okx.com:8443/ws/v5/public",
+            WebsocketSupportedExchanges::KuCoin => "wss://ws-api-futures.kucoin.com/endpoint",
+            WebsocketSupportedExchanges::Bitget => "wss://ws.bitget.com/v2/ws/public",
+            WebsocketSupportedExchanges::Coinbase => "wss://advanced-trade-ws.coinbase.com",
             WebsocketSupportedExchanges::Aster => "wss://fstream.asterdex.com",
             WebsocketSupportedExchanges::Pacifica => "wss://ws.pacifica.fi/ws",
             WebsocketSupportedExchanges::Lighter => "wss://mainnet.zklighter.elliot.ai/stream",
@@ -172,6 +205,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => 30,
             WebsocketSupportedExchanges::Binance => 30,
             WebsocketSupportedExchanges::Okx => 20,
+            // KuCoin recommends sending a ping every 18 seconds (pingInterval: 18000ms)
+            WebsocketSupportedExchanges::KuCoin => 18,
+            WebsocketSupportedExchanges::Bitget => 30,
+            WebsocketSupportedExchanges::Coinbase => 30,
             WebsocketSupportedExchanges::Aster => 10,
             WebsocketSupportedExchanges::Pacifica => 30,
             WebsocketSupportedExchanges::Lighter => 90,
@@ -187,6 +224,9 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => 15,
             WebsocketSupportedExchanges::Binance => 15,
             WebsocketSupportedExchanges::Okx => 10,
+            WebsocketSupportedExchanges::KuCoin => 10,
+            WebsocketSupportedExchanges::Bitget => 15,
+            WebsocketSupportedExchanges::Coinbase => 15,
             WebsocketSupportedExchanges::Aster => 10,
             WebsocketSupportedExchanges::Pacifica => 10,
             WebsocketSupportedExchanges::Lighter => 10,
@@ -202,6 +242,9 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Kraken => 10000,
             WebsocketSupportedExchanges::Binance => 5000,
             WebsocketSupportedExchanges::Okx => 5000,
+            WebsocketSupportedExchanges::KuCoin => 5000,
+            WebsocketSupportedExchanges::Bitget => 5000,
+            WebsocketSupportedExchanges::Coinbase => 5000,
             WebsocketSupportedExchanges::Aster => 5000,
             WebsocketSupportedExchanges::Pacifica => 5000,
             WebsocketSupportedExchanges::Lighter => 5000,

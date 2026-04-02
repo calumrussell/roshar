@@ -23,6 +23,21 @@ pub const OKX_PRIVATE_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/private";
 // MEXC
 pub const MEX_WSS_URL: &str = "wss://wbs.mexc.com/ws";
 
+// KuCoin Futures
+// Note: the actual connection URL is dynamic and must be obtained via
+// POST https://api-futures.kucoin.com/api/v1/bullet-public (token appended as ?token=...).
+// This constant is the base server endpoint for reference only.
+pub const KUCOIN_FUTURES_WSS_URL: &str = "wss://ws-api-futures.kucoin.com/endpoint";
+pub const KUCOIN_FUTURES_REST_URL: &str = "https://api-futures.kucoin.com";
+
+// Bitget (USDT-margined perpetuals)
+pub const BITGET_WSS_URL: &str = "wss://ws.bitget.com/v2/ws/public";
+pub const BITGET_REST_URL: &str = "https://api.bitget.com";
+
+// Coinbase Advanced Trade
+pub const COINBASE_WSS_URL: &str = "wss://advanced-trade-ws.coinbase.com";
+pub const COINBASE_REST_URL: &str = "https://api.coinbase.com";
+
 // Derive (formerly Lyra)
 pub const DERIVE_WSS_URL: &str = "wss://api.lyra.finance/ws";
 

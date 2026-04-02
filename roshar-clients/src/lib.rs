@@ -1,11 +1,14 @@
 pub mod aster;
 pub mod binance;
+pub mod bitget;
 pub mod bybit;
+pub mod coinbase;
 pub mod constants;
 pub mod derive;
 pub mod http;
 pub mod hyperliquid;
 pub mod kraken;
+pub mod kucoin;
 pub mod lighter;
 pub mod okx;
 pub mod pacifica;
@@ -51,6 +54,20 @@ pub use derive::{
 
 // Re-export Polymarket types
 pub use polymarket::GammaApi;
+
+// Re-export KuCoin types
+pub use kucoin::{KuCoinApi, KuCoinClient, KuCoinContract, KuCoinFundingRate, KuCoinMarketApi};
+
+// Re-export Bitget types
+pub use bitget::{
+    BitgetApi, BitgetClient, BitgetContract, BitgetHistoricalFundingRate, BitgetMarketApi,
+    BitgetTickerData,
+};
+
+// Re-export Coinbase types
+pub use coinbase::{
+    CoinbaseApi, CoinbaseClient, CoinbaseMarketApi, CoinbaseProduct, CoinbaseProductsResponse,
+};
 
 // Re-export Aster types
 pub use aster::{AsterApi, AsterClient, AsterMarketApi};
