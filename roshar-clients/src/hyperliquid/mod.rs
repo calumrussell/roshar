@@ -312,6 +312,8 @@ pub trait HyperliquidApi {
         is_buy: bool,
         limit_px: f64,
         sz: f64,
+        reduce_only: bool,
+        order_type: HyperliquidOrderType,
     ) -> Result<(), String>;
     async fn get_all_funding_rates_with_size(&self)
         -> Result<Vec<(String, f64, f64, f64)>, String>;
@@ -470,6 +472,8 @@ impl HyperliquidApi for HyperliquidClient {
         is_buy: bool,
         limit_px: f64,
         sz: f64,
+        reduce_only: bool,
+        order_type: HyperliquidOrderType,
     ) -> Result<(), String> {
         let params = ModifyOrderParams {
             oid,
@@ -477,8 +481,8 @@ impl HyperliquidApi for HyperliquidClient {
             is_buy,
             limit_px,
             sz,
-            reduce_only: false,
-            order_type: HyperliquidOrderType::Gtc,
+            reduce_only,
+            order_type,
         };
 
         self.api
