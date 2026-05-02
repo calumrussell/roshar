@@ -54,3 +54,7 @@ pub const LIGHTER_TESTNET_WSS_URL: &str = "wss://testnet.zklighter.elliot.ai/str
 // Paradex (StarkNet Appchain perp DEX)
 pub const PARADEX_WSS_URL: &str = "wss://ws.api.prod.paradex.trade/v1";
 pub const PARADEX_TESTNET_WSS_URL: &str = "wss://ws.api.testnet.paradex.trade/v1";
+
+// Deribit
+pub const DERIBIT_WSS_URL: &str = "wss://www.deribit.com/ws/api/v2";
+pub const DERIBIT_TESTNET_WSS_URL: &str = "wss://test.deribit.com/ws/api/v2";

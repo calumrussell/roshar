@@ -149,7 +149,9 @@ pub struct AsterKline {
 impl<'de> Deserialize<'de> for AsterKline {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let arr: serde_json::Value = Deserialize::deserialize(deserializer)?;
-        let a = arr.as_array().ok_or_else(|| serde::de::Error::custom("expected array"))?;
+        let a = arr
+            .as_array()
+            .ok_or_else(|| serde::de::Error::custom("expected array"))?;
         Ok(Self {
             open_time: a[0].as_i64().unwrap_or(0),
             open: a[1].as_str().unwrap_or("").to_string(),
