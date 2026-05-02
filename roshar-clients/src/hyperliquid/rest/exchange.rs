@@ -223,12 +223,21 @@ impl ExchangeApi {
         self.wallet
             .get_or_try_init(|| async {
                 let private_key = if self.is_prod {
-                    std::env::var("HYPERLIQUID_PRIVATE_KEY")
-                        .map_err(|_| anyhow!("HYPERLIQUID_PRIVATE_KEY environment variable not set"))?
+                    std::env::var("HYPERLIQUID_API_PRIVATE_KEY")
+                        .or_else(|_| std::env::var("HYPERLIQUID_PRIVATE_KEY"))
+                        .map_err(|_| {
+                            anyhow!(
+                                "Neither HYPERLIQUID_API_PRIVATE_KEY nor HYPERLIQUID_PRIVATE_KEY is set"
+                            )
+                        })?
                 } else {
-                    std::env::var("HYPERLIQUID_TESTNET_PRIVATE_KEY").map_err(|_| {
-                        anyhow!("HYPERLIQUID_TESTNET_PRIVATE_KEY environment variable not set")
-                    })?
+                    std::env::var("HYPERLIQUID_TESTNET_API_PRIVATE_KEY")
+                        .or_else(|_| std::env::var("HYPERLIQUID_TESTNET_PRIVATE_KEY"))
+                        .map_err(|_| {
+                            anyhow!(
+                                "Neither HYPERLIQUID_TESTNET_API_PRIVATE_KEY nor HYPERLIQUID_TESTNET_PRIVATE_KEY is set"
+                            )
+                        })?
                 };
 
                 private_key
@@ -433,7 +442,7 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             action,
             signature: signature.into(),
             nonce,
-            vault_address: self.vault_address.clone(),
+            vault_address: vault_h160.map(|addr| format!("{:#x}", addr)),
         };
 
         let request_body = serde_json::to_string(&payload)
