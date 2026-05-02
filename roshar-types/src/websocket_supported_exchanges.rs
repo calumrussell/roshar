@@ -12,6 +12,7 @@ pub enum WebsocketSupportedExchanges {
     Pacifica,
     Lighter,
     Paradex,
+    Deribit,
 }
 
 impl WebsocketSupportedExchanges {
@@ -33,9 +34,7 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Bitget => crate::bitget::BitgetWssMessage::ping(),
             WebsocketSupportedExchanges::Coinbase => String::new(),
-            WebsocketSupportedExchanges::Aster => {
-                crate::aster::AsterWssMessage::ping().to_json()
-            }
+            WebsocketSupportedExchanges::Aster => crate::aster::AsterWssMessage::ping().to_json(),
             WebsocketSupportedExchanges::Pacifica => {
                 crate::pacifica::PacificaWssMessage::ping().to_json()
             }
@@ -44,6 +43,9 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Paradex => {
                 crate::paradex::ParadexWssMessage::ping().to_json()
+            }
+            WebsocketSupportedExchanges::Deribit => {
+                crate::deribit::DeribitWssMessage::test(1).to_json()
             }
         }
     }
@@ -62,9 +64,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Binance => {
                 crate::binance::BinanceWssMessage::batch_depth(&[coin.to_string()]).to_json()
             }
-            WebsocketSupportedExchanges::Okx => {
-                crate::okx::OkxWssMessage::depth(coin).to_json()
-            }
+            WebsocketSupportedExchanges::Okx => crate::okx::OkxWssMessage::depth(coin).to_json(),
             WebsocketSupportedExchanges::KuCoin => {
                 crate::kucoin::KuCoinWssMessage::depth(coin).to_json()
             }
@@ -88,6 +88,10 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Paradex => {
                 crate::paradex::ParadexWssMessage::depth(coin).to_json()
             }
+            WebsocketSupportedExchanges::Deribit => {
+                crate::deribit::DeribitWssMessage::subscribe(&[format!("book.{}.100ms", coin)], 1)
+                    .to_json()
+            }
         }
     }
 
@@ -105,9 +109,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Binance => {
                 crate::binance::BinanceWssMessage::batch_trades(&[coin.to_string()]).to_json()
             }
-            WebsocketSupportedExchanges::Okx => {
-                crate::okx::OkxWssMessage::trades(coin).to_json()
-            }
+            WebsocketSupportedExchanges::Okx => crate::okx::OkxWssMessage::trades(coin).to_json(),
             WebsocketSupportedExchanges::KuCoin => {
                 crate::kucoin::KuCoinWssMessage::trades(coin).to_json()
             }
@@ -128,6 +130,10 @@ impl WebsocketSupportedExchanges {
             }
             WebsocketSupportedExchanges::Paradex => {
                 crate::paradex::ParadexWssMessage::trades(coin).to_json()
+            }
+            WebsocketSupportedExchanges::Deribit => {
+                crate::deribit::DeribitWssMessage::subscribe(&[format!("trades.{}.100ms", coin)], 1)
+                    .to_json()
             }
         }
     }
@@ -194,6 +200,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Pacifica => "wss://ws.pacifica.fi/ws",
             WebsocketSupportedExchanges::Lighter => "wss://mainnet.zklighter.elliot.ai/stream",
             WebsocketSupportedExchanges::Paradex => "wss://ws.api.prod.paradex.trade/v1",
+            WebsocketSupportedExchanges::Deribit => "wss://www.deribit.com/ws/api/v2",
         }
     }
 
@@ -213,6 +220,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Pacifica => 30,
             WebsocketSupportedExchanges::Lighter => 90,
             WebsocketSupportedExchanges::Paradex => 30,
+            WebsocketSupportedExchanges::Deribit => 30,
         }
     }
 
@@ -231,6 +239,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Pacifica => 10,
             WebsocketSupportedExchanges::Lighter => 10,
             WebsocketSupportedExchanges::Paradex => 10,
+            WebsocketSupportedExchanges::Deribit => 10,
         }
     }
 
@@ -249,6 +258,7 @@ impl WebsocketSupportedExchanges {
             WebsocketSupportedExchanges::Pacifica => 5000,
             WebsocketSupportedExchanges::Lighter => 5000,
             WebsocketSupportedExchanges::Paradex => 5000,
+            WebsocketSupportedExchanges::Deribit => 5000,
         }
     }
 }

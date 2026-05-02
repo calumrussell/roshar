@@ -4,6 +4,7 @@ pub mod bitget;
 pub mod bybit;
 pub mod coinbase;
 pub mod constants;
+pub mod deribit;
 pub mod derive;
 pub mod http;
 pub mod hyperliquid;
@@ -68,6 +69,9 @@ pub use bitget::{
 pub use coinbase::{
     CoinbaseApi, CoinbaseClient, CoinbaseMarketApi, CoinbaseProduct, CoinbaseProductsResponse,
 };
+
+// Re-export Deribit types
+pub use deribit::DeribitClient;
 
 // Re-export Aster types
 pub use aster::{AsterApi, AsterClient, AsterMarketApi};
