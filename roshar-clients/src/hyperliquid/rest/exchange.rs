@@ -37,6 +37,95 @@ pub struct ScheduleCancel {
     pub time: Option<u64>,
 }
 
+#[derive(Serialize, Debug, Clone)]
+struct WireOrderRequest {
+    #[serde(rename = "a")]
+    asset: u32,
+    #[serde(rename = "b")]
+    is_buy: bool,
+    #[serde(rename = "p")]
+    limit_px: String,
+    #[serde(rename = "s")]
+    sz: String,
+    #[serde(rename = "r")]
+    reduce_only: bool,
+    #[serde(rename = "t")]
+    order_type: WireClientOrder,
+    #[serde(rename = "c", skip_serializing_if = "Option::is_none")]
+    cloid: Option<String>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(untagged)]
+enum WireClientOrder {
+    Limit { limit: WireLimit },
+    Trigger { trigger: WireTrigger },
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct WireLimit {
+    tif: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct WireTrigger {
+    is_market: bool,
+    trigger_px: String,
+    tpsl: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct WireBulkOrder {
+    orders: Vec<WireOrderRequest>,
+    grouping: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct WireCancelRequest {
+    #[serde(rename = "a")]
+    asset: u32,
+    #[serde(rename = "o")]
+    oid: u64,
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct WireBulkCancel {
+    cancels: Vec<WireCancelRequest>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct WireModify {
+    oid: u64,
+    order: WireOrderRequest,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct WireUpdateLeverage {
+    asset: u32,
+    is_cross: bool,
+    leverage: u32,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct WireScheduleCancel {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    time: Option<u64>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "camelCase")]
+enum L1Action {
+    Order(WireBulkOrder),
+    Cancel(WireBulkCancel),
+    Modify(WireModify),
+    UpdateLeverage(WireUpdateLeverage),
+    ScheduleCancel(WireScheduleCancel),
+}
+
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct ExchangePayload {
@@ -296,8 +385,8 @@ impl ExchangeApi {
         }
     }
 
-    fn signed_hash_payload(
-        action: &serde_json::Value,
+    fn signed_hash_payload<S: Serialize>(
+        action: &S,
         nonce: u64,
         vault_address: Option<H160>,
     ) -> Result<H256> {
@@ -439,7 +528,7 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
         Err(anyhow!("Unknown Hyperliquid asset '{asset}'"))
     }
 
-    async fn send_action(&self, action: serde_json::Value) -> Result<ExchangeResponseStatus> {
+    async fn send_action(&self, action: &L1Action) -> Result<ExchangeResponseStatus> {
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -453,11 +542,13 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
                     .map_err(|e| anyhow!("Invalid vault address format '{address}': {e}"))
             })
             .transpose()?;
-        let connection_id = Self::signed_hash_payload(&action, nonce, vault_h160)?;
+        let connection_id = Self::signed_hash_payload(action, nonce, vault_h160)?;
         let signature = self.sign_connection_id(connection_id).await?;
+        let action_value = serde_json::to_value(action)
+            .map_err(|e| anyhow!("Failed to serialize action payload: {e}"))?;
 
         let payload = ExchangePayload {
-            action,
+            action: action_value,
             signature: signature.into(),
             nonce,
             vault_address: vault_h160.map(|addr| format!("{:#x}", addr)),
@@ -515,40 +606,52 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
         order_type: HyperliquidOrderType,
     ) -> Result<ExchangeResponseStatus> {
         let asset_index = self.resolve_asset_index(asset).await?;
-        let order_type_json = match order_type {
-            HyperliquidOrderType::Alo => serde_json::json!({ "limit": { "tif": "Alo" }}),
-            HyperliquidOrderType::Ioc => serde_json::json!({ "limit": { "tif": "Ioc" }}),
-            HyperliquidOrderType::Gtc => serde_json::json!({ "limit": { "tif": "Gtc" }}),
-            HyperliquidOrderType::TriggerTp(is_market, trigger_px) => serde_json::json!({
-                "trigger": {
-                    "isMarket": is_market,
-                    "triggerPx": trigger_px.to_string(),
-                    "tpsl": "tp"
-                }
-            }),
-            HyperliquidOrderType::TriggerSl(is_market, trigger_px) => serde_json::json!({
-                "trigger": {
-                    "isMarket": is_market,
-                    "triggerPx": trigger_px.to_string(),
-                    "tpsl": "sl"
-                }
-            }),
+        let order_type_wire = match order_type {
+            HyperliquidOrderType::Alo => WireClientOrder::Limit {
+                limit: WireLimit {
+                    tif: "Alo".to_string(),
+                },
+            },
+            HyperliquidOrderType::Ioc => WireClientOrder::Limit {
+                limit: WireLimit {
+                    tif: "Ioc".to_string(),
+                },
+            },
+            HyperliquidOrderType::Gtc => WireClientOrder::Limit {
+                limit: WireLimit {
+                    tif: "Gtc".to_string(),
+                },
+            },
+            HyperliquidOrderType::TriggerTp(is_market, trigger_px) => WireClientOrder::Trigger {
+                trigger: WireTrigger {
+                    is_market,
+                    trigger_px: trigger_px.to_string(),
+                    tpsl: "tp".to_string(),
+                },
+            },
+            HyperliquidOrderType::TriggerSl(is_market, trigger_px) => WireClientOrder::Trigger {
+                trigger: WireTrigger {
+                    is_market,
+                    trigger_px: trigger_px.to_string(),
+                    tpsl: "sl".to_string(),
+                },
+            },
         };
 
-        let action = serde_json::json!({
-            "type": "order",
-            "orders": [{
-                "a": asset_index,
-                "b": is_buy,
-                "p": limit_px.to_string(),
-                "s": sz.to_string(),
-                "r": reduce_only,
-                "t": order_type_json
+        let action = L1Action::Order(WireBulkOrder {
+            orders: vec![WireOrderRequest {
+                asset: asset_index,
+                is_buy,
+                limit_px: limit_px.to_string(),
+                sz: sz.to_string(),
+                reduce_only,
+                order_type: order_type_wire,
+                cloid: None,
             }],
-            "grouping": "na"
+            grouping: "na".to_string(),
         });
 
-        self.send_action(action).await
+        self.send_action(&action).await
     }
 
     pub async fn cancel_order(
@@ -557,14 +660,13 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
         oid: u64,
     ) -> Result<ExchangeResponseStatus> {
         let asset_index = self.resolve_asset_index(asset).await?;
-        let action = serde_json::json!({
-            "type": "cancel",
-            "cancels": [{
-                "a": asset_index,
-                "o": oid
-            }]
+        let action = L1Action::Cancel(WireBulkCancel {
+            cancels: vec![WireCancelRequest {
+                asset: asset_index,
+                oid,
+            }],
         });
-        self.send_action(action).await
+        self.send_action(&action).await
     }
 
     pub async fn modify_order(
@@ -572,40 +674,52 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
         params: ModifyOrderParams,
     ) -> Result<ExchangeResponseStatus> {
         let asset_index = self.resolve_asset_index(&params.asset).await?;
-        let order_type_json = match params.order_type {
-            HyperliquidOrderType::Alo => serde_json::json!({ "limit": { "tif": "Alo" }}),
-            HyperliquidOrderType::Ioc => serde_json::json!({ "limit": { "tif": "Ioc" }}),
-            HyperliquidOrderType::Gtc => serde_json::json!({ "limit": { "tif": "Gtc" }}),
-            HyperliquidOrderType::TriggerTp(is_market, trigger_px) => serde_json::json!({
-                "trigger": {
-                    "isMarket": is_market,
-                    "triggerPx": trigger_px.to_string(),
-                    "tpsl": "tp"
-                }
-            }),
-            HyperliquidOrderType::TriggerSl(is_market, trigger_px) => serde_json::json!({
-                "trigger": {
-                    "isMarket": is_market,
-                    "triggerPx": trigger_px.to_string(),
-                    "tpsl": "sl"
-                }
-            }),
+        let order_type_wire = match params.order_type {
+            HyperliquidOrderType::Alo => WireClientOrder::Limit {
+                limit: WireLimit {
+                    tif: "Alo".to_string(),
+                },
+            },
+            HyperliquidOrderType::Ioc => WireClientOrder::Limit {
+                limit: WireLimit {
+                    tif: "Ioc".to_string(),
+                },
+            },
+            HyperliquidOrderType::Gtc => WireClientOrder::Limit {
+                limit: WireLimit {
+                    tif: "Gtc".to_string(),
+                },
+            },
+            HyperliquidOrderType::TriggerTp(is_market, trigger_px) => WireClientOrder::Trigger {
+                trigger: WireTrigger {
+                    is_market,
+                    trigger_px: trigger_px.to_string(),
+                    tpsl: "tp".to_string(),
+                },
+            },
+            HyperliquidOrderType::TriggerSl(is_market, trigger_px) => WireClientOrder::Trigger {
+                trigger: WireTrigger {
+                    is_market,
+                    trigger_px: trigger_px.to_string(),
+                    tpsl: "sl".to_string(),
+                },
+            },
         };
 
-        let action = serde_json::json!({
-            "type": "modify",
-            "oid": params.oid,
-            "order": {
-                "a": asset_index,
-                "b": params.is_buy,
-                "p": params.limit_px.to_string(),
-                "s": params.sz.to_string(),
-                "r": params.reduce_only,
-                "t": order_type_json
-            }
+        let action = L1Action::Modify(WireModify {
+            oid: params.oid,
+            order: WireOrderRequest {
+                asset: asset_index,
+                is_buy: params.is_buy,
+                limit_px: params.limit_px.to_string(),
+                sz: params.sz.to_string(),
+                reduce_only: params.reduce_only,
+                order_type: order_type_wire,
+                cloid: None,
+            },
         });
 
-        self.send_action(action).await
+        self.send_action(&action).await
     }
 
     pub async fn update_leverage(
@@ -615,26 +729,22 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
         is_cross: bool,
     ) -> Result<ExchangeResponseStatus> {
         let asset_index = self.resolve_asset_index(coin).await?;
-        let action = serde_json::json!({
-            "type": "updateLeverage",
-            "asset": asset_index,
-            "isCross": is_cross,
-            "leverage": leverage
+        let action = L1Action::UpdateLeverage(WireUpdateLeverage {
+            asset: asset_index,
+            is_cross,
+            leverage,
         });
-        self.send_action(action).await
+        self.send_action(&action).await
     }
 
     pub async fn schedule_cancel(&self, time_ms: u64) -> Result<ExchangeResponseStatus> {
         // Validate timing
         Self::validate_schedule_time(time_ms)?;
 
-        let action = ScheduleCancel {
-            type_field: "scheduleCancel".to_string(),
+        let action = L1Action::ScheduleCancel(WireScheduleCancel {
             time: Some(time_ms),
-        };
-        let action_value = serde_json::to_value(action)
-            .map_err(|e| anyhow!("Failed to serialize schedule cancel action: {e}"))?;
-        self.send_action(action_value).await
+        });
+        self.send_action(&action).await
     }
 
     async fn sign_connection_id(&self, connection_id: H256) -> Result<Signature> {
@@ -834,6 +944,40 @@ mod tests {
         assert_eq!(
             sig.to_string(),
             "1713c0fc661b792a50e8ffdd59b637b1ed172d9a3aa4d801d9d88646710fb74b33959f4d075a7ccbec9f2374a6da21ffa4448d58d0413a0d335775f680a881431c"
+        );
+    }
+
+    #[test]
+    fn test_order_action_signature_matches_sdk_vector() {
+        let wallet = "e908f86dbb4d55ac876378565aafeabc187f6690f046459397b17d9b9a19688e"
+            .parse::<LocalWallet>()
+            .unwrap();
+        let action = L1Action::Order(WireBulkOrder {
+            orders: vec![WireOrderRequest {
+                asset: 1,
+                is_buy: true,
+                limit_px: "2000.0".to_string(),
+                sz: "3.5".to_string(),
+                reduce_only: false,
+                order_type: WireClientOrder::Limit {
+                    limit: WireLimit {
+                        tif: "Ioc".to_string(),
+                    },
+                },
+                cloid: None,
+            }],
+            grouping: "na".to_string(),
+        });
+        let connection_id = ExchangeApi::signed_hash_payload(&action, 1_583_838, None).unwrap();
+        let mainnet_digest = ExchangeApi::l1_agent_eip712_hash(&L1Agent {
+            source: "a".to_string(),
+            connection_id,
+        });
+        let mainnet_sig = ExchangeApi::sign_hash_like_sdk(mainnet_digest, &wallet).unwrap();
+
+        assert_eq!(
+            mainnet_sig.to_string(),
+            "77957e58e70f43b6b68581f2dc42011fc384538a2e5b7bf42d5b936f19fbb67360721a8598727230f67080efee48c812a6a4442013fd3b0eed509171bef9f23f1c"
         );
     }
 }
