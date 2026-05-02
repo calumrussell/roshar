@@ -34,11 +34,40 @@ pub struct HistoricalFundingRate {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SpotBalance {
     pub coin: String,
-    pub token: u32,
+    #[serde(default)]
+    pub token: Option<u32>,
     pub hold: String,
     pub total: String,
     #[serde(rename = "entryNtl")]
     pub entry_ntl: String,
+}
+
+impl SpotBalance {
+    /// Converts outcome token notation (`+<encoding>`) into outcome order coin notation (`#<encoding>`).
+    /// Returns the original value for non-outcome coins.
+    pub fn normalized_order_coin(&self) -> String {
+        normalize_outcome_token_to_order_coin(&self.coin)
+    }
+}
+
+/// Converts outcome token notation (`+<encoding>`) into outcome order coin notation (`#<encoding>`).
+/// Returns the input unchanged for non-outcome coins.
+pub fn normalize_outcome_token_to_order_coin(coin: &str) -> String {
+    if let Some(rest) = coin.strip_prefix('+') {
+        format!("#{rest}")
+    } else {
+        coin.to_string()
+    }
+}
+
+/// Converts outcome order coin notation (`#<encoding>`) into outcome token notation (`+<encoding>`).
+/// Returns the input unchanged for non-outcome coins.
+pub fn normalize_outcome_order_coin_to_token(coin: &str) -> String {
+    if let Some(rest) = coin.strip_prefix('#') {
+        format!("+{rest}")
+    } else {
+        coin.to_string()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -352,5 +381,33 @@ mod tests {
         assert_eq!(market_data.coin, "PURR/USDC");
         assert_eq!(market_data.total_supply, "596541413.3415000439");
         assert_eq!(market_data.day_base_volume, "32247437.0");
+    }
+
+    #[test]
+    fn test_spot_clearinghouse_state_deserialises_with_optional_token() {
+        let json = r#"{
+            "balances": [
+                {"coin":"USDC","token":0,"total":"0.0000001","hold":"0.0","entryNtl":"0.0"},
+                {"coin":"+0","total":"187.0","hold":"0.0","entryNtl":"121.03849263"},
+                {"coin":"+1","total":"1.0","hold":"0.0","entryNtl":"0.35261391"}
+            ]
+        }"#;
+
+        let state: SpotClearinghouseState = serde_json::from_str(json).unwrap();
+        assert_eq!(state.balances.len(), 3);
+        assert_eq!(state.balances[0].coin, "USDC");
+        assert_eq!(state.balances[0].token, Some(0));
+        assert_eq!(state.balances[1].coin, "+0");
+        assert_eq!(state.balances[1].token, None);
+        assert_eq!(state.balances[2].coin, "+1");
+        assert_eq!(state.balances[2].token, None);
+    }
+
+    #[test]
+    fn test_outcome_coin_normalization_helpers() {
+        assert_eq!(normalize_outcome_token_to_order_coin("+1"), "#1");
+        assert_eq!(normalize_outcome_token_to_order_coin("USDC"), "USDC");
+        assert_eq!(normalize_outcome_order_coin_to_token("#1"), "+1");
+        assert_eq!(normalize_outcome_order_coin_to_token("USDC"), "USDC");
     }
 }

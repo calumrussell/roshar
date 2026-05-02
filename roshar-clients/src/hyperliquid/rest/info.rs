@@ -723,6 +723,23 @@ mod tests {
         assert_eq!(formatted, "0x1234567890123456789012345678901234567890");
     }
 
+    #[test]
+    fn test_user_spot_state_mixed_balances_deserialize() {
+        let payload = serde_json::json!({
+            "balances": [
+                {"coin":"USDC","token":0,"total":"0.0000001","hold":"0.0","entryNtl":"0.0"},
+                {"coin":"+0","total":"187.0","hold":"0.0","entryNtl":"121.03849263"},
+                {"coin":"+1","total":"1.0","hold":"0.0","entryNtl":"0.35261391"}
+            ]
+        });
+
+        let state: SpotClearinghouseState = serde_json::from_value(payload).unwrap();
+        assert_eq!(state.balances.len(), 3);
+        assert_eq!(state.balances[0].token, Some(0));
+        assert_eq!(state.balances[1].token, None);
+        assert_eq!(state.balances[2].token, None);
+    }
+
     #[tokio::test]
     async fn test_get_historical_funding_rates_pagination() {
         let end_time = chrono::Utc::now().timestamp_millis();
