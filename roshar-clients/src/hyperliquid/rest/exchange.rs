@@ -2,8 +2,9 @@
 
 use anyhow::{anyhow, Result};
 use ethers::abi::{encode, Token};
+use ethers::core::k256::{elliptic_curve::FieldBytes, Secp256k1};
 use ethers::signers::LocalWallet;
-use ethers::types::{H160, H256, Signature};
+use ethers::types::{H160, H256, Signature, U256};
 use roshar_types::{MetaAndAssetCtxs, SpotMetaAndAssetCtxs};
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
@@ -160,6 +161,23 @@ pub struct ExchangeApi {
 }
 
 impl ExchangeApi {
+    fn sign_hash_like_sdk(hash: H256, wallet: &LocalWallet) -> Result<Signature> {
+        // Match hyperliquid_rust_sdk signing path exactly:
+        // signer().sign_digest_recoverable(...) over the precomputed 32-byte digest.
+        let (sig, rec_id) = wallet
+            .signer()
+            .sign_prehash_recoverable(hash.as_bytes())
+            .map_err(|e| anyhow!("Failed to sign prehash: {e}"))?;
+
+        let v = u8::from(rec_id) as u64 + 27;
+        let r_bytes: FieldBytes<Secp256k1> = sig.r().into();
+        let s_bytes: FieldBytes<Secp256k1> = sig.s().into();
+        let r = U256::from_big_endian(r_bytes.as_slice());
+        let s = U256::from_big_endian(s_bytes.as_slice());
+
+        Ok(Signature { r, s, v })
+    }
+
     fn encode_outcome_asset_id(outcome_id: u32, side: u32) -> Result<u32> {
         if side > 1 {
             return Err(anyhow!(
@@ -627,14 +645,13 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             connection_id,
         });
 
-        wallet
-            .sign_hash(digest)
-            .map_err(|e| anyhow!("Signing failed: {e}"))
+        Self::sign_hash_like_sdk(digest, wallet)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
     use std::panic;
 
     use super::*;
@@ -778,5 +795,45 @@ mod tests {
             let error_message = format!("{e}");
             assert!(error_message.contains("at least 5 seconds"));
         }
+    }
+
+    #[test]
+    fn test_sign_l1_action_matches_sdk_mainnet_vector() {
+        let wallet = "e908f86dbb4d55ac876378565aafeabc187f6690f046459397b17d9b9a19688e"
+            .parse::<LocalWallet>()
+            .unwrap();
+        let connection_id =
+            H256::from_str("0xde6c4037798a4434ca03cd05f00e3b803126221375cd1e7eaaaf041768be06eb")
+                .unwrap();
+        let digest = ExchangeApi::l1_agent_eip712_hash(&L1Agent {
+            source: "a".to_string(),
+            connection_id,
+        });
+        let sig = ExchangeApi::sign_hash_like_sdk(digest, &wallet).unwrap();
+
+        assert_eq!(
+            sig.to_string(),
+            "fa8a41f6a3fa728206df80801a83bcbfbab08649cd34d9c0bfba7c7b2f99340f53a00226604567b98a1492803190d65a201d6805e5831b7044f17fd530aec7841c"
+        );
+    }
+
+    #[test]
+    fn test_sign_l1_action_matches_sdk_testnet_vector() {
+        let wallet = "e908f86dbb4d55ac876378565aafeabc187f6690f046459397b17d9b9a19688e"
+            .parse::<LocalWallet>()
+            .unwrap();
+        let connection_id =
+            H256::from_str("0xde6c4037798a4434ca03cd05f00e3b803126221375cd1e7eaaaf041768be06eb")
+                .unwrap();
+        let digest = ExchangeApi::l1_agent_eip712_hash(&L1Agent {
+            source: "b".to_string(),
+            connection_id,
+        });
+        let sig = ExchangeApi::sign_hash_like_sdk(digest, &wallet).unwrap();
+
+        assert_eq!(
+            sig.to_string(),
+            "1713c0fc661b792a50e8ffdd59b637b1ed172d9a3aa4d801d9d88646710fb74b33959f4d075a7ccbec9f2374a6da21ffa4448d58d0413a0d335775f680a881431c"
+        );
     }
 }
