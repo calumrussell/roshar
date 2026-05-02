@@ -347,6 +347,7 @@ pub trait HyperliquidApi {
         start_time: u64,
         end_time: Option<u64>,
     ) -> Result<Vec<roshar_types::HistoricalFundingRate>, String>;
+    async fn outcome_meta(&self) -> Result<serde_json::Value, String>;
     async fn get_open_orders(&self) -> Result<Vec<UserOrder>, String>;
 }
 
@@ -620,6 +621,14 @@ impl HyperliquidApi for HyperliquidClient {
             .get_historical_funding_rates(coin, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to fetch historical funding rates: {:?}", e))
+    }
+
+    /// Get outcome market metadata from exchange (REST API call)
+    async fn outcome_meta(&self) -> Result<serde_json::Value, String> {
+        self.info_api
+            .outcome_meta()
+            .await
+            .map_err(|e| format!("Failed to fetch outcome meta: {:?}", e))
     }
 
     /// Get full user spot state from exchange (REST API call)

@@ -457,6 +457,37 @@ impl InfoApi {
         Ok(meta_data)
     }
 
+    pub async fn outcome_meta(&self) -> Result<serde_json::Value> {
+        let url = format!("{}/info", self.base_url);
+
+        let request_body = serde_json::json!({
+            "type": "outcomeMeta"
+        });
+
+        let response = self
+            .client
+            .post(&url)
+            .await
+            .json(&request_body)
+            .send()
+            .await
+            .context("Failed to request outcome meta info")?;
+
+        if !response.status().is_success() {
+            anyhow::bail!(
+                "Outcome meta API request failed with status: {}",
+                response.status()
+            );
+        }
+
+        let outcome_meta_data: serde_json::Value = response
+            .json()
+            .await
+            .context("Failed to parse outcome meta response")?;
+
+        Ok(outcome_meta_data)
+    }
+
     pub async fn get_candle_snapshot(
         &self,
         coin: &str,
@@ -727,5 +758,18 @@ mod tests {
         }
 
         println!("Fetched {} funding rates (pagination working)", rates.len());
+    }
+
+    #[tokio::test]
+    #[ignore = "requires endpoint availability and network access"]
+    async fn test_outcome_meta() {
+        let info_api = InfoApi::production_with_client(create_test_client());
+
+        let outcome_meta_result = info_api.outcome_meta().await;
+        assert!(
+            outcome_meta_result.is_ok(),
+            "Failed to get outcomeMeta: {:?}",
+            outcome_meta_result.err()
+        );
     }
 }
