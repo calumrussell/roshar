@@ -7,5 +7,4 @@ pub(crate) use exchange::{ExchangeApi, ModifyOrderParams};
 pub(crate) use info::InfoApi;
 pub use metadata::{ExchangeMetadataHandle, ExchangeMetadataManager, SpotAssetInfo};
 
-// Re-export SDK types that users need
-pub use hyperliquid_rust_sdk::{ExchangeDataStatus, ExchangeResponseStatus};
+pub use exchange::{ExchangeDataStatus, ExchangeResponseStatus};

@@ -230,7 +230,7 @@ impl HyperliquidClient {
         let validator = OrderValidator::new();
 
         let api = if let Some(vault_addr) = config.wallet_address.as_ref() {
-            ExchangeApi::new_with_vault(config.is_mainnet, Some(format!("{:?}", vault_addr)))
+            ExchangeApi::new_with_vault(config.is_mainnet, Some(format!("{:#x}", vault_addr)))
         } else {
             ExchangeApi::new(config.is_mainnet)
         };
