@@ -14,6 +14,7 @@ pub mod lighter;
 pub mod okx;
 pub mod pacifica;
 pub mod paradex;
+pub mod phoenix;
 pub mod polymarket;
 pub(crate) mod ws;
 
@@ -97,4 +98,14 @@ pub use paradex::{ParadexApi, ParadexClient, ParadexMarketApi};
 pub use roshar_types::paradex::{
     ParadexFundingEntry, ParadexKline, ParadexMarket, ParadexMarketSummary, ParadexOrderBook,
     ParadexTrade,
+};
+
+// Re-export Phoenix types
+pub use phoenix::{PhoenixApi, PhoenixClient, PhoenixMarketApi};
+pub use roshar_types::phoenix::{
+    PhoenixAllMids, PhoenixCandle, PhoenixCollateralEvent, PhoenixExchange, PhoenixExchangeKeys,
+    PhoenixFundingHistory, PhoenixFundingRate, PhoenixLeverageTier, PhoenixLimitOrder,
+    PhoenixMarketConfig, PhoenixMarketStats, PhoenixOrderBook, PhoenixOrderHistory,
+    PhoenixPaginatedResponse, PhoenixPnlPoint, PhoenixPosition, PhoenixTradeHistory,
+    PhoenixTraderState, PhoenixWssMessage,
 };

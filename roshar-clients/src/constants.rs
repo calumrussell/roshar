@@ -58,3 +58,7 @@ pub const PARADEX_TESTNET_WSS_URL: &str = "wss://ws.api.testnet.paradex.trade/v1
 // Deribit
 pub const DERIBIT_WSS_URL: &str = "wss://www.deribit.com/ws/api/v2";
 pub const DERIBIT_TESTNET_WSS_URL: &str = "wss://test.deribit.com/ws/api/v2";
+
+// Phoenix (Solana perp DEX — on-chain CLOB)
+pub const PHOENIX_WSS_URL: &str = "wss://perp-api.phoenix.trade/v1/ws";
+pub const PHOENIX_REST_URL: &str = "https://perp-api.phoenix.trade";
