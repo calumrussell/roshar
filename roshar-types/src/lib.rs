@@ -11,6 +11,7 @@ pub mod lighter;
 pub mod okx;
 pub mod pacifica;
 pub mod paradex;
+pub mod phoenix;
 pub mod polymarket;
 
 mod websocket_supported_exchanges;
