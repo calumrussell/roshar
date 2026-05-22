@@ -335,8 +335,12 @@ fn decode_create_response(
             order_id: order.oid.to_string(),
         }),
         OrderStatus::Filled(order) => {
-            let filled_qty = order.total_sz.parse::<f64>().unwrap_or(0.0);
-            let avg_price = order.avg_px.parse::<f64>().unwrap_or(0.0);
+            let filled_qty = order.total_sz.parse::<f64>().map_err(|e| {
+                format!("Failed to parse filled size {:?}: {}", order.total_sz, e)
+            })?;
+            let avg_price = order.avg_px.parse::<f64>().map_err(|e| {
+                format!("Failed to parse avg price {:?}: {}", order.avg_px, e)
+            })?;
             let remaining_qty = requested_sz - filled_qty;
             if remaining_qty > 1e-10 {
                 Ok(OrderResult::PartialFill {
