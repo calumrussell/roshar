@@ -18,6 +18,53 @@ pub enum HyperliquidOrderType {
     TriggerSl(bool, f64),
 }
 
+/// POST a JSON body to a Hyperliquid info endpoint using a non-rate-limited
+/// `reqwest::Client`. Mirrors `info::post_info_json`: debug-logs request and
+/// response bodies, error-logs and bails on non-2xx with the response body
+/// and outgoing request included.
+async fn info_post_json<B, T>(
+    client: &reqwest::Client,
+    url: &str,
+    body: &B,
+    label: &str,
+) -> Result<T>
+where
+    B: serde::Serialize,
+    T: serde::de::DeserializeOwned,
+{
+    let body_str = serde_json::to_string(body)
+        .map_err(|e| anyhow!("Failed to serialize {label} request: {e}"))?;
+    log::debug!("POST {url} ({label}) body={body_str}");
+
+    let response = client
+        .post(url)
+        .header("Content-Type", "application/json")
+        .body(body_str.clone())
+        .send()
+        .await
+        .map_err(|e| anyhow!("Failed to send {label} request: {e}"))?;
+
+    let status = response.status();
+    let text = response
+        .text()
+        .await
+        .map_err(|e| anyhow!("Failed to read {label} response body: {e}"))?;
+
+    if !status.is_success() {
+        log::error!(
+            "{label} request failed: status={status} body={text} request={body_str}"
+        );
+        return Err(anyhow!(
+            "{label} request failed with status {status}: {text}"
+        ));
+    }
+
+    log::debug!("{label} response: status={status} body={text}");
+
+    serde_json::from_str(&text)
+        .map_err(|e| anyhow!("Failed to parse {label} response: {e} (body: {text})"))
+}
+
 pub struct ModifyOrderParams {
     pub oid: u64,
     pub asset: String,
@@ -467,24 +514,8 @@ impl ExchangeApi {
         let client = crate::http::get_http_client();
         let info_url = self.info_url();
 
-        let perp_response = client
-            .post(info_url)
-            .json(&serde_json::json!({ "type": "metaAndAssetCtxs" }))
-            .send()
-            .await
-            .map_err(|e| anyhow!("Failed to fetch perp metadata: {e}"))?;
-
-        if !perp_response.status().is_success() {
-            return Err(anyhow!(
-                "Perp metadata request failed with status {}",
-                perp_response.status()
-            ));
-        }
-
-        let perp_meta: MetaAndAssetCtxs = perp_response
-            .json()
-            .await
-            .map_err(|e| anyhow!("Failed to parse perp metadata: {e}"))?;
+        let perp_meta: MetaAndAssetCtxs =
+            info_post_json(client, info_url, &serde_json::json!({ "type": "metaAndAssetCtxs" }), "metaAndAssetCtxs (resolve_asset_index)").await?;
 
         if let Some((idx, _)) = perp_meta
             .0
@@ -502,24 +533,8 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             return Ok(idx as u32);
         }
 
-        let spot_response = client
-            .post(info_url)
-            .json(&serde_json::json!({ "type": "spotMetaAndAssetCtxs" }))
-            .send()
-            .await
-            .map_err(|e| anyhow!("Failed to fetch spot metadata: {e}"))?;
-
-        if !spot_response.status().is_success() {
-            return Err(anyhow!(
-                "Spot metadata request failed with status {}",
-                spot_response.status()
-            ));
-        }
-
-        let spot_meta: SpotMetaAndAssetCtxs = spot_response
-            .json()
-            .await
-            .map_err(|e| anyhow!("Failed to parse spot metadata: {e}"))?;
+        let spot_meta: SpotMetaAndAssetCtxs =
+            info_post_json(client, info_url, &serde_json::json!({ "type": "spotMetaAndAssetCtxs" }), "spotMetaAndAssetCtxs (resolve_asset_index)").await?;
 
         if let Some(asset_info) = spot_meta.0.universe.iter().find(|spot| spot.name == asset) {
             return Ok(10_000 + asset_info.index);

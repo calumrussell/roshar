@@ -10,6 +10,53 @@ use roshar_types::{
     SpotClearinghouseState, SpotMarketData, SpotMetaAndAssetCtxs, UserOrder, UserPerpetualsState,
 };
 
+/// POST a JSON body to `{base_url}/info`, parse the response as `T`.
+/// Logs the outgoing request and incoming response at `debug`, and on non-2xx
+/// emits an `error!` log carrying both response body and outgoing request,
+/// then bails with the same context.
+async fn post_info_json<B, T>(
+    client: &RateLimitedClient,
+    base_url: &str,
+    body: &B,
+    label: &str,
+) -> Result<T>
+where
+    B: serde::Serialize,
+    T: serde::de::DeserializeOwned,
+{
+    let url = format!("{}/info", base_url);
+    let body_str = serde_json::to_string(body)
+        .with_context(|| format!("Failed to serialize {label} request"))?;
+    log::debug!("POST {url} ({label}) body={body_str}");
+
+    let response = client
+        .post(&url)
+        .await
+        .header("Content-Type", "application/json")
+        .body(body_str.clone())
+        .send()
+        .await
+        .with_context(|| format!("Failed to send {label} request"))?;
+
+    let status = response.status();
+    let text = response
+        .text()
+        .await
+        .with_context(|| format!("Failed to read {label} response body"))?;
+
+    if !status.is_success() {
+        log::error!(
+            "{label} request failed: status={status} body={text} request={body_str}"
+        );
+        anyhow::bail!("{label} request failed with status {status}: {text}");
+    }
+
+    log::debug!("{label} response: status={status} body={text}");
+
+    serde_json::from_str(&text)
+        .with_context(|| format!("Failed to parse {label} response (body={text})"))
+}
+
 pub struct InfoApi {
     base_url: String,
     client: std::sync::Arc<RateLimitedClient>,
@@ -41,20 +88,15 @@ impl InfoApi {
     }
 
     pub async fn get_spot_meta_and_asset_ctxs(&self) -> Result<SpotMetaAndAssetCtxs> {
-        let url = format!("{}/info", self.base_url);
-
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&InfoApiRequest {
+        post_info_json(
+            &self.client,
+            &self.base_url,
+            &InfoApiRequest {
                 typ: "spotMetaAndAssetCtxs".to_string(),
-            })
-            .send()
-            .await?;
-
-        let meta: SpotMetaAndAssetCtxs = response.json().await?;
-        Ok(meta)
+            },
+            "spotMetaAndAssetCtxs",
+        )
+        .await
     }
 
     pub async fn get_info_spot(&self) -> Result<HashMap<String, SpotMarketData>> {
@@ -77,19 +119,15 @@ impl InfoApi {
     }
 
     pub async fn get_info(&self) -> Result<HashMap<String, AssetInfo>> {
-        let url = format!("{}/info", self.base_url);
-
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&InfoApiRequest {
+        let meta: MetaAndAssetCtxs = post_info_json(
+            &self.client,
+            &self.base_url,
+            &InfoApiRequest {
                 typ: "metaAndAssetCtxs".to_string(),
-            })
-            .send()
-            .await?;
-
-        let meta: MetaAndAssetCtxs = response.json().await?;
+            },
+            "metaAndAssetCtxs",
+        )
+        .await?;
 
         let mut res = HashMap::new();
         for (i, universe_coin) in meta.0.universe.iter().enumerate() {
@@ -105,19 +143,15 @@ impl InfoApi {
     }
 
     pub async fn get_all_funding_rates_with_size(&self) -> Result<Vec<(String, f64, f64, f64)>> {
-        let url = format!("{}/info", self.base_url);
-
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&InfoApiRequest {
+        let meta: MetaAndAssetCtxs = post_info_json(
+            &self.client,
+            &self.base_url,
+            &InfoApiRequest {
                 typ: "metaAndAssetCtxs".to_string(),
-            })
-            .send()
-            .await?;
-
-        let meta: MetaAndAssetCtxs = response.json().await?;
+            },
+            "metaAndAssetCtxs",
+        )
+        .await?;
 
         let mut funding_rates = Vec::new();
         for (i, universe_coin) in meta.0.universe.iter().enumerate() {
@@ -164,30 +198,13 @@ impl InfoApi {
     }
 
     pub async fn get_user_orders(&self, user_address: &str) -> Result<Vec<UserOrder>> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "openOrders",
             "user": user_address
         });
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request user orders")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!("Info API request failed with status: {}", response.status());
-        }
-
-        let orders_data: serde_json::Value = response
-            .json()
-            .await
-            .context("Failed to parse orders response")?;
+        let orders_data: serde_json::Value =
+            post_info_json(&self.client, &self.base_url, &request_body, "openOrders").await?;
         let mut user_orders = Vec::new();
         if let Some(orders) = orders_data.as_array() {
             for order in orders {
@@ -232,28 +249,36 @@ impl InfoApi {
             "user": user_address,
             "startTime": 0
         });
+        let body_str = serde_json::to_string(&request_body)?;
+        log::debug!("POST {url} (userFunding) body={body_str}");
 
         let response = self
             .client
             .post(&url)
             .await
-            .json(&request_body)
+            .header("Content-Type", "application/json")
+            .body(body_str.clone())
             .send()
             .await
             .context("Failed to request funding history")?;
 
-        if !response.status().is_success() {
+        let status = response.status();
+        let text = response
+            .text()
+            .await
+            .context("Failed to read funding history response body")?;
+
+        if !status.is_success() {
             log::warn!(
-                "Funding history endpoint not available (status: {}). This feature may not be implemented in the Hyperliquid API yet.",
-                response.status()
+                "Funding history endpoint not available (status={status} body={text}). This feature may not be implemented in the Hyperliquid API yet."
             );
             return Ok(vec![]);
         }
 
-        let funding_data: serde_json::Value = response
-            .json()
-            .await
-            .context("Failed to parse funding response")?;
+        log::debug!("userFunding response: status={status} body={text}");
+
+        let funding_data: serde_json::Value = serde_json::from_str(&text)
+            .with_context(|| format!("Failed to parse funding response (body={text})"))?;
         let mut funding_history = Vec::new();
         if let Some(fundings) = funding_data.as_array() {
             for funding in fundings {
@@ -295,7 +320,6 @@ impl InfoApi {
         start_time: u64,
         end_time: Option<u64>,
     ) -> Result<Vec<HistoricalFundingRate>> {
-        let url = format!("{}/info", self.base_url);
         let mut all_rates = Vec::new();
         let mut current_start = start_time;
 
@@ -311,26 +335,13 @@ impl InfoApi {
                     serde_json::Value::Number(serde_json::Number::from(end_time));
             }
 
-            let response = self
-                .client
-                .post(&url)
-                .await
-                .json(&request_body)
-                .send()
-                .await
-                .context("Failed to request historical funding rates")?;
-
-            if !response.status().is_success() {
-                anyhow::bail!(
-                    "Historical funding rates endpoint failed (status: {})",
-                    response.status()
-                );
-            }
-
-            let funding_rates: Vec<HistoricalFundingRate> = response
-                .json()
-                .await
-                .context("Failed to parse historical funding rates response")?;
+            let funding_rates: Vec<HistoricalFundingRate> = post_info_json(
+                &self.client,
+                &self.base_url,
+                &request_body,
+                "fundingHistory",
+            )
+            .await?;
 
             let num_results = funding_rates.len();
 
@@ -366,126 +377,49 @@ impl InfoApi {
         &self,
         user_address: &str,
     ) -> Result<UserPerpetualsState> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "clearinghouseState",
             "user": user_address
         });
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request user state")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!(
-                "User state API request failed with status: {}",
-                response.status()
-            );
-        }
-
-        let user_state: UserPerpetualsState = response
-            .json()
-            .await
-            .context("Failed to parse user state response")?;
-
-        Ok(user_state)
+        post_info_json(
+            &self.client,
+            &self.base_url,
+            &request_body,
+            "clearinghouseState",
+        )
+        .await
     }
 
     pub async fn user_spot_state(&self, user_address: &str) -> Result<SpotClearinghouseState> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "spotClearinghouseState",
             "user": user_address
         });
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request spot user state")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!(
-                "Spot user state API request failed with status: {}",
-                response.status()
-            );
-        }
-
-        let spot_state: SpotClearinghouseState = response
-            .json()
-            .await
-            .context("Failed to parse spot user state response")?;
-
-        Ok(spot_state)
+        post_info_json(
+            &self.client,
+            &self.base_url,
+            &request_body,
+            "spotClearinghouseState",
+        )
+        .await
     }
 
     pub async fn meta(&self) -> Result<serde_json::Value> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "meta"
         });
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request meta info")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!("Meta API request failed with status: {}", response.status());
-        }
-
-        let meta_data: serde_json::Value = response
-            .json()
-            .await
-            .context("Failed to parse meta response")?;
-
-        Ok(meta_data)
+        post_info_json(&self.client, &self.base_url, &request_body, "meta").await
     }
 
     pub async fn outcome_meta(&self) -> Result<serde_json::Value> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "outcomeMeta"
         });
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request outcome meta info")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!(
-                "Outcome meta API request failed with status: {}",
-                response.status()
-            );
-        }
-
-        let outcome_meta_data: serde_json::Value = response
-            .json()
-            .await
-            .context("Failed to parse outcome meta response")?;
-
-        Ok(outcome_meta_data)
+        post_info_json(&self.client, &self.base_url, &request_body, "outcomeMeta").await
     }
 
     pub async fn get_candle_snapshot(
@@ -495,8 +429,6 @@ impl InfoApi {
         start_time: u64,
         end_time: u64,
     ) -> Result<Vec<roshar_types::HyperliquidCandleData>> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "candleSnapshot",
             "req": {
@@ -507,28 +439,13 @@ impl InfoApi {
             }
         });
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .json(&request_body)
-            .send()
-            .await
-            .context("Failed to request candle snapshot")?;
-
-        if !response.status().is_success() {
-            anyhow::bail!(
-                "Candle snapshot endpoint failed (status: {})",
-                response.status()
-            );
-        }
-
-        let candles: Vec<roshar_types::HyperliquidCandleData> = response
-            .json()
-            .await
-            .context("Failed to parse candle snapshot response")?;
-
-        Ok(candles)
+        post_info_json(
+            &self.client,
+            &self.base_url,
+            &request_body,
+            "candleSnapshot",
+        )
+        .await
     }
 
     /// Get open orders for a wallet address
