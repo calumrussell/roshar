@@ -6,9 +6,29 @@ use ethers::core::k256::{elliptic_curve::FieldBytes, Secp256k1};
 use ethers::signers::LocalWallet;
 use ethers::types::{H160, H256, Signature, U256};
 use roshar_types::{MetaAndAssetCtxs, SpotMetaAndAssetCtxs};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
+use std::str::FromStr;
 use std::time::{SystemTime, UNIX_EPOCH};
+
+/// Convert an `f64` price or size to the canonical wire string Hyperliquid
+/// expects: fixed-precision (no scientific notation), trailing zeros stripped,
+/// and any IEEE-754 round-then-multiply residue (e.g. `2.0942000000000003`)
+/// snapped to its intended decimal form.
+///
+/// Mirrors the official Hyperliquid Python SDK pattern (`f"{x:.8f}"` followed
+/// by `Decimal.normalize()`). The validator already rounds to a tick / sz_decimals
+/// before reaching this point, so 8 decimal places is always enough headroom.
+fn float_to_wire(x: f64) -> String {
+    // `format!("{:.8}", x)` never produces scientific notation and quantizes to
+    // a fixed grid that absorbs the trailing IEEE-754 residue.
+    let fixed = format!("{:.8}", x);
+    match Decimal::from_str(&fixed) {
+        Ok(d) => d.normalize().to_string(),
+        Err(_) => fixed,
+    }
+}
 
 pub enum HyperliquidOrderType {
     Alo,
@@ -648,14 +668,14 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             HyperliquidOrderType::TriggerTp(is_market, trigger_px) => WireClientOrder::Trigger {
                 trigger: WireTrigger {
                     is_market,
-                    trigger_px: trigger_px.to_string(),
+                    trigger_px: float_to_wire(trigger_px),
                     tpsl: "tp".to_string(),
                 },
             },
             HyperliquidOrderType::TriggerSl(is_market, trigger_px) => WireClientOrder::Trigger {
                 trigger: WireTrigger {
                     is_market,
-                    trigger_px: trigger_px.to_string(),
+                    trigger_px: float_to_wire(trigger_px),
                     tpsl: "sl".to_string(),
                 },
             },
@@ -665,8 +685,8 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             orders: vec![WireOrderRequest {
                 asset: asset_index,
                 is_buy,
-                limit_px: limit_px.to_string(),
-                sz: sz.to_string(),
+                limit_px: float_to_wire(limit_px),
+                sz: float_to_wire(sz),
                 reduce_only,
                 order_type: order_type_wire,
                 cloid: None,
@@ -716,14 +736,14 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             HyperliquidOrderType::TriggerTp(is_market, trigger_px) => WireClientOrder::Trigger {
                 trigger: WireTrigger {
                     is_market,
-                    trigger_px: trigger_px.to_string(),
+                    trigger_px: float_to_wire(trigger_px),
                     tpsl: "tp".to_string(),
                 },
             },
             HyperliquidOrderType::TriggerSl(is_market, trigger_px) => WireClientOrder::Trigger {
                 trigger: WireTrigger {
                     is_market,
-                    trigger_px: trigger_px.to_string(),
+                    trigger_px: float_to_wire(trigger_px),
                     tpsl: "sl".to_string(),
                 },
             },
@@ -734,8 +754,8 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             order: WireOrderRequest {
                 asset: asset_index,
                 is_buy: params.is_buy,
-                limit_px: params.limit_px.to_string(),
-                sz: params.sz.to_string(),
+                limit_px: float_to_wire(params.limit_px),
+                sz: float_to_wire(params.sz),
                 reduce_only: params.reduce_only,
                 order_type: order_type_wire,
                 cloid: None,
@@ -788,6 +808,22 @@ mod tests {
     use std::panic;
 
     use super::*;
+
+    #[test]
+    fn float_to_wire_strips_ieee754_residue() {
+        // Real artifacts captured from live 422 responses.
+        assert_eq!(float_to_wire(2.0942000000000003), "2.0942");
+        assert_eq!(float_to_wire(1.9802000000000002), "1.9802");
+        assert_eq!(float_to_wire(5.1000000000000005), "5.1");
+        assert_eq!(float_to_wire(0.00030000000000000003), "0.0003");
+        // Integer-valued prices stay integer-formatted (no trailing ".0").
+        assert_eq!(float_to_wire(76056.0), "76056");
+        // Already-clean values pass through.
+        assert_eq!(float_to_wire(84.71), "84.71");
+        assert_eq!(float_to_wire(2071.2), "2071.2");
+        // Zero is "0", not the empty string.
+        assert_eq!(float_to_wire(0.0), "0");
+    }
 
     #[tokio::test]
     #[ignore = "requires testnet access and authentication"]
