@@ -558,25 +558,35 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
             .map_err(|e| anyhow!("Failed to serialize payload: {e}"))?;
 
         let http_client = crate::http::get_http_client();
+        let exchange_url = self.exchange_url();
+        log::debug!("POST {exchange_url} body={request_body}");
         let response = http_client
-            .post(self.exchange_url())
+            .post(exchange_url)
             .header("Content-Type", "application/json")
-            .body(request_body)
+            .body(request_body.clone())
             .send()
             .await
             .map_err(|e| anyhow!("Request failed: {e}"))?;
 
-        if !response.status().is_success() {
+        let status = response.status();
+        let body = response
+            .text()
+            .await
+            .map_err(|e| anyhow!("Failed to read exchange response body: {e}"))?;
+
+        if !status.is_success() {
+            log::error!(
+                "Exchange request failed: status={status} body={body} request={request_body}"
+            );
             return Err(anyhow!(
-                "Exchange request failed with status: {}",
-                response.status()
+                "Exchange request failed with status {status}: {body} (request: {request_body})"
             ));
         }
 
-        let payload: ExchangeRawStatus = response
-            .json()
-            .await
-            .map_err(|e| anyhow!("Failed to parse exchange response: {e}"))?;
+        log::debug!("Exchange response: status={status} body={body}");
+
+        let payload: ExchangeRawStatus = serde_json::from_str(&body)
+            .map_err(|e| anyhow!("Failed to parse exchange response: {e} (body: {body})"))?;
 
         match payload.status.as_str() {
             "ok" => serde_json::from_value::<ExchangeResponse>(payload.response)
