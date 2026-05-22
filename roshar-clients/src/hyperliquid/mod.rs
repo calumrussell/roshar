@@ -6,8 +6,8 @@ pub use validator::OrderValidator;
 
 use crate::http::RateLimitedClient;
 use rest::{
-    ExchangeApi, ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
-    ModifyOrderParams,
+    CancelStatus, ExchangeApi, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
+    ModifyOrderParams, OrderStatus,
 };
 
 use anyhow::Result;
@@ -288,6 +288,152 @@ impl HyperliquidClient {
     }
 }
 
+/// Decode a `/exchange` response from a single-order `order` action.
+///
+/// Per HL docs the response shape is:
+/// ```json
+/// {"status":"ok","response":{"type":"order","data":{"statuses":[<Resting|Filled|Error>]}}}
+/// ```
+/// `WaitingForFill` / `WaitingForTrigger` are documented for trigger orders.
+/// Any other shape is surfaced as `Err` with the full `ExchangeResponse` so the
+/// operator can see what HL actually sent.
+fn decode_create_response(
+    resp: ExchangeResponseStatus,
+    requested_sz: f64,
+) -> Result<OrderResult, String> {
+    let response = match resp {
+        ExchangeResponseStatus::Ok(r) => r,
+        ExchangeResponseStatus::Err(err) => return Err(format!("Exchange error: {}", err)),
+    };
+
+    if response.response_type != "order" {
+        return Err(format!(
+            "Unexpected response type for order create: expected \"order\", got {:?}",
+            response
+        ));
+    }
+
+    let first_value = response
+        .data
+        .as_ref()
+        .and_then(|d| d.statuses.first().cloned())
+        .ok_or_else(|| format!("Order create response missing statuses entry: {:?}", response))?;
+
+    // Parse the first status entry with the action-specific OrderStatus type.
+    // A serde error here means HL returned a shape outside the documented
+    // resting/filled/error vocabulary — surface the raw value and full response.
+    let first_status: OrderStatus = serde_json::from_value(first_value.clone()).map_err(|e| {
+        format!(
+            "Unexpected order status (parse error: {}): {} in response {:?}",
+            e, first_value, response
+        )
+    })?;
+
+    match first_status {
+        OrderStatus::Error(msg) => Err(format!("Exchange rejected order: {}", msg)),
+        OrderStatus::Resting(order) => Ok(OrderResult::Resting {
+            order_id: order.oid.to_string(),
+        }),
+        OrderStatus::Filled(order) => {
+            let filled_qty = order.total_sz.parse::<f64>().map_err(|e| {
+                format!("Failed to parse filled size {:?}: {}", order.total_sz, e)
+            })?;
+            let avg_price = order.avg_px.parse::<f64>().map_err(|e| {
+                format!("Failed to parse avg price {:?}: {}", order.avg_px, e)
+            })?;
+            let remaining_qty = requested_sz - filled_qty;
+            if remaining_qty > 1e-10 {
+                Ok(OrderResult::PartialFill {
+                    order_id: order.oid.to_string(),
+                    filled_qty,
+                    avg_price,
+                    remaining_qty,
+                })
+            } else {
+                Ok(OrderResult::Filled {
+                    order_id: order.oid.to_string(),
+                    filled_qty,
+                    avg_price,
+                })
+            }
+        }
+    }
+}
+
+/// Decode a `/exchange` response from a single-order `cancel` action.
+///
+/// Per HL docs the response shape is:
+/// ```json
+/// {"status":"ok","response":{"type":"cancel","data":{"statuses":["success" | {"error": "..."}]}}}
+/// ```
+fn decode_cancel_response(resp: ExchangeResponseStatus, oid: u64) -> Result<(), String> {
+    let response = match resp {
+        ExchangeResponseStatus::Ok(r) => r,
+        ExchangeResponseStatus::Err(err) => {
+            return Err(format!("Failed to cancel order {}: {}", oid, err));
+        }
+    };
+
+    if response.response_type != "cancel" {
+        return Err(format!(
+            "Unexpected response type for cancel of order {}: expected \"cancel\", got {:?}",
+            oid, response
+        ));
+    }
+
+    let first_value = response
+        .data
+        .as_ref()
+        .and_then(|d| d.statuses.first().cloned())
+        .ok_or_else(|| {
+            format!(
+                "Cancel response for order {} missing statuses entry: {:?}",
+                oid, response
+            )
+        })?;
+
+    let first_status: CancelStatus = serde_json::from_value(first_value.clone()).map_err(|e| {
+        format!(
+            "Unexpected cancel status for order {} (parse error: {}): {} in response {:?}",
+            oid, e, first_value, response
+        )
+    })?;
+
+    match first_status {
+        CancelStatus::Success => Ok(()),
+        CancelStatus::Error(msg) => Err(format!(
+            "Exchange rejected cancel for order {}: {}",
+            oid, msg
+        )),
+    }
+}
+
+/// Decode a `/exchange` response from a single-order `modify` action.
+///
+/// Per HL docs the response shape is:
+/// ```json
+/// {"status":"ok","response":{"type":"default"}}
+/// ```
+/// No `data` field — `modify` is a bare ack. Verified in production:
+/// HL returns `"type":"default"` with no statuses on a successful modify.
+fn decode_modify_response(resp: ExchangeResponseStatus, oid: u64) -> Result<(), String> {
+    let response = match resp {
+        ExchangeResponseStatus::Ok(r) => r,
+        ExchangeResponseStatus::Err(err) => {
+            return Err(format!("Failed to modify order {}: {}", oid, err));
+        }
+    };
+
+    if response.response_type != "default" {
+        return Err(format!(
+            "Unexpected response type for modify of order {}: expected \"default\", got {:?}",
+            oid, response
+        ));
+    }
+
+    Ok(())
+}
+
 #[async_trait]
 pub trait HyperliquidApi {
     async fn validate_order(
@@ -398,87 +544,22 @@ impl HyperliquidApi for HyperliquidClient {
         reduce_only: bool,
         order_type: HyperliquidOrderType,
     ) -> Result<OrderResult, String> {
-        let res = self
+        let resp = self
             .api
             .create_order(ticker, is_buy, limit_px, sz, reduce_only, order_type)
-            .await;
-
-        match res {
-            Ok(ExchangeResponseStatus::Ok(data)) => {
-                if let Some(first_status) = data.data.and_then(|d| d.statuses.into_iter().next()) {
-                    match first_status {
-                        ExchangeDataStatus::Error(msg) => {
-                            Err(format!("Exchange rejected order: {}", msg))
-                        }
-                        ExchangeDataStatus::Resting(order) => Ok(OrderResult::Resting {
-                            order_id: order.oid.to_string(),
-                        }),
-                        ExchangeDataStatus::Filled(order) => {
-                            // Parse filled quantities and price
-                            let filled_qty = order.total_sz.parse::<f64>().unwrap_or(0.0);
-                            let avg_price = order.avg_px.parse::<f64>().unwrap_or(0.0);
-
-                            let remaining_qty = sz - filled_qty;
-                            if remaining_qty > 1e-10 {
-                                // GTC order partially filled, remainder resting on book
-                                Ok(OrderResult::PartialFill {
-                                    order_id: order.oid.to_string(),
-                                    filled_qty,
-                                    avg_price,
-                                    remaining_qty,
-                                })
-                            } else {
-                                Ok(OrderResult::Filled {
-                                    order_id: order.oid.to_string(),
-                                    filled_qty,
-                                    avg_price,
-                                })
-                            }
-                        }
-                        ExchangeDataStatus::WaitingForFill => {
-                            Err("Order waiting for fill".to_string())
-                        }
-                        ExchangeDataStatus::WaitingForTrigger => {
-                            Err("Order waiting for trigger".to_string())
-                        }
-                        ExchangeDataStatus::Success => {
-                            Err("Order returned success without ID".to_string())
-                        }
-                    }
-                } else {
-                    Err("No order status returned".to_string())
-                }
-            }
-            Ok(ExchangeResponseStatus::Err(err)) => Err(format!("Exchange error: {}", err)),
-            Err(e) => Err(format!("API error: {:?}", e)),
-        }
+            .await
+            .map_err(|e| format!("API error: {:?}", e))?;
+        decode_create_response(resp, sz)
     }
 
     /// Cancel an order by order ID
     async fn cancel_order(&self, asset: &str, oid: u64) -> Result<(), String> {
-        let status = self
+        let resp = self
             .api
             .cancel_order(asset, oid)
             .await
             .map_err(|e| format!("API error: {:?}", e))?;
-        let data = match status {
-            ExchangeResponseStatus::Ok(data) => data,
-            ExchangeResponseStatus::Err(err) => {
-                return Err(format!("Failed to cancel order {}: {}", oid, err));
-            }
-        };
-        match data.data.and_then(|d| d.statuses.into_iter().next()) {
-            Some(ExchangeDataStatus::Success) => Ok(()),
-            Some(ExchangeDataStatus::Error(msg)) => Err(format!(
-                "Exchange rejected cancel for order {}: {}",
-                oid, msg
-            )),
-            Some(other) => Err(format!(
-                "Unexpected cancel status for order {}: {:?}",
-                oid, other
-            )),
-            None => Err(format!("No cancel status returned for order {}", oid)),
-        }
+        decode_cancel_response(resp, oid)
     }
 
     /// Modify an existing order
@@ -501,34 +582,12 @@ impl HyperliquidApi for HyperliquidClient {
             reduce_only,
             order_type,
         };
-
-        let status = self
+        let resp = self
             .api
             .modify_order(params)
             .await
             .map_err(|e| format!("API error: {:?}", e))?;
-        let data = match status {
-            ExchangeResponseStatus::Ok(data) => data,
-            ExchangeResponseStatus::Err(err) => {
-                return Err(format!("Failed to modify order {}: {}", oid, err));
-            }
-        };
-        match data.data.and_then(|d| d.statuses.into_iter().next()) {
-            Some(
-                ExchangeDataStatus::Resting(_)
-                | ExchangeDataStatus::Filled(_)
-                | ExchangeDataStatus::Success,
-            ) => Ok(()),
-            Some(ExchangeDataStatus::Error(msg)) => Err(format!(
-                "Exchange rejected modify for order {}: {}",
-                oid, msg
-            )),
-            Some(other) => Err(format!(
-                "Unexpected modify status for order {}: {:?}",
-                oid, other
-            )),
-            None => Err(format!("No modify status returned for order {}", oid)),
-        }
+        decode_modify_response(resp, oid)
     }
 
     /// Get all funding rates with size data from metadata manager (cached)
@@ -691,5 +750,176 @@ impl HyperliquidApi for HyperliquidClient {
             .open_orders(wallet_address)
             .await
             .map_err(|e| format!("Failed to fetch open orders: {:?}", e))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn parse_ok(body: &str) -> ExchangeResponseStatus {
+        ExchangeResponseStatus::Ok(serde_json::from_str(body).expect("test fixture is valid JSON"))
+    }
+
+    // ------------------------------ create ------------------------------
+
+    #[test]
+    fn decode_create_resting() {
+        let resp = parse_ok(
+            r#"{"type":"order","data":{"statuses":[{"resting":{"oid":77738308}}]}}"#,
+        );
+        let result = decode_create_response(resp, 0.02).expect("resting decode");
+        match result {
+            OrderResult::Resting { order_id } => assert_eq!(order_id, "77738308"),
+            other => panic!("expected Resting, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn decode_create_filled_complete() {
+        let resp = parse_ok(
+            r#"{"type":"order","data":{"statuses":[{"filled":{"totalSz":"0.02","avgPx":"1891.4","oid":77747314}}]}}"#,
+        );
+        let result = decode_create_response(resp, 0.02).expect("filled decode");
+        match result {
+            OrderResult::Filled {
+                order_id,
+                filled_qty,
+                avg_price,
+            } => {
+                assert_eq!(order_id, "77747314");
+                assert!((filled_qty - 0.02).abs() < 1e-9);
+                assert!((avg_price - 1891.4).abs() < 1e-9);
+            }
+            other => panic!("expected Filled, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn decode_create_partial_fill() {
+        let resp = parse_ok(
+            r#"{"type":"order","data":{"statuses":[{"filled":{"totalSz":"0.01","avgPx":"1891.4","oid":77747314}}]}}"#,
+        );
+        let result = decode_create_response(resp, 0.02).expect("partial decode");
+        match result {
+            OrderResult::PartialFill {
+                filled_qty,
+                remaining_qty,
+                ..
+            } => {
+                assert!((filled_qty - 0.01).abs() < 1e-9);
+                assert!((remaining_qty - 0.01).abs() < 1e-9);
+            }
+            other => panic!("expected PartialFill, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn decode_create_per_order_error() {
+        let resp = parse_ok(
+            r#"{"type":"order","data":{"statuses":[{"error":"Order must have minimum value of $10."}]}}"#,
+        );
+        let err = decode_create_response(resp, 0.01).expect_err("should reject");
+        assert!(err.contains("minimum value of $10"), "got: {err}");
+    }
+
+    #[test]
+    fn decode_create_wrong_response_type_surfaces_payload() {
+        // E.g. modify's response shape mistakenly fed to create decoder.
+        let resp = parse_ok(r#"{"type":"default"}"#);
+        let err = decode_create_response(resp, 1.0).expect_err("should reject");
+        assert!(err.contains("expected \"order\""), "got: {err}");
+        assert!(err.contains("default"), "raw payload missing: {err}");
+    }
+
+    #[test]
+    fn decode_create_top_level_err() {
+        let resp = ExchangeResponseStatus::Err("rate limited".into());
+        let err = decode_create_response(resp, 1.0).expect_err("should reject");
+        assert!(err.contains("rate limited"), "got: {err}");
+    }
+
+    #[test]
+    fn decode_create_undocumented_status_surfaces_payload() {
+        // The `order` action is only documented to return resting/filled/error.
+        // A bare "success" string (the cancel action's success encoding) doesn't
+        // fit the OrderStatus type and must fail to deserialize, surfacing the
+        // raw payload rather than being silently coerced.
+        let resp = parse_ok(r#"{"type":"order","data":{"statuses":["success"]}}"#);
+        let err = decode_create_response(resp, 1.0).expect_err("should reject");
+        assert!(err.contains("Unexpected order status"), "got: {err}");
+        assert!(err.contains("\"success\""), "raw status missing: {err}");
+    }
+
+    // ------------------------------ cancel ------------------------------
+
+    #[test]
+    fn decode_cancel_success() {
+        let resp = parse_ok(r#"{"type":"cancel","data":{"statuses":["success"]}}"#);
+        decode_cancel_response(resp, 12345).expect("cancel decode");
+    }
+
+    #[test]
+    fn decode_cancel_per_order_error() {
+        let resp = parse_ok(
+            r#"{"type":"cancel","data":{"statuses":[{"error":"Order was never placed, already canceled, or filled."}]}}"#,
+        );
+        let err = decode_cancel_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("12345"), "oid missing: {err}");
+        assert!(err.contains("never placed"), "got: {err}");
+    }
+
+    #[test]
+    fn decode_cancel_wrong_response_type_surfaces_payload() {
+        let resp = parse_ok(r#"{"type":"default"}"#);
+        let err = decode_cancel_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("expected \"cancel\""), "got: {err}");
+        assert!(err.contains("default"), "raw payload missing: {err}");
+    }
+
+    #[test]
+    fn decode_cancel_missing_statuses_surfaces_payload() {
+        let resp = parse_ok(r#"{"type":"cancel"}"#);
+        let err = decode_cancel_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("12345"), "oid missing: {err}");
+        assert!(err.contains("missing statuses"), "got: {err}");
+    }
+
+    #[test]
+    fn decode_cancel_undocumented_bare_string_surfaces_payload() {
+        // Only "success" is documented as a bare string for cancel. Anything else
+        // (e.g. "waitingForFill", which used to be silently accepted) must fail to
+        // deserialize and surface the raw payload.
+        let resp = parse_ok(r#"{"type":"cancel","data":{"statuses":["waitingForFill"]}}"#);
+        let err = decode_cancel_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("Unexpected cancel status"), "got: {err}");
+        assert!(err.contains("waitingForFill"), "raw status missing: {err}");
+    }
+
+    // ------------------------------ modify ------------------------------
+
+    #[test]
+    fn decode_modify_success_default_ack() {
+        // Verified live: HL's modify returns `"type":"default"` with no data field.
+        let resp = parse_ok(r#"{"type":"default"}"#);
+        decode_modify_response(resp, 12345).expect("modify decode");
+    }
+
+    #[test]
+    fn decode_modify_wrong_response_type_surfaces_payload() {
+        // E.g. accidentally getting an "order"-shaped response from modify.
+        let resp =
+            parse_ok(r#"{"type":"order","data":{"statuses":[{"resting":{"oid":123}}]}}"#);
+        let err = decode_modify_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("expected \"default\""), "got: {err}");
+        assert!(err.contains("order"), "raw payload missing: {err}");
+    }
+
+    #[test]
+    fn decode_modify_top_level_err() {
+        let resp = ExchangeResponseStatus::Err("rate limited".into());
+        let err = decode_modify_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("12345"), "oid missing: {err}");
+        assert!(err.contains("rate limited"), "got: {err}");
     }
 }

@@ -22,7 +22,9 @@ pub(crate) mod ws;
 pub use constants::*;
 
 // Re-export commonly used types
-pub use hyperliquid::rest::{ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType};
+pub use hyperliquid::rest::{
+    CancelStatus, ExchangeResponseStatus, HyperliquidOrderType, OrderStatus,
+};
 pub use hyperliquid::validator::{OrderRequest, ValidatedOrder};
 pub use hyperliquid::{HyperliquidApi, HyperliquidClient, HyperliquidConfig};
 
