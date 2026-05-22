@@ -242,43 +242,14 @@ impl InfoApi {
     }
 
     pub async fn get_funding_history(&self, user_address: &str) -> Result<Vec<FundingHistory>> {
-        let url = format!("{}/info", self.base_url);
-
         let request_body = serde_json::json!({
             "type": "userFunding",
             "user": user_address,
             "startTime": 0
         });
-        let body_str = serde_json::to_string(&request_body)?;
-        log::debug!("POST {url} (userFunding) body={body_str}");
 
-        let response = self
-            .client
-            .post(&url)
-            .await
-            .header("Content-Type", "application/json")
-            .body(body_str.clone())
-            .send()
-            .await
-            .context("Failed to request funding history")?;
-
-        let status = response.status();
-        let text = response
-            .text()
-            .await
-            .context("Failed to read funding history response body")?;
-
-        if !status.is_success() {
-            log::warn!(
-                "Funding history endpoint not available (status={status} body={text}). This feature may not be implemented in the Hyperliquid API yet."
-            );
-            return Ok(vec![]);
-        }
-
-        log::debug!("userFunding response: status={status} body={text}");
-
-        let funding_data: serde_json::Value = serde_json::from_str(&text)
-            .with_context(|| format!("Failed to parse funding response (body={text})"))?;
+        let funding_data: serde_json::Value =
+            post_info_json(&self.client, &self.base_url, &request_body, "userFunding").await?;
         let mut funding_history = Vec::new();
         if let Some(fundings) = funding_data.as_array() {
             for funding in fundings {

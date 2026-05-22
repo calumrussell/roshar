@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use ethers::abi::{encode, Token};
 use ethers::core::k256::{elliptic_curve::FieldBytes, Secp256k1};
 use ethers::signers::LocalWallet;
@@ -22,7 +22,7 @@ pub enum HyperliquidOrderType {
 /// `reqwest::Client`. Mirrors `info::post_info_json`: debug-logs request and
 /// response bodies, error-logs and bails on non-2xx with the response body
 /// and outgoing request included.
-async fn info_post_json<B, T>(
+async fn post_info_json<B, T>(
     client: &reqwest::Client,
     url: &str,
     body: &B,
@@ -33,7 +33,7 @@ where
     T: serde::de::DeserializeOwned,
 {
     let body_str = serde_json::to_string(body)
-        .map_err(|e| anyhow!("Failed to serialize {label} request: {e}"))?;
+        .with_context(|| format!("Failed to serialize {label} request"))?;
     log::debug!("POST {url} ({label}) body={body_str}");
 
     let response = client
@@ -42,27 +42,25 @@ where
         .body(body_str.clone())
         .send()
         .await
-        .map_err(|e| anyhow!("Failed to send {label} request: {e}"))?;
+        .with_context(|| format!("Failed to send {label} request"))?;
 
     let status = response.status();
     let text = response
         .text()
         .await
-        .map_err(|e| anyhow!("Failed to read {label} response body: {e}"))?;
+        .with_context(|| format!("Failed to read {label} response body"))?;
 
     if !status.is_success() {
         log::error!(
             "{label} request failed: status={status} body={text} request={body_str}"
         );
-        return Err(anyhow!(
-            "{label} request failed with status {status}: {text}"
-        ));
+        anyhow::bail!("{label} request failed with status {status}: {text}");
     }
 
     log::debug!("{label} response: status={status} body={text}");
 
     serde_json::from_str(&text)
-        .map_err(|e| anyhow!("Failed to parse {label} response: {e} (body: {text})"))
+        .with_context(|| format!("Failed to parse {label} response (body={text})"))
 }
 
 pub struct ModifyOrderParams {
@@ -515,7 +513,7 @@ impl ExchangeApi {
         let info_url = self.info_url();
 
         let perp_meta: MetaAndAssetCtxs =
-            info_post_json(client, info_url, &serde_json::json!({ "type": "metaAndAssetCtxs" }), "metaAndAssetCtxs (resolve_asset_index)").await?;
+            post_info_json(client, info_url, &serde_json::json!({ "type": "metaAndAssetCtxs" }), "metaAndAssetCtxs (resolve_asset_index)").await?;
 
         if let Some((idx, _)) = perp_meta
             .0
@@ -534,7 +532,7 @@ Provide a numeric asset id directly (e.g. 100000 + perp_dex_index * 10000 + inde
         }
 
         let spot_meta: SpotMetaAndAssetCtxs =
-            info_post_json(client, info_url, &serde_json::json!({ "type": "spotMetaAndAssetCtxs" }), "spotMetaAndAssetCtxs (resolve_asset_index)").await?;
+            post_info_json(client, info_url, &serde_json::json!({ "type": "spotMetaAndAssetCtxs" }), "spotMetaAndAssetCtxs (resolve_asset_index)").await?;
 
         if let Some(asset_info) = spot_meta.0.universe.iter().find(|spot| spot.name == asset) {
             return Ok(10_000 + asset_info.index);
