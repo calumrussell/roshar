@@ -319,6 +319,9 @@ fn decode_create_response(
         .and_then(|d| d.statuses.first().cloned())
         .ok_or_else(|| format!("Order create response missing statuses entry: {:?}", response))?;
 
+    // Per HL docs, the `order` action's status entries are limited to
+    // `resting`, `filled`, and `error`. Anything else is surfaced with the
+    // raw response so we learn about it instead of guessing.
     match first_status {
         ExchangeDataStatus::Error(msg) => Err(format!("Exchange rejected order: {}", msg)),
         ExchangeDataStatus::Resting(order) => Ok(OrderResult::Resting {
@@ -343,17 +346,9 @@ fn decode_create_response(
                 })
             }
         }
-        ExchangeDataStatus::WaitingForFill => Err(format!(
-            "Order waiting for fill, response: {:?}",
-            response
-        )),
-        ExchangeDataStatus::WaitingForTrigger => Err(format!(
-            "Order waiting for trigger, response: {:?}",
-            response
-        )),
-        ExchangeDataStatus::Success => Err(format!(
-            "Order returned bare \"success\" status without ID, response: {:?}",
-            response
+        other => Err(format!(
+            "Unexpected order status {:?}, response: {:?}",
+            other, response
         )),
     }
 }
@@ -832,6 +827,17 @@ mod tests {
         let resp = ExchangeResponseStatus::Err("rate limited".into());
         let err = decode_create_response(resp, 1.0).expect_err("should reject");
         assert!(err.contains("rate limited"), "got: {err}");
+    }
+
+    #[test]
+    fn decode_create_undocumented_variant_surfaces_payload() {
+        // The `order` action is only documented to return resting/filled/error.
+        // If HL ever returns one of the bare-string variants in this slot, we want
+        // the operator to see the raw payload rather than have us guess at semantics.
+        let resp = parse_ok(r#"{"type":"order","data":{"statuses":["success"]}}"#);
+        let err = decode_create_response(resp, 1.0).expect_err("should reject");
+        assert!(err.contains("Unexpected order status"), "got: {err}");
+        assert!(err.contains("Success"), "raw status missing: {err}");
     }
 
     // ------------------------------ cancel ------------------------------
