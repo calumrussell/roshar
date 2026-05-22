@@ -860,15 +860,11 @@ mod tests {
         let ExchangeResponseStatus::Ok(modify_response) = modify_status else {
             panic!("Modify failed")
         };
-        let modify_data = modify_response.data.unwrap();
-        assert!(!modify_data.statuses.is_empty());
+        // Per HL docs and live observation, modify returns `{"type":"default"}` with no data.
+        // The oid is preserved across the modify, so we cancel the original order id.
+        assert_eq!(modify_response.response_type, "default");
 
-        let modified_order = match modify_data.statuses.first().unwrap() {
-            ExchangeDataStatus::Resting(order) => order,
-            _ => panic!("Bad return type"),
-        };
-
-        let cancel_status = api.cancel_order("ETH", modified_order.oid).await.unwrap();
+        let cancel_status = api.cancel_order("ETH", order.oid).await.unwrap();
         let ExchangeResponseStatus::Ok(cancel_response) = cancel_status else {
             panic!("Cancel failed")
         };
