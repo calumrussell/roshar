@@ -456,12 +456,28 @@ impl HyperliquidApi for HyperliquidClient {
 
     /// Cancel an order by order ID
     async fn cancel_order(&self, asset: &str, oid: u64) -> Result<(), String> {
-        match self.api.cancel_order(asset, oid).await {
-            Ok(ExchangeResponseStatus::Ok(_)) => Ok(()),
-            Ok(ExchangeResponseStatus::Err(err)) => {
-                Err(format!("Failed to cancel order {}: {}", oid, err))
+        let status = self
+            .api
+            .cancel_order(asset, oid)
+            .await
+            .map_err(|e| format!("API error: {:?}", e))?;
+        let data = match status {
+            ExchangeResponseStatus::Ok(data) => data,
+            ExchangeResponseStatus::Err(err) => {
+                return Err(format!("Failed to cancel order {}: {}", oid, err));
             }
-            Err(e) => Err(format!("API error: {:?}", e)),
+        };
+        match data.data.and_then(|d| d.statuses.into_iter().next()) {
+            Some(ExchangeDataStatus::Success) => Ok(()),
+            Some(ExchangeDataStatus::Error(msg)) => Err(format!(
+                "Exchange rejected cancel for order {}: {}",
+                oid, msg
+            )),
+            Some(other) => Err(format!(
+                "Unexpected cancel status for order {}: {:?}",
+                oid, other
+            )),
+            None => Err(format!("No cancel status returned for order {}", oid)),
         }
     }
 
@@ -486,12 +502,33 @@ impl HyperliquidApi for HyperliquidClient {
             order_type,
         };
 
-        self.api
+        let status = self
+            .api
             .modify_order(params)
             .await
-            .map_err(|e| format!("Failed to modify order: {:?}", e))?;
-
-        Ok(())
+            .map_err(|e| format!("API error: {:?}", e))?;
+        let data = match status {
+            ExchangeResponseStatus::Ok(data) => data,
+            ExchangeResponseStatus::Err(err) => {
+                return Err(format!("Failed to modify order {}: {}", oid, err));
+            }
+        };
+        match data.data.and_then(|d| d.statuses.into_iter().next()) {
+            Some(
+                ExchangeDataStatus::Resting(_)
+                | ExchangeDataStatus::Filled(_)
+                | ExchangeDataStatus::Success,
+            ) => Ok(()),
+            Some(ExchangeDataStatus::Error(msg)) => Err(format!(
+                "Exchange rejected modify for order {}: {}",
+                oid, msg
+            )),
+            Some(other) => Err(format!(
+                "Unexpected modify status for order {}: {:?}",
+                oid, other
+            )),
+            None => Err(format!("No modify status returned for order {}", oid)),
+        }
     }
 
     /// Get all funding rates with size data from metadata manager (cached)
