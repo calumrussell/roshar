@@ -238,50 +238,67 @@ pub struct FilledOrder {
     pub oid: u64,
 }
 
-#[derive(Debug, Clone)]
-pub enum ExchangeDataStatus {
-    Error(String),
+/// Status entries returned for the `order` action.
+///
+/// Per HL docs the only documented variants are `resting`, `filled`, and
+/// `error`. The enum intentionally has no catch-all variant so the
+/// compiler enforces an exhaustive match — adding speculative arms for
+/// shapes that aren't in the docs (e.g. `success` / `waitingForFill`)
+/// requires updating the type itself, which forces a docs check.
+///
+/// Wire format (per docs example):
+///   `{"resting":{"oid":123}}`
+///   `{"filled":{"totalSz":"0.02","avgPx":"1891.4","oid":456}}`
+///   `{"error":"Order must have minimum value of $10."}`
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum OrderStatus {
     Resting(RestingOrder),
     Filled(FilledOrder),
+    Error(String),
+}
+
+/// Status entries returned for the `cancel` action.
+///
+/// Per HL docs the only documented variants are `success` (a bare string)
+/// and `{"error": "..."}`.
+#[derive(Debug, Clone)]
+pub enum CancelStatus {
     Success,
-    WaitingForFill,
-    WaitingForTrigger,
+    Error(String),
 }
 
-#[derive(Debug, Clone, Deserialize)]
-#[serde(untagged)]
-enum ExchangeDataStatusWire {
-    Error { error: String },
-    Resting { resting: RestingOrder },
-    Filled { filled: FilledOrder },
-    Status(String),
-}
-
-impl<'de> Deserialize<'de> for ExchangeDataStatus {
+impl<'de> Deserialize<'de> for CancelStatus {
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        let wire = ExchangeDataStatusWire::deserialize(deserializer)?;
-        match wire {
-            ExchangeDataStatusWire::Error { error } => Ok(Self::Error(error)),
-            ExchangeDataStatusWire::Resting { resting } => Ok(Self::Resting(resting)),
-            ExchangeDataStatusWire::Filled { filled } => Ok(Self::Filled(filled)),
-            ExchangeDataStatusWire::Status(status) => match status.as_str() {
-                "success" => Ok(Self::Success),
-                "waitingForFill" => Ok(Self::WaitingForFill),
-                "waitingForTrigger" => Ok(Self::WaitingForTrigger),
-                _ => Err(serde::de::Error::custom(format!(
-                    "Unknown status variant: {status}"
-                ))),
-            },
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum Wire {
+            Bare(String),
+            WithError { error: String },
+        }
+        match Wire::deserialize(deserializer)? {
+            Wire::Bare(s) if s == "success" => Ok(CancelStatus::Success),
+            Wire::Bare(other) => Err(serde::de::Error::custom(format!(
+                "unexpected cancel status string: {other:?}"
+            ))),
+            Wire::WithError { error } => Ok(CancelStatus::Error(error)),
         }
     }
 }
 
+/// The `data` field of a successful `/exchange` response.
+///
+/// `statuses` is intentionally `Vec<serde_json::Value>` — the wire shape
+/// is action-dependent and only the per-action decoder knows what to
+/// expect. Deferring the typed parse keeps action knowledge out of the
+/// transport types and surfaces unexpected payloads (rather than silently
+/// coercing them into a shared enum).
 #[derive(Debug, Clone, Deserialize)]
 pub struct ExchangeData {
-    pub statuses: Vec<ExchangeDataStatus>,
+    pub statuses: Vec<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -840,9 +857,12 @@ mod tests {
         let create_data = create_response.data.unwrap();
         assert!(!create_data.statuses.is_empty());
 
-        let order = match create_data.statuses.first().unwrap() {
-            ExchangeDataStatus::Resting(order) => order,
-            _ => panic!("Bad return type"),
+        let first_create: OrderStatus =
+            serde_json::from_value(create_data.statuses.first().unwrap().clone())
+                .expect("order status entry parses");
+        let order = match first_create {
+            OrderStatus::Resting(order) => order,
+            other => panic!("expected Resting, got {:?}", other),
         };
 
         let modify_status = api
@@ -870,10 +890,10 @@ mod tests {
         };
         let cancel_data = cancel_response.data.unwrap();
         assert!(!cancel_data.statuses.is_empty());
-        matches!(
-            cancel_data.statuses.first().unwrap(),
-            ExchangeDataStatus::Success
-        );
+        let first_cancel: CancelStatus =
+            serde_json::from_value(cancel_data.statuses.first().unwrap().clone())
+                .expect("cancel status entry parses");
+        assert!(matches!(first_cancel, CancelStatus::Success));
     }
 
     #[tokio::test]

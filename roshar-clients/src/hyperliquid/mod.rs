@@ -6,8 +6,8 @@ pub use validator::OrderValidator;
 
 use crate::http::RateLimitedClient;
 use rest::{
-    ExchangeApi, ExchangeDataStatus, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
-    ModifyOrderParams,
+    CancelStatus, ExchangeApi, ExchangeResponseStatus, HyperliquidOrderType, InfoApi,
+    ModifyOrderParams, OrderStatus,
 };
 
 use anyhow::Result;
@@ -313,21 +313,28 @@ fn decode_create_response(
         ));
     }
 
-    let first_status = response
+    let first_value = response
         .data
         .as_ref()
         .and_then(|d| d.statuses.first().cloned())
         .ok_or_else(|| format!("Order create response missing statuses entry: {:?}", response))?;
 
-    // Per HL docs, the `order` action's status entries are limited to
-    // `resting`, `filled`, and `error`. Anything else is surfaced with the
-    // raw response so we learn about it instead of guessing.
+    // Parse the first status entry with the action-specific OrderStatus type.
+    // A serde error here means HL returned a shape outside the documented
+    // resting/filled/error vocabulary — surface the raw value and full response.
+    let first_status: OrderStatus = serde_json::from_value(first_value.clone()).map_err(|e| {
+        format!(
+            "Unexpected order status (parse error: {}): {} in response {:?}",
+            e, first_value, response
+        )
+    })?;
+
     match first_status {
-        ExchangeDataStatus::Error(msg) => Err(format!("Exchange rejected order: {}", msg)),
-        ExchangeDataStatus::Resting(order) => Ok(OrderResult::Resting {
+        OrderStatus::Error(msg) => Err(format!("Exchange rejected order: {}", msg)),
+        OrderStatus::Resting(order) => Ok(OrderResult::Resting {
             order_id: order.oid.to_string(),
         }),
-        ExchangeDataStatus::Filled(order) => {
+        OrderStatus::Filled(order) => {
             let filled_qty = order.total_sz.parse::<f64>().unwrap_or(0.0);
             let avg_price = order.avg_px.parse::<f64>().unwrap_or(0.0);
             let remaining_qty = requested_sz - filled_qty;
@@ -346,10 +353,6 @@ fn decode_create_response(
                 })
             }
         }
-        other => Err(format!(
-            "Unexpected order status {:?}, response: {:?}",
-            other, response
-        )),
     }
 }
 
@@ -374,7 +377,7 @@ fn decode_cancel_response(resp: ExchangeResponseStatus, oid: u64) -> Result<(), 
         ));
     }
 
-    let first_status = response
+    let first_value = response
         .data
         .as_ref()
         .and_then(|d| d.statuses.first().cloned())
@@ -385,15 +388,18 @@ fn decode_cancel_response(resp: ExchangeResponseStatus, oid: u64) -> Result<(), 
             )
         })?;
 
+    let first_status: CancelStatus = serde_json::from_value(first_value.clone()).map_err(|e| {
+        format!(
+            "Unexpected cancel status for order {} (parse error: {}): {} in response {:?}",
+            oid, e, first_value, response
+        )
+    })?;
+
     match first_status {
-        ExchangeDataStatus::Success => Ok(()),
-        ExchangeDataStatus::Error(msg) => Err(format!(
+        CancelStatus::Success => Ok(()),
+        CancelStatus::Error(msg) => Err(format!(
             "Exchange rejected cancel for order {}: {}",
             oid, msg
-        )),
-        other => Err(format!(
-            "Unexpected cancel status {:?} for order {}, response: {:?}",
-            other, oid, response
         )),
     }
 }
@@ -830,14 +836,15 @@ mod tests {
     }
 
     #[test]
-    fn decode_create_undocumented_variant_surfaces_payload() {
+    fn decode_create_undocumented_status_surfaces_payload() {
         // The `order` action is only documented to return resting/filled/error.
-        // If HL ever returns one of the bare-string variants in this slot, we want
-        // the operator to see the raw payload rather than have us guess at semantics.
+        // A bare "success" string (the cancel action's success encoding) doesn't
+        // fit the OrderStatus type and must fail to deserialize, surfacing the
+        // raw payload rather than being silently coerced.
         let resp = parse_ok(r#"{"type":"order","data":{"statuses":["success"]}}"#);
         let err = decode_create_response(resp, 1.0).expect_err("should reject");
         assert!(err.contains("Unexpected order status"), "got: {err}");
-        assert!(err.contains("Success"), "raw status missing: {err}");
+        assert!(err.contains("\"success\""), "raw status missing: {err}");
     }
 
     // ------------------------------ cancel ------------------------------
@@ -872,6 +879,17 @@ mod tests {
         let err = decode_cancel_response(resp, 12345).expect_err("should reject");
         assert!(err.contains("12345"), "oid missing: {err}");
         assert!(err.contains("missing statuses"), "got: {err}");
+    }
+
+    #[test]
+    fn decode_cancel_undocumented_bare_string_surfaces_payload() {
+        // Only "success" is documented as a bare string for cancel. Anything else
+        // (e.g. "waitingForFill", which used to be silently accepted) must fail to
+        // deserialize and surface the raw payload.
+        let resp = parse_ok(r#"{"type":"cancel","data":{"statuses":["waitingForFill"]}}"#);
+        let err = decode_cancel_response(resp, 12345).expect_err("should reject");
+        assert!(err.contains("Unexpected cancel status"), "got: {err}");
+        assert!(err.contains("waitingForFill"), "raw status missing: {err}");
     }
 
     // ------------------------------ modify ------------------------------
