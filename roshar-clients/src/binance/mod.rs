@@ -107,6 +107,16 @@ impl BinanceClient {
         }
         Ok(())
     }
+
+    pub fn subscribe_book_ticker(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+        let symbols_owned: Vec<String> = symbols.iter().map(|s| s.to_string()).collect();
+        let msg = BinanceWssMessage::batch_book_ticker(&symbols_owned).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
 }
 
 #[async_trait]

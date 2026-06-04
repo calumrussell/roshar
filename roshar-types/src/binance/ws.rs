@@ -90,6 +90,18 @@ impl BinanceWssMessage {
             params: Some(streams),
         }
     }
+
+    pub fn batch_book_ticker(symbols: &[String]) -> Self {
+        let params: Vec<String> = symbols
+            .iter()
+            .map(|symbol| format!("{}@bookTicker", symbol.to_lowercase()))
+            .collect();
+        Self {
+            id: 1,
+            method: "SUBSCRIBE".to_string(),
+            params: Some(params),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -190,6 +202,25 @@ pub struct BinanceTradeMessage {
     pub order_type: Option<String>, // "MARKET", "LIMIT", etc. - optional field
     #[serde(rename = "m")]
     pub is_buyer_maker: bool,
+}
+
+/// Best bid/offer update from the `@bookTicker` stream.
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct BinanceBookTickerMessage {
+    #[serde(rename = "e", default)]
+    pub event_type: String,
+    #[serde(rename = "u")]
+    pub update_id: u64,
+    #[serde(rename = "s")]
+    pub symbol: String,
+    #[serde(rename = "b")]
+    pub best_bid_price: String,
+    #[serde(rename = "B")]
+    pub best_bid_qty: String,
+    #[serde(rename = "a")]
+    pub best_ask_price: String,
+    #[serde(rename = "A")]
+    pub best_ask_qty: String,
 }
 
 // REST API response types (for reference/deserialization only, no client code)
