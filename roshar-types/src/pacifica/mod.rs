@@ -186,6 +186,58 @@ pub struct PacificaFundingRate {
     pub mark_price: String,
 }
 
+/// Open order from `GET /api/v1/orders`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PacificaOpenOrder {
+    pub order_id: i64,
+    pub client_order_id: Option<String>,
+    pub symbol: String,
+    pub side: String,
+    pub price: String,
+    pub initial_amount: String,
+    pub filled_amount: String,
+    pub cancelled_amount: String,
+    pub stop_price: Option<String>,
+    pub order_type: String,
+    pub stop_parent_order_id: Option<i64>,
+    pub reduce_only: bool,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PacificaOpenOrdersResponse {
+    pub success: bool,
+    pub data: Vec<PacificaOpenOrder>,
+    pub error: Option<String>,
+    pub code: Option<i64>,
+    pub last_order_id: Option<i64>,
+}
+
+/// Position from `GET /api/v1/positions`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PacificaPosition {
+    pub symbol: String,
+    pub side: String,
+    pub amount: String,
+    pub entry_price: String,
+    pub margin: String,
+    pub funding: String,
+    pub isolated: bool,
+    pub liquidation_price: Option<String>,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PacificaPositionsResponse {
+    pub success: bool,
+    pub data: Vec<PacificaPosition>,
+    pub error: Option<String>,
+    pub code: Option<i64>,
+    pub last_order_id: Option<i64>,
+}
+
 /// OHLCV kline from `GET /api/v1/klines`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PacificaKline {
