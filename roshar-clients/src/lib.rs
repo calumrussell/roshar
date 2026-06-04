@@ -83,10 +83,10 @@ pub use roshar_types::aster::{
 };
 
 // Re-export Pacifica types
-pub use pacifica::{PacificaApi, PacificaClient, PacificaMarketApi};
+pub use pacifica::{PacificaApi, PacificaClient, PacificaMarketApi, PacificaTradingApi};
 pub use roshar_types::pacifica::{
-    PacificaFundingRate, PacificaKline, PacificaMarket, PacificaOrderBook, PacificaTicker,
-    PacificaTrade,
+    PacificaFundingRate, PacificaKline, PacificaMarket, PacificaOpenOrder, PacificaOrderBook,
+    PacificaPosition, PacificaTicker, PacificaTrade,
 };
 
 // Re-export Lighter types

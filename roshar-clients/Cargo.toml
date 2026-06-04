@@ -38,6 +38,10 @@ async-trait = "0.1"
 # Exact-decimal wire formatting for Hyperliquid order payloads
 rust_decimal = { workspace = true }
 
+# Solana ed25519 signing for Pacifica exchange
+ed25519-dalek = "2"
+bs58 = "0.5"
+
 [dev-dependencies]
 env_logger = "0.11"
 tokio = { version = "1.40", features = ["rt-multi-thread", "macros"] }
