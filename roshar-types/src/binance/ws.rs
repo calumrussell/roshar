@@ -1,5 +1,79 @@
 use serde::{Deserialize, Serialize};
 
+/// Kline intervals of the `<symbol>@kline_<interval>` stream. `S1` exists on spot only.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BinanceKlineInterval {
+    S1,
+    M1,
+    M3,
+    M5,
+    M15,
+    M30,
+    H1,
+    H2,
+    H4,
+    H6,
+    H8,
+    H12,
+    D1,
+    D3,
+    W1,
+    /// One month (`1M`).
+    Mo1,
+}
+
+impl BinanceKlineInterval {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::S1 => "1s",
+            Self::M1 => "1m",
+            Self::M3 => "3m",
+            Self::M5 => "5m",
+            Self::M15 => "15m",
+            Self::M30 => "30m",
+            Self::H1 => "1h",
+            Self::H2 => "2h",
+            Self::H4 => "4h",
+            Self::H6 => "6h",
+            Self::H8 => "8h",
+            Self::H12 => "12h",
+            Self::D1 => "1d",
+            Self::D3 => "3d",
+            Self::W1 => "1w",
+            Self::Mo1 => "1M",
+        }
+    }
+}
+
+/// Update speed of the diff-depth stream.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BinanceDepthSpeed {
+    /// `<symbol>@depth`: 250ms on futures, 1000ms on spot.
+    Default,
+    /// `<symbol>@depth@500ms`: futures only.
+    Ms500,
+    /// `<symbol>@depth@100ms`.
+    Ms100,
+}
+
+impl BinanceDepthSpeed {
+    fn suffix(&self) -> &'static str {
+        match self {
+            Self::Default => "",
+            Self::Ms500 => "@500ms",
+            Self::Ms100 => "@100ms",
+        }
+    }
+}
+
+fn depth_stream(symbol: &str, speed: BinanceDepthSpeed) -> String {
+    format!("{}@depth{}", symbol.to_lowercase(), speed.suffix())
+}
+
+fn kline_stream(symbol: &str, interval: BinanceKlineInterval) -> String {
+    format!("{}@kline_{}", symbol.to_lowercase(), interval.as_str())
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct BinanceWssMessage {
     pub id: u32,
@@ -21,11 +95,11 @@ impl BinanceWssMessage {
         }
     }
 
-    pub fn depth_unsub(symbol: &str) -> Self {
+    pub fn depth_unsub(symbol: &str, speed: BinanceDepthSpeed) -> Self {
         Self {
             id: 1,
             method: "UNSUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@depth@100ms", symbol.to_lowercase())]),
+            params: Some(vec![depth_stream(symbol, speed)]),
         }
     }
 
@@ -37,18 +111,18 @@ impl BinanceWssMessage {
         }
     }
 
-    pub fn candle_unsub(symbol: &str) -> Self {
+    pub fn candle_unsub(symbol: &str, interval: BinanceKlineInterval) -> Self {
         Self {
             id: 1,
             method: "UNSUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@kline_1m", symbol.to_lowercase())]),
+            params: Some(vec![kline_stream(symbol, interval)]),
         }
     }
 
-    pub fn batch_depth(symbols: &[String]) -> Self {
+    pub fn batch_depth(symbols: &[String], speed: BinanceDepthSpeed) -> Self {
         let params: Vec<String> = symbols
             .iter()
-            .map(|symbol| format!("{}@depth@100ms", symbol.to_lowercase()))
+            .map(|symbol| depth_stream(symbol, speed))
             .collect();
         Self {
             id: 1,
@@ -69,10 +143,10 @@ impl BinanceWssMessage {
         }
     }
 
-    pub fn batch_candles(symbols: &[String]) -> Self {
+    pub fn batch_candles(symbols: &[String], interval: BinanceKlineInterval) -> Self {
         let params: Vec<String> = symbols
             .iter()
-            .map(|symbol| format!("{}@kline_1m", symbol.to_lowercase()))
+            .map(|symbol| kline_stream(symbol, interval))
             .collect();
         Self {
             id: 1,
@@ -301,13 +375,37 @@ mod tests {
 
     #[test]
     fn test_wss_message_batch_depth() {
-        let msg = BinanceWssMessage::batch_depth(&["BTCUSDT".to_string(), "ETHUSDT".to_string()]);
+        let msg = BinanceWssMessage::batch_depth(
+            &["BTCUSDT".to_string(), "ETHUSDT".to_string()],
+            BinanceDepthSpeed::Ms100,
+        );
         let json = msg.to_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["method"], "SUBSCRIBE");
         assert_eq!(parsed["params"][0], "btcusdt@depth@100ms");
         assert_eq!(parsed["params"][1], "ethusdt@depth@100ms");
+    }
+
+    #[test]
+    fn test_wss_message_depth_speeds_and_intervals() {
+        let d = |speed| {
+            BinanceWssMessage::depth_unsub("BTCUSDT", speed)
+                .params
+                .unwrap()
+        };
+        assert_eq!(d(BinanceDepthSpeed::Default), vec!["btcusdt@depth"]);
+        assert_eq!(d(BinanceDepthSpeed::Ms500), vec!["btcusdt@depth@500ms"]);
+        assert_eq!(d(BinanceDepthSpeed::Ms100), vec!["btcusdt@depth@100ms"]);
+
+        let k = |interval| {
+            BinanceWssMessage::candle_unsub("BTCUSDT", interval)
+                .params
+                .unwrap()
+        };
+        assert_eq!(k(BinanceKlineInterval::M1), vec!["btcusdt@kline_1m"]);
+        assert_eq!(k(BinanceKlineInterval::Mo1), vec!["btcusdt@kline_1M"]);
+        assert_eq!(k(BinanceKlineInterval::H4), vec!["btcusdt@kline_4h"]);
     }
 
     #[test]
@@ -323,7 +421,10 @@ mod tests {
 
     #[test]
     fn test_wss_message_batch_candles() {
-        let msg = BinanceWssMessage::batch_candles(&["BTCUSDT".to_string(), "ETHUSDT".to_string()]);
+        let msg = BinanceWssMessage::batch_candles(
+            &["BTCUSDT".to_string(), "ETHUSDT".to_string()],
+            BinanceKlineInterval::M1,
+        );
         let json = msg.to_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 

@@ -148,9 +148,16 @@ impl PacificaClient {
         Ok(())
     }
 
-    pub fn subscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    /// `interval` is sent as given (e.g. `"1m"`).
+    pub fn subscribe_candles(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        interval: &str,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::pacifica::PacificaWssMessage::candles(symbol).to_json();
+            let msg =
+                roshar_types::pacifica::PacificaWssMessage::candles(symbol, interval).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),

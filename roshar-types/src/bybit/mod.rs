@@ -3,8 +3,8 @@ mod ws;
 use serde::{Deserialize, Serialize};
 
 pub use ws::{
-    ByBitCandleData, ByBitCandleMessage, ByBitDepthBookData, ByBitDepthMessage, ByBitMessage,
-    ByBitTradesData, ByBitTradesMessage, ByBitWssMessage,
+    ByBitCandleData, ByBitCandleMessage, ByBitDepthBookData, ByBitDepthMessage, ByBitKlineInterval,
+    ByBitMessage, ByBitOrderbookDepth, ByBitTradesData, ByBitTradesMessage, ByBitWssMessage,
 };
 
 /// Historical funding rate data from ByBit

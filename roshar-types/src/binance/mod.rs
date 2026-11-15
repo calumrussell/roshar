@@ -2,9 +2,9 @@ mod kline;
 mod ws;
 
 pub use ws::{
-    BinanceBookTickerMessage, BinanceCandleMessage, BinanceDepthDiffMessage, BinanceKlineData,
-    BinanceOrderBookSnapshot, BinanceTradeMessage, BinanceWssMessage, ExchangeInfo,
-    OpenInterestData, SymbolInfo, TickerData,
+    BinanceBookTickerMessage, BinanceCandleMessage, BinanceDepthDiffMessage, BinanceDepthSpeed,
+    BinanceKlineData, BinanceKlineInterval, BinanceOrderBookSnapshot, BinanceTradeMessage,
+    BinanceWssMessage, ExchangeInfo, OpenInterestData, SymbolInfo, TickerData,
 };
 
 pub use self::kline::BinanceKline;

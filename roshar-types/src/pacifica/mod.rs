@@ -75,13 +75,14 @@ impl PacificaWssMessage {
         }
     }
 
-    pub fn candles(symbol: &str) -> Self {
+    /// Candle subscription. `interval` is sent as given (e.g. `"1m"`).
+    pub fn candles(symbol: &str, interval: &str) -> Self {
         Self {
             method: "subscribe".to_string(),
             params: Some(PacificaSubscribeParams {
                 channel: "candle".to_string(),
                 market: Some(symbol.to_string()),
-                interval: Some("1m".to_string()),
+                interval: Some(interval.to_string()),
             }),
         }
     }

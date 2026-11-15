@@ -4,6 +4,8 @@ pub const BINANCE_SPOT_WSS_URL: &str = "wss://stream.binance.com:9443/ws";
 
 pub(crate) mod rest;
 
+pub use roshar_types::{BinanceDepthSpeed, BinanceKlineInterval};
+
 use rest::BinanceRestClient;
 
 use anyhow::Result;
@@ -54,9 +56,14 @@ impl BinanceClient {
         &mut self.ws_config
     }
 
-    pub fn subscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn subscribe_depth(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        speed: BinanceDepthSpeed,
+    ) -> Result<()> {
         let symbols_owned: Vec<String> = symbols.iter().map(|s| s.to_string()).collect();
-        let msg = BinanceWssMessage::batch_depth(&symbols_owned).to_json();
+        let msg = BinanceWssMessage::batch_depth(&symbols_owned, speed).to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -74,9 +81,14 @@ impl BinanceClient {
         Ok(())
     }
 
-    pub fn subscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn subscribe_candles(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        interval: BinanceKlineInterval,
+    ) -> Result<()> {
         let symbols_owned: Vec<String> = symbols.iter().map(|s| s.to_string()).collect();
-        let msg = BinanceWssMessage::batch_candles(&symbols_owned).to_json();
+        let msg = BinanceWssMessage::batch_candles(&symbols_owned, interval).to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -84,9 +96,14 @@ impl BinanceClient {
         Ok(())
     }
 
-    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn unsubscribe_depth(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        speed: BinanceDepthSpeed,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = BinanceWssMessage::depth_unsub(symbol).to_json();
+            let msg = BinanceWssMessage::depth_unsub(symbol, speed).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -106,9 +123,14 @@ impl BinanceClient {
         Ok(())
     }
 
-    pub fn unsubscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn unsubscribe_candles(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        interval: BinanceKlineInterval,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = BinanceWssMessage::candle_unsub(symbol).to_json();
+            let msg = BinanceWssMessage::candle_unsub(symbol, interval).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),

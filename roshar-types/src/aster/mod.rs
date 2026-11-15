@@ -2,6 +2,74 @@ use serde::{Deserialize, Serialize};
 
 // ── WebSocket messages ────────────────────────────────────────────────────────
 
+/// Kline intervals of the `<symbol>@kline_<interval>` stream.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AsterKlineInterval {
+    M1,
+    M3,
+    M5,
+    M15,
+    M30,
+    H1,
+    H2,
+    H4,
+    H6,
+    H8,
+    H12,
+    D1,
+    D3,
+    W1,
+    /// One month (`1M`).
+    Mo1,
+}
+
+impl AsterKlineInterval {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::M1 => "1m",
+            Self::M3 => "3m",
+            Self::M5 => "5m",
+            Self::M15 => "15m",
+            Self::M30 => "30m",
+            Self::H1 => "1h",
+            Self::H2 => "2h",
+            Self::H4 => "4h",
+            Self::H6 => "6h",
+            Self::H8 => "8h",
+            Self::H12 => "12h",
+            Self::D1 => "1d",
+            Self::D3 => "3d",
+            Self::W1 => "1w",
+            Self::Mo1 => "1M",
+        }
+    }
+}
+
+/// Update speed of the diff-depth stream.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AsterDepthSpeed {
+    /// `<symbol>@depth` (250ms).
+    Default,
+    /// `<symbol>@depth@500ms`.
+    Ms500,
+    /// `<symbol>@depth@100ms`.
+    Ms100,
+}
+
+impl AsterDepthSpeed {
+    fn suffix(&self) -> &'static str {
+        match self {
+            Self::Default => "",
+            Self::Ms500 => "@500ms",
+            Self::Ms100 => "@100ms",
+        }
+    }
+}
+
+fn depth_stream(symbol: &str, speed: AsterDepthSpeed) -> String {
+    format!("{}@depth{}", symbol.to_lowercase(), speed.suffix())
+}
+
 /// Subscribe / unsubscribe message for Aster WebSocket streams.
 /// Aster mirrors the Binance Futures WebSocket protocol exactly.
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -25,19 +93,19 @@ impl AsterWssMessage {
         }
     }
 
-    pub fn depth(symbol: &str) -> Self {
+    pub fn depth(symbol: &str, speed: AsterDepthSpeed) -> Self {
         Self {
             id: 1,
             method: "SUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@depth@100ms", symbol.to_lowercase())]),
+            params: Some(vec![depth_stream(symbol, speed)]),
         }
     }
 
-    pub fn depth_unsub(symbol: &str) -> Self {
+    pub fn depth_unsub(symbol: &str, speed: AsterDepthSpeed) -> Self {
         Self {
             id: 1,
             method: "UNSUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@depth@100ms", symbol.to_lowercase())]),
+            params: Some(vec![depth_stream(symbol, speed)]),
         }
     }
 
@@ -65,11 +133,15 @@ impl AsterWssMessage {
         }
     }
 
-    pub fn klines(symbol: &str) -> Self {
+    pub fn klines(symbol: &str, interval: AsterKlineInterval) -> Self {
         Self {
             id: 1,
             method: "SUBSCRIBE".to_string(),
-            params: Some(vec![format!("{}@kline_1m", symbol.to_lowercase())]),
+            params: Some(vec![format!(
+                "{}@kline_{}",
+                symbol.to_lowercase(),
+                interval.as_str()
+            )]),
         }
     }
 }
@@ -196,7 +268,7 @@ pub struct AsterOrderBook {
 
 // ── WebSocket stream message types ───────────────────────────────────────────
 
-/// Diff depth update stream (`{symbol}@depth@100ms`).
+/// Diff depth update stream (`{symbol}@depth[@500ms|@100ms]`).
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AsterDepthMessage {
     #[serde(rename = "e")]
@@ -286,6 +358,30 @@ mod tests {
             r#"[1499040000000,0.016,"0.8","0.015","0.0158","148976.1",1499644799999,"2434.2",308]"#;
         let err = serde_json::from_str::<AsterKline>(row).unwrap_err();
         assert!(err.to_string().contains("index 1 is not a string"), "{err}");
+    }
+
+    #[test]
+    fn subscription_streams() {
+        let p = |m: AsterWssMessage| m.params.unwrap();
+        assert_eq!(
+            p(AsterWssMessage::depth("BTCUSDT", AsterDepthSpeed::Ms100)),
+            vec!["btcusdt@depth@100ms"]
+        );
+        assert_eq!(
+            p(AsterWssMessage::depth_unsub(
+                "BTCUSDT",
+                AsterDepthSpeed::Default
+            )),
+            vec!["btcusdt@depth"]
+        );
+        assert_eq!(
+            p(AsterWssMessage::klines("BTCUSDT", AsterKlineInterval::M1)),
+            vec!["btcusdt@kline_1m"]
+        );
+        assert_eq!(
+            p(AsterWssMessage::klines("BTCUSDT", AsterKlineInterval::Mo1)),
+            vec!["btcusdt@kline_1M"]
+        );
     }
 
     #[test]

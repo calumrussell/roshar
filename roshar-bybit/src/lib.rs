@@ -10,7 +10,7 @@ pub use rest::{
     ByBitInstrumentInfo, ByBitLeverageFilter, ByBitLotSizeFilter, ByBitPriceFilter,
     ByBitTickerData, ByBitTickersResponse, MarketApi as ByBitMarketApi,
 };
-pub use roshar_types::ByBitHistoricalFundingRate;
+pub use roshar_types::{ByBitHistoricalFundingRate, ByBitKlineInterval, ByBitOrderbookDepth};
 
 use anyhow::Result;
 use async_trait::async_trait;
@@ -63,9 +63,14 @@ impl ByBitClient {
         &mut self.ws_config
     }
 
-    pub fn subscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn subscribe_depth(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        depth: ByBitOrderbookDepth,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = ByBitWssMessage::depth(symbol).to_json();
+            let msg = ByBitWssMessage::depth(symbol, depth).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -85,9 +90,14 @@ impl ByBitClient {
         Ok(())
     }
 
-    pub fn subscribe_candles(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn subscribe_candles(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        interval: ByBitKlineInterval,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = ByBitWssMessage::candle(symbol).to_json();
+            let msg = ByBitWssMessage::candle(symbol, interval).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -96,9 +106,14 @@ impl ByBitClient {
         Ok(())
     }
 
-    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn unsubscribe_depth(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        depth: ByBitOrderbookDepth,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = ByBitWssMessage::depth_unsub(symbol).to_json();
+            let msg = ByBitWssMessage::depth_unsub(symbol, depth).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),

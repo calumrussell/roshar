@@ -102,6 +102,72 @@ pub struct ByBitCandleData {
     pub timestamp: u64, // Timestamp
 }
 
+/// Depth of the `orderbook.{depth}.{symbol}` stream. Linear/inverse: 1, 50, 200, 500.
+/// Spot: 1, 50, 200. Option: 25, 100.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ByBitOrderbookDepth {
+    L1,
+    L25,
+    L50,
+    L100,
+    L200,
+    L500,
+}
+
+impl ByBitOrderbookDepth {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::L1 => "1",
+            Self::L25 => "25",
+            Self::L50 => "50",
+            Self::L100 => "100",
+            Self::L200 => "200",
+            Self::L500 => "500",
+        }
+    }
+}
+
+/// Interval of the `kline.{interval}.{symbol}` stream. Numeric variants are minutes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ByBitKlineInterval {
+    M1,
+    M3,
+    M5,
+    M15,
+    M30,
+    M60,
+    M120,
+    M240,
+    M360,
+    M720,
+    /// One day (`D`).
+    Day,
+    /// One week (`W`).
+    Week,
+    /// One month (`M`).
+    Month,
+}
+
+impl ByBitKlineInterval {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::M1 => "1",
+            Self::M3 => "3",
+            Self::M5 => "5",
+            Self::M15 => "15",
+            Self::M30 => "30",
+            Self::M60 => "60",
+            Self::M120 => "120",
+            Self::M240 => "240",
+            Self::M360 => "360",
+            Self::M720 => "720",
+            Self::Day => "D",
+            Self::Week => "W",
+            Self::Month => "M",
+        }
+    }
+}
+
 // WebSocket Message Type
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ByBitWssMessage {
@@ -124,19 +190,19 @@ impl ByBitWssMessage {
         }
     }
 
-    pub fn depth(coin: &str) -> Self {
+    pub fn depth(coin: &str, depth: ByBitOrderbookDepth) -> Self {
         Self {
             req_id: "test".to_string(),
             op: "subscribe".to_string(),
-            args: Some(vec![format!("orderbook.50.{coin}")]),
+            args: Some(vec![format!("orderbook.{}.{coin}", depth.as_str())]),
         }
     }
 
-    pub fn depth_unsub(coin: &str) -> Self {
+    pub fn depth_unsub(coin: &str, depth: ByBitOrderbookDepth) -> Self {
         Self {
             req_id: "test".to_string(),
             op: "unsubscribe".to_string(),
-            args: Some(vec![format!("orderbook.50.{coin}")]),
+            args: Some(vec![format!("orderbook.{}.{coin}", depth.as_str())]),
         }
     }
 
@@ -156,11 +222,11 @@ impl ByBitWssMessage {
         }
     }
 
-    pub fn candle(coin: &str) -> Self {
+    pub fn candle(coin: &str, interval: ByBitKlineInterval) -> Self {
         Self {
             req_id: "test".to_string(),
             op: "subscribe".to_string(),
-            args: Some(vec![format!("kline.1.{}", coin)]),
+            args: Some(vec![format!("kline.{}.{}", interval.as_str(), coin)]),
         }
     }
 }
@@ -221,12 +287,24 @@ mod tests {
 
     #[test]
     fn test_wss_message_depth() {
-        let msg = ByBitWssMessage::depth("BTCUSDT");
+        let msg = ByBitWssMessage::depth("BTCUSDT", ByBitOrderbookDepth::L50);
         let json = msg.to_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         assert_eq!(parsed["op"], "subscribe");
         assert_eq!(parsed["args"][0], "orderbook.50.BTCUSDT");
+
+        let unsub = ByBitWssMessage::depth_unsub("BTCUSDT", ByBitOrderbookDepth::L500);
+        assert_eq!(unsub.op, "unsubscribe");
+        assert_eq!(unsub.args.unwrap(), vec!["orderbook.500.BTCUSDT"]);
+    }
+
+    #[test]
+    fn test_wss_message_candle() {
+        let msg = ByBitWssMessage::candle("BTCUSDT", ByBitKlineInterval::M1);
+        assert_eq!(msg.args.unwrap(), vec!["kline.1.BTCUSDT"]);
+        let msg = ByBitWssMessage::candle("BTCUSDT", ByBitKlineInterval::Day);
+        assert_eq!(msg.args.unwrap(), vec!["kline.D.BTCUSDT"]);
     }
 
     #[test]

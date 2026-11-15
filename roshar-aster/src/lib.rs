@@ -9,6 +9,7 @@ pub use rest::MarketApi as AsterMarketApi;
 
 use anyhow::Result;
 use async_trait::async_trait;
+pub use roshar_types::aster::{AsterDepthSpeed, AsterKlineInterval};
 use roshar_types::aster::{
     AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr,
 };
@@ -60,9 +61,14 @@ impl AsterClient {
         &mut self.ws_config
     }
 
-    pub fn subscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn subscribe_depth(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        speed: AsterDepthSpeed,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::depth(symbol).to_json();
+            let msg = roshar_types::aster::AsterWssMessage::depth(symbol, speed).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -71,9 +77,14 @@ impl AsterClient {
         Ok(())
     }
 
-    pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn unsubscribe_depth(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        speed: AsterDepthSpeed,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::depth_unsub(symbol).to_json();
+            let msg = roshar_types::aster::AsterWssMessage::depth_unsub(symbol, speed).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -115,9 +126,14 @@ impl AsterClient {
         Ok(())
     }
 
-    pub fn subscribe_klines(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn subscribe_klines(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        interval: AsterKlineInterval,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::klines(symbol).to_json();
+            let msg = roshar_types::aster::AsterWssMessage::klines(symbol, interval).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
