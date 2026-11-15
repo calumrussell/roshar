@@ -58,8 +58,9 @@ impl MarketApi {
         Ok(format!("{}?token={}", server.endpoint, parsed.data.token))
     }
 
-    /// Get all active perpetual contracts.
-    /// Returns a map of symbol -> contract info.
+    /// Get all contracts returned by the active-contracts endpoint, whatever their `status`.
+    /// Returns a map of symbol -> contract info. Filter on `status == "Open"` to keep only
+    /// tradable contracts.
     ///
     /// Endpoint: GET /api/v1/contracts/active
     /// Rate limit weight: 3
@@ -88,7 +89,6 @@ impl MarketApi {
         let map = parsed
             .data
             .into_iter()
-            .filter(|c| c.status == "Open")
             .map(|c| (c.symbol.clone(), c))
             .collect();
 

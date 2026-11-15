@@ -22,8 +22,9 @@ impl MarketApi {
         Self { client }
     }
 
-    /// Get all tradable products.
-    /// Returns a map of product_id -> product info.
+    /// Get all products, whatever their status.
+    /// Returns a map of product_id -> product info. Filter on `status == "online"` and
+    /// `!trading_disabled` to keep only tradable products.
     ///
     /// Endpoint: GET /api/v3/brokerage/market/products
     /// Rate limit: 10/sec (IP, public endpoints)
@@ -52,7 +53,6 @@ impl MarketApi {
         let map = parsed
             .products
             .into_iter()
-            .filter(|p| p.status == "online" && !p.trading_disabled)
             .map(|p| (p.product_id.clone(), p))
             .collect();
 

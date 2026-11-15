@@ -19,8 +19,9 @@ impl MarketApi {
         Self { client }
     }
 
-    /// Get all USDT-margined perpetual contract configs.
-    /// Returns a map of symbol -> contract info.
+    /// Get all USDT-margined perpetual contract configs, whatever their `symbolStatus`.
+    /// Returns a map of symbol -> contract info. Filter on `symbol_status` (e.g. `"normal"`)
+    /// to keep only tradable contracts.
     ///
     /// Endpoint: GET /api/v2/mix/market/contracts?productType=USDT-FUTURES
     /// Rate limit: 20/sec (IP)
@@ -53,7 +54,6 @@ impl MarketApi {
         let map = parsed
             .data
             .into_iter()
-            .filter(|c| c.symbol_status == "normal")
             .map(|c| (c.symbol.clone(), c))
             .collect();
 
