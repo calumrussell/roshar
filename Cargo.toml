@@ -2,10 +2,23 @@
 members = [
     "roshar-ws",
     "roshar-ws-mgr",
-    "roshar-bt",
-    "roshar-bt-py",
-    "roshar-types",
-    "roshar-clients",
+    "roshar-http",
+    "roshar-aster",
+    "roshar-binance",
+    "roshar-bitget",
+    "roshar-bybit",
+    "roshar-coinbase",
+    "roshar-deribit",
+    "roshar-derive",
+    "roshar-hyperliquid",
+    "roshar-kraken",
+    "roshar-kucoin",
+    "roshar-lighter",
+    "roshar-okx",
+    "roshar-pacifica",
+    "roshar-paradex",
+    "roshar-phoenix",
+    "roshar-polymarket",
 ]
 resolver = "2"
 
@@ -26,6 +39,5 @@ log = "0.4"
 rust_decimal = "1.36"
 serde_json = "1.0"
 env_logger = "0.11"
-roshar-types = { path = "roshar-types" }
 roshar-ws-mgr = { path = "roshar-ws-mgr" }
 

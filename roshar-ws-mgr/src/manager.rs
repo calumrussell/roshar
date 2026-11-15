@@ -40,7 +40,6 @@ pub enum Message {
 pub enum ManagerError {
     Unknown(String),
     Inactive(String),
-    Restarting(String),
 }
 
 impl std::fmt::Display for ManagerError {
@@ -48,7 +47,6 @@ impl std::fmt::Display for ManagerError {
         match self {
             ManagerError::Unknown(conn) => write!(f, "Connection Unknown: {:?}", conn),
             ManagerError::Inactive(conn) => write!(f, "Connection Inactive: {:?}", conn),
-            ManagerError::Restarting(conn) => write!(f, "Connection Restarting: {:?}", conn),
         }
     }
 }

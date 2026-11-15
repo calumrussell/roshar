@@ -1,0 +1,1992 @@
+{
+  "decode_status": [
+    [
+      {
+        "response": {
+          "data": {
+            "statuses": [
+              {
+                "resting": {
+                  "oid": 77738308
+                }
+              }
+            ]
+          },
+          "type": "order"
+        },
+        "status": "ok"
+      },
+      "Ok(Resting { oid: 77738308 })"
+    ],
+    [
+      {
+        "response": {
+          "data": {
+            "statuses": [
+              {
+                "filled": {
+                  "avgPx": "1891.4",
+                  "oid": 77747314,
+                  "totalSz": "0.02"
+                }
+              }
+            ]
+          },
+          "type": "order"
+        },
+        "status": "ok"
+      },
+      "Ok(Filled { total_sz: 0.02, avg_px: 1891.4, oid: 77747314 })"
+    ],
+    [
+      {
+        "response": {
+          "data": {
+            "statuses": [
+              {
+                "error": "Order could not immediately match against any resting orders."
+              }
+            ]
+          },
+          "type": "order"
+        },
+        "status": "ok"
+      },
+      "Ok(Rejected(\"Order could not immediately match against any resting orders.\"))"
+    ],
+    [
+      {
+        "response": {
+          "data": {
+            "statuses": [
+              "success"
+            ]
+          },
+          "type": "cancel"
+        },
+        "status": "ok"
+      },
+      "Ok(Success)"
+    ],
+    [
+      {
+        "response": {
+          "type": "default"
+        },
+        "status": "ok"
+      },
+      "Ok(Success)"
+    ],
+    [
+      {
+        "response": "User or API Wallet 0xabc does not exist.",
+        "status": "err"
+      },
+      "Ok(Rejected(\"User or API Wallet 0xabc does not exist.\"))"
+    ],
+    [
+      {
+        "foo": 1
+      },
+      "Err(\"{\\\"foo\\\":1}\")"
+    ]
+  ],
+  "float_to_wire": [
+    [
+      0.0,
+      "0"
+    ],
+    [
+      1.0,
+      "1"
+    ],
+    [
+      0.1,
+      "0.1"
+    ],
+    [
+      0.004361,
+      "0.004361"
+    ],
+    [
+      187.45,
+      "187.45"
+    ],
+    [
+      100000.0,
+      "100000"
+    ],
+    [
+      123456.7,
+      "123456.7"
+    ],
+    [
+      1e-8,
+      "0.00000001"
+    ],
+    [
+      0.30000000000000004,
+      "0.3"
+    ],
+    [
+      4600.0,
+      "4600"
+    ],
+    [
+      0.000025,
+      "0.000025"
+    ]
+  ],
+  "signing": {
+    "batch_modify/novault/mainnet": {
+      "action": {
+        "modifies": [
+          {
+            "oid": 77738308,
+            "order": {
+              "a": 0,
+              "b": true,
+              "p": "0.00436",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          },
+          {
+            "oid": "0x80000000000000000000000000000003",
+            "order": {
+              "a": 0,
+              "b": false,
+              "c": "0x80000000000000000000000000000003",
+              "p": "0.004365",
+              "r": true,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          }
+        ],
+        "type": "batchModify"
+      },
+      "connection_id": "df16d6f93c3e22ae9dcaaf4aa7ac4b7455b1bd390e5e274799e749c7f08819af",
+      "signed": {
+        "action": {
+          "modifies": [
+            {
+              "oid": 77738308,
+              "order": {
+                "a": 0,
+                "b": true,
+                "p": "0.00436",
+                "r": false,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            },
+            {
+              "oid": "0x80000000000000000000000000000003",
+              "order": {
+                "a": 0,
+                "b": false,
+                "c": "0x80000000000000000000000000000003",
+                "p": "0.004365",
+                "r": true,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            }
+          ],
+          "type": "batchModify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xc8aa2c2bb0b2f88506a6fc3b2ea750523da351b92e6a9333545ca05e875e1df3",
+          "s": "0x7bf27d02c94f9962fee148e5ac515afbdd5e93a8721b87f4239cbf77637e90d8",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "batch_modify/novault/testnet": {
+      "action": {
+        "modifies": [
+          {
+            "oid": 77738308,
+            "order": {
+              "a": 0,
+              "b": true,
+              "p": "0.00436",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          },
+          {
+            "oid": "0x80000000000000000000000000000003",
+            "order": {
+              "a": 0,
+              "b": false,
+              "c": "0x80000000000000000000000000000003",
+              "p": "0.004365",
+              "r": true,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          }
+        ],
+        "type": "batchModify"
+      },
+      "connection_id": "df16d6f93c3e22ae9dcaaf4aa7ac4b7455b1bd390e5e274799e749c7f08819af",
+      "signed": {
+        "action": {
+          "modifies": [
+            {
+              "oid": 77738308,
+              "order": {
+                "a": 0,
+                "b": true,
+                "p": "0.00436",
+                "r": false,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            },
+            {
+              "oid": "0x80000000000000000000000000000003",
+              "order": {
+                "a": 0,
+                "b": false,
+                "c": "0x80000000000000000000000000000003",
+                "p": "0.004365",
+                "r": true,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            }
+          ],
+          "type": "batchModify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x408349d27c6228e7d5e6ec0f023f39a764e22abb96042c6b724c15f578c00db0",
+          "s": "0x6334ddfeb959385758106fc4fbad9a9de2631761b97c1deb72eeec847f67c795",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "batch_modify/vault/mainnet": {
+      "action": {
+        "modifies": [
+          {
+            "oid": 77738308,
+            "order": {
+              "a": 0,
+              "b": true,
+              "p": "0.00436",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          },
+          {
+            "oid": "0x80000000000000000000000000000003",
+            "order": {
+              "a": 0,
+              "b": false,
+              "c": "0x80000000000000000000000000000003",
+              "p": "0.004365",
+              "r": true,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          }
+        ],
+        "type": "batchModify"
+      },
+      "connection_id": "6162f407eb848677f53b057c10e1251b92fa8899e1545e94bfb2e890fb3dcbfa",
+      "signed": {
+        "action": {
+          "modifies": [
+            {
+              "oid": 77738308,
+              "order": {
+                "a": 0,
+                "b": true,
+                "p": "0.00436",
+                "r": false,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            },
+            {
+              "oid": "0x80000000000000000000000000000003",
+              "order": {
+                "a": 0,
+                "b": false,
+                "c": "0x80000000000000000000000000000003",
+                "p": "0.004365",
+                "r": true,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            }
+          ],
+          "type": "batchModify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xee3c7da8a44bd816031f9db3e94e24131a1092c041a8e5552d4d2e09b8cd85f6",
+          "s": "0x6eab44c671f273d29ba2b5b12e3757409745a44d81f914a77c6a601ca48c166a",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "batch_modify/vault/testnet": {
+      "action": {
+        "modifies": [
+          {
+            "oid": 77738308,
+            "order": {
+              "a": 0,
+              "b": true,
+              "p": "0.00436",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          },
+          {
+            "oid": "0x80000000000000000000000000000003",
+            "order": {
+              "a": 0,
+              "b": false,
+              "c": "0x80000000000000000000000000000003",
+              "p": "0.004365",
+              "r": true,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          }
+        ],
+        "type": "batchModify"
+      },
+      "connection_id": "6162f407eb848677f53b057c10e1251b92fa8899e1545e94bfb2e890fb3dcbfa",
+      "signed": {
+        "action": {
+          "modifies": [
+            {
+              "oid": 77738308,
+              "order": {
+                "a": 0,
+                "b": true,
+                "p": "0.00436",
+                "r": false,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            },
+            {
+              "oid": "0x80000000000000000000000000000003",
+              "order": {
+                "a": 0,
+                "b": false,
+                "c": "0x80000000000000000000000000000003",
+                "p": "0.004365",
+                "r": true,
+                "s": "4600",
+                "t": {
+                  "limit": {
+                    "tif": "Alo"
+                  }
+                }
+              }
+            }
+          ],
+          "type": "batchModify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xebb17b11ac6600d638e485ed31b056c5e56643e7086e40cd780422f550c5c130",
+          "s": "0x17cd4c1b97647609203b07b8574bde10a24eb11cc2c5de61cf522c4897886c55",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel/novault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          },
+          {
+            "a": 0,
+            "o": 77738308
+          }
+        ],
+        "type": "cancel"
+      },
+      "connection_id": "7c93a30933b543aa377a699ea49d1d715e26e59f32ecdac7398b3a187b8e6209",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            },
+            {
+              "a": 0,
+              "o": 77738308
+            }
+          ],
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x0a64c6d41a7bbfa73e7d315a374cb1b90be1d8e9fe5ba1d3fce030bf1c8fe390",
+          "s": "0x5f43111d4fa5e62e52af0d9e45f9fad9dfd7ac08270b2ead8837c0c168d35df2",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel/novault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          },
+          {
+            "a": 0,
+            "o": 77738308
+          }
+        ],
+        "type": "cancel"
+      },
+      "connection_id": "7c93a30933b543aa377a699ea49d1d715e26e59f32ecdac7398b3a187b8e6209",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            },
+            {
+              "a": 0,
+              "o": 77738308
+            }
+          ],
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x7f165bb708e774b6b0e7086ff9e2813be7977ca5920a345a4d4a4bf5668bf850",
+          "s": "0x2baf546c836ddd349b7a4afec3a5833a76923a936996ddd9d41101b983e279e0",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel/vault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          },
+          {
+            "a": 0,
+            "o": 77738308
+          }
+        ],
+        "type": "cancel"
+      },
+      "connection_id": "a1378b360d513467d6c4a6664abcd9a5d9768e4e287af2e21b18cdcaf6256097",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            },
+            {
+              "a": 0,
+              "o": 77738308
+            }
+          ],
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x2bbfd70d57dbfe732a323cd581083db7ead55d3e589e2294b8c2971317f4bb4d",
+          "s": "0x5fd47d6bea2df756beaa4930a8067f37d307050f4f05b352cef56982e6869e06",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel/vault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          },
+          {
+            "a": 0,
+            "o": 77738308
+          }
+        ],
+        "type": "cancel"
+      },
+      "connection_id": "a1378b360d513467d6c4a6664abcd9a5d9768e4e287af2e21b18cdcaf6256097",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            },
+            {
+              "a": 0,
+              "o": 77738308
+            }
+          ],
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x90b85919fd4e8cd3c0647e8902d7c7ba3e2a30f7d31b50bed2491d4521ec6315",
+          "s": "0x32fb24a27cc41ae16737933c98cd9c5e93acffb369451adc501af3071329a260",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel_by_cloid/novault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000001"
+          }
+        ],
+        "type": "cancelByCloid"
+      },
+      "connection_id": "0e5365a3c72dc2303913b7ca8493be8fd6b04e0703981c7efe3168b2412aa7a3",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000001"
+            }
+          ],
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x32e3fe623d62dc3b2e67b32fdbc934cc975abe4fce507bc7402980b2b8101711",
+          "s": "0x42a36bf4bfb40f83e2cb78752abebb63f53186ca716f9ec1a6d49a8bf7267d74",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel_by_cloid/novault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000001"
+          }
+        ],
+        "type": "cancelByCloid"
+      },
+      "connection_id": "0e5365a3c72dc2303913b7ca8493be8fd6b04e0703981c7efe3168b2412aa7a3",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000001"
+            }
+          ],
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x86982d9a09045ce05dfcb0c2a9e92d7a94d8d763478452321a61340f653aacff",
+          "s": "0x736fb6882a8f3042257eac087c9e231a20914f85d76fb2f47911cfcd2a5879a0",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel_by_cloid/vault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000001"
+          }
+        ],
+        "type": "cancelByCloid"
+      },
+      "connection_id": "bcddd69a983b1b0296d4073f82d27f5f5fb4f5ac623f6a925b20319f694c75a6",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000001"
+            }
+          ],
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x586cb0792a38fb45d744b16a58695a187f4e366da10f197ef91fb20d733bf0df",
+          "s": "0x52ce19115ad9d18702ce634136c8929691dd296d4af05dbe0546432be888fcb6",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel_by_cloid/vault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000001"
+          }
+        ],
+        "type": "cancelByCloid"
+      },
+      "connection_id": "bcddd69a983b1b0296d4073f82d27f5f5fb4f5ac623f6a925b20319f694c75a6",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000001"
+            }
+          ],
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x17e4d404b3c004e1de681574808c1b7e2db5c66c23ba224e10ddf5efff71842d",
+          "s": "0x11985c660acc72424841cb70bfe3a8ea704860fdbc5d2d77c36ef0a3ceb070db",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel_by_cloid_fast/novault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000002"
+          },
+          {
+            "asset": 5,
+            "cloid": "0x80000000000000000000000000000003"
+          }
+        ],
+        "f": true,
+        "type": "cancelByCloid"
+      },
+      "connection_id": "89863d57cf4bd6bfc15933014233ba575b8436417b870f4a6387607542c0ac71",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000002"
+            },
+            {
+              "asset": 5,
+              "cloid": "0x80000000000000000000000000000003"
+            }
+          ],
+          "f": true,
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x20fea3d89b6b38649d9ad110c6becc1f96233b7a742ab836891ef25da2225d79",
+          "s": "0x7d4f3efc179019d33e59c4741cb7c891c478c8a9b0840808622aaea1b0c1d9bf",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel_by_cloid_fast/novault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000002"
+          },
+          {
+            "asset": 5,
+            "cloid": "0x80000000000000000000000000000003"
+          }
+        ],
+        "f": true,
+        "type": "cancelByCloid"
+      },
+      "connection_id": "89863d57cf4bd6bfc15933014233ba575b8436417b870f4a6387607542c0ac71",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000002"
+            },
+            {
+              "asset": 5,
+              "cloid": "0x80000000000000000000000000000003"
+            }
+          ],
+          "f": true,
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xc9cb30dc9fb4684b8934aba0ef9976b7afd1b3d2e5fbe2787efc345347c19137",
+          "s": "0x1464481a49b8c3324640373325e18e8238802276f90e816030976d8b528404bd",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel_by_cloid_fast/vault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000002"
+          },
+          {
+            "asset": 5,
+            "cloid": "0x80000000000000000000000000000003"
+          }
+        ],
+        "f": true,
+        "type": "cancelByCloid"
+      },
+      "connection_id": "8ea85cee34347d2316897e6c08909658101968e3e6ef0f63c5a098790e5b4506",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000002"
+            },
+            {
+              "asset": 5,
+              "cloid": "0x80000000000000000000000000000003"
+            }
+          ],
+          "f": true,
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x591e1126582b6e711590143e5c605de86b1cf3aecceb59916ba10640e58e54c2",
+          "s": "0x7433019dfb537538d293e153a200942b0c84e779381a4879123f4efcf97133d4",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel_by_cloid_fast/vault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "asset": 0,
+            "cloid": "0x80000000000000000000000000000002"
+          },
+          {
+            "asset": 5,
+            "cloid": "0x80000000000000000000000000000003"
+          }
+        ],
+        "f": true,
+        "type": "cancelByCloid"
+      },
+      "connection_id": "8ea85cee34347d2316897e6c08909658101968e3e6ef0f63c5a098790e5b4506",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "asset": 0,
+              "cloid": "0x80000000000000000000000000000002"
+            },
+            {
+              "asset": 5,
+              "cloid": "0x80000000000000000000000000000003"
+            }
+          ],
+          "f": true,
+          "type": "cancelByCloid"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xda8243e10d12b53bf32a093c1a294dd32bebcf85e09393bc3533bef21c4f5fdc",
+          "s": "0x77f369b82be42a865f556cb79ac288902437312e03215106d0af7e6246ce01fc",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel_fast/novault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          }
+        ],
+        "f": true,
+        "type": "cancel"
+      },
+      "connection_id": "98fe8ec0e0cc28cd89e8d49bead866dce6cc8145021a27d909ab0e3e74654854",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            }
+          ],
+          "f": true,
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x4f04cdf99b116bf593480c0f2cede9ca8723c6d58f8f5af8a59939142b2b58e3",
+          "s": "0x74a65cfb595223829df2334017c8ae550ad654b899ca7cb37904cbb07e9b5201",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel_fast/novault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          }
+        ],
+        "f": true,
+        "type": "cancel"
+      },
+      "connection_id": "98fe8ec0e0cc28cd89e8d49bead866dce6cc8145021a27d909ab0e3e74654854",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            }
+          ],
+          "f": true,
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x89fa5b89096a479abd974960649b73ae5852728e94b29cc54ee19e1698cbba75",
+          "s": "0x245343425ef5e2666f5102c8851053d8fd74e51d7e6aefe2da2352de0fcde5db",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "cancel_fast/vault/mainnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          }
+        ],
+        "f": true,
+        "type": "cancel"
+      },
+      "connection_id": "84a0e47279611d6ffe46f28452ad9ab37a25a5f9f6028fa3f6848a4056f10a7e",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            }
+          ],
+          "f": true,
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x55b328bc8ee2094cd489225300282a015ce0ae82dcd2c265ac9db4b2cebcaad9",
+          "s": "0x50951c1ddb38962a67940564dee1b61328eb85886d652f0ded136f92998d0744",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "cancel_fast/vault/testnet": {
+      "action": {
+        "cancels": [
+          {
+            "a": 200,
+            "o": 7
+          }
+        ],
+        "f": true,
+        "type": "cancel"
+      },
+      "connection_id": "84a0e47279611d6ffe46f28452ad9ab37a25a5f9f6028fa3f6848a4056f10a7e",
+      "signed": {
+        "action": {
+          "cancels": [
+            {
+              "a": 200,
+              "o": 7
+            }
+          ],
+          "f": true,
+          "type": "cancel"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x157478d91e0d1b9a5c44040acf3a213c8c7ec18c466fadcae9d4a6843ff1db5a",
+          "s": "0x5c568eb5ba05c8de0d6a3aaac48face881cf156c0915d1d888b0f774b6d48f07",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "modify_always_place/novault/mainnet": {
+      "action": {
+        "a": true,
+        "oid": 5,
+        "order": {
+          "a": 1,
+          "b": true,
+          "p": "3000.5",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Gtc"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "46a012b2f1130ddcbf1fee4bda551383e0b97bc80ea22479c91ed3c04b751587",
+      "signed": {
+        "action": {
+          "a": true,
+          "oid": 5,
+          "order": {
+            "a": 1,
+            "b": true,
+            "p": "3000.5",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x1d4e420f9e90463c00381e3ac9ee980d60a641964a417c152202bb540da05d78",
+          "s": "0x7004ed472d1226dbb2159535d9e9496a39ae4ae88daf14ba0740179f62ca4319",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "modify_always_place/novault/testnet": {
+      "action": {
+        "a": true,
+        "oid": 5,
+        "order": {
+          "a": 1,
+          "b": true,
+          "p": "3000.5",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Gtc"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "46a012b2f1130ddcbf1fee4bda551383e0b97bc80ea22479c91ed3c04b751587",
+      "signed": {
+        "action": {
+          "a": true,
+          "oid": 5,
+          "order": {
+            "a": 1,
+            "b": true,
+            "p": "3000.5",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x5dd2d7d37521b5fe3d9cec2ddef7956c10f967946913345365e7f8bf9648cecd",
+          "s": "0x5a504d6731782a2258c8909f3304f7b06f0bfc658ddc1bceccd05c7b9cc10f7c",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "modify_always_place/vault/mainnet": {
+      "action": {
+        "a": true,
+        "oid": 5,
+        "order": {
+          "a": 1,
+          "b": true,
+          "p": "3000.5",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Gtc"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "9977457e25169071c1ed631c0f3ea28457a6a58beff356c6bb9c1d54ae090f57",
+      "signed": {
+        "action": {
+          "a": true,
+          "oid": 5,
+          "order": {
+            "a": 1,
+            "b": true,
+            "p": "3000.5",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xc8eb31ec5b63216bb7e0280b6bf221f26c0c68713196704d44dca78f9af1d1fb",
+          "s": "0x37f27d6ad841ce8dc45e1121ab7e2b956f173459e695cbef63a2e18d8adfc5bf",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "modify_always_place/vault/testnet": {
+      "action": {
+        "a": true,
+        "oid": 5,
+        "order": {
+          "a": 1,
+          "b": true,
+          "p": "3000.5",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Gtc"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "9977457e25169071c1ed631c0f3ea28457a6a58beff356c6bb9c1d54ae090f57",
+      "signed": {
+        "action": {
+          "a": true,
+          "oid": 5,
+          "order": {
+            "a": 1,
+            "b": true,
+            "p": "3000.5",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x7deff6692c6e8b454dcd44bcd672ae8a997ba7ea0aaccc51dd9f1eb31db5e267",
+          "s": "0x5cd1cea6a91aa0747d4f6843e2de082ddcc1b5ae7295dcdbb1f6b6463a0e5785",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "modify_cloid/novault/mainnet": {
+      "action": {
+        "oid": "0x80000000000000000000000000000004",
+        "order": {
+          "a": 1,
+          "b": false,
+          "c": "0x80000000000000000000000000000004",
+          "p": "3001",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Alo"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "d7d0bedba08c36a3a3cf4c081d21a9e0daf506dab410ee122034eab24186d0fb",
+      "signed": {
+        "action": {
+          "oid": "0x80000000000000000000000000000004",
+          "order": {
+            "a": 1,
+            "b": false,
+            "c": "0x80000000000000000000000000000004",
+            "p": "3001",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x97ae93d4558eee6378a6058bc2190daf32ab52e5a98d97b90d048ea459502cca",
+          "s": "0x1f6426d041f0baa73b4fdd04ba20cc99cf6260b47f62bcb5207256dcf993d5c4",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "modify_cloid/novault/testnet": {
+      "action": {
+        "oid": "0x80000000000000000000000000000004",
+        "order": {
+          "a": 1,
+          "b": false,
+          "c": "0x80000000000000000000000000000004",
+          "p": "3001",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Alo"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "d7d0bedba08c36a3a3cf4c081d21a9e0daf506dab410ee122034eab24186d0fb",
+      "signed": {
+        "action": {
+          "oid": "0x80000000000000000000000000000004",
+          "order": {
+            "a": 1,
+            "b": false,
+            "c": "0x80000000000000000000000000000004",
+            "p": "3001",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x6f8ce615417a43f1692bc90e00c7e5394ea23616ba22553082774fc583d258c9",
+          "s": "0x19a8163ecd84c032439f1eb4d30c8e5cf77600bfc94218fa5f0481f0c178b298",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "modify_cloid/vault/mainnet": {
+      "action": {
+        "oid": "0x80000000000000000000000000000004",
+        "order": {
+          "a": 1,
+          "b": false,
+          "c": "0x80000000000000000000000000000004",
+          "p": "3001",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Alo"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "fbe2bf442bb416a785abe72e0a96356fc384f434e87ca489d55b2cc99e123c05",
+      "signed": {
+        "action": {
+          "oid": "0x80000000000000000000000000000004",
+          "order": {
+            "a": 1,
+            "b": false,
+            "c": "0x80000000000000000000000000000004",
+            "p": "3001",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x000d4d12ee565482e9265128bdc42f42b7d18fa737b584a5cbb1091a49b55baf",
+          "s": "0x54495f835a0123c928cbe8c6d4859cdea4123212c38ade59fbe54c208e798557",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "modify_cloid/vault/testnet": {
+      "action": {
+        "oid": "0x80000000000000000000000000000004",
+        "order": {
+          "a": 1,
+          "b": false,
+          "c": "0x80000000000000000000000000000004",
+          "p": "3001",
+          "r": false,
+          "s": "0.01",
+          "t": {
+            "limit": {
+              "tif": "Alo"
+            }
+          }
+        },
+        "type": "modify"
+      },
+      "connection_id": "fbe2bf442bb416a785abe72e0a96356fc384f434e87ca489d55b2cc99e123c05",
+      "signed": {
+        "action": {
+          "oid": "0x80000000000000000000000000000004",
+          "order": {
+            "a": 1,
+            "b": false,
+            "c": "0x80000000000000000000000000000004",
+            "p": "3001",
+            "r": false,
+            "s": "0.01",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          },
+          "type": "modify"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xd913ecbaaa3aeb40d5f0ab1a15765ba193d72b073a03bac64f280d017a5e6789",
+          "s": "0x091678d4bd7edf1ae127a2945a07c2d232c3a552a053fe48ea7e672638661e0e",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "order_alo_na/novault/mainnet": {
+      "action": {
+        "grouping": "na",
+        "orders": [
+          {
+            "a": 0,
+            "b": true,
+            "p": "0.004361",
+            "r": false,
+            "s": "4600",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "0f2c14891d1e345b53624a737ada078546ba0905da0d3d94d15ddb8403537bc2",
+      "signed": {
+        "action": {
+          "grouping": "na",
+          "orders": [
+            {
+              "a": 0,
+              "b": true,
+              "p": "0.004361",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xd5cca6fe18720a454fd405335e887cb04ecfda1e0a3d856dc334d07f3b2f3b1f",
+          "s": "0x0201bd1dfc974dea44664074bc0f9d2cfec24c3192844a35477326550692d64f",
+          "v": 28
+        },
+        "vaultAddress": null
+      }
+    },
+    "order_alo_na/novault/testnet": {
+      "action": {
+        "grouping": "na",
+        "orders": [
+          {
+            "a": 0,
+            "b": true,
+            "p": "0.004361",
+            "r": false,
+            "s": "4600",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "0f2c14891d1e345b53624a737ada078546ba0905da0d3d94d15ddb8403537bc2",
+      "signed": {
+        "action": {
+          "grouping": "na",
+          "orders": [
+            {
+              "a": 0,
+              "b": true,
+              "p": "0.004361",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xfda6fb579c2d963e617e590076cb8f75957c387a3c1e7de43f72584ac9fc22f3",
+          "s": "0x6925254d19dffbc1266ddceec4ba9d4ca7d919ec847dee46897f52b32191e46a",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "order_alo_na/vault/mainnet": {
+      "action": {
+        "grouping": "na",
+        "orders": [
+          {
+            "a": 0,
+            "b": true,
+            "p": "0.004361",
+            "r": false,
+            "s": "4600",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "4a82818a154a77fde9bd94aa4f714bfc54d56acaa89124d90178232100972396",
+      "signed": {
+        "action": {
+          "grouping": "na",
+          "orders": [
+            {
+              "a": 0,
+              "b": true,
+              "p": "0.004361",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0xe747d805d7b7f46751740e5545893d48298edc4bb25c296e024ba17312248ece",
+          "s": "0x6503dc9c8b8e2fd28042ac7267e874ea2aefbb146b442acc7e5652acf979613a",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "order_alo_na/vault/testnet": {
+      "action": {
+        "grouping": "na",
+        "orders": [
+          {
+            "a": 0,
+            "b": true,
+            "p": "0.004361",
+            "r": false,
+            "s": "4600",
+            "t": {
+              "limit": {
+                "tif": "Alo"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "4a82818a154a77fde9bd94aa4f714bfc54d56acaa89124d90178232100972396",
+      "signed": {
+        "action": {
+          "grouping": "na",
+          "orders": [
+            {
+              "a": 0,
+              "b": true,
+              "p": "0.004361",
+              "r": false,
+              "s": "4600",
+              "t": {
+                "limit": {
+                  "tif": "Alo"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x09d4fec0254b92276602d1de4c5ceef25a2d491c3f8ac59ea2875bc8296c1b51",
+          "s": "0x58ed81ad35f689368530a718a5a7df34067b254ea954d84323f4253153324dc3",
+          "v": 27
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "order_multi_priority/novault/mainnet": {
+      "action": {
+        "grouping": {
+          "p": 10000
+        },
+        "orders": [
+          {
+            "a": 3,
+            "b": false,
+            "c": "0x80000000000000000000000000000007",
+            "p": "187.45",
+            "r": true,
+            "s": "0.12",
+            "t": {
+              "limit": {
+                "tif": "Ioc"
+              }
+            }
+          },
+          {
+            "a": 10000,
+            "b": true,
+            "c": "0x80000000000000000000000000000009",
+            "p": "1.2345",
+            "r": false,
+            "s": "10",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "e0aa0aa79ce9c70d64503178aa6036313aba3a0ccbd4f4315fc19fed1488a35a",
+      "signed": {
+        "action": {
+          "grouping": {
+            "p": 10000
+          },
+          "orders": [
+            {
+              "a": 3,
+              "b": false,
+              "c": "0x80000000000000000000000000000007",
+              "p": "187.45",
+              "r": true,
+              "s": "0.12",
+              "t": {
+                "limit": {
+                  "tif": "Ioc"
+                }
+              }
+            },
+            {
+              "a": 10000,
+              "b": true,
+              "c": "0x80000000000000000000000000000009",
+              "p": "1.2345",
+              "r": false,
+              "s": "10",
+              "t": {
+                "limit": {
+                  "tif": "Gtc"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x9ebd7de4517f5ced6c9b12ee65c18ac1713697ab94d8d19c02123543cf4d68cc",
+          "s": "0x436f5723ec0aefc5e8a613426cbb0712dc9b950719bcbc06b41d7d008e5ebeca",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "order_multi_priority/novault/testnet": {
+      "action": {
+        "grouping": {
+          "p": 10000
+        },
+        "orders": [
+          {
+            "a": 3,
+            "b": false,
+            "c": "0x80000000000000000000000000000007",
+            "p": "187.45",
+            "r": true,
+            "s": "0.12",
+            "t": {
+              "limit": {
+                "tif": "Ioc"
+              }
+            }
+          },
+          {
+            "a": 10000,
+            "b": true,
+            "c": "0x80000000000000000000000000000009",
+            "p": "1.2345",
+            "r": false,
+            "s": "10",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "e0aa0aa79ce9c70d64503178aa6036313aba3a0ccbd4f4315fc19fed1488a35a",
+      "signed": {
+        "action": {
+          "grouping": {
+            "p": 10000
+          },
+          "orders": [
+            {
+              "a": 3,
+              "b": false,
+              "c": "0x80000000000000000000000000000007",
+              "p": "187.45",
+              "r": true,
+              "s": "0.12",
+              "t": {
+                "limit": {
+                  "tif": "Ioc"
+                }
+              }
+            },
+            {
+              "a": 10000,
+              "b": true,
+              "c": "0x80000000000000000000000000000009",
+              "p": "1.2345",
+              "r": false,
+              "s": "10",
+              "t": {
+                "limit": {
+                  "tif": "Gtc"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x64ff84e75a3fb81c97e686518f77c7063a7b6a21844f2fbe6280f1c53465b168",
+          "s": "0x7192f4ec51c31a08b8030baac048b6cfdb622c06426e64c40df69f600457637a",
+          "v": 27
+        },
+        "vaultAddress": null
+      }
+    },
+    "order_multi_priority/vault/mainnet": {
+      "action": {
+        "grouping": {
+          "p": 10000
+        },
+        "orders": [
+          {
+            "a": 3,
+            "b": false,
+            "c": "0x80000000000000000000000000000007",
+            "p": "187.45",
+            "r": true,
+            "s": "0.12",
+            "t": {
+              "limit": {
+                "tif": "Ioc"
+              }
+            }
+          },
+          {
+            "a": 10000,
+            "b": true,
+            "c": "0x80000000000000000000000000000009",
+            "p": "1.2345",
+            "r": false,
+            "s": "10",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "d2dd1917ac31f318ad8b1d68eb4e5d45dbe7a9032aae6c99c210b06f6453bad1",
+      "signed": {
+        "action": {
+          "grouping": {
+            "p": 10000
+          },
+          "orders": [
+            {
+              "a": 3,
+              "b": false,
+              "c": "0x80000000000000000000000000000007",
+              "p": "187.45",
+              "r": true,
+              "s": "0.12",
+              "t": {
+                "limit": {
+                  "tif": "Ioc"
+                }
+              }
+            },
+            {
+              "a": 10000,
+              "b": true,
+              "c": "0x80000000000000000000000000000009",
+              "p": "1.2345",
+              "r": false,
+              "s": "10",
+              "t": {
+                "limit": {
+                  "tif": "Gtc"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x403131bf686b9673a9338b548689c2391993def5141c02f4cdda3f9b846025a1",
+          "s": "0x0cf2d2596e5bdcf7c49ae9b9c144d00f0dd9349afb6510041a208324456d606a",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    },
+    "order_multi_priority/vault/testnet": {
+      "action": {
+        "grouping": {
+          "p": 10000
+        },
+        "orders": [
+          {
+            "a": 3,
+            "b": false,
+            "c": "0x80000000000000000000000000000007",
+            "p": "187.45",
+            "r": true,
+            "s": "0.12",
+            "t": {
+              "limit": {
+                "tif": "Ioc"
+              }
+            }
+          },
+          {
+            "a": 10000,
+            "b": true,
+            "c": "0x80000000000000000000000000000009",
+            "p": "1.2345",
+            "r": false,
+            "s": "10",
+            "t": {
+              "limit": {
+                "tif": "Gtc"
+              }
+            }
+          }
+        ],
+        "type": "order"
+      },
+      "connection_id": "d2dd1917ac31f318ad8b1d68eb4e5d45dbe7a9032aae6c99c210b06f6453bad1",
+      "signed": {
+        "action": {
+          "grouping": {
+            "p": 10000
+          },
+          "orders": [
+            {
+              "a": 3,
+              "b": false,
+              "c": "0x80000000000000000000000000000007",
+              "p": "187.45",
+              "r": true,
+              "s": "0.12",
+              "t": {
+                "limit": {
+                  "tif": "Ioc"
+                }
+              }
+            },
+            {
+              "a": 10000,
+              "b": true,
+              "c": "0x80000000000000000000000000000009",
+              "p": "1.2345",
+              "r": false,
+              "s": "10",
+              "t": {
+                "limit": {
+                  "tif": "Gtc"
+                }
+              }
+            }
+          ],
+          "type": "order"
+        },
+        "nonce": 1700000000123,
+        "signature": {
+          "r": "0x01626176d35d2cb27c2636930a5956e874ebaec9c1eb9078bac342f3e9702473",
+          "s": "0x16eab38d39ac6e7870cb739a04e6f65ae5b0b060e7092e971afe883113a8a354",
+          "v": 28
+        },
+        "vaultAddress": "0x1111111111111111111111111111111111111111"
+      }
+    }
+  },
+  "to_tick": [
+    [
+      0.0043605,
+      0,
+      false,
+      0.00436
+    ],
+    [
+      0.0043605,
+      0,
+      true,
+      0.004361
+    ],
+    [
+      187.456789,
+      2,
+      false,
+      187.45
+    ],
+    [
+      187.456789,
+      2,
+      true,
+      187.46
+    ],
+    [
+      3000.55,
+      4,
+      false,
+      3000.5
+    ],
+    [
+      3000.55,
+      4,
+      true,
+      3000.6
+    ],
+    [
+      101234.6,
+      5,
+      false,
+      101230.0
+    ],
+    [
+      101234.6,
+      5,
+      true,
+      101240.0
+    ],
+    [
+      1.23456,
+      1,
+      false,
+      1.2345
+    ],
+    [
+      1.23456,
+      1,
+      true,
+      1.2346
+    ],
+    [
+      0.000123456,
+      0,
+      false,
+      0.000123
+    ],
+    [
+      0.000123456,
+      0,
+      true,
+      0.000124
+    ]
+  ]
+}
