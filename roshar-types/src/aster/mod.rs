@@ -148,20 +148,35 @@ pub struct AsterKline {
 
 impl<'de> Deserialize<'de> for AsterKline {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        use serde::de::Error;
+
         let arr: serde_json::Value = Deserialize::deserialize(deserializer)?;
         let a = arr
             .as_array()
-            .ok_or_else(|| serde::de::Error::custom("expected array"))?;
+            .ok_or_else(|| D::Error::custom("AsterKline: expected array"))?;
+        let int = |i: usize| -> Result<i64, D::Error> {
+            a.get(i)
+                .ok_or_else(|| D::Error::custom(format!("AsterKline: missing index {i}")))?
+                .as_i64()
+                .ok_or_else(|| D::Error::custom(format!("AsterKline: index {i} is not an integer")))
+        };
+        let string = |i: usize| -> Result<String, D::Error> {
+            a.get(i)
+                .ok_or_else(|| D::Error::custom(format!("AsterKline: missing index {i}")))?
+                .as_str()
+                .map(str::to_string)
+                .ok_or_else(|| D::Error::custom(format!("AsterKline: index {i} is not a string")))
+        };
         Ok(Self {
-            open_time: a[0].as_i64().unwrap_or(0),
-            open: a[1].as_str().unwrap_or("").to_string(),
-            high: a[2].as_str().unwrap_or("").to_string(),
-            low: a[3].as_str().unwrap_or("").to_string(),
-            close: a[4].as_str().unwrap_or("").to_string(),
-            volume: a[5].as_str().unwrap_or("").to_string(),
-            close_time: a[6].as_i64().unwrap_or(0),
-            quote_volume: a[7].as_str().unwrap_or("").to_string(),
-            num_trades: a[8].as_i64().unwrap_or(0),
+            open_time: int(0)?,
+            open: string(1)?,
+            high: string(2)?,
+            low: string(3)?,
+            close: string(4)?,
+            volume: string(5)?,
+            close_time: int(6)?,
+            quote_volume: string(7)?,
+            num_trades: int(8)?,
         })
     }
 }
@@ -240,4 +255,41 @@ pub struct AsterMarkPriceMessage {
     pub funding_rate: String,
     #[serde(rename = "T")]
     pub next_funding_time: u64,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn kline_parses_wire_row() {
+        let row = r#"[1499040000000,"0.016","0.8","0.015","0.0158","148976.1",1499644799999,"2434.2",308,"1756.8","28.4","0"]"#;
+        let k: AsterKline = serde_json::from_str(row).unwrap();
+        assert_eq!(k.open_time, 1499040000000);
+        assert_eq!(k.open, "0.016");
+        assert_eq!(k.close, "0.0158");
+        assert_eq!(k.close_time, 1499644799999);
+        assert_eq!(k.quote_volume, "2434.2");
+        assert_eq!(k.num_trades, 308);
+    }
+
+    #[test]
+    fn kline_short_row_is_error() {
+        let row = r#"[1499040000000,"0.016","0.8"]"#;
+        let err = serde_json::from_str::<AsterKline>(row).unwrap_err();
+        assert!(err.to_string().contains("missing index 3"), "{err}");
+    }
+
+    #[test]
+    fn kline_wrong_type_is_error() {
+        let row =
+            r#"[1499040000000,0.016,"0.8","0.015","0.0158","148976.1",1499644799999,"2434.2",308]"#;
+        let err = serde_json::from_str::<AsterKline>(row).unwrap_err();
+        assert!(err.to_string().contains("index 1 is not a string"), "{err}");
+    }
+
+    #[test]
+    fn kline_not_array_is_error() {
+        assert!(serde_json::from_str::<AsterKline>("{}").is_err());
+    }
 }
