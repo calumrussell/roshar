@@ -7,7 +7,9 @@
 
 use anyhow::{anyhow, bail, Context};
 use k256::ecdsa::SigningKey;
-use roshar_types::hyperliquid::exchange::{Action, Cloid, OrderRef, OrderReq, Tif};
+use roshar_types::hyperliquid::exchange::{
+    Action, Cloid, Grouping, OrderRef, OrderReq, OrderType, Tif, Tpsl, TypedOrderReq,
+};
 use serde_json::{json, Value};
 use sha3::{Digest, Keccak256};
 
@@ -118,6 +120,136 @@ impl WireOrder {
     }
 }
 
+fn tpsl_str(t: Tpsl) -> &'static str {
+    match t {
+        Tpsl::Tp => "tp",
+        Tpsl::Sl => "sl",
+    }
+}
+
+fn grouping_str(g: Grouping) -> &'static str {
+    match g {
+        Grouping::Na => "na",
+        Grouping::NormalTpsl => "normalTpsl",
+        Grouping::PositionTpsl => "positionTpsl",
+    }
+}
+
+/// Order type in wire form. Trigger keys are in the SDK's `order_type_to_wire` order:
+/// `isMarket`, `triggerPx`, `tpsl`.
+enum WireType {
+    Limit(Tif),
+    Trigger {
+        is_market: bool,
+        trigger_px: String,
+        tpsl: Tpsl,
+    },
+}
+
+/// A `TypedOrderReq` in wire form. Kept apart from `WireOrder` so the limit-only path is untouched.
+struct WireTypedOrder {
+    a: u32,
+    b: bool,
+    p: String,
+    s: String,
+    r: bool,
+    t: WireType,
+    c: Option<[u8; 34]>,
+}
+
+impl WireTypedOrder {
+    fn new(o: &TypedOrderReq) -> Self {
+        WireTypedOrder {
+            a: o.asset,
+            b: o.is_buy,
+            p: float_to_wire(o.px),
+            s: float_to_wire(o.sz),
+            r: o.reduce_only,
+            t: match o.order_type {
+                OrderType::Limit(tif) => WireType::Limit(tif),
+                OrderType::Trigger {
+                    is_market,
+                    trigger_px,
+                    tpsl,
+                } => WireType::Trigger {
+                    is_market,
+                    trigger_px: float_to_wire(trigger_px),
+                    tpsl,
+                },
+            },
+            c: o.cloid.as_ref().map(cloid_buf),
+        }
+    }
+
+    fn json(&self) -> Value {
+        let mut m = serde_json::Map::new();
+        m.insert("a".into(), json!(self.a));
+        m.insert("b".into(), json!(self.b));
+        m.insert("p".into(), json!(self.p));
+        m.insert("s".into(), json!(self.s));
+        m.insert("r".into(), json!(self.r));
+        let t = match &self.t {
+            WireType::Limit(tif) => json!({"limit": {"tif": tif_str(*tif)}}),
+            WireType::Trigger {
+                is_market,
+                trigger_px,
+                tpsl,
+            } => json!({"trigger": {
+                "isMarket": is_market,
+                "triggerPx": trigger_px,
+                "tpsl": tpsl_str(*tpsl),
+            }}),
+        };
+        m.insert("t".into(), t);
+        if let Some(c) = &self.c {
+            m.insert("c".into(), json!(cloid_str(c)));
+        }
+        Value::Object(m)
+    }
+
+    fn pack(&self, w: &mut Vec<u8>) {
+        mp_map(w, if self.c.is_some() { 7 } else { 6 });
+        mp_str(w, "a");
+        mp_uint(w, self.a as u64);
+        mp_str(w, "b");
+        mp_bool(w, self.b);
+        mp_str(w, "p");
+        mp_str(w, &self.p);
+        mp_str(w, "s");
+        mp_str(w, &self.s);
+        mp_str(w, "r");
+        mp_bool(w, self.r);
+        mp_str(w, "t");
+        mp_map(w, 1);
+        match &self.t {
+            WireType::Limit(tif) => {
+                mp_str(w, "limit");
+                mp_map(w, 1);
+                mp_str(w, "tif");
+                mp_str(w, tif_str(*tif));
+            }
+            WireType::Trigger {
+                is_market,
+                trigger_px,
+                tpsl,
+            } => {
+                mp_str(w, "trigger");
+                mp_map(w, 3);
+                mp_str(w, "isMarket");
+                mp_bool(w, *is_market);
+                mp_str(w, "triggerPx");
+                mp_str(w, trigger_px);
+                mp_str(w, "tpsl");
+                mp_str(w, tpsl_str(*tpsl));
+            }
+        }
+        if let Some(c) = &self.c {
+            mp_str(w, "c");
+            mp_str(w, cloid_str(c));
+        }
+    }
+}
+
 // msgpack primitives matching Python `msgpack.packb` (smallest int width, str types). Writes to a Vec
 // cannot fail.
 fn mp_map(w: &mut Vec<u8>, n: u32) {
@@ -157,6 +289,15 @@ enum Wire {
     CancelByCloid {
         cancels: Vec<(u32, [u8; 34])>,
         fast: bool,
+    },
+    OrderTyped {
+        orders: Vec<WireTypedOrder>,
+        grouping: Grouping,
+    },
+    UpdateLeverage {
+        asset: u32,
+        is_cross: bool,
+        leverage: u32,
     },
 }
 
@@ -218,6 +359,19 @@ impl Wire {
                 cancels: cancels.iter().map(|(a, c)| (*a, cloid_buf(c))).collect(),
                 fast: *fast,
             },
+            Action::OrderTyped { orders, grouping } => Wire::OrderTyped {
+                orders: orders.iter().map(WireTypedOrder::new).collect(),
+                grouping: *grouping,
+            },
+            Action::UpdateLeverage {
+                asset,
+                is_cross,
+                leverage,
+            } => Wire::UpdateLeverage {
+                asset: *asset,
+                is_cross: *is_cross,
+                leverage: *leverage,
+            },
         }
     }
 
@@ -277,6 +431,24 @@ impl Wire {
                 if *fast {
                     m.insert("f".into(), json!(true));
                 }
+            }
+            Wire::OrderTyped { orders, grouping } => {
+                m.insert("type".into(), json!("order"));
+                m.insert(
+                    "orders".into(),
+                    Value::Array(orders.iter().map(WireTypedOrder::json).collect()),
+                );
+                m.insert("grouping".into(), json!(grouping_str(*grouping)));
+            }
+            Wire::UpdateLeverage {
+                asset,
+                is_cross,
+                leverage,
+            } => {
+                m.insert("type".into(), json!("updateLeverage"));
+                m.insert("asset".into(), json!(asset));
+                m.insert("isCross".into(), json!(is_cross));
+                m.insert("leverage".into(), json!(leverage));
             }
         }
         Value::Object(m)
@@ -369,6 +541,33 @@ impl Wire {
                     mp_str(w, "f");
                     mp_bool(w, true);
                 }
+            }
+            Wire::OrderTyped { orders, grouping } => {
+                mp_map(w, 3);
+                mp_str(w, "type");
+                mp_str(w, "order");
+                mp_str(w, "orders");
+                mp_arr(w, orders.len() as u32);
+                for o in orders {
+                    o.pack(w);
+                }
+                mp_str(w, "grouping");
+                mp_str(w, grouping_str(*grouping));
+            }
+            Wire::UpdateLeverage {
+                asset,
+                is_cross,
+                leverage,
+            } => {
+                mp_map(w, 4);
+                mp_str(w, "type");
+                mp_str(w, "updateLeverage");
+                mp_str(w, "asset");
+                mp_uint(w, *asset as u64);
+                mp_str(w, "isCross");
+                mp_bool(w, *is_cross);
+                mp_str(w, "leverage");
+                mp_uint(w, *leverage as u64);
             }
         }
     }

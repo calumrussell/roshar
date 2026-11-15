@@ -15,13 +15,15 @@ make a change pass: a changed vector means a changed signature.
 - **No caller policy.** The library does not choose coins, sizes, retries, rounding direction,
   caching or refresh intervals. Credentials are passed in; nothing is read from the environment.
 - **Wire types live in `roshar_types::hyperliquid::exchange`** and are re-exported here: `Action`,
-  `OrderReq`, `OrderRef`, `Tif`, `Cloid`, `cloid_hex`, `OrderStatus`, `L2Snapshot`, `Level`, `Side`.
+  `OrderReq`, `OrderRef`, `Tif`, `Cloid`, `cloid_hex`, `OrderStatus`, `L2Snapshot`, `Level`, `Side`, and for
+  trigger orders `TypedOrderReq`, `OrderType`, `Tpsl`, `Grouping`.
 
 ## Modules
 
 | Module | What it does |
 |---|---|
 | `signer` | `Signer::from_hex(key, vault: Option<&str>, mainnet)`. `sign(&Action, nonce)` gives the `/exchange` payload. `float_to_wire` gives exact decimal strings. Pass `vault = Some(subaccount)` to trade a sub-account or vault, `None` for the key's own account or its master. |
+| `Action` variants | `Order` (limit orders, grouping `na` or priority `{p}`), `BatchModify`, `Modify`, `Cancel`, `CancelByCloid`. `OrderTyped { orders: Vec<TypedOrderReq>, grouping }` takes limit or trigger orders (`OrderType::Trigger { is_market, trigger_px, tpsl }`) with grouping `na`, `normalTpsl` or `positionTpsl`. `UpdateLeverage { asset, is_cross, leverage }`. Every variant is checked against Python SDK vectors (`tests/vectors.json`, `tests/trigger_vectors.json`). |
 | `nonce` | `NonceGen`: strictly increasing millisecond nonces. |
 | `poster` | `WsPoster::connect(url)`. `post(payload)` returns a `PendingPost` whose `rx` oneshot always resolves to a `PostResult { sent_ns, recv_ns, status }`. A transport problem (timeout or disconnect) is `status: Err`. `spawn_fan_writer` races one action over several connections. `decode_status` decodes the first status of a response. `now_ns` is the clock used by all `*_ns` fields. |
 | `rest` | `RestPoster::new(HL_EXCHANGE_URL)`. Same `PostResult` over HTTP. |
@@ -76,6 +78,10 @@ if let Ok(OrderStatus::Resting { oid }) = res.status {
 
 ## Not covered yet
 
-- Leverage updates (`updateLeverage`), `scheduleCancel` (dead-man's switch), transfers and vault
-  actions. Add them as new `Action` variants, with signing vectors checked against the Python SDK.
+- `scheduleCancel` (dead-man's switch), `updateIsolatedMargin`, transfers and vault actions. Add them as
+  new `Action` variants, with signing vectors checked against the Python SDK (see
+  `tests/gen_trigger_vectors.py` for an offline generator).
+- `decode_status` does not recognise the bare-string statuses a trigger order can return (e.g.
+  `"waitingForTrigger"`, `"waitingForFill"`); they come back as `Err(raw response)`. Callers placing
+  trigger orders should inspect that response themselves.
 - The integer-price exemption from the 5-significant-figure rule (see the TODO in `tick.rs`).

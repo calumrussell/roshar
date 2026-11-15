@@ -55,6 +55,50 @@ pub struct OrderReq {
     pub cloid: Option<Cloid>,
 }
 
+/// Trigger kind: `"tp"` (take profit) or `"sl"` (stop loss).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Tpsl {
+    Tp,
+    Sl,
+}
+
+/// Order type of a `TypedOrderReq`: `{"limit": {"tif": ..}}` or
+/// `{"trigger": {"isMarket": .., "triggerPx": "..", "tpsl": "tp" | "sl"}}`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum OrderType {
+    Limit(Tif),
+    /// `is_market`: fill as a market order (bounded by the order's `px`) once triggered; otherwise
+    /// rest as a limit at `px`.
+    Trigger {
+        is_market: bool,
+        trigger_px: f64,
+        tpsl: Tpsl,
+    },
+}
+
+/// An order with any order type, for `Action::OrderTyped`. Same wire fields as `OrderReq`, whose
+/// type and encoding are unchanged.
+#[derive(Clone, Debug)]
+pub struct TypedOrderReq {
+    pub asset: u32,
+    pub is_buy: bool,
+    /// Limit price. For a market trigger it bounds the fill (slippage limit).
+    pub px: f64,
+    pub sz: f64,
+    pub reduce_only: bool,
+    pub order_type: OrderType,
+    pub cloid: Option<Cloid>,
+}
+
+/// `grouping` of `Action::OrderTyped`: `"na"`, `"normalTpsl"` (TP/SL orders follow the first order)
+/// or `"positionTpsl"` (TP/SL attached to the open position and resized with it).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Grouping {
+    Na,
+    NormalTpsl,
+    PositionTpsl,
+}
+
 #[derive(Clone, Debug)]
 pub enum OrderRef {
     Oid(u64),
@@ -89,6 +133,19 @@ pub enum Action {
     CancelByCloid {
         cancels: Vec<(u32, Cloid)>,
         fast: bool,
+    },
+    /// `{"type":"order","orders":[...],"grouping":"na" | "normalTpsl" | "positionTpsl"}` with limit or
+    /// trigger orders (the SDK's `bulk_orders(.., grouping=..)`). `Order` is unchanged and still the
+    /// limit-only path.
+    OrderTyped {
+        orders: Vec<TypedOrderReq>,
+        grouping: Grouping,
+    },
+    /// `{"type":"updateLeverage","asset":n,"isCross":bool,"leverage":n}` (the SDK's `update_leverage`).
+    UpdateLeverage {
+        asset: u32,
+        is_cross: bool,
+        leverage: u32,
     },
 }
 
