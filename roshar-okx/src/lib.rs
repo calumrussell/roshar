@@ -124,6 +124,14 @@ pub trait OkxApi {
         before: Option<i64>,
         limit: Option<u32>,
     ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
+    async fn get_history_candles(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
 }
 
 #[async_trait]
@@ -153,6 +161,19 @@ impl OkxApi for OkxClient {
     ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
         self.market_api
             .get_candles(inst_id, bar, after, before, limit)
+            .await
+    }
+
+    async fn get_history_candles(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        self.market_api
+            .get_history_candles(inst_id, bar, after, before, limit)
             .await
     }
 }

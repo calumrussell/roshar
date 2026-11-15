@@ -147,9 +147,9 @@ impl MarketApi {
         Ok(tickers_map)
     }
 
-    /// Fetch candlestick data for an instrument.
+    /// Fetch recent candlestick data for an instrument.
     ///
-    /// Uses GET /api/v5/market/candles (public, no auth).
+    /// Uses GET /api/v5/market/candles (public, no auth). Covers roughly the latest 1,440 bars.
     /// Rate limit: 40 requests per 2 seconds (IP-based).
     ///
     /// # Arguments
@@ -157,7 +157,7 @@ impl MarketApi {
     /// * `bar` - Bar size (e.g. "1m", "5m", "1H", "1D"). Default "1m"
     /// * `after` - Pagination: return records older than this timestamp (ms)
     /// * `before` - Pagination: return records newer than this timestamp (ms)
-    /// * `limit` - Number of results per request (max 100, default 100)
+    /// * `limit` - Number of results per request (max 300 here, default 100)
     pub async fn get_candles(
         &self,
         inst_id: &str,
@@ -166,9 +166,40 @@ impl MarketApi {
         before: Option<i64>,
         limit: Option<u32>,
     ) -> Result<Vec<OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        self.candles("candles", inst_id, bar, after, before, limit)
+            .await
+    }
+
+    /// Fetch historical candlestick data for an instrument.
+    ///
+    /// Uses GET /api/v5/market/history-candles (public, no auth), which goes back further than
+    /// `/market/candles`. Same parameters and response; newest first.
+    /// Rate limit: 20 requests per 2 seconds (IP-based); max 100 bars per request.
+    pub async fn get_history_candles(
+        &self,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        self.candles("history-candles", inst_id, bar, after, before, limit)
+            .await
+    }
+
+    async fn candles(
+        &self,
+        endpoint: &str,
+        inst_id: &str,
+        bar: &str,
+        after: Option<i64>,
+        before: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<Vec<OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
         let mut url = format!(
-            "{}/api/v5/market/candles?instId={}&bar={}",
+            "{}/api/v5/market/{}?instId={}&bar={}",
             super::OKX_REST_URL,
+            endpoint,
             inst_id,
             bar
         );
@@ -193,7 +224,7 @@ impl MarketApi {
 
         let response_text = response.text().await?;
         let candles_response: OkxCandlesResponse = serde_json::from_str(&response_text)
-            .map_err(|e| format!("Failed to parse OKX candles response: {e}"))?;
+            .map_err(|e| format!("Failed to parse OKX {endpoint} response: {e}"))?;
 
         if candles_response.code != "0" {
             return Err(format!("OKX API error: {}", candles_response.msg).into());
@@ -243,6 +274,23 @@ mod tests {
             btc.tick_sz,
             btc.lot_sz
         );
+    }
+
+    #[tokio::test]
+    async fn test_get_history_candles() {
+        let api = MarketApi::new(10);
+        // Three months back: beyond /market/candles' window.
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as i64;
+        let after = now - 90 * 24 * 3_600_000;
+        let result = api
+            .get_history_candles("BTC-USDT-SWAP", "1m", Some(after), None, Some(100))
+            .await;
+        let candles = result.expect("history candles");
+        assert_eq!(candles.len(), 100);
+        assert!(candles.iter().all(|c| c.ts < after));
     }
 
     #[tokio::test]
