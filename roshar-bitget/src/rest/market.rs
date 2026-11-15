@@ -139,13 +139,16 @@ impl MarketApi {
             return Err(format!("Bitget API error {}: {}", parsed.code, parsed.msg).into());
         }
 
-        let mut rates = parsed.data;
-        rates.sort_by(|a, b| {
-            let ta: i64 = a.settle_time.parse().unwrap_or(0);
-            let tb: i64 = b.settle_time.parse().unwrap_or(0);
-            ta.cmp(&tb)
-        });
+        let mut timed = Vec::with_capacity(parsed.data.len());
+        for rate in parsed.data {
+            let ts: i64 = rate
+                .settle_time
+                .parse()
+                .map_err(|e| format!("Invalid Bitget settleTime {:?}: {e}", rate.settle_time))?;
+            timed.push((ts, rate));
+        }
+        timed.sort_by_key(|(ts, _)| *ts);
 
-        Ok(rates)
+        Ok(timed.into_iter().map(|(_, rate)| rate).collect())
     }
 }

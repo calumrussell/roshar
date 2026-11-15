@@ -309,15 +309,22 @@ impl MarketApi {
 
             let batch_size = rates.len();
 
+            let mut timed = Vec::with_capacity(batch_size);
+            for rate in rates {
+                let ts: i64 = rate.funding_rate_timestamp.parse().map_err(|e| {
+                    format!(
+                        "Invalid ByBit fundingRateTimestamp {:?}: {e}",
+                        rate.funding_rate_timestamp
+                    )
+                })?;
+                timed.push((ts, rate));
+            }
+
             // Find the earliest timestamp in this batch for pagination
-            let earliest_time: i64 = rates
-                .iter()
-                .filter_map(|r| r.funding_rate_timestamp.parse().ok())
-                .min()
-                .unwrap_or(current_end);
+            let earliest_time = timed.iter().map(|(ts, _)| *ts).min().unwrap_or(current_end);
 
             // Prepend rates (since we're paginating backwards)
-            all_rates.splice(0..0, rates);
+            all_rates.splice(0..0, timed);
 
             // If we got less than limit, we've reached the beginning
             if batch_size < LIMIT as usize || earliest_time <= start_time {
@@ -329,13 +336,9 @@ impl MarketApi {
         }
 
         // Sort by timestamp ascending (oldest first)
-        all_rates.sort_by(|a, b| {
-            let t1: i64 = a.funding_rate_timestamp.parse().unwrap_or(0);
-            let t2: i64 = b.funding_rate_timestamp.parse().unwrap_or(0);
-            t1.cmp(&t2)
-        });
+        all_rates.sort_by_key(|(ts, _)| *ts);
 
-        Ok(all_rates)
+        Ok(all_rates.into_iter().map(|(_, rate)| rate).collect())
     }
 }
 
