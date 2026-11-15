@@ -3,6 +3,9 @@ pub const LIGHTER_WSS_URL: &str = "wss://mainnet.zklighter.elliot.ai/stream";
 pub const LIGHTER_TESTNET_WSS_URL: &str = "wss://testnet.zklighter.elliot.ai/stream";
 
 pub(crate) mod rest;
+pub mod exchange;
+pub mod signer;
+pub mod ws_tx;
 
 use rest::MarketApi;
 
