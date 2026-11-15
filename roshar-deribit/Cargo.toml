@@ -1,0 +1,16 @@
+[package]
+name = "roshar-deribit"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "deribit exchange client for Roshar"
+repository = "https://github.com/calumrussell/roshar"
+
+[dependencies]
+anyhow = "1.0"
+roshar-types = { workspace = true }
+roshar-ws-mgr = { workspace = true }
+
+[dev-dependencies]
+env_logger = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

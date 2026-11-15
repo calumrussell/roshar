@@ -14,9 +14,6 @@ pub mod paradex;
 pub mod phoenix;
 pub mod polymarket;
 
-mod websocket_supported_exchanges;
-pub use websocket_supported_exchanges::WebsocketSupportedExchanges;
-
 pub use aster::*;
 pub use binance::*;
 pub use bitget::*;

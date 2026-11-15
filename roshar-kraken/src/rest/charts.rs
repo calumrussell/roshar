@@ -1,0 +1,76 @@
+use chrono::{DateTime, Utc};
+use roshar_http::RateLimitedClient;
+use std::sync::Arc;
+
+use super::market::KrakenRestCandleResponse;
+
+/// Candle data from Kraken REST API
+#[derive(Clone, Debug)]
+pub struct Candle {
+    pub open: String,
+    pub high: String,
+    pub low: String,
+    pub close: String,
+    pub volume: String,
+    pub exchange: String,
+    pub time: DateTime<Utc>,
+    pub close_time: DateTime<Utc>,
+    pub coin: String,
+}
+
+pub struct ChartsApi {
+    client: Arc<RateLimitedClient>,
+}
+
+impl ChartsApi {
+    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
+        Self { client }
+    }
+
+    pub async fn fetch_candle(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<Candle>, Box<dyn std::error::Error + Send + Sync>> {
+        let url = format!("https://futures.kraken.com/api/charts/v1/trade/{symbol}/1m");
+
+        let response = self.client.get(&url).await?;
+        let candle_response: KrakenRestCandleResponse = response.json().await?;
+        Ok(Self::process_candle_response(candle_response, symbol))
+    }
+
+    fn process_candle_response(
+        candle_response: KrakenRestCandleResponse,
+        symbol: &str,
+    ) -> Vec<Candle> {
+        if candle_response.candles.is_empty() {
+            return Vec::new();
+        }
+
+        let now = chrono::Utc::now().timestamp_millis();
+        let current_minute_start = (now / 60_000) * 60_000;
+
+        let most_recent_completed = candle_response
+            .candles
+            .iter()
+            .filter(|kraken_candle| kraken_candle.time < current_minute_start)
+            .max_by_key(|kraken_candle| kraken_candle.time);
+
+        if let Some(kraken_candle) = most_recent_completed {
+            let candle = Candle {
+                open: kraken_candle.open.clone(),
+                high: kraken_candle.high.clone(),
+                low: kraken_candle.low.clone(),
+                close: kraken_candle.close.clone(),
+                volume: kraken_candle.volume.clone(),
+                exchange: "kraken".to_string(),
+                time: DateTime::from_timestamp_millis(kraken_candle.time).unwrap_or_default(),
+                close_time: DateTime::from_timestamp_millis(kraken_candle.time + 60_000)
+                    .unwrap_or_default(),
+                coin: symbol.to_string(),
+            };
+            vec![candle]
+        } else {
+            Vec::new()
+        }
+    }
+}

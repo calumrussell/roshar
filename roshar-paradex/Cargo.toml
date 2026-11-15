@@ -1,0 +1,19 @@
+[package]
+name = "roshar-paradex"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "paradex exchange client for Roshar"
+repository = "https://github.com/calumrussell/roshar"
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+roshar-http = { version = "0.1.0", path = "../roshar-http" }
+roshar-types = { workspace = true }
+roshar-ws-mgr = { workspace = true }
+serde_json = "1.0"
+
+[dev-dependencies]
+env_logger = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

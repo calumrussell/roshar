@@ -21,7 +21,10 @@ pub struct PhoenixSubscription {
     pub authority: Option<String>,
     #[serde(rename = "traderPdaIndex", skip_serializing_if = "Option::is_none")]
     pub trader_pda_index: Option<u8>,
-    #[serde(rename = "bypassExecutionBand", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "bypassExecutionBand",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub bypass_execution_band: Option<bool>,
 }
 
