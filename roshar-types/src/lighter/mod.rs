@@ -97,27 +97,32 @@ pub struct LighterMarket {
     pub contract_type: String,
 }
 
-/// Extended market detail from `GET /api/v1/orderBookDetails`.
+/// Market detail from `GET /api/v1/orderBookDetails` (`order_book_details[]`). Field names and
+/// JSON types as the endpoint sends them (checked against mainnet 2026-11-15); numbers the API
+/// sends as JSON numbers are `f64`, numbers it sends as strings stay `String`. Fields not listed
+/// here are ignored.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LighterMarketDetail {
     pub market_id: u32,
-    pub name: String,
-    #[serde(default)]
+    pub symbol: String,
+    pub market_type: String,
+    pub status: String,
+    pub size_decimals: u32,
+    pub price_decimals: u32,
+    pub min_base_amount: String,
+    pub min_quote_amount: String,
+    pub maker_fee: String,
+    pub taker_fee: String,
     pub mark_price: String,
-    #[serde(default)]
     pub index_price: String,
-    #[serde(default)]
-    pub last_price: String,
-    #[serde(default)]
-    pub daily_volume: String,
-    #[serde(default)]
-    pub daily_price_change: String,
-    #[serde(default)]
-    pub open_interest: String,
-    #[serde(default)]
-    pub funding_rate: String,
-    #[serde(default)]
-    pub next_funding_time: i64,
+    pub last_trade_price: f64,
+    pub daily_base_token_volume: f64,
+    pub daily_quote_token_volume: f64,
+    pub daily_price_change: f64,
+    pub daily_price_high: f64,
+    pub daily_price_low: f64,
+    pub open_interest: f64,
+    pub open_interest_usd: String,
 }
 
 /// Order book snapshot from `GET /api/v1/orderBookOrders`.

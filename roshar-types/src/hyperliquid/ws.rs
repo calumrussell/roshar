@@ -162,6 +162,10 @@ pub struct HyperliquidWssSubscription {
     pub coin: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<String>,
+    /// `l2Book` only: without `fast: true` Hyperliquid throttles the feed hard (measured ~0.27
+    /// updates/s plain vs ~1.8/s fast). The unsubscribe must carry the same value as the subscribe.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fast: Option<bool>,
 }
 
 // Hyperliquid WebSocket Message Types
@@ -188,6 +192,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "allMids".into(),
                 interval: None,
                 coin: None,
@@ -200,6 +205,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "l2Book".into(),
                 interval: None,
                 coin: Some(coin.into()),
@@ -208,10 +214,28 @@ impl HyperliquidWssMessage {
         }
     }
 
+    /// `l2Book` with `fast: true` (unthrottled). Unsubscribe with [`Self::l2_book_fast_unsub`].
+    pub fn l2_book_fast(coin: &str) -> Self {
+        let mut m = Self::l2_book(coin);
+        if let Some(s) = m.subscription.as_mut() {
+            s.fast = Some(true);
+        }
+        m
+    }
+
+    pub fn l2_book_fast_unsub(coin: &str) -> Self {
+        let mut m = Self::l2_book_unsub(coin);
+        if let Some(s) = m.subscription.as_mut() {
+            s.fast = Some(true);
+        }
+        m
+    }
+
     pub fn l2_book_unsub(coin: &str) -> Self {
         Self {
             method: "unsubscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "l2Book".into(),
                 interval: None,
                 coin: Some(coin.into()),
@@ -224,6 +248,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "candle".into(),
                 interval: Some("1m".into()),
                 coin: Some(coin.into()),
@@ -236,6 +261,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "unsubscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "candle".into(),
                 interval: Some("1m".into()),
                 coin: Some(coin.into()),
@@ -248,6 +274,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "trades".into(),
                 interval: None,
                 coin: Some(coin.into()),
@@ -260,6 +287,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "unsubscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "trades".into(),
                 interval: None,
                 coin: Some(coin.into()),
@@ -272,6 +300,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "userFills".into(),
                 interval: None,
                 coin: None,
@@ -284,6 +313,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "unsubscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "userFills".into(),
                 interval: None,
                 coin: None,
@@ -296,6 +326,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "orderUpdates".into(),
                 interval: None,
                 coin: None,
@@ -308,6 +339,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "unsubscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "orderUpdates".into(),
                 interval: None,
                 coin: None,
@@ -320,6 +352,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "subscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "bbo".into(),
                 interval: None,
                 coin: Some(coin.into()),
@@ -332,6 +365,7 @@ impl HyperliquidWssMessage {
         Self {
             method: "unsubscribe".to_string(),
             subscription: Some(HyperliquidWssSubscription {
+                fast: None,
                 typ: "bbo".into(),
                 interval: None,
                 coin: Some(coin.into()),
@@ -402,5 +436,30 @@ mod tests {
         assert_eq!(sub.typ, "allMids");
         assert!(sub.coin.is_none());
         assert!(sub.interval.is_none());
+    }
+}
+
+#[cfg(test)]
+mod fast_l2_book_tests {
+    use super::HyperliquidWssMessage;
+
+    #[test]
+    fn plain_l2_book_has_no_fast_field() {
+        assert_eq!(
+            HyperliquidWssMessage::l2_book("ETH").to_json(),
+            r#"{"method":"subscribe","subscription":{"type":"l2Book","coin":"ETH"}}"#
+        );
+    }
+
+    #[test]
+    fn fast_l2_book_subscribe_and_unsubscribe_match() {
+        assert_eq!(
+            HyperliquidWssMessage::l2_book_fast("ETH").to_json(),
+            r#"{"method":"subscribe","subscription":{"type":"l2Book","coin":"ETH","fast":true}}"#
+        );
+        assert_eq!(
+            HyperliquidWssMessage::l2_book_fast_unsub("ETH").to_json(),
+            r#"{"method":"unsubscribe","subscription":{"type":"l2Book","coin":"ETH","fast":true}}"#
+        );
     }
 }
