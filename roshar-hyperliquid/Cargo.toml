@@ -3,26 +3,31 @@ name = "roshar-hyperliquid"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "hyperliquid exchange client for Roshar"
+description = "Hyperliquid exchange client for Roshar: signing, order posting, user streams, info queries"
 repository = "https://github.com/calumrussell/roshar"
 
+[features]
+default = []
+# ws_config() for roshar-ws-mgr consumers. Off by default so order-path users don't pull in ws-mgr's TLS stack.
+ws-mgr = ["dep:roshar-ws-mgr"]
+
 [dependencies]
-anyhow = "1.0"
-async-trait = "0.1"
-chrono = "0.4"
-ethers = "2.0"
-log = "0.4"
-reqwest = { version = "0.11", features = ["json"] }
-rmp-serde = "1.0"
-roshar-http = { version = "0.1.0", path = "../roshar-http" }
 roshar-types = { workspace = true }
-roshar-ws-mgr = { workspace = true }
-rust_decimal = { workspace = true }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+roshar-ws-mgr = { workspace = true, optional = true }
+anyhow = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+futures-util = "0.3"
+tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+hex = "0.4"
+parking_lot = "0.12"
+k256 = { version = "0.13", features = ["ecdsa"] }
 sha3 = "0.10"
-tokio = { version = "1", features = ["net", "io-util", "sync", "time"] }
+rmp = "0.8"
+leaky-bucket = "1.0"
 
 [dev-dependencies]
-env_logger = "0.11"
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "net"] }

@@ -1,12 +1,13 @@
+pub mod exchange;
 mod info;
 mod ws;
 
 pub use info::{
     normalize_outcome_order_coin_to_token, normalize_outcome_token_to_order_coin, Asset, AssetInfo,
-    AssetPosition, CrossMarginSummary, EvmContract, FundingHistory, HistoricalFundingRate,
-    InfoApiRequest, Leverage, MarketData, MetaAndAssetCtxs, Position, SpotAsset, SpotBalance,
+    AssetPosition, CrossMarginSummary, EvmContract, HistoricalFundingRate, InfoApiRequest,
+    Leverage, MarketData, MetaAndAssetCtxs, Position, SpotAsset, SpotBalance,
     SpotClearinghouseState, SpotMarketData, SpotMeta, SpotMetaAndAssetCtxs, SpotToken, Universe,
-    UserOrder, UserPerpetualsState,
+    UserPerpetualsState,
 };
 pub use ws::{
     HyperliquidBbo, HyperliquidBboMessage, HyperliquidBook, HyperliquidBookLevel,

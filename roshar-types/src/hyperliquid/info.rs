@@ -1,27 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-// User order management data structures
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UserOrder {
-    pub asset: String,
-    pub is_buy: bool,
-    pub limit_px: String,
-    pub sz: String,
-    pub oid: u64,
-    pub timestamp: u64,
-    pub order_type: String,
-    pub reduce_only: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FundingHistory {
-    pub asset: String,
-    pub time: u64,
-    pub funding_rate: String,
-    pub payment: String,
-    pub position_size: String,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoricalFundingRate {
     pub coin: String,
