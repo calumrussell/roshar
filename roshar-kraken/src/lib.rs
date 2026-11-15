@@ -6,14 +6,13 @@ pub(crate) mod rest;
 
 use rest::{ChartsApi, MarketApi};
 pub use rest::{
-    KrakenGetLeverageResponse, KrakenLeveragePreference, KrakenLeverageSettingResponse,
-    KrakenModifyResponse, KrakenOpenOrdersResponse, KrakenOrder, KrakenOrderResponse,
-    KrakenOrderStatusResponse, KrakenRestCandleData, KrakenRestCandleResponse, KrakenTickerData,
-    MultiCollateralApi, OrderManagementApi,
+    KrakenCredentials, KrakenGetLeverageResponse, KrakenLeveragePreference,
+    KrakenLeverageSettingResponse, KrakenModifyResponse, KrakenOpenOrdersResponse, KrakenOrder,
+    KrakenOrderResponse, KrakenOrderStatusResponse, KrakenResolution, KrakenRestCandleData,
+    KrakenRestCandleResponse, KrakenTickType, KrakenTickerData, MultiCollateralApi,
+    OrderManagementApi,
 };
 use roshar_http::RateLimitedClient;
-
-pub use rest::charts::Candle;
 
 use anyhow::Result;
 use async_trait::async_trait;
@@ -111,21 +110,34 @@ impl KrakenClient {
 
 #[async_trait]
 pub trait KrakenApi {
-    async fn fetch_candles(&self, symbol: &str) -> Result<Vec<Candle>, String>;
+    /// Candles from the charts endpoint, as sent. `from`/`to` are in seconds.
+    async fn get_candles(
+        &self,
+        tick_type: KrakenTickType,
+        symbol: &str,
+        resolution: KrakenResolution,
+        from: Option<i64>,
+        to: Option<i64>,
+    ) -> Result<KrakenRestCandleResponse, String>;
     async fn get_tickers(
         &self,
     ) -> Result<std::collections::HashMap<String, KrakenTickerData>, String>;
-    async fn get_all_funding_rates_with_size(&self)
-        -> Result<Vec<(String, f64, f64, f64)>, String>;
 }
 
 #[async_trait]
 impl KrakenApi for KrakenClient {
-    async fn fetch_candles(&self, symbol: &str) -> Result<Vec<Candle>, String> {
+    async fn get_candles(
+        &self,
+        tick_type: KrakenTickType,
+        symbol: &str,
+        resolution: KrakenResolution,
+        from: Option<i64>,
+        to: Option<i64>,
+    ) -> Result<KrakenRestCandleResponse, String> {
         self.charts_api
-            .fetch_candle(symbol)
+            .get_candles(tick_type, symbol, resolution, from, to)
             .await
-            .map_err(|e| format!("Failed to fetch candles: {}", e))
+            .map_err(|e| format!("Failed to get candles: {}", e))
     }
 
     async fn get_tickers(
@@ -135,14 +147,5 @@ impl KrakenApi for KrakenClient {
             .get_tickers()
             .await
             .map_err(|e| format!("Failed to get tickers: {}", e))
-    }
-
-    async fn get_all_funding_rates_with_size(
-        &self,
-    ) -> Result<Vec<(String, f64, f64, f64)>, String> {
-        self.market_api
-            .get_all_funding_rates_with_size()
-            .await
-            .map_err(|e| format!("Failed to get funding rates: {}", e))
     }
 }

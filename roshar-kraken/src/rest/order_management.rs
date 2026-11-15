@@ -4,7 +4,7 @@ use roshar_http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-use super::auth::AuthApi;
+use super::auth::{AuthApi, KrakenCredentials};
 
 const BASE_URL: &str = "https://futures.kraken.com";
 
@@ -203,11 +203,15 @@ pub struct KrakenEditEvent {
 /// Kraken Order Management API
 pub struct OrderManagementApi {
     client: Arc<RateLimitedClient>,
+    credentials: KrakenCredentials,
 }
 
 impl OrderManagementApi {
-    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
-        Self { client }
+    pub fn new_with_client(client: Arc<RateLimitedClient>, credentials: KrakenCredentials) -> Self {
+        Self {
+            client,
+            credentials,
+        }
     }
 
     async fn make_request<T, R>(
@@ -220,7 +224,7 @@ impl OrderManagementApi {
         R: for<'de> Deserialize<'de>,
     {
         let post_data = serde_urlencoded::to_string(request_data)?;
-        let headers = AuthApi::create_headers(endpoint, &post_data)?;
+        let headers = AuthApi::create_headers(&self.credentials, endpoint, &post_data)?;
 
         let mut request = self.client.post(&format!("{BASE_URL}{endpoint}")).await;
 
@@ -243,7 +247,7 @@ impl OrderManagementApi {
     where
         R: for<'de> Deserialize<'de>,
     {
-        let headers = AuthApi::create_headers(endpoint, "")?;
+        let headers = AuthApi::create_headers(&self.credentials, endpoint, "")?;
 
         let mut request = self
             .client
@@ -360,7 +364,7 @@ impl OrderManagementApi {
 
         let post_data = serde_urlencoded::to_string(&form_data)?;
         let endpoint = "/derivatives/api/v3/orders/status";
-        let headers = AuthApi::create_headers(endpoint, &post_data)?;
+        let headers = AuthApi::create_headers(&self.credentials, endpoint, &post_data)?;
 
         let mut request = self.client.post(&format!("{BASE_URL}{endpoint}")).await;
 
@@ -398,10 +402,18 @@ mod tests {
         Arc::new(RateLimitedClient::new(10, 1))
     }
 
+    // Live tests only: the library itself never reads the environment.
+    fn test_credentials() -> KrakenCredentials {
+        KrakenCredentials::new(
+            std::env::var("KRAKEN_PUBLIC_KEY").expect("KRAKEN_PUBLIC_KEY"),
+            std::env::var("KRAKEN_PRIVATE_KEY").expect("KRAKEN_PRIVATE_KEY"),
+        )
+    }
+
     #[tokio::test]
     #[ignore]
     async fn test_create_order() -> Result<(), Box<dyn std::error::Error>> {
-        let api = OrderManagementApi::new_with_client(create_test_client());
+        let api = OrderManagementApi::new_with_client(create_test_client(), test_credentials());
 
         let order_result = api
             .create_order(
@@ -451,7 +463,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_dead_mans_switch() -> Result<(), Box<dyn std::error::Error>> {
-        let api = OrderManagementApi::new_with_client(create_test_client());
+        let api = OrderManagementApi::new_with_client(create_test_client(), test_credentials());
 
         let dms_result = api.dead_mans_switch(60).await?;
         assert_eq!(dms_result.result, "success");

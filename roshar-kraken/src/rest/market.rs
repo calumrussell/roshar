@@ -36,22 +36,6 @@ pub struct KrakenTickerResponse {
     pub tickers: Vec<KrakenTickerData>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct KrakenRestCandleData {
-    pub time: i64,
-    pub open: String,
-    pub high: String,
-    pub low: String,
-    pub close: String,
-    #[allow(dead_code)]
-    pub volume: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct KrakenRestCandleResponse {
-    pub candles: Vec<KrakenRestCandleData>,
-}
-
 pub struct MarketApi {
     client: Arc<RateLimitedClient>,
 }
@@ -59,35 +43,6 @@ pub struct MarketApi {
 impl MarketApi {
     pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
         Self { client }
-    }
-
-    pub async fn get_all_funding_rates_with_size(
-        &self,
-    ) -> Result<Vec<(String, f64, f64, f64)>, Box<dyn std::error::Error>> {
-        let url = "https://futures.kraken.com/derivatives/api/v3/tickers";
-
-        let response = self.client.get(url).await?;
-        let ticker_response: KrakenTickerResponse = response.json().await?;
-
-        let mut funding_rates = Vec::new();
-
-        for ticker in ticker_response.tickers {
-            if ticker.funding_rate != 0.0 || !ticker.next_funding_rate_time.is_empty() {
-                let mid_price = (ticker.bid + ticker.ask) / 2.0;
-
-                let relative_funding_rate = if mid_price > 0.0 {
-                    ticker.funding_rate / mid_price
-                } else {
-                    ticker.funding_rate
-                };
-
-                let open_interest = ticker.open_interest * mid_price;
-                let volume = ticker.vol_24h * mid_price;
-
-                funding_rates.push((ticker.symbol, relative_funding_rate, open_interest, volume));
-            }
-        }
-        Ok(funding_rates)
     }
 
     pub async fn get_tickers(

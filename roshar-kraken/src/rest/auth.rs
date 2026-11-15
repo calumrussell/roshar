@@ -7,7 +7,33 @@ use sha2::{Digest, Sha256, Sha512};
 
 type HmacSha512 = Hmac<Sha512>;
 
-pub struct AuthApi;
+/// Kraken Futures API key pair. The library never reads these from the environment.
+#[derive(Clone)]
+pub struct KrakenCredentials {
+    pub public_key: String,
+    /// Base64-encoded API secret.
+    pub private_key: String,
+}
+
+impl KrakenCredentials {
+    pub fn new(public_key: impl Into<String>, private_key: impl Into<String>) -> Self {
+        Self {
+            public_key: public_key.into(),
+            private_key: private_key.into(),
+        }
+    }
+}
+
+impl std::fmt::Debug for KrakenCredentials {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("KrakenCredentials")
+            .field("public_key", &self.public_key)
+            .field("private_key", &"<redacted>")
+            .finish()
+    }
+}
+
+pub(crate) struct AuthApi;
 
 impl AuthApi {
     pub fn generate_nonce() -> i64 {
@@ -43,24 +69,17 @@ impl AuthApi {
         Ok(general_purpose::STANDARD.encode(result.into_bytes()))
     }
 
-    fn get_env() -> (String, String) {
-        let private_key = std::env::var("KRAKEN_PRIVATE_KEY").unwrap();
-        let public_key = std::env::var("KRAKEN_PUBLIC_KEY").unwrap();
-
-        (public_key, private_key)
-    }
-
     pub fn create_headers(
+        credentials: &KrakenCredentials,
         endpoint: &str,
         post_data: &str,
     ) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
-        let (public_key, private_key) = Self::get_env();
         let nonce = Self::generate_nonce().to_string();
 
-        let signature = Self::get_signature(&private_key, &nonce, post_data, endpoint)?;
+        let signature = Self::get_signature(&credentials.private_key, &nonce, post_data, endpoint)?;
 
         let mut headers = HashMap::new();
-        headers.insert("APIKey".to_string(), public_key);
+        headers.insert("APIKey".to_string(), credentials.public_key.clone());
         headers.insert("Authent".to_string(), signature);
         headers.insert("Nonce".to_string(), nonce);
         headers.insert("Content-Type".to_string(), "application/json".to_string());

@@ -2,7 +2,7 @@ use roshar_http::RateLimitedClient;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-use super::auth::AuthApi;
+use super::auth::{AuthApi, KrakenCredentials};
 
 const BASE_URL: &str = "https://futures.kraken.com";
 
@@ -41,18 +41,22 @@ pub struct KrakenGetLeverageResponse {
 /// Kraken Multi-Collateral API
 pub struct MultiCollateralApi {
     client: Arc<RateLimitedClient>,
+    credentials: KrakenCredentials,
 }
 
 impl MultiCollateralApi {
-    pub fn new_with_client(client: Arc<RateLimitedClient>) -> Self {
-        Self { client }
+    pub fn new_with_client(client: Arc<RateLimitedClient>, credentials: KrakenCredentials) -> Self {
+        Self {
+            client,
+            credentials,
+        }
     }
 
     async fn make_get_request<R>(&self, endpoint: &str) -> Result<R, Box<dyn std::error::Error>>
     where
         R: for<'de> Deserialize<'de>,
     {
-        let headers = AuthApi::create_headers(endpoint, "")?;
+        let headers = AuthApi::create_headers(&self.credentials, endpoint, "")?;
 
         let mut request = self
             .client
@@ -79,7 +83,7 @@ impl MultiCollateralApi {
         R: for<'de> Deserialize<'de>,
     {
         let post_data = serde_urlencoded::to_string(request_data)?;
-        let headers = AuthApi::create_headers(endpoint, &post_data)?;
+        let headers = AuthApi::create_headers(&self.credentials, endpoint, &post_data)?;
 
         let mut request = self
             .client
@@ -131,10 +135,18 @@ mod tests {
         Arc::new(RateLimitedClient::new(10, 1))
     }
 
+    // Live tests only: the library itself never reads the environment.
+    fn test_credentials() -> KrakenCredentials {
+        KrakenCredentials::new(
+            std::env::var("KRAKEN_PUBLIC_KEY").expect("KRAKEN_PUBLIC_KEY"),
+            std::env::var("KRAKEN_PRIVATE_KEY").expect("KRAKEN_PRIVATE_KEY"),
+        )
+    }
+
     #[tokio::test]
     #[ignore]
     async fn test_get_leverage() -> Result<(), Box<dyn std::error::Error>> {
-        let api = MultiCollateralApi::new_with_client(create_test_client());
+        let api = MultiCollateralApi::new_with_client(create_test_client(), test_credentials());
         let leverage_response = api.get_leverage().await?;
 
         assert_eq!(leverage_response.result, "success");
@@ -144,7 +156,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_set_leverage() -> Result<(), Box<dyn std::error::Error>> {
-        let api = MultiCollateralApi::new_with_client(create_test_client());
+        let api = MultiCollateralApi::new_with_client(create_test_client(), test_credentials());
 
         let set_response = api.set_leverage("PF_XBTUSD", "cross").await?;
 
