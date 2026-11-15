@@ -99,6 +99,11 @@ impl PacificaWssMessage {
 }
 
 // ── REST response types ───────────────────────────────────────────────────────
+//
+// TODO(audit): the REST field names below (camelCase `baseAsset`, `markPrice`, ...) have not been
+// checked against Pacifica's API docs, and most fields are `#[serde(default)]`, so a missing or
+// renamed field silently becomes ""/0 instead of an error. Verify against live responses, then
+// drop the defaults (or use `Option` where the exchange really omits a field).
 
 /// Market metadata from `GET /api/v1/markets`.
 #[derive(Debug, Clone, Serialize, Deserialize)]

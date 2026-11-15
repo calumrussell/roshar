@@ -7,8 +7,8 @@ use roshar_types::pacifica::{
 use serde_json::{json, Value};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-const MAINNET_BASE_URL: &str = "https://api.pacifica.fi/api/v1";
-const TESTNET_BASE_URL: &str = "https://test-api.pacifica.fi/api/v1";
+use crate::wire::float_to_wire;
+
 const DEFAULT_EXPIRY_WINDOW_MS: i64 = 5_000;
 
 pub struct TradingApi {
@@ -45,11 +45,7 @@ impl TradingApi {
             signing_key,
             agent_wallet,
             account,
-            base_url: if is_mainnet {
-                MAINNET_BASE_URL
-            } else {
-                TESTNET_BASE_URL
-            },
+            base_url: super::base_url(is_mainnet),
         })
     }
 
@@ -111,8 +107,8 @@ impl TradingApi {
     ) -> Result<i64, Box<dyn std::error::Error + Send + Sync>> {
         let side = if is_buy { "bid" } else { "ask" };
         let mut payload = json!({
-            "amount": amount.to_string(),
-            "price": price.to_string(),
+            "amount": float_to_wire(amount)?,
+            "price": float_to_wire(price)?,
             "reduce_only": reduce_only,
             "side": side,
             "symbol": symbol,
@@ -176,9 +172,9 @@ impl TradingApi {
         amount: f64,
     ) -> Result<i64, Box<dyn std::error::Error + Send + Sync>> {
         let payload = json!({
-            "amount": amount.to_string(),
+            "amount": float_to_wire(amount)?,
             "order_id": order_id,
-            "price": price.to_string(),
+            "price": float_to_wire(price)?,
             "symbol": symbol,
         });
         let request = self

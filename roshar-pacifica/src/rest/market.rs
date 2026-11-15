@@ -5,16 +5,17 @@ use roshar_types::pacifica::{
 };
 use std::collections::HashMap;
 
-const BASE_URL: &str = "https://api.pacifica.fi/api/v1";
-
 pub struct MarketApi {
     client: RateLimitedClient,
+    base_url: &'static str,
 }
 
 impl MarketApi {
-    pub fn new(requests_per_second: u32) -> Self {
+    /// Market data from mainnet or testnet, matching `TradingApi`'s `is_mainnet`.
+    pub fn new(requests_per_second: u32, is_mainnet: bool) -> Self {
         Self {
             client: RateLimitedClient::new(requests_per_second, 1),
+            base_url: super::base_url(is_mainnet),
         }
     }
 
@@ -23,7 +24,7 @@ impl MarketApi {
     pub async fn get_markets(
         &self,
     ) -> Result<Vec<PacificaMarket>, Box<dyn std::error::Error + Send + Sync>> {
-        let url = format!("{BASE_URL}/markets");
+        let url = format!("{}/markets", self.base_url);
         let response = self.client.get(&url).await?;
 
         if !response.status().is_success() {
@@ -43,7 +44,7 @@ impl MarketApi {
     pub async fn get_tickers(
         &self,
     ) -> Result<HashMap<String, PacificaTicker>, Box<dyn std::error::Error + Send + Sync>> {
-        let url = format!("{BASE_URL}/ticker");
+        let url = format!("{}/ticker", self.base_url);
         let response = self.client.get(&url).await?;
 
         if !response.status().is_success() {
@@ -64,7 +65,7 @@ impl MarketApi {
         &self,
         symbol: Option<&str>,
     ) -> Result<Vec<PacificaFundingRate>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/funding-rate");
+        let mut url = format!("{}/funding-rate", self.base_url);
         if let Some(sym) = symbol {
             url.push_str(&format!("?symbol={sym}"));
         }
@@ -91,8 +92,10 @@ impl MarketApi {
         symbol: &str,
         limit: Option<u32>,
     ) -> Result<PacificaOrderBook, Box<dyn std::error::Error + Send + Sync>> {
+        // TODO(audit): the default depth of 50 is a library choice; pass `limit` through and let
+        // the exchange default apply once Pacifica's default is confirmed.
         let depth = limit.unwrap_or(50);
-        let url = format!("{BASE_URL}/orderbook?symbol={symbol}&limit={depth}");
+        let url = format!("{}/orderbook?symbol={symbol}&limit={depth}", self.base_url);
 
         let response = self.client.get(&url).await?;
 
@@ -115,7 +118,7 @@ impl MarketApi {
         symbol: &str,
         limit: Option<u32>,
     ) -> Result<Vec<PacificaTrade>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/trades?symbol={symbol}");
+        let mut url = format!("{}/trades?symbol={symbol}", self.base_url);
         if let Some(lim) = limit {
             url.push_str(&format!("&limit={lim}"));
         }
@@ -144,7 +147,10 @@ impl MarketApi {
         end_time: Option<i64>,
         limit: Option<u32>,
     ) -> Result<Vec<PacificaKline>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/klines?symbol={symbol}&interval={interval}");
+        let mut url = format!(
+            "{}/klines?symbol={symbol}&interval={interval}",
+            self.base_url
+        );
 
         if let Some(start) = start_time {
             url.push_str(&format!("&startTime={start}"));
