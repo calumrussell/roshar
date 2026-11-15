@@ -7,9 +7,8 @@ pub(crate) mod rest;
 use rest::MarketApi;
 
 pub use rest::{
-    ByBitCreateOrderRequest, ByBitCreateOrderResponse, ByBitInstrumentInfo, ByBitLeverageFilter,
-    ByBitLotSizeFilter, ByBitOrderResult, ByBitPriceFilter, ByBitTickerData, ByBitTickersResponse,
-    MarketApi as ByBitMarketApi,
+    ByBitInstrumentInfo, ByBitLeverageFilter, ByBitLotSizeFilter, ByBitPriceFilter,
+    ByBitTickerData, ByBitTickersResponse, MarketApi as ByBitMarketApi,
 };
 pub use roshar_types::ByBitHistoricalFundingRate;
 
