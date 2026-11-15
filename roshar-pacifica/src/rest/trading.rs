@@ -1,9 +1,9 @@
+use crate::types::{
+    PacificaOpenOrder, PacificaOpenOrdersResponse, PacificaPosition, PacificaPositionsResponse,
+};
 use anyhow::{anyhow, Context, Result};
 use ed25519_dalek::{Signer, SigningKey};
 use roshar_http::RateLimitedClient;
-use roshar_types::pacifica::{
-    PacificaOpenOrder, PacificaOpenOrdersResponse, PacificaPosition, PacificaPositionsResponse,
-};
 use serde_json::{json, Value};
 use std::time::{SystemTime, UNIX_EPOCH};
 

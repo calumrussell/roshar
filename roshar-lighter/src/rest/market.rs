@@ -1,7 +1,7 @@
-use roshar_http::RateLimitedClient;
-use roshar_types::lighter::{
+use crate::types::{
     LighterFundingRate, LighterMarket, LighterMarketDetail, LighterOrderBook, LighterTrade,
 };
+use roshar_http::RateLimitedClient;
 
 const BASE_URL: &str = "https://mainnet.zklighter.elliot.ai/api/v1";
 

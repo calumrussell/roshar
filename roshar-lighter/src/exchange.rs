@@ -121,13 +121,24 @@ impl TxApi {
 
     pub fn with_timeout(base_url: &str, timeout: Duration) -> Result<TxApi> {
         let http = reqwest::Client::builder().timeout(timeout).build()?;
-        Ok(TxApi { http, base: base_url.trim_end_matches('/').to_string() })
+        Ok(TxApi {
+            http,
+            base: base_url.trim_end_matches('/').to_string(),
+        })
     }
 
     /// `POST /api/v1/sendTx` (form-encoded `tx_type`, `tx_info`).
     pub async fn send_tx(&self, tx: &SignedTx) -> Result<SendTxResponse> {
-        let form = [("tx_type", tx.tx_type.to_string()), ("tx_info", tx.tx_info.clone())];
-        let r = self.http.post(format!("{}/api/v1/sendTx", self.base)).form(&form).send().await?;
+        let form = [
+            ("tx_type", tx.tx_type.to_string()),
+            ("tx_info", tx.tx_info.clone()),
+        ];
+        let r = self
+            .http
+            .post(format!("{}/api/v1/sendTx", self.base))
+            .form(&form)
+            .send()
+            .await?;
         parse(r).await
     }
 
@@ -135,35 +146,69 @@ impl TxApi {
     pub async fn send_tx_batch(&self, txs: &[SignedTx]) -> Result<SendTxBatchResponse> {
         let (types, infos) = batch_fields(txs)?;
         let form = [("tx_types", types), ("tx_infos", infos)];
-        let r = self.http.post(format!("{}/api/v1/sendTxBatch", self.base)).form(&form).send().await?;
+        let r = self
+            .http
+            .post(format!("{}/api/v1/sendTxBatch", self.base))
+            .form(&form)
+            .send()
+            .await?;
         parse(r).await
     }
 
     /// `GET /api/v1/nextNonce`: the nonce the next transaction of this API key must use.
     pub async fn next_nonce(&self, account_index: i64, api_key_index: u8) -> Result<i64> {
-        let q = [("account_index", account_index.to_string()), ("api_key_index", api_key_index.to_string())];
-        let r = self.http.get(format!("{}/api/v1/nextNonce", self.base)).query(&q).send().await?;
+        let q = [
+            ("account_index", account_index.to_string()),
+            ("api_key_index", api_key_index.to_string()),
+        ];
+        let r = self
+            .http
+            .get(format!("{}/api/v1/nextNonce", self.base))
+            .query(&q)
+            .send()
+            .await?;
         Ok(parse::<NextNonce>(r).await?.nonce)
     }
 
     /// `GET /api/v1/apikeys` for one key. Compare `public_key` with `Signer::public_key_hex` to
     /// check the key is registered (what the Python SDK's `check_client` does).
     pub async fn api_key(&self, account_index: i64, api_key_index: u8) -> Result<ApiKeyInfo> {
-        let q = [("account_index", account_index.to_string()), ("api_key_index", api_key_index.to_string())];
-        let r = self.http.get(format!("{}/api/v1/apikeys", self.base)).query(&q).send().await?;
+        let q = [
+            ("account_index", account_index.to_string()),
+            ("api_key_index", api_key_index.to_string()),
+        ];
+        let r = self
+            .http
+            .get(format!("{}/api/v1/apikeys", self.base))
+            .query(&q)
+            .send()
+            .await?;
         let keys = parse::<ApiKeys>(r).await?.api_keys;
         keys.into_iter()
             .find(|k| k.api_key_index == api_key_index)
-            .with_context(|| format!("api key {api_key_index} not registered on account {account_index}"))
+            .with_context(|| {
+                format!("api key {api_key_index} not registered on account {account_index}")
+            })
     }
 
     /// `GET /api/v1/account?by=index`.
     pub async fn account(&self, account_index: i64) -> Result<Account> {
-        let q = [("by", "index".to_string()), ("value", account_index.to_string())];
-        let r = self.http.get(format!("{}/api/v1/account", self.base)).query(&q).send().await?;
+        let q = [
+            ("by", "index".to_string()),
+            ("value", account_index.to_string()),
+        ];
+        let r = self
+            .http
+            .get(format!("{}/api/v1/account", self.base))
+            .query(&q)
+            .send()
+            .await?;
         let mut accounts = parse::<Accounts>(r).await?.accounts;
         if accounts.len() != 1 {
-            bail!("expected one account {account_index}, got {}", accounts.len());
+            bail!(
+                "expected one account {account_index}, got {}",
+                accounts.len()
+            );
         }
         Ok(accounts.remove(0))
     }
@@ -171,7 +216,12 @@ impl TxApi {
     /// `GET /api/v1/orderBookDetails?market_id=`.
     pub async fn order_book_detail(&self, market_id: i64) -> Result<OrderBookDetail> {
         let q = [("market_id", market_id.to_string())];
-        let r = self.http.get(format!("{}/api/v1/orderBookDetails", self.base)).query(&q).send().await?;
+        let r = self
+            .http
+            .get(format!("{}/api/v1/orderBookDetails", self.base))
+            .query(&q)
+            .send()
+            .await?;
         let mut d = parse::<Details>(r).await?.order_book_details;
         match d.iter().position(|x| x.market_id == market_id) {
             Some(i) => Ok(d.swap_remove(i)),
@@ -181,9 +231,21 @@ impl TxApi {
 
     /// `GET /api/v1/orderBookOrders?market_id=&limit=` as the raw body (status, bytes), for
     /// callers that record it verbatim. Non-200 statuses are returned, not turned into errors.
-    pub async fn order_book_orders_raw(&self, market_id: i64, limit: u32) -> Result<(u16, bytes::Bytes)> {
-        let q = [("market_id", market_id.to_string()), ("limit", limit.to_string())];
-        let r = self.http.get(format!("{}/api/v1/orderBookOrders", self.base)).query(&q).send().await?;
+    pub async fn order_book_orders_raw(
+        &self,
+        market_id: i64,
+        limit: u32,
+    ) -> Result<(u16, bytes::Bytes)> {
+        let q = [
+            ("market_id", market_id.to_string()),
+            ("limit", limit.to_string()),
+        ];
+        let r = self
+            .http
+            .get(format!("{}/api/v1/orderBookOrders", self.base))
+            .query(&q)
+            .send()
+            .await?;
         let status = r.status().as_u16();
         Ok((status, r.bytes().await?))
     }
@@ -197,7 +259,10 @@ pub fn batch_fields(txs: &[SignedTx]) -> Result<(String, String)> {
     }
     let types: Vec<u8> = txs.iter().map(|t| t.tx_type).collect();
     let infos: Vec<&str> = txs.iter().map(|t| t.tx_info.as_str()).collect();
-    Ok((serde_json::to_string(&types)?, serde_json::to_string(&infos)?))
+    Ok((
+        serde_json::to_string(&types)?,
+        serde_json::to_string(&infos)?,
+    ))
 }
 
 async fn parse<T: DeserializeOwned>(r: reqwest::Response) -> Result<T> {
@@ -207,9 +272,14 @@ async fn parse<T: DeserializeOwned>(r: reqwest::Response) -> Result<T> {
 }
 
 fn parse_body<T: DeserializeOwned>(status: u16, body: &str) -> Result<T> {
-    let code: Code = serde_json::from_str(body).with_context(|| format!("HTTP {status}: {body}"))?;
+    let code: Code =
+        serde_json::from_str(body).with_context(|| format!("HTTP {status}: {body}"))?;
     if code.code != 200 {
-        bail!("lighter code {}: {} (HTTP {status})", code.code, code.message.unwrap_or_default());
+        bail!(
+            "lighter code {}: {} (HTTP {status})",
+            code.code,
+            code.message.unwrap_or_default()
+        );
     }
     serde_json::from_str(body).with_context(|| format!("unexpected response: {body}"))
 }
@@ -226,14 +296,19 @@ mod tests {
         )
         .unwrap();
         assert_eq!(ok.tx_hash, "ab");
-        let err = parse_body::<SendTxResponse>(400, r#"{"code":21120,"message":"invalid nonce"}"#).unwrap_err();
+        let err = parse_body::<SendTxResponse>(400, r#"{"code":21120,"message":"invalid nonce"}"#)
+            .unwrap_err();
         assert!(err.to_string().contains("invalid nonce"));
         assert!(parse_body::<SendTxResponse>(200, r#"{"code":200}"#).is_err());
     }
 
     #[test]
     fn batch_fields_are_json_strings() {
-        let t = SignedTx { tx_type: 14, tx_info: r#"{"a":1}"#.into(), tx_hash: "h".into() };
+        let t = SignedTx {
+            tx_type: 14,
+            tx_info: r#"{"a":1}"#.into(),
+            tx_hash: "h".into(),
+        };
         let (types, infos) = batch_fields(&[t.clone(), t]).unwrap();
         assert_eq!(types, "[14,14]");
         assert_eq!(infos, r#"["{\"a\":1}","{\"a\":1}"]"#);

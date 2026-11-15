@@ -1,8 +1,8 @@
-use roshar_http::RateLimitedClient;
-use roshar_types::{
+use crate::types::{
     BinanceAggTrade, BinanceHistoricalFundingRate, BinanceKline, BinanceOrderBookSnapshot,
     BinancePremiumIndex, ExchangeInfo, OpenInterestData, TickerData,
 };
+use roshar_http::RateLimitedClient;
 
 const BASE_URL: &str = "https://fapi.binance.com";
 

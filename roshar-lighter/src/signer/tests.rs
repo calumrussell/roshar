@@ -32,7 +32,11 @@ fn info(t: &Value) -> Value {
 }
 
 fn recorded_sig(sig_b64: &str) -> [u8; 80] {
-    base64::engine::general_purpose::STANDARD.decode(sig_b64).unwrap().try_into().unwrap()
+    base64::engine::general_purpose::STANDARD
+        .decode(sig_b64)
+        .unwrap()
+        .try_into()
+        .unwrap()
 }
 
 /// k = s + e*sk for the recorded signature.
@@ -42,7 +46,10 @@ fn recover_k(s: &Signer, sig: &[u8; 80]) -> Scalar {
 }
 
 fn opts(i: &Value) -> TxOpts {
-    TxOpts { nonce: i["Nonce"].as_i64().unwrap(), expired_at_ms: i["ExpiredAt"].as_i64().unwrap() }
+    TxOpts {
+        nonce: i["Nonce"].as_i64().unwrap(),
+        expired_at_ms: i["ExpiredAt"].as_i64().unwrap(),
+    }
 }
 
 fn assert_same(got: &SignedTx, want: &Value) {
@@ -65,7 +72,12 @@ fn verifies(s: &Signer, msg_hash_hex: &str, sig: &[u8; 80]) -> bool {
 }
 
 fn chains(v: &Value) -> Vec<(String, Value)> {
-    v["chains"].as_object().unwrap().iter().map(|(k, c)| (k.clone(), c.clone())).collect()
+    v["chains"]
+        .as_object()
+        .unwrap()
+        .iter()
+        .map(|(k, c)| (k.clone(), c.clone()))
+        .collect()
 }
 
 #[test]
@@ -89,9 +101,13 @@ fn create_order_vectors() {
                 base_amount: t["base_amount"].as_i64().unwrap(),
                 price: t["price"].as_u64().unwrap() as u32,
                 is_ask: t["is_ask"].as_u64().unwrap() == 1,
-                order_type: [OrderType::Limit, OrderType::Market][t["order_type"].as_u64().unwrap() as usize],
-                time_in_force: [TimeInForce::ImmediateOrCancel, TimeInForce::GoodTillTime, TimeInForce::PostOnly]
-                    [t["time_in_force"].as_u64().unwrap() as usize],
+                order_type: [OrderType::Limit, OrderType::Market]
+                    [t["order_type"].as_u64().unwrap() as usize],
+                time_in_force: [
+                    TimeInForce::ImmediateOrCancel,
+                    TimeInForce::GoodTillTime,
+                    TimeInForce::PostOnly,
+                ][t["time_in_force"].as_u64().unwrap() as usize],
                 reduce_only: t["reduce_only"].as_u64().unwrap() == 1,
                 trigger_price: t["trigger_price"].as_u64().unwrap() as u32,
                 // -1 was filled in by the library from its clock.
@@ -108,7 +124,11 @@ fn create_order_vectors() {
             let fresh = s.sign_create_order(&o, opts(&i)).unwrap();
             assert_eq!(fresh.tx_hash, t["tx_hash"].as_str().unwrap());
             let fi = info(&serde_json::json!({"tx_info": fresh.tx_info}));
-            assert!(verifies(&s, &fresh.tx_hash, &recorded_sig(fi["Sig"].as_str().unwrap())));
+            assert!(verifies(
+                &s,
+                &fresh.tx_hash,
+                &recorded_sig(fi["Sig"].as_str().unwrap())
+            ));
             n += 1;
         }
     }
@@ -122,7 +142,10 @@ fn cancel_order_vectors() {
         let s = signer(&v, &chain);
         for t in c["cancel_order"].as_array().unwrap() {
             let i = info(t);
-            let o = CancelOrder { market_index: t["market_index"].as_i64().unwrap(), index: t["index"].as_i64().unwrap() };
+            let o = CancelOrder {
+                market_index: t["market_index"].as_i64().unwrap(),
+                index: t["index"].as_i64().unwrap(),
+            };
             let k = recover_k(&s, &recorded_sig(i["Sig"].as_str().unwrap()));
             assert_same(&s.cancel_order(&o, opts(&i), Some(&k)).unwrap(), t);
         }
@@ -138,8 +161,11 @@ fn cancel_all_orders_vectors() {
             let i = info(t);
             let m = t["market_index"].as_i64().unwrap();
             let o = CancelAllOrders {
-                time_in_force: [CancelAllTif::Immediate, CancelAllTif::Scheduled, CancelAllTif::Abort]
-                    [t["time_in_force"].as_u64().unwrap() as usize],
+                time_in_force: [
+                    CancelAllTif::Immediate,
+                    CancelAllTif::Scheduled,
+                    CancelAllTif::Abort,
+                ][t["time_in_force"].as_u64().unwrap() as usize],
                 time: t["time"].as_i64().unwrap(),
                 market_index: if m == 255 { None } else { Some(m) },
             };
@@ -179,10 +205,15 @@ fn auth_token_vectors() {
             let sig_hex = token.rsplit(':').next().unwrap();
             let sig: [u8; 80] = hex::decode(sig_hex).unwrap().try_into().unwrap();
             let k = recover_k(&s, &sig);
-            let got = s.auth_token_with(t["deadline"].as_i64().unwrap(), Some(&k)).unwrap();
+            let got = s
+                .auth_token_with(t["deadline"].as_i64().unwrap(), Some(&k))
+                .unwrap();
             assert_eq!(got, token);
             let fresh = s.auth_token(t["deadline"].as_i64().unwrap()).unwrap();
-            assert_eq!(fresh.rsplit_once(':').map(|x| x.0), token.rsplit_once(':').map(|x| x.0));
+            assert_eq!(
+                fresh.rsplit_once(':').map(|x| x.0),
+                token.rsplit_once(':').map(|x| x.0)
+            );
         }
     }
 }
@@ -191,9 +222,15 @@ fn auth_token_vectors() {
 fn rejects_what_the_go_signer_rejects() {
     let v = vectors();
     let s = signer(&v, "304");
-    let o = TxOpts { nonce: 1, expired_at_ms: 1_800_000_000_000 };
-    let scheduled_one_market =
-        CancelAllOrders { time_in_force: CancelAllTif::Scheduled, time: 1_800_000_000_000, market_index: Some(2) };
+    let o = TxOpts {
+        nonce: 1,
+        expired_at_ms: 1_800_000_000_000,
+    };
+    let scheduled_one_market = CancelAllOrders {
+        time_in_force: CancelAllTif::Scheduled,
+        time: 1_800_000_000_000,
+        market_index: Some(2),
+    };
     assert!(s.sign_cancel_all_orders(&scheduled_one_market, o).is_err());
     let post_only_no_expiry = CreateOrder {
         market_index: 1,
@@ -208,7 +245,15 @@ fn rejects_what_the_go_signer_rejects() {
         order_expiry: 0,
     };
     assert!(s.sign_create_order(&post_only_no_expiry, o).is_err());
-    assert!(s.sign_cancel_order(&CancelOrder { market_index: 255, index: 1 }, o).is_err());
+    assert!(s
+        .sign_cancel_order(
+            &CancelOrder {
+                market_index: 255,
+                index: 1
+            },
+            o
+        )
+        .is_err());
     assert!(ApiKey::from_hex("0x1234").is_err());
     let _ = curve::public_key; // keep the import used in all cfgs
 }

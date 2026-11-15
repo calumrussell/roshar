@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const ASTER_WSS_URL: &str = "wss://fstream.asterdex.com";
 
@@ -7,12 +10,10 @@ use rest::MarketApi;
 
 pub use rest::MarketApi as AsterMarketApi;
 
+pub use crate::types::{AsterDepthSpeed, AsterKlineInterval};
+use crate::types::{AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr};
 use anyhow::Result;
 use async_trait::async_trait;
-pub use roshar_types::aster::{AsterDepthSpeed, AsterKlineInterval};
-use roshar_types::aster::{
-    AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr,
-};
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -37,7 +38,7 @@ impl AsterClient {
                 name: Self::WS_CONN_NAME.to_string(),
                 url: ASTER_WSS_URL.to_string(),
                 ping_duration: 10,
-                ping_message: roshar_types::aster::AsterWssMessage::ping().to_json(),
+                ping_message: crate::types::AsterWssMessage::ping().to_json(),
                 ping_timeout: 10,
                 reconnect_timeout: 5000,
                 use_text_ping: Some(false),
@@ -68,7 +69,7 @@ impl AsterClient {
         speed: AsterDepthSpeed,
     ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::depth(symbol, speed).to_json();
+            let msg = crate::types::AsterWssMessage::depth(symbol, speed).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -84,7 +85,7 @@ impl AsterClient {
         speed: AsterDepthSpeed,
     ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::depth_unsub(symbol, speed).to_json();
+            let msg = crate::types::AsterWssMessage::depth_unsub(symbol, speed).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -95,7 +96,7 @@ impl AsterClient {
 
     pub fn subscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::trades(symbol).to_json();
+            let msg = crate::types::AsterWssMessage::trades(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -106,7 +107,7 @@ impl AsterClient {
 
     pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::trades_unsub(symbol).to_json();
+            let msg = crate::types::AsterWssMessage::trades_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -117,7 +118,7 @@ impl AsterClient {
 
     pub fn subscribe_mark_price(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::mark_price(symbol).to_json();
+            let msg = crate::types::AsterWssMessage::mark_price(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -133,7 +134,7 @@ impl AsterClient {
         interval: AsterKlineInterval,
     ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::aster::AsterWssMessage::klines(symbol, interval).to_json();
+            let msg = crate::types::AsterWssMessage::klines(symbol, interval).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),

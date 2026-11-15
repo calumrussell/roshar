@@ -1,9 +1,12 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const LIGHTER_WSS_URL: &str = "wss://mainnet.zklighter.elliot.ai/stream";
 pub const LIGHTER_TESTNET_WSS_URL: &str = "wss://testnet.zklighter.elliot.ai/stream";
 
-pub(crate) mod rest;
 pub mod exchange;
+pub(crate) mod rest;
 pub mod signer;
 pub mod ws_tx;
 
@@ -11,11 +14,11 @@ use rest::MarketApi;
 
 pub use rest::MarketApi as LighterMarketApi;
 
-use anyhow::Result;
-use async_trait::async_trait;
-use roshar_types::lighter::{
+use crate::types::{
     LighterFundingRate, LighterMarket, LighterMarketDetail, LighterOrderBook, LighterTrade,
 };
+use anyhow::Result;
+use async_trait::async_trait;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::sync::Arc;
 
@@ -40,7 +43,7 @@ impl LighterClient {
                 url: LIGHTER_WSS_URL.to_string(),
                 // Lighter disconnects if no frame is received within 2 minutes.
                 ping_duration: 90,
-                ping_message: roshar_types::lighter::LighterWssMessage::ping().to_json(),
+                ping_message: crate::types::LighterWssMessage::ping().to_json(),
                 ping_timeout: 10,
                 reconnect_timeout: 5000,
                 use_text_ping: Some(true),
@@ -67,7 +70,7 @@ impl LighterClient {
     /// Subscribe to order book updates for a market by its integer index.
     pub fn subscribe_depth(&self, manager: &Arc<Manager>, market_indices: &[u32]) -> Result<()> {
         for &idx in market_indices {
-            let msg = roshar_types::lighter::LighterWssMessage::depth(idx).to_json();
+            let msg = crate::types::LighterWssMessage::depth(idx).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -78,7 +81,7 @@ impl LighterClient {
 
     pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, market_indices: &[u32]) -> Result<()> {
         for &idx in market_indices {
-            let msg = roshar_types::lighter::LighterWssMessage::depth_unsub(idx).to_json();
+            let msg = crate::types::LighterWssMessage::depth_unsub(idx).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -90,7 +93,7 @@ impl LighterClient {
     /// Subscribe to trade execution stream for a market.
     pub fn subscribe_trades(&self, manager: &Arc<Manager>, market_indices: &[u32]) -> Result<()> {
         for &idx in market_indices {
-            let msg = roshar_types::lighter::LighterWssMessage::trades(idx).to_json();
+            let msg = crate::types::LighterWssMessage::trades(idx).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -101,7 +104,7 @@ impl LighterClient {
 
     pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, market_indices: &[u32]) -> Result<()> {
         for &idx in market_indices {
-            let msg = roshar_types::lighter::LighterWssMessage::trades_unsub(idx).to_json();
+            let msg = crate::types::LighterWssMessage::trades_unsub(idx).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -117,7 +120,7 @@ impl LighterClient {
         market_indices: &[u32],
     ) -> Result<()> {
         for &idx in market_indices {
-            let msg = roshar_types::lighter::LighterWssMessage::market_stats(idx).to_json();
+            let msg = crate::types::LighterWssMessage::market_stats(idx).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -128,7 +131,7 @@ impl LighterClient {
 
     /// Subscribe to market stats for all markets in a single message.
     pub fn subscribe_all_market_stats(&self, manager: &Arc<Manager>) -> Result<()> {
-        let msg = roshar_types::lighter::LighterWssMessage::all_market_stats().to_json();
+        let msg = crate::types::LighterWssMessage::all_market_stats().to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -139,7 +142,7 @@ impl LighterClient {
     /// Subscribe to best-bid/offer ticker for a market.
     pub fn subscribe_ticker(&self, manager: &Arc<Manager>, market_indices: &[u32]) -> Result<()> {
         for &idx in market_indices {
-            let msg = roshar_types::lighter::LighterWssMessage::ticker(idx).to_json();
+            let msg = crate::types::LighterWssMessage::ticker(idx).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),

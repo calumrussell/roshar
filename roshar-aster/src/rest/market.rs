@@ -1,7 +1,5 @@
+use crate::types::{AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr};
 use roshar_http::RateLimitedClient;
-use roshar_types::aster::{
-    AsterFundingRate, AsterKline, AsterMarkPrice, AsterOrderBook, AsterTicker24hr,
-};
 use std::collections::HashMap;
 
 const BASE_URL: &str = "https://fapi.asterdex.com";

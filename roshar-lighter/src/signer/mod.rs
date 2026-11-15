@@ -158,7 +158,11 @@ impl ApiKey {
     pub fn from_hex(private_key: &str) -> Result<ApiKey> {
         let s = private_key.strip_prefix("0x").unwrap_or(private_key);
         let b = hex::decode(s).context("API private key is not hex")?;
-        ensure!(b.len() == 40, "API private key must be 40 bytes, got {}", b.len());
+        ensure!(
+            b.len() == 40,
+            "API private key must be 40 bytes, got {}",
+            b.len()
+        );
         let sk = Scalar::from_le_bytes(b.as_slice().try_into().unwrap());
         ensure!(!sk.is_zero(), "API private key is zero");
         Ok(ApiKey { sk })
@@ -166,7 +170,10 @@ impl ApiKey {
 
     /// `0x` + hex of the 40-byte public key, as Lighter's `/api/v1/apikeys` reports it.
     pub fn public_key_hex(&self) -> String {
-        format!("0x{}", hex::encode(curve::public_key(&self.sk).to_le_bytes()))
+        format!(
+            "0x{}",
+            hex::encode(curve::public_key(&self.sk).to_le_bytes())
+        )
     }
 }
 
@@ -180,10 +187,26 @@ pub struct Signer {
 }
 
 impl Signer {
-    pub fn new(key: ApiKey, account_index: i64, api_key_index: u8, chain_id: u32) -> Result<Signer> {
-        ensure!(account_index > 0 && account_index <= MAX_ACCOUNT_INDEX, "invalid account index {account_index}");
-        ensure!(api_key_index <= MAX_API_KEY_INDEX, "invalid API key index {api_key_index}");
-        Ok(Signer { key, account_index, api_key_index, chain_id })
+    pub fn new(
+        key: ApiKey,
+        account_index: i64,
+        api_key_index: u8,
+        chain_id: u32,
+    ) -> Result<Signer> {
+        ensure!(
+            account_index > 0 && account_index <= MAX_ACCOUNT_INDEX,
+            "invalid account index {account_index}"
+        );
+        ensure!(
+            api_key_index <= MAX_API_KEY_INDEX,
+            "invalid API key index {api_key_index}"
+        );
+        Ok(Signer {
+            key,
+            account_index,
+            api_key_index,
+            chain_id,
+        })
     }
 
     pub fn account_index(&self) -> i64 {
@@ -226,7 +249,10 @@ impl Signer {
     }
 
     fn auth_token_with(&self, deadline_unix_s: i64, k: Option<&Scalar>) -> Result<String> {
-        let message = format!("{}:{}:{}", deadline_unix_s, self.account_index, self.api_key_index);
+        let message = format!(
+            "{}:{}:{}",
+            deadline_unix_s, self.account_index, self.api_key_index
+        );
         let elems = poseidon2::bytes_to_elements(message.as_bytes()).map_err(anyhow::Error::msg)?;
         let h = poseidon2::hash_to_quintic_extension(&elems);
         Ok(format!("{message}:{}", hex::encode(self.sign_hash(&h, k))))
@@ -241,7 +267,11 @@ impl Signer {
 
     fn check_common(&self, opts: TxOpts) -> Result<()> {
         ensure!(opts.nonce >= 0, "nonce too low");
-        ensure!((0..=MAX_TIMESTAMP).contains(&opts.expired_at_ms), "invalid ExpiredAt {}", opts.expired_at_ms);
+        ensure!(
+            (0..=MAX_TIMESTAMP).contains(&opts.expired_at_ms),
+            "invalid ExpiredAt {}",
+            opts.expired_at_ms
+        );
         Ok(())
     }
 
@@ -287,7 +317,11 @@ impl Signer {
             base64::engine::general_purpose::STANDARD.encode(sig),
             attrs_json
         );
-        SignedTx { tx_type, tx_info, tx_hash: hex::encode(h.to_le_bytes()) }
+        SignedTx {
+            tx_type,
+            tx_info,
+            tx_hash: hex::encode(h.to_le_bytes()),
+        }
     }
 
     fn create_order(&self, o: &CreateOrder, opts: TxOpts, k: Option<&Scalar>) -> Result<SignedTx> {
@@ -335,23 +369,39 @@ impl Signer {
         Ok(self.finish(TX_TYPE_CANCEL_ORDER, elems, &[], body, opts, k))
     }
 
-    fn cancel_all_orders(&self, c: &CancelAllOrders, opts: TxOpts, k: Option<&Scalar>) -> Result<SignedTx> {
+    fn cancel_all_orders(
+        &self,
+        c: &CancelAllOrders,
+        opts: TxOpts,
+        k: Option<&Scalar>,
+    ) -> Result<SignedTx> {
         self.check_common(opts)?;
         let attrs: Vec<(u8, i64)> = match c.market_index {
             None | Some(NIL_MARKET_INDEX) => vec![],
             Some(m) => {
-                ensure!((0..=MAX_MARKET_INDEX).contains(&m), "invalid cancel-all market index {m}");
-                ensure!(c.time_in_force == CancelAllTif::Immediate, "cancel-all for one market can't be scheduled");
+                ensure!(
+                    (0..=MAX_MARKET_INDEX).contains(&m),
+                    "invalid cancel-all market index {m}"
+                );
+                ensure!(
+                    c.time_in_force == CancelAllTif::Immediate,
+                    "cancel-all for one market can't be scheduled"
+                );
                 vec![(ATTR_CANCEL_ALL_MARKET_INDEX, m)]
             }
         };
         match c.time_in_force {
-            CancelAllTif::Immediate | CancelAllTif::Abort => ensure!(c.time == 0, "cancel-all time must be 0"),
+            CancelAllTif::Immediate | CancelAllTif::Abort => {
+                ensure!(c.time == 0, "cancel-all time must be 0")
+            }
             CancelAllTif::Scheduled => ensure!(c.time >= 1, "scheduled cancel-all needs a time"),
         }
         let mut elems = self.header(TX_TYPE_CANCEL_ALL_ORDERS, opts);
         elems.extend([F::new(c.time_in_force as u64), F::new(c.time as u64)]);
-        let body = format!(",\"TimeInForce\":{},\"Time\":{}", c.time_in_force as u8, c.time);
+        let body = format!(
+            ",\"TimeInForce\":{},\"Time\":{}",
+            c.time_in_force as u8, c.time
+        );
         Ok(self.finish(TX_TYPE_CANCEL_ALL_ORDERS, elems, &attrs, body, opts, k))
     }
 
@@ -359,12 +409,22 @@ impl Signer {
         self.check_common(opts)?;
         check_market(m.market_index)?;
         check_order_index(m.index)?;
-        ensure!((0..=MAX_BASE_AMOUNT).contains(&m.base_amount), "invalid base amount {}", m.base_amount);
+        ensure!(
+            (0..=MAX_BASE_AMOUNT).contains(&m.base_amount),
+            "invalid base amount {}",
+            m.base_amount
+        );
         ensure!(m.price >= 1, "price too low");
         let mut elems = self.header(TX_TYPE_MODIFY_ORDER, opts);
         elems.extend(
-            [m.market_index as u64, m.index as u64, m.base_amount as u64, m.price as u64, m.trigger_price as u64]
-                .map(F::new),
+            [
+                m.market_index as u64,
+                m.index as u64,
+                m.base_amount as u64,
+                m.price as u64,
+                m.trigger_price as u64,
+            ]
+            .map(F::new),
         );
         let body = format!(
             ",\"MarketIndex\":{},\"Index\":{},\"BaseAmount\":{},\"Price\":{},\"TriggerPrice\":{}",
@@ -403,7 +463,10 @@ fn check_market(m: i64) -> Result<()> {
 
 fn check_order_index(i: i64) -> Result<()> {
     ensure!(i >= 1, "order index too low");
-    ensure!(i <= MAX_CLIENT_ORDER_INDEX || (MIN_ORDER_INDEX..=MAX_ORDER_INDEX).contains(&i), "order index too high");
+    ensure!(
+        i <= MAX_CLIENT_ORDER_INDEX || (MIN_ORDER_INDEX..=MAX_ORDER_INDEX).contains(&i),
+        "order index too high"
+    );
     Ok(())
 }
 
@@ -418,9 +481,17 @@ fn validate_create_order(o: &CreateOrder) -> Result<()> {
         o.client_order_index
     );
     ensure!(o.reduce_only || o.base_amount != 0, "base amount too low");
-    ensure!((0..=MAX_BASE_AMOUNT).contains(&o.base_amount), "invalid base amount {}", o.base_amount);
+    ensure!(
+        (0..=MAX_BASE_AMOUNT).contains(&o.base_amount),
+        "invalid base amount {}",
+        o.base_amount
+    );
     ensure!(o.price >= 1, "price too low");
-    ensure!(o.order_expiry >= 0, "invalid order expiry {}", o.order_expiry);
+    ensure!(
+        o.order_expiry >= 0,
+        "invalid order expiry {}",
+        o.order_expiry
+    );
     let nil_expiry = o.order_expiry == 0;
     let nil_trigger = o.trigger_price == 0;
     match o.order_type {
@@ -439,7 +510,10 @@ fn validate_create_order(o: &CreateOrder) -> Result<()> {
             o.time_in_force == ImmediateOrCancel && !nil_trigger && !nil_expiry,
             "invalid stop-loss/take-profit order"
         ),
-        StopLossLimit | TakeProfitLimit => ensure!(!nil_trigger && !nil_expiry, "invalid stop/take-profit limit order"),
+        StopLossLimit | TakeProfitLimit => ensure!(
+            !nil_trigger && !nil_expiry,
+            "invalid stop/take-profit limit order"
+        ),
         Twap => ensure!(
             o.time_in_force == GoodTillTime && nil_trigger && !nil_expiry,
             "invalid TWAP order"

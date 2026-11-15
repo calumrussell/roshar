@@ -1,5 +1,5 @@
+use crate::types::{OkxCandle, OkxInstrumentInfo};
 use roshar_http::RateLimitedClient;
-use roshar_types::{OkxCandle, OkxInstrumentInfo};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;

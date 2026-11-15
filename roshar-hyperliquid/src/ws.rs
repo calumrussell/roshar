@@ -1,5 +1,5 @@
 //! Market-data websocket configuration for roshar-ws-mgr consumers.
-//! Subscription messages are `roshar_types::HyperliquidWssMessage`.
+//! Subscription messages are `roshar_hyperliquid::types::HyperliquidWssMessage`.
 
 pub const HL_WSS_URL: &str = "wss://api.hyperliquid.xyz/ws";
 pub const HL_TESTNET_WSS_URL: &str = "wss://api.hyperliquid-testnet.xyz/ws";
@@ -16,7 +16,7 @@ pub fn ws_config(mainnet: bool) -> roshar_ws_mgr::Config {
         }
         .to_string(),
         ping_duration: 20,
-        ping_message: roshar_types::HyperliquidWssMessage::ping().to_json(),
+        ping_message: crate::types::HyperliquidWssMessage::ping().to_json(),
         ping_timeout: 10,
         reconnect_timeout: 5000,
         use_text_ping: Some(true),

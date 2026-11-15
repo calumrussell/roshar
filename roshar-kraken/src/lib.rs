@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const KRAKEN_WSS_URL: &str = "wss://futures.kraken.com/ws/v1";
 pub const KRAKEN_SPOT_WSS_URL: &str = "wss://ws.kraken.com/v2";
@@ -14,9 +17,9 @@ pub use rest::{
 };
 use roshar_http::RateLimitedClient;
 
+use crate::types::KrakenWssMessage;
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::KrakenWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::sync::Arc;
 

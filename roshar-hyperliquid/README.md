@@ -14,7 +14,7 @@ make a change pass: a changed vector means a changed signature.
   Success, Rejected}`) with `u64` oids.
 - **No caller policy.** The library does not choose coins, sizes, retries, rounding direction,
   caching or refresh intervals. Credentials are passed in; nothing is read from the environment.
-- **Wire types live in `roshar_types::hyperliquid::exchange`** and are re-exported here: `Action`,
+- **Wire types live in `roshar_hyperliquid::types::exchange`** and are re-exported here: `Action`,
   `OrderReq`, `OrderRef`, `Tif`, `Cloid`, `cloid_hex`, `OrderStatus`, `L2Snapshot`, `Level`, `Side`, and for
   trigger orders `TypedOrderReq`, `OrderType`, `Tpsl`, `Grouping`.
 
@@ -30,7 +30,7 @@ make a change pass: a changed vector means a changed signature.
 | `user_stream` | `UserStream::spawn(ws_url, user, tx)`. Emits `UserEvent::{Order(OrderUpdate), Fill(UserFill), ...}` from `orderUpdates` and `userFills`. |
 | `info` | `Info::new()` (mainnet), `Info::testnet()`, `.with_timeout(..)`, `.with_rate_limit(n, interval)`. See below. |
 | `tick` | `to_tick(px, sz_decimals, up)`: valid perp price, rounded in the direction you choose. |
-| `ws` | `HL_WSS_URL`, `HL_TESTNET_WSS_URL`. `ws_config(mainnet)` builds the roshar-ws-mgr config (feature `ws-mgr`). Subscription messages are `roshar_types::HyperliquidWssMessage`. |
+| `ws` | `HL_WSS_URL`, `HL_TESTNET_WSS_URL`. `ws_config(mainnet)` builds the roshar-ws-mgr config (feature `ws-mgr`). Subscription messages are `roshar_hyperliquid::types::HyperliquidWssMessage`. |
 
 ### `Info` endpoints
 

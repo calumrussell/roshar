@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const BYBIT_WSS_URL: &str = "wss://stream.bybit.com/v5/public/linear";
 pub const BYBIT_SPOT_WSS_URL: &str = "wss://stream.bybit.com/v5/public/spot";
@@ -6,15 +9,15 @@ pub(crate) mod rest;
 
 use rest::MarketApi;
 
+pub use crate::types::{ByBitHistoricalFundingRate, ByBitKlineInterval, ByBitOrderbookDepth};
 pub use rest::{
     ByBitInstrumentInfo, ByBitLeverageFilter, ByBitLotSizeFilter, ByBitPriceFilter,
     ByBitTickerData, ByBitTickersResponse, MarketApi as ByBitMarketApi,
 };
-pub use roshar_types::{ByBitHistoricalFundingRate, ByBitKlineInterval, ByBitOrderbookDepth};
 
+use crate::types::ByBitWssMessage;
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::ByBitWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;

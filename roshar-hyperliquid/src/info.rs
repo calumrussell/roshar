@@ -5,8 +5,8 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context};
 use leaky_bucket::RateLimiter;
-use roshar_types::hyperliquid::exchange::{cloid_hex, Cloid, L2Snapshot, Level};
-use roshar_types::hyperliquid::{
+use crate::types::exchange::{cloid_hex, Cloid, L2Snapshot, Level};
+use crate::types::{
     HistoricalFundingRate, HyperliquidCandleData, MetaAndAssetCtxs, SpotClearinghouseState,
     SpotMetaAndAssetCtxs, UserPerpetualsState,
 };

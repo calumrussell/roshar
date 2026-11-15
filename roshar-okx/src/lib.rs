@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const OKX_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/public";
 pub const OKX_PRIVATE_WSS_URL: &str = "wss://ws.okx.com:8443/ws/v5/private";
@@ -9,9 +12,9 @@ use rest::MarketApi;
 pub use rest::MarketApi as OkxMarketApi;
 pub use rest::{OkxInstrumentsResponse, OkxTickerData, OkxTickersResponse};
 
+use crate::types::OkxWssMessage;
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::OkxWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -110,7 +113,7 @@ pub trait OkxApi {
     async fn get_instruments_info(
         &self,
     ) -> Result<
-        HashMap<String, roshar_types::OkxInstrumentInfo>,
+        HashMap<String, crate::types::OkxInstrumentInfo>,
         Box<dyn std::error::Error + Send + Sync>,
     >;
     async fn get_tickers(
@@ -123,7 +126,7 @@ pub trait OkxApi {
         after: Option<i64>,
         before: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
+    ) -> Result<Vec<crate::types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
     async fn get_history_candles(
         &self,
         inst_id: &str,
@@ -131,7 +134,7 @@ pub trait OkxApi {
         after: Option<i64>,
         before: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
+    ) -> Result<Vec<crate::types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>>;
 }
 
 #[async_trait]
@@ -139,7 +142,7 @@ impl OkxApi for OkxClient {
     async fn get_instruments_info(
         &self,
     ) -> Result<
-        HashMap<String, roshar_types::OkxInstrumentInfo>,
+        HashMap<String, crate::types::OkxInstrumentInfo>,
         Box<dyn std::error::Error + Send + Sync>,
     > {
         self.market_api.get_instruments_info().await
@@ -158,7 +161,7 @@ impl OkxApi for OkxClient {
         after: Option<i64>,
         before: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Vec<crate::types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
         self.market_api
             .get_candles(inst_id, bar, after, before, limit)
             .await
@@ -171,7 +174,7 @@ impl OkxApi for OkxClient {
         after: Option<i64>,
         before: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Vec<crate::types::OkxCandle>, Box<dyn std::error::Error + Send + Sync>> {
         self.market_api
             .get_history_candles(inst_id, bar, after, before, limit)
             .await

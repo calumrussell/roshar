@@ -12,7 +12,6 @@ default = []
 ws-mgr = ["dep:roshar-ws-mgr"]
 
 [dependencies]
-roshar-types = { workspace = true }
 roshar-ws-mgr = { workspace = true, optional = true }
 anyhow = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "net"] }

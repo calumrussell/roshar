@@ -1,8 +1,8 @@
-use roshar_http::RateLimitedClient;
-use roshar_types::pacifica::{
+use crate::types::{
     PacificaFundingRate, PacificaKline, PacificaMarket, PacificaOrderBook, PacificaTicker,
     PacificaTrade,
 };
+use roshar_http::RateLimitedClient;
 use std::collections::HashMap;
 
 pub struct MarketApi {

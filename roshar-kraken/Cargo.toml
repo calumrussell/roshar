@@ -14,7 +14,6 @@ chrono = "0.4"
 hmac = "0.12"
 reqwest = { version = "0.11", features = ["json"] }
 roshar-http = { version = "0.1.0", path = "../roshar-http" }
-roshar-types = { workspace = true }
 roshar-ws-mgr = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

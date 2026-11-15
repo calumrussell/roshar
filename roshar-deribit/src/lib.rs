@@ -1,9 +1,12 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const DERIBIT_WSS_URL: &str = "wss://www.deribit.com/ws/api/v2";
 pub const DERIBIT_TESTNET_WSS_URL: &str = "wss://test.deribit.com/ws/api/v2";
 
+use crate::types::DeribitWssMessage;
 use anyhow::Result;
-use roshar_types::DeribitWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::sync::Arc;
 

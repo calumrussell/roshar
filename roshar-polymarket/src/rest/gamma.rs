@@ -1,5 +1,5 @@
+use crate::types::{ListEventsParams, PolymarketEvent};
 use roshar_http::RateLimitedClient;
-use roshar_types::polymarket::{ListEventsParams, PolymarketEvent};
 
 /// Polymarket Gamma API client for market data
 pub struct GammaApi {
@@ -26,7 +26,7 @@ impl GammaApi {
     /// # Example
     /// ```no_run
     /// use roshar_polymarket::GammaApi;
-    /// use roshar_types::polymarket::ListEventsParams;
+    /// use roshar_polymarket::types::ListEventsParams;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

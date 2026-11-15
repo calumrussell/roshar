@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const PACIFICA_WSS_URL: &str = "wss://ws.pacifica.fi/ws";
 pub const PACIFICA_TESTNET_WSS_URL: &str = "wss://test-ws.pacifica.fi/ws";
@@ -13,12 +16,12 @@ use rest::TradingApi;
 pub use rest::MarketApi as PacificaMarketApi;
 pub use rest::TradingApi as PacificaTradingApiImpl;
 
-use anyhow::Result;
-use async_trait::async_trait;
-use roshar_types::pacifica::{
+use crate::types::{
     PacificaFundingRate, PacificaKline, PacificaMarket, PacificaOpenOrder, PacificaOrderBook,
     PacificaPosition, PacificaTicker, PacificaTrade,
 };
+use anyhow::Result;
+use async_trait::async_trait;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -75,7 +78,7 @@ impl PacificaClient {
             }
             .to_string(),
             ping_duration: 30,
-            ping_message: roshar_types::pacifica::PacificaWssMessage::ping().to_json(),
+            ping_message: crate::types::PacificaWssMessage::ping().to_json(),
             ping_timeout: 10,
             reconnect_timeout: 5000,
             use_text_ping: Some(true),
@@ -106,7 +109,7 @@ impl PacificaClient {
 
     pub fn subscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::pacifica::PacificaWssMessage::depth(symbol).to_json();
+            let msg = crate::types::PacificaWssMessage::depth(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -117,7 +120,7 @@ impl PacificaClient {
 
     pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::pacifica::PacificaWssMessage::depth_unsub(symbol).to_json();
+            let msg = crate::types::PacificaWssMessage::depth_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -128,7 +131,7 @@ impl PacificaClient {
 
     pub fn subscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::pacifica::PacificaWssMessage::trades(symbol).to_json();
+            let msg = crate::types::PacificaWssMessage::trades(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -139,7 +142,7 @@ impl PacificaClient {
 
     pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::pacifica::PacificaWssMessage::trades_unsub(symbol).to_json();
+            let msg = crate::types::PacificaWssMessage::trades_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -156,8 +159,7 @@ impl PacificaClient {
         interval: &str,
     ) -> Result<()> {
         for symbol in symbols {
-            let msg =
-                roshar_types::pacifica::PacificaWssMessage::candles(symbol, interval).to_json();
+            let msg = crate::types::PacificaWssMessage::candles(symbol, interval).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -168,7 +170,7 @@ impl PacificaClient {
 
     pub fn subscribe_mark_price(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::pacifica::PacificaWssMessage::mark_price(symbol).to_json();
+            let msg = crate::types::PacificaWssMessage::mark_price(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),

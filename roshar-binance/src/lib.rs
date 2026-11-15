@@ -1,18 +1,21 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const BINANCE_WSS_URL: &str = "wss://fstream.binance.com/ws";
 pub const BINANCE_SPOT_WSS_URL: &str = "wss://stream.binance.com:9443/ws";
 
 pub(crate) mod rest;
 
-pub use roshar_types::{BinanceDepthSpeed, BinanceKlineInterval};
+pub use crate::types::{BinanceDepthSpeed, BinanceKlineInterval};
 
 use rest::BinanceRestClient;
 
-use anyhow::Result;
-use async_trait::async_trait;
-use roshar_types::{
+use crate::types::{
     BinanceOrderBookSnapshot, BinancePremiumIndex, BinanceWssMessage, OpenInterestData,
 };
+use anyhow::Result;
+use async_trait::async_trait;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -155,14 +158,14 @@ pub trait BinanceApi {
     async fn get_24hr_ticker(
         &self,
         symbol: Option<&str>,
-    ) -> Result<Vec<roshar_types::TickerData>, String>;
+    ) -> Result<Vec<crate::types::TickerData>, String>;
     async fn get_historical_funding_rates(
         &self,
         symbol: &str,
         start_time: i64,
         end_time: i64,
-    ) -> Result<Vec<roshar_types::BinanceHistoricalFundingRate>, String>;
-    async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String>;
+    ) -> Result<Vec<crate::types::BinanceHistoricalFundingRate>, String>;
+    async fn get_exchange_info(&self) -> Result<crate::types::ExchangeInfo, String>;
     async fn get_agg_trades(
         &self,
         symbol: &str,
@@ -170,7 +173,7 @@ pub trait BinanceApi {
         end_time: Option<i64>,
         from_id: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::BinanceAggTrade>, String>;
+    ) -> Result<Vec<crate::types::BinanceAggTrade>, String>;
     async fn get_klines(
         &self,
         symbol: &str,
@@ -178,7 +181,7 @@ pub trait BinanceApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::BinanceKline>, String>;
+    ) -> Result<Vec<crate::types::BinanceKline>, String>;
     async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, BinancePremiumIndex>, String>;
@@ -198,7 +201,7 @@ impl BinanceApi for BinanceClient {
     async fn get_24hr_ticker(
         &self,
         symbol: Option<&str>,
-    ) -> Result<Vec<roshar_types::TickerData>, String> {
+    ) -> Result<Vec<crate::types::TickerData>, String> {
         self.rest_client
             .get_24hr_ticker(symbol)
             .await
@@ -210,14 +213,14 @@ impl BinanceApi for BinanceClient {
         symbol: &str,
         start_time: i64,
         end_time: i64,
-    ) -> Result<Vec<roshar_types::BinanceHistoricalFundingRate>, String> {
+    ) -> Result<Vec<crate::types::BinanceHistoricalFundingRate>, String> {
         self.rest_client
             .get_historical_funding_rates(symbol, start_time, end_time)
             .await
             .map_err(|e| format!("Failed to get historical funding rates: {}", e))
     }
 
-    async fn get_exchange_info(&self) -> Result<roshar_types::ExchangeInfo, String> {
+    async fn get_exchange_info(&self) -> Result<crate::types::ExchangeInfo, String> {
         self.rest_client
             .get_exchange_info()
             .await
@@ -231,7 +234,7 @@ impl BinanceApi for BinanceClient {
         end_time: Option<i64>,
         from_id: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::BinanceAggTrade>, String> {
+    ) -> Result<Vec<crate::types::BinanceAggTrade>, String> {
         self.rest_client
             .get_agg_trades(symbol, start_time, end_time, from_id, limit)
             .await
@@ -245,7 +248,7 @@ impl BinanceApi for BinanceClient {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<roshar_types::BinanceKline>, String> {
+    ) -> Result<Vec<crate::types::BinanceKline>, String> {
         self.rest_client
             .get_klines(symbol, interval, start_time, end_time, limit)
             .await

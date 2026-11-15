@@ -1,5 +1,5 @@
+use crate::types::{CoinbaseProduct, CoinbaseProductsResponse};
 use roshar_http::RateLimitedClient;
-use roshar_types::{CoinbaseProduct, CoinbaseProductsResponse};
 use std::collections::HashMap;
 use std::sync::Arc;
 

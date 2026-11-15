@@ -1,8 +1,8 @@
-use roshar_http::RateLimitedClient;
-use roshar_types::paradex::{
+use crate::types::{
     ParadexFundingEntry, ParadexKline, ParadexListResponse, ParadexMarket, ParadexMarketSummary,
     ParadexOrderBook, ParadexTrade,
 };
+use roshar_http::RateLimitedClient;
 use std::collections::HashMap;
 
 const BASE_URL: &str = "https://api.prod.paradex.trade/v1";

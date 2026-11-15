@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const PHOENIX_WSS_URL: &str = "wss://perp-api.phoenix.trade/v1/ws";
 pub const PHOENIX_REST_URL: &str = "https://perp-api.phoenix.trade";
@@ -8,13 +11,13 @@ use rest::MarketApi;
 
 pub use rest::MarketApi as PhoenixMarketApi;
 
-use anyhow::Result;
-use async_trait::async_trait;
-use roshar_types::phoenix::{
+use crate::types::{
     PhoenixCandle, PhoenixCollateralEvent, PhoenixExchange, PhoenixFundingHistory,
     PhoenixMarketConfig, PhoenixOrderBook, PhoenixOrderHistory, PhoenixPaginatedResponse,
     PhoenixPnlPoint, PhoenixTradeHistory, PhoenixTraderState,
 };
+use anyhow::Result;
+use async_trait::async_trait;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::sync::Arc;
 
@@ -38,7 +41,7 @@ impl PhoenixClient {
                 name: Self::WS_CONN_NAME.to_string(),
                 url: PHOENIX_WSS_URL.to_string(),
                 ping_duration: 30,
-                ping_message: roshar_types::phoenix::PhoenixWssMessage::ping().to_json(),
+                ping_message: crate::types::PhoenixWssMessage::ping().to_json(),
                 ping_timeout: 10,
                 reconnect_timeout: 5000,
                 use_text_ping: Some(true),
@@ -64,7 +67,7 @@ impl PhoenixClient {
 
     /// Subscribe to mid prices for all listed markets.
     pub fn subscribe_all_mids(&self, manager: &Arc<Manager>) -> Result<()> {
-        let msg = roshar_types::phoenix::PhoenixWssMessage::all_mids().to_json();
+        let msg = crate::types::PhoenixWssMessage::all_mids().to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -73,7 +76,7 @@ impl PhoenixClient {
     }
 
     pub fn unsubscribe_all_mids(&self, manager: &Arc<Manager>) -> Result<()> {
-        let msg = roshar_types::phoenix::PhoenixWssMessage::all_mids_unsub().to_json();
+        let msg = crate::types::PhoenixWssMessage::all_mids_unsub().to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -84,7 +87,7 @@ impl PhoenixClient {
     /// Subscribe to L2 orderbook updates for the given market symbols.
     pub fn subscribe_orderbook(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::orderbook(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::orderbook(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -95,7 +98,7 @@ impl PhoenixClient {
 
     pub fn unsubscribe_orderbook(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::orderbook_unsub(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::orderbook_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -107,7 +110,7 @@ impl PhoenixClient {
     /// Subscribe to trade execution stream for the given market symbols.
     pub fn subscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::trades(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::trades(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -118,7 +121,7 @@ impl PhoenixClient {
 
     pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::trades_unsub(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::trades_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -130,7 +133,7 @@ impl PhoenixClient {
     /// Subscribe to market stats (mark price, OI, funding, volume) for the given symbols.
     pub fn subscribe_market(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::market(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::market(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -141,7 +144,7 @@ impl PhoenixClient {
 
     pub fn unsubscribe_market(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::market_unsub(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::market_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -159,8 +162,7 @@ impl PhoenixClient {
         timeframe: &str,
     ) -> Result<()> {
         for symbol in symbols {
-            let msg =
-                roshar_types::phoenix::PhoenixWssMessage::candles(symbol, timeframe).to_json();
+            let msg = crate::types::PhoenixWssMessage::candles(symbol, timeframe).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -176,8 +178,7 @@ impl PhoenixClient {
         timeframe: &str,
     ) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::candles_unsub(symbol, timeframe)
-                .to_json();
+            let msg = crate::types::PhoenixWssMessage::candles_unsub(symbol, timeframe).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -189,7 +190,7 @@ impl PhoenixClient {
     /// Subscribe to per-interval funding rate updates for the given symbols.
     pub fn subscribe_funding_rate(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg = roshar_types::phoenix::PhoenixWssMessage::funding_rate(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::funding_rate(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -200,8 +201,7 @@ impl PhoenixClient {
 
     pub fn unsubscribe_funding_rate(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
         for symbol in symbols {
-            let msg =
-                roshar_types::phoenix::PhoenixWssMessage::funding_rate_unsub(symbol).to_json();
+            let msg = crate::types::PhoenixWssMessage::funding_rate_unsub(symbol).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -218,8 +218,7 @@ impl PhoenixClient {
         trader_pda_index: u8,
     ) -> Result<()> {
         let msg =
-            roshar_types::phoenix::PhoenixWssMessage::trader_state(authority, trader_pda_index)
-                .to_json();
+            crate::types::PhoenixWssMessage::trader_state(authority, trader_pda_index).to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -233,11 +232,8 @@ impl PhoenixClient {
         authority: &str,
         trader_pda_index: u8,
     ) -> Result<()> {
-        let msg = roshar_types::phoenix::PhoenixWssMessage::trader_state_unsub(
-            authority,
-            trader_pda_index,
-        )
-        .to_json();
+        let msg = crate::types::PhoenixWssMessage::trader_state_unsub(authority, trader_pda_index)
+            .to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),

@@ -90,7 +90,13 @@ impl Fp5 {
     pub(crate) const ONE: Fp5 = Fp5([F::ONE, F::ZERO, F::ZERO, F::ZERO, F::ZERO]);
 
     pub(crate) fn from_u64s(v: [u64; 5]) -> Fp5 {
-        Fp5([F::new(v[0]), F::new(v[1]), F::new(v[2]), F::new(v[3]), F::new(v[4])])
+        Fp5([
+            F::new(v[0]),
+            F::new(v[1]),
+            F::new(v[2]),
+            F::new(v[3]),
+            F::new(v[4]),
+        ])
     }
 
     pub(crate) fn is_zero(&self) -> bool {
@@ -200,7 +206,17 @@ mod tests {
 
     #[test]
     fn base_field_matches_u128_arithmetic() {
-        let vals = [0u64, 1, 2, P - 1, P - 2, EPSILON, 1 << 63, 0x1234_5678_9abc_def0 % P, P / 3];
+        let vals = [
+            0u64,
+            1,
+            2,
+            P - 1,
+            P - 2,
+            EPSILON,
+            1 << 63,
+            0x1234_5678_9abc_def0 % P,
+            P / 3,
+        ];
         for &a in &vals {
             for &b in &vals {
                 let (fa, fb) = (F::new(a), F::new(b));

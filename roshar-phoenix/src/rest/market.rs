@@ -1,9 +1,9 @@
-use roshar_http::RateLimitedClient;
-use roshar_types::phoenix::{
+use crate::types::{
     PhoenixCandle, PhoenixCollateralEvent, PhoenixExchange, PhoenixFundingHistory,
     PhoenixMarketConfig, PhoenixOrderBook, PhoenixOrderHistory, PhoenixPaginatedResponse,
     PhoenixPnlPoint, PhoenixTradeHistory, PhoenixTraderState,
 };
+use roshar_http::RateLimitedClient;
 
 const BASE_URL: &str = "https://perp-api.phoenix.trade";
 

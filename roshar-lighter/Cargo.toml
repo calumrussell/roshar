@@ -10,7 +10,6 @@ repository = "https://github.com/calumrussell/roshar"
 anyhow = "1.0"
 async-trait = "0.1"
 roshar-http = { version = "0.1.0", path = "../roshar-http" }
-roshar-types = { workspace = true }
 roshar-ws-mgr = { workspace = true }
 serde_json = "1.0"
 serde = { version = "1", features = ["derive"] }

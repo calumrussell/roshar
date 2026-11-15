@@ -1,5 +1,5 @@
+use crate::types::ByBitHistoricalFundingRate;
 use roshar_http::RateLimitedClient;
-use roshar_types::ByBitHistoricalFundingRate;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;

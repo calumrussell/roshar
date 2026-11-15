@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const PARADEX_WSS_URL: &str = "wss://ws.api.prod.paradex.trade/v1";
 pub const PARADEX_TESTNET_WSS_URL: &str = "wss://ws.api.testnet.paradex.trade/v1";
@@ -8,12 +11,12 @@ use rest::MarketApi;
 
 pub use rest::MarketApi as ParadexMarketApi;
 
-use anyhow::Result;
-use async_trait::async_trait;
-use roshar_types::paradex::{
+use crate::types::{
     ParadexFundingEntry, ParadexKline, ParadexMarket, ParadexMarketSummary, ParadexOrderBook,
     ParadexTrade,
 };
+use anyhow::Result;
+use async_trait::async_trait;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -40,7 +43,7 @@ impl ParadexClient {
                 // Paradex server pings every 55s; client must pong within 5s.
                 // The ws manager handles standard WebSocket ping/pong frames.
                 ping_duration: 30,
-                ping_message: roshar_types::paradex::ParadexWssMessage::ping().to_json(),
+                ping_message: crate::types::ParadexWssMessage::ping().to_json(),
                 ping_timeout: 10,
                 reconnect_timeout: 5000,
                 use_text_ping: Some(true),
@@ -66,7 +69,7 @@ impl ParadexClient {
 
     pub fn subscribe_depth(&self, manager: &Arc<Manager>, markets: &[&str]) -> Result<()> {
         for market in markets {
-            let msg = roshar_types::paradex::ParadexWssMessage::depth(market).to_json();
+            let msg = crate::types::ParadexWssMessage::depth(market).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -77,7 +80,7 @@ impl ParadexClient {
 
     pub fn unsubscribe_depth(&self, manager: &Arc<Manager>, markets: &[&str]) -> Result<()> {
         for market in markets {
-            let msg = roshar_types::paradex::ParadexWssMessage::depth_unsub(market).to_json();
+            let msg = crate::types::ParadexWssMessage::depth_unsub(market).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -88,7 +91,7 @@ impl ParadexClient {
 
     pub fn subscribe_trades(&self, manager: &Arc<Manager>, markets: &[&str]) -> Result<()> {
         for market in markets {
-            let msg = roshar_types::paradex::ParadexWssMessage::trades(market).to_json();
+            let msg = crate::types::ParadexWssMessage::trades(market).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -99,7 +102,7 @@ impl ParadexClient {
 
     pub fn unsubscribe_trades(&self, manager: &Arc<Manager>, markets: &[&str]) -> Result<()> {
         for market in markets {
-            let msg = roshar_types::paradex::ParadexWssMessage::trades_unsub(market).to_json();
+            let msg = crate::types::ParadexWssMessage::trades_unsub(market).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -110,7 +113,7 @@ impl ParadexClient {
 
     pub fn subscribe_bbo(&self, manager: &Arc<Manager>, markets: &[&str]) -> Result<()> {
         for market in markets {
-            let msg = roshar_types::paradex::ParadexWssMessage::bbo(market).to_json();
+            let msg = crate::types::ParadexWssMessage::bbo(market).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -121,7 +124,7 @@ impl ParadexClient {
 
     pub fn subscribe_funding(&self, manager: &Arc<Manager>, markets: &[&str]) -> Result<()> {
         for market in markets {
-            let msg = roshar_types::paradex::ParadexWssMessage::funding(market).to_json();
+            let msg = crate::types::ParadexWssMessage::funding(market).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -132,7 +135,7 @@ impl ParadexClient {
 
     /// Subscribe to the global markets summary ticker stream.
     pub fn subscribe_markets_summary(&self, manager: &Arc<Manager>) -> Result<()> {
-        let msg = roshar_types::paradex::ParadexWssMessage::markets_summary().to_json();
+        let msg = crate::types::ParadexWssMessage::markets_summary().to_json();
         manager.write(
             &self.ws_config.name,
             Message::TextMessage(self.ws_config.name.clone(), msg),

@@ -37,7 +37,12 @@ pub(crate) struct Point {
 }
 
 impl Point {
-    pub(crate) const NEUTRAL: Point = Point { x: Fp5::ZERO, z: Fp5::ONE, u: Fp5::ZERO, t: Fp5::ONE };
+    pub(crate) const NEUTRAL: Point = Point {
+        x: Fp5::ZERO,
+        z: Fp5::ONE,
+        u: Fp5::ZERO,
+        t: Fp5::ONE,
+    };
 
     pub(crate) fn generator() -> Point {
         Point {

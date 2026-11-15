@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const KUCOIN_FUTURES_WSS_URL: &str = "wss://ws-api-futures.kucoin.com/endpoint";
 pub const KUCOIN_FUTURES_REST_URL: &str = "https://api-futures.kucoin.com";
@@ -7,9 +10,9 @@ pub(crate) mod rest;
 pub use rest::MarketApi as KuCoinMarketApi;
 pub use rest::{KuCoinContract, KuCoinFundingRate};
 
+use crate::types::KuCoinWssMessage;
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::KuCoinWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;

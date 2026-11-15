@@ -2,7 +2,9 @@
 //! `/info` queries, tick rounding and the market-data websocket config.
 //!
 //! Wire types (`Action`, `OrderReq`, `Tif`, `Cloid`, `OrderStatus`, ...) are defined in
-//! `roshar_types::hyperliquid::exchange` and re-exported here.
+//! `types::exchange` and re-exported here.
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
 
 pub mod info;
 pub mod nonce;
@@ -20,7 +22,7 @@ pub use poster::{
     PendingPost, PostResult, WsPoster,
 };
 pub use rest::{RestPoster, HL_EXCHANGE_URL};
-pub use roshar_types::hyperliquid::exchange::*;
+pub use crate::types::exchange::*;
 pub use signer::{float_to_wire, Signer};
 pub use tick::to_tick;
 pub use user_stream::{

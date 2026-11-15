@@ -1,12 +1,10 @@
 # roshar
 
-Exchange clients for crypto venues: one crate per exchange, plus shared wire types and websocket
-transport.
+Exchange clients for crypto venues: one crate per exchange, plus websocket and HTTP transport.
 
 | Crate | What |
 |---|---|
-| `roshar-<exchange>` | Client for one exchange: REST, websocket config, and signing where supported. Exchanges: aster, binance, bitget, bybit, coinbase, deribit, derive, hyperliquid, kraken, kucoin, lighter, okx, pacifica, paradex, phoenix, polymarket. |
-| `roshar-types` | Wire and message types, one module per exchange. |
+| `roshar-<exchange>` | Client for one exchange: wire types (`roshar_<exchange>::types`), REST, websocket config, and signing where supported. Exchanges: aster, binance, bitget, bybit, coinbase, deribit, derive, hyperliquid, kraken, kucoin, lighter, okx, pacifica, paradex, phoenix, polymarket. |
 | `roshar-ws` | Low-level websocket client. |
 | `roshar-ws-mgr` | Websocket connection manager: reconnects, pings, fans out messages. |
 | `roshar-http` | Pooled HTTP client with leaky-bucket rate limiting. |

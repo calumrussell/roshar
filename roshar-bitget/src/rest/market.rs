@@ -1,5 +1,5 @@
+use crate::types::{BitgetContract, BitgetHistoricalFundingRate, BitgetResponse, BitgetTickerData};
 use roshar_http::RateLimitedClient;
-use roshar_types::{BitgetContract, BitgetHistoricalFundingRate, BitgetResponse, BitgetTickerData};
 use std::collections::HashMap;
 use std::sync::Arc;
 

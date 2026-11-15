@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const COINBASE_WSS_URL: &str = "wss://advanced-trade-ws.coinbase.com";
 pub const COINBASE_REST_URL: &str = "https://api.coinbase.com";
@@ -7,9 +10,9 @@ pub(crate) mod rest;
 pub use rest::MarketApi as CoinbaseMarketApi;
 pub use rest::{CoinbaseProduct, CoinbaseProductsResponse};
 
+use crate::types::CoinbaseWssMessage;
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::CoinbaseWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;

@@ -1,3 +1,6 @@
+/// Wire and message types for this exchange (websocket messages, REST payloads).
+pub mod types;
+
 // Endpoints
 pub const BITGET_WSS_URL: &str = "wss://ws.bitget.com/v2/ws/public";
 pub const BITGET_REST_URL: &str = "https://api.bitget.com";
@@ -7,9 +10,9 @@ pub(crate) mod rest;
 pub use rest::MarketApi as BitgetMarketApi;
 pub use rest::{BitgetContract, BitgetHistoricalFundingRate, BitgetTickerData};
 
+use crate::types::BitgetWssMessage;
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::BitgetWssMessage;
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;

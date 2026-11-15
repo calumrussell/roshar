@@ -4,16 +4,15 @@ Run cargo-release for the specified packages.
 
 ## Arguments
 
-- `$ARGUMENTS` - Space-separated list of package names to release (e.g., `roshar-types roshar-clients`)
+- `$ARGUMENTS` - Space-separated list of package names to release (e.g., `roshar-okx roshar-hyperliquid`)
 
 ## Available Packages
 
 The following packages are available in this workspace:
 - roshar-ws
 - roshar-ws-mgr
-- roshar-bt
-- roshar-types
-- roshar-clients
+- roshar-http
+- roshar-<exchange>: aster, binance, bitget, bybit, coinbase, deribit, derive, hyperliquid, kraken, kucoin, lighter, okx, pacifica, paradex, phoenix, polymarket
 
 ## Instructions
 

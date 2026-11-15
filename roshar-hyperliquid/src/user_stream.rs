@@ -12,7 +12,7 @@ use std::time::Duration;
 use crate::poster::now_ns;
 use anyhow::{anyhow, bail, Context};
 use futures_util::{SinkExt, StreamExt};
-use roshar_types::hyperliquid::exchange::Cloid;
+use crate::types::exchange::Cloid;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::sync::mpsc::UnboundedSender;

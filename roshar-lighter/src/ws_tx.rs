@@ -52,10 +52,18 @@ mod tests {
 
     #[test]
     fn send_tx_embeds_tx_info_verbatim() {
-        let t = SignedTx { tx_type: 15, tx_info: r#"{"Z":1,"A":2}"#.into(), tx_hash: "h".into() };
+        let t = SignedTx {
+            tx_type: 15,
+            tx_info: r#"{"Z":1,"A":2}"#.into(),
+            tx_hash: "h".into(),
+        };
         let m = send_tx("b1", &t);
-        assert_eq!(m, r#"{"type":"jsonapi/sendtx","data":{"id":"b1","tx_type":15,"tx_info":{"Z":1,"A":2}}}"#);
-        let v: serde_json::Value = serde_json::from_str(&send_tx_batch("b2", &[t.clone(), t]).unwrap()).unwrap();
+        assert_eq!(
+            m,
+            r#"{"type":"jsonapi/sendtx","data":{"id":"b1","tx_type":15,"tx_info":{"Z":1,"A":2}}}"#
+        );
+        let v: serde_json::Value =
+            serde_json::from_str(&send_tx_batch("b2", &[t.clone(), t]).unwrap()).unwrap();
         assert_eq!(v["data"]["tx_types"], "[15,15]");
     }
 }

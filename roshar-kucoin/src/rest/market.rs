@@ -1,5 +1,5 @@
+use crate::types::{KuCoinContract, KuCoinFundingRate, KuCoinFundingRateListData, KuCoinResponse};
 use roshar_http::RateLimitedClient;
-use roshar_types::{KuCoinContract, KuCoinFundingRate, KuCoinFundingRateListData, KuCoinResponse};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -40,7 +40,7 @@ impl MarketApi {
         }
 
         let text = response.text().await?;
-        let parsed: KuCoinResponse<roshar_types::KuCoinWsTokenData> =
+        let parsed: KuCoinResponse<crate::types::KuCoinWsTokenData> =
             serde_json::from_str(&text)
                 .map_err(|e| format!("Failed to parse KuCoin bullet-public response: {e}"))?;
 

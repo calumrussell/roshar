@@ -7,7 +7,7 @@
 
 use anyhow::{anyhow, bail, Context};
 use k256::ecdsa::SigningKey;
-use roshar_types::hyperliquid::exchange::{
+use crate::types::exchange::{
     Action, Cloid, Grouping, OrderRef, OrderReq, OrderType, Tif, Tpsl, TypedOrderReq,
 };
 use serde_json::{json, Value};
