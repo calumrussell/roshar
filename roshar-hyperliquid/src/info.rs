@@ -53,6 +53,8 @@ pub struct Info {
 
 fn http_client(timeout: Duration) -> anyhow::Result<reqwest::Client> {
     Ok(reqwest::Client::builder()
+        // Pin rustls: a workspace build can enable reqwest's default-tls, which would otherwise win.
+        .use_rustls_tls()
         .timeout(timeout)
         .connect_timeout(Duration::from_secs(5))
         .pool_idle_timeout(Duration::from_secs(90))
