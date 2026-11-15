@@ -44,6 +44,7 @@ impl BinanceRestClient {
         Ok(exchange_info)
     }
 
+    /// Present open interest of a symbol (`GET /fapi/v1/openInterest`).
     pub async fn get_open_interest(
         &self,
         symbol: &str,
@@ -93,16 +94,18 @@ impl BinanceRestClient {
         }
     }
 
+    /// Order book snapshot (`GET /fapi/v1/depth`). Used to bootstrap a local book from the
+    /// diff-depth stream. `limit` is one of 5, 10, 20, 50, 100, 500, 1000; `None` uses the
+    /// exchange default.
     pub async fn get_depth_snapshot(
         &self,
         symbol: &str,
         limit: Option<u32>,
     ) -> Result<BinanceOrderBookSnapshot, Box<dyn std::error::Error + Send + Sync>> {
-        let limit = limit.unwrap_or(1000);
-        let url = format!(
-            "{}/fapi/v1/depth?symbol={}&limit={}",
-            BASE_URL, symbol, limit
-        );
+        let mut url = format!("{}/fapi/v1/depth?symbol={}", BASE_URL, symbol);
+        if let Some(limit) = limit {
+            url.push_str(&format!("&limit={limit}"));
+        }
         let response = self.get(&url).await?;
 
         if !response.status().is_success() {

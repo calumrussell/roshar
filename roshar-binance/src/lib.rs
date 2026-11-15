@@ -8,7 +8,9 @@ use rest::BinanceRestClient;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use roshar_types::{BinancePremiumIndex, BinanceWssMessage};
+use roshar_types::{
+    BinanceOrderBookSnapshot, BinancePremiumIndex, BinanceWssMessage, OpenInterestData,
+};
 use roshar_ws_mgr::{Config, Manager, Message};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -158,6 +160,15 @@ pub trait BinanceApi {
     async fn get_realtime_funding_rates(
         &self,
     ) -> Result<HashMap<String, BinancePremiumIndex>, String>;
+    /// Order book snapshot (`GET /fapi/v1/depth`), needed to bootstrap the diff-depth stream.
+    /// `limit` is one of 5, 10, 20, 50, 100, 500, 1000; `None` uses the exchange default.
+    async fn get_depth_snapshot(
+        &self,
+        symbol: &str,
+        limit: Option<u32>,
+    ) -> Result<BinanceOrderBookSnapshot, String>;
+    /// Present open interest of a symbol (`GET /fapi/v1/openInterest`).
+    async fn get_open_interest(&self, symbol: &str) -> Result<OpenInterestData, String>;
 }
 
 #[async_trait]
@@ -235,6 +246,24 @@ impl BinanceApi for BinanceClient {
 
         Ok(funding_rates)
     }
+
+    async fn get_depth_snapshot(
+        &self,
+        symbol: &str,
+        limit: Option<u32>,
+    ) -> Result<BinanceOrderBookSnapshot, String> {
+        self.rest_client
+            .get_depth_snapshot(symbol, limit)
+            .await
+            .map_err(|e| format!("Failed to get depth snapshot: {}", e))
+    }
+
+    async fn get_open_interest(&self, symbol: &str) -> Result<OpenInterestData, String> {
+        self.rest_client
+            .get_open_interest(symbol)
+            .await
+            .map_err(|e| format!("Failed to get open interest: {}", e))
+    }
 }
 
 #[cfg(test)]
@@ -285,5 +314,27 @@ mod tests {
             "Fetched {} funding rates (lookup working)",
             funding_rates.len()
         );
+    }
+
+    #[tokio::test]
+    async fn test_get_depth_snapshot() {
+        let client = BinanceClient::new(10);
+        let snapshot = client
+            .get_depth_snapshot("BTCUSDT", Some(5))
+            .await
+            .expect("depth snapshot");
+        assert!(snapshot.last_update_id > 0);
+        assert_eq!(snapshot.bids.len(), 5);
+        assert_eq!(snapshot.asks.len(), 5);
+    }
+
+    #[tokio::test]
+    async fn test_get_open_interest() {
+        let client = BinanceClient::new(10);
+        let oi = client
+            .get_open_interest("BTCUSDT")
+            .await
+            .expect("open interest");
+        assert_eq!(oi.symbol, "BTCUSDT");
     }
 }
