@@ -1,76 +1,47 @@
-// Live funding-rate integration tests (hit the public API).
+// Live funding integration tests (hit the public API).
 mod funding_rates {
     use roshar_binance::BinanceApi;
     use roshar_binance::BinanceClient;
 
     #[tokio::test]
-    async fn test_get_realtime_funding_rates() {
+    async fn test_get_premium_index_all() {
         let _ = env_logger::try_init();
-
         let client = BinanceClient::new(100);
 
-        let result = client.get_realtime_funding_rates().await;
+        let all = client
+            .get_premium_index(None)
+            .await
+            .expect("[Binance] premium index");
+        assert!(all.len() >= 10, "[Binance] got {} symbols", all.len());
 
-        assert!(
-            result.is_ok(),
-            "[Binance] Failed to fetch realtime funding rates: {:?}",
-            result.err()
-        );
+        let btc = all
+            .iter()
+            .find(|p| p.symbol == "BTCUSDT")
+            .expect("[Binance] BTCUSDT in premium index");
+        assert!(btc.mark_price.parse::<f64>().unwrap() > 0.0);
+        btc.last_funding_rate.parse::<f64>().unwrap();
+        assert!(btc.next_funding_time > 0);
 
-        let funding_rates = result.unwrap();
+        let one = client
+            .get_premium_index(Some("BTCUSDT"))
+            .await
+            .expect("[Binance] premium index BTCUSDT");
+        assert_eq!(one.len(), 1);
+        assert_eq!(one[0].symbol, "BTCUSDT");
+    }
 
-        // Binance has many perpetual contracts, should have data
-        assert!(
-            !funding_rates.is_empty(),
-            "[Binance] Expected funding rates data, got empty HashMap"
-        );
-
-        // Check that we have multiple symbols (at least 10 major pairs)
-        assert!(
-            funding_rates.len() >= 10,
-            "[Binance] Expected at least 10 symbols with funding rates, got {}",
-            funding_rates.len()
-        );
-
-        // Check that BTCUSDT exists (it's always available)
-        assert!(
-            funding_rates.contains_key("BTCUSDT"),
-            "[Binance] Expected BTCUSDT in funding rates"
-        );
-
-        // Check that ETHUSDT exists (another major pair)
-        assert!(
-            funding_rates.contains_key("ETHUSDT"),
-            "[Binance] Expected ETHUSDT in funding rates"
-        );
-
-        // Verify the structure of a funding rate entry
-        if let Some(btc_data) = funding_rates.get("BTCUSDT") {
-            assert_eq!(btc_data.symbol, "BTCUSDT");
-            // Mark price should be parseable as a float
-            let mark_price: f64 = btc_data
-                .mark_price
-                .parse()
-                .expect("[Binance] mark_price should be a valid number");
-            assert!(mark_price > 0.0, "[Binance] mark_price should be positive");
-
-            // Funding rate should be parseable as a float
-            let _funding_rate: f64 = btc_data
-                .last_funding_rate
-                .parse()
-                .expect("[Binance] last_funding_rate should be a valid number");
-
-            // Next funding time should be positive
-            assert!(
-                btc_data.next_funding_time > 0,
-                "[Binance] next_funding_time should be positive"
-            );
-        }
-
-        println!(
-            "[Binance] Fetched funding rates for {} symbols. BTCUSDT funding_rate: {}",
-            funding_rates.len(),
-            funding_rates.get("BTCUSDT").unwrap().last_funding_rate
-        );
+    #[tokio::test]
+    async fn test_get_funding_rate_history_and_info() {
+        let client = BinanceClient::new(10);
+        let rates = client
+            .get_funding_rate_history(Some("BTCUSDT"), None, None, Some(3))
+            .await
+            .expect("[Binance] funding rate history");
+        assert_eq!(rates.len(), 3);
+        let info = client
+            .get_funding_info()
+            .await
+            .expect("[Binance] funding info");
+        assert!(!info.is_empty());
     }
 }
