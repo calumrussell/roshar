@@ -12,9 +12,13 @@ use rest::MarketApi;
 pub use rest::MarketApi as PhoenixMarketApi;
 
 use crate::types::{
-    PhoenixCandle, PhoenixCollateralEvent, PhoenixExchange, PhoenixFundingHistory,
-    PhoenixMarketConfig, PhoenixOrderBook, PhoenixOrderHistory, PhoenixPaginatedResponse,
-    PhoenixPnlPoint, PhoenixTradeHistory, PhoenixTraderState,
+    PhoenixCandle, PhoenixCollateralEvent, PhoenixCommodityCalendar, PhoenixExchange,
+    PhoenixExchangeKeys, PhoenixExchangeSnapshot, PhoenixExchangeStatus, PhoenixFill,
+    PhoenixFundingHistoryResponse, PhoenixFundingOverview, PhoenixFundingRateHistory,
+    PhoenixMarkPrice, PhoenixMarketCalendarRecord, PhoenixMarketCalendarResponse,
+    PhoenixMarketConfig, PhoenixMarketStatsHistory, PhoenixNextCommodityMarketTransition,
+    PhoenixNextMarketCalendarTransition, PhoenixOrderBook, PhoenixOrderHistory,
+    PhoenixPaginatedResponse, PhoenixPnlPoint, PhoenixTradeHistory, PhoenixTraderState,
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -26,8 +30,17 @@ pub struct PhoenixClient {
     ws_config: Config,
 }
 
+impl Default for PhoenixClient {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PhoenixClient {
-    const DEFAULT_REQUESTS_PER_SECOND: u32 = 10;
+    /// Phoenix publishes no numeric limit. Measured from an unauthenticated client on
+    /// 2026-11-15: 2 req/s sustained is accepted; 3 req/s and above draws 429s
+    /// (`retry-after: 2`). Authenticated sessions get higher limits.
+    const DEFAULT_REQUESTS_PER_SECOND: u32 = 2;
     const WS_CONN_NAME: &str = "phoenix";
 
     pub fn new() -> Self {
@@ -40,11 +53,13 @@ impl PhoenixClient {
             ws_config: Config {
                 name: Self::WS_CONN_NAME.to_string(),
                 url: PHOENIX_WSS_URL.to_string(),
+                // Phoenix has no JSON ping (a `{"type":"ping"}` frame is rejected with a
+                // 400 error); keepalive is WebSocket ping/pong frames.
                 ping_duration: 30,
-                ping_message: crate::types::PhoenixWssMessage::ping().to_json(),
-                ping_timeout: 10,
+                ping_message: String::new(),
+                ping_timeout: 60,
                 reconnect_timeout: 5000,
-                use_text_ping: Some(true),
+                use_text_ping: Some(false),
                 read_buffer_size: None,
                 write_buffer_size: None,
                 max_message_size: None,
@@ -53,6 +68,7 @@ impl PhoenixClient {
                 tcp_send_buffer_size: None,
                 tcp_nodelay: Some(true),
                 broadcast_channel_size: None,
+                headers: vec![],
             },
         }
     }
@@ -84,10 +100,44 @@ impl PhoenixClient {
         Ok(())
     }
 
+    /// Subscribe to exchange/market configuration (snapshot, then deltas).
+    /// `encoding`: `Some("json")` for a JSON snapshot; `None` for the default
+    /// `base64+zstd` encoded snapshot. The server rejects re-requesting a snapshot
+    /// within ~15 s on the same connection.
+    pub fn subscribe_exchange(&self, manager: &Arc<Manager>, encoding: Option<&str>) -> Result<()> {
+        let msg = crate::types::PhoenixWssMessage::exchange(encoding).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
+    pub fn unsubscribe_exchange(
+        &self,
+        manager: &Arc<Manager>,
+        encoding: Option<&str>,
+    ) -> Result<()> {
+        let msg = crate::types::PhoenixWssMessage::exchange_unsub(encoding).to_json();
+        manager.write(
+            &self.ws_config.name,
+            Message::TextMessage(self.ws_config.name.clone(), msg),
+        )?;
+        Ok(())
+    }
+
     /// Subscribe to L2 orderbook updates for the given market symbols.
-    pub fn subscribe_orderbook(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    /// `bypass_execution_band: Some(true)` returns the full book during commodities
+    /// after-hours.
+    pub fn subscribe_orderbook(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        bypass_execution_band: Option<bool>,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = crate::types::PhoenixWssMessage::orderbook(symbol).to_json();
+            let msg =
+                crate::types::PhoenixWssMessage::orderbook(symbol, bypass_execution_band).to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -96,9 +146,16 @@ impl PhoenixClient {
         Ok(())
     }
 
-    pub fn unsubscribe_orderbook(&self, manager: &Arc<Manager>, symbols: &[&str]) -> Result<()> {
+    pub fn unsubscribe_orderbook(
+        &self,
+        manager: &Arc<Manager>,
+        symbols: &[&str],
+        bypass_execution_band: Option<bool>,
+    ) -> Result<()> {
         for symbol in symbols {
-            let msg = crate::types::PhoenixWssMessage::orderbook_unsub(symbol).to_json();
+            let msg =
+                crate::types::PhoenixWssMessage::orderbook_unsub(symbol, bypass_execution_band)
+                    .to_json();
             manager.write(
                 &self.ws_config.name,
                 Message::TextMessage(self.ws_config.name.clone(), msg),
@@ -242,25 +299,84 @@ impl PhoenixClient {
     }
 }
 
+type BoxError = Box<dyn std::error::Error + Send + Sync>;
+
 #[async_trait]
 pub trait PhoenixApi {
-    async fn get_exchange(
-        &self,
-    ) -> Result<PhoenixExchange, Box<dyn std::error::Error + Send + Sync>>;
+    async fn get_exchange(&self) -> Result<PhoenixExchange, BoxError>;
 
-    async fn get_markets(
-        &self,
-    ) -> Result<Vec<PhoenixMarketConfig>, Box<dyn std::error::Error + Send + Sync>>;
+    async fn get_markets(&self) -> Result<Vec<PhoenixMarketConfig>, BoxError>;
 
-    async fn get_market(
-        &self,
-        symbol: &str,
-    ) -> Result<PhoenixMarketConfig, Box<dyn std::error::Error + Send + Sync>>;
+    async fn get_market(&self, symbol: &str) -> Result<PhoenixMarketConfig, BoxError>;
+
+    async fn get_exchange_keys(&self) -> Result<PhoenixExchangeKeys, BoxError>;
+
+    async fn get_exchange_status(&self) -> Result<PhoenixExchangeStatus, BoxError>;
+
+    async fn get_exchange_snapshot(&self) -> Result<PhoenixExchangeSnapshot, BoxError>;
 
     async fn get_orderbook(
         &self,
         symbol: &str,
-    ) -> Result<PhoenixOrderBook, Box<dyn std::error::Error + Send + Sync>>;
+        include_splines: Option<bool>,
+        bypass_execution_band: Option<bool>,
+    ) -> Result<PhoenixOrderBook, BoxError>;
+
+    async fn get_mark_price(&self, symbol: &str) -> Result<PhoenixMarkPrice, BoxError>;
+
+    async fn get_market_stats(
+        &self,
+        symbol: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        limit: Option<u32>,
+        timeframe: Option<&str>,
+    ) -> Result<PhoenixMarketStatsHistory, BoxError>;
+
+    async fn get_market_calendar(
+        &self,
+        symbol: &str,
+    ) -> Result<PhoenixMarketCalendarResponse, BoxError>;
+
+    async fn get_market_calendar_by_id(
+        &self,
+        market_calendar_id: &str,
+    ) -> Result<PhoenixMarketCalendarRecord, BoxError>;
+
+    async fn get_commodity_calendar(&self) -> Result<PhoenixCommodityCalendar, BoxError>;
+
+    async fn get_next_market_calendar_transition(
+        &self,
+        symbol: &str,
+    ) -> Result<PhoenixNextMarketCalendarTransition, BoxError>;
+
+    async fn get_next_commodity_market_transition(
+        &self,
+    ) -> Result<PhoenixNextCommodityMarketTransition, BoxError>;
+
+    async fn get_funding_rates(
+        &self,
+        symbol: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<PhoenixFundingRateHistory, BoxError>;
+
+    async fn get_funding_overview(
+        &self,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        per_market_limit: Option<u32>,
+    ) -> Result<PhoenixFundingOverview, BoxError>;
+
+    async fn get_market_fills(
+        &self,
+        symbol: &str,
+        limit: Option<u32>,
+        cursor: Option<&str>,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+    ) -> Result<PhoenixPaginatedResponse<PhoenixFill>, BoxError>;
 
     async fn get_candles(
         &self,
@@ -269,13 +385,14 @@ pub trait PhoenixApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<PhoenixCandle>, Box<dyn std::error::Error + Send + Sync>>;
+        enable_external_source: Option<bool>,
+    ) -> Result<Vec<PhoenixCandle>, BoxError>;
 
     async fn get_trader_state(
         &self,
         authority: &str,
-        pda_index: Option<u8>,
-    ) -> Result<Vec<PhoenixTraderState>, Box<dyn std::error::Error + Send + Sync>>;
+        trader_pda_index: Option<u8>,
+    ) -> Result<PhoenixTraderState, BoxError>;
 
     async fn get_trader_pnl(
         &self,
@@ -284,18 +401,16 @@ pub trait PhoenixApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<i64>,
-    ) -> Result<Vec<PhoenixPnlPoint>, Box<dyn std::error::Error + Send + Sync>>;
+    ) -> Result<Vec<PhoenixPnlPoint>, BoxError>;
 
     async fn get_order_history(
         &self,
         authority: &str,
+        trader_pda_index: Option<u8>,
         market_symbol: Option<&str>,
-        limit: Option<i64>,
+        limit: i64,
         cursor: Option<&str>,
-    ) -> Result<
-        PhoenixPaginatedResponse<PhoenixOrderHistory>,
-        Box<dyn std::error::Error + Send + Sync>,
-    >;
+    ) -> Result<PhoenixPaginatedResponse<PhoenixOrderHistory>, BoxError>;
 
     async fn get_trades_history(
         &self,
@@ -304,11 +419,9 @@ pub trait PhoenixApi {
         market_symbol: Option<&str>,
         limit: Option<i64>,
         cursor: Option<&str>,
-    ) -> Result<
-        PhoenixPaginatedResponse<PhoenixTradeHistory>,
-        Box<dyn std::error::Error + Send + Sync>,
-    >;
+    ) -> Result<PhoenixPaginatedResponse<PhoenixTradeHistory>, BoxError>;
 
+    #[allow(clippy::too_many_arguments)]
     async fn get_funding_history(
         &self,
         authority: &str,
@@ -317,43 +430,141 @@ pub trait PhoenixApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<i64>,
-    ) -> Result<Vec<PhoenixFundingHistory>, Box<dyn std::error::Error + Send + Sync>>;
+        cursor: Option<&str>,
+    ) -> Result<PhoenixFundingHistoryResponse, BoxError>;
 
     async fn get_collateral_history(
         &self,
         authority: &str,
         pda_index: u8,
-        limit: Option<i64>,
-        cursor: Option<&str>,
-    ) -> Result<Vec<PhoenixCollateralEvent>, Box<dyn std::error::Error + Send + Sync>>;
+        limit: i64,
+        next_cursor: Option<&str>,
+    ) -> Result<PhoenixPaginatedResponse<PhoenixCollateralEvent>, BoxError>;
 }
 
 #[async_trait]
 impl PhoenixApi for PhoenixClient {
-    async fn get_exchange(
-        &self,
-    ) -> Result<PhoenixExchange, Box<dyn std::error::Error + Send + Sync>> {
+    async fn get_exchange(&self) -> Result<PhoenixExchange, BoxError> {
         self.market_api.get_exchange().await
     }
 
-    async fn get_markets(
-        &self,
-    ) -> Result<Vec<PhoenixMarketConfig>, Box<dyn std::error::Error + Send + Sync>> {
+    async fn get_markets(&self) -> Result<Vec<PhoenixMarketConfig>, BoxError> {
         self.market_api.get_markets().await
     }
 
-    async fn get_market(
-        &self,
-        symbol: &str,
-    ) -> Result<PhoenixMarketConfig, Box<dyn std::error::Error + Send + Sync>> {
+    async fn get_market(&self, symbol: &str) -> Result<PhoenixMarketConfig, BoxError> {
         self.market_api.get_market(symbol).await
+    }
+
+    async fn get_exchange_keys(&self) -> Result<PhoenixExchangeKeys, BoxError> {
+        self.market_api.get_exchange_keys().await
+    }
+
+    async fn get_exchange_status(&self) -> Result<PhoenixExchangeStatus, BoxError> {
+        self.market_api.get_exchange_status().await
+    }
+
+    async fn get_exchange_snapshot(&self) -> Result<PhoenixExchangeSnapshot, BoxError> {
+        self.market_api.get_exchange_snapshot().await
     }
 
     async fn get_orderbook(
         &self,
         symbol: &str,
-    ) -> Result<PhoenixOrderBook, Box<dyn std::error::Error + Send + Sync>> {
-        self.market_api.get_orderbook(symbol).await
+        include_splines: Option<bool>,
+        bypass_execution_band: Option<bool>,
+    ) -> Result<PhoenixOrderBook, BoxError> {
+        self.market_api
+            .get_orderbook(symbol, include_splines, bypass_execution_band)
+            .await
+    }
+
+    async fn get_mark_price(&self, symbol: &str) -> Result<PhoenixMarkPrice, BoxError> {
+        self.market_api.get_mark_price(symbol).await
+    }
+
+    async fn get_market_stats(
+        &self,
+        symbol: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        limit: Option<u32>,
+        timeframe: Option<&str>,
+    ) -> Result<PhoenixMarketStatsHistory, BoxError> {
+        self.market_api
+            .get_market_stats(symbol, start_time, end_time, limit, timeframe)
+            .await
+    }
+
+    async fn get_market_calendar(
+        &self,
+        symbol: &str,
+    ) -> Result<PhoenixMarketCalendarResponse, BoxError> {
+        self.market_api.get_market_calendar(symbol).await
+    }
+
+    async fn get_market_calendar_by_id(
+        &self,
+        market_calendar_id: &str,
+    ) -> Result<PhoenixMarketCalendarRecord, BoxError> {
+        self.market_api
+            .get_market_calendar_by_id(market_calendar_id)
+            .await
+    }
+
+    async fn get_commodity_calendar(&self) -> Result<PhoenixCommodityCalendar, BoxError> {
+        self.market_api.get_commodity_calendar().await
+    }
+
+    async fn get_next_market_calendar_transition(
+        &self,
+        symbol: &str,
+    ) -> Result<PhoenixNextMarketCalendarTransition, BoxError> {
+        self.market_api
+            .get_next_market_calendar_transition(symbol)
+            .await
+    }
+
+    async fn get_next_commodity_market_transition(
+        &self,
+    ) -> Result<PhoenixNextCommodityMarketTransition, BoxError> {
+        self.market_api.get_next_commodity_market_transition().await
+    }
+
+    async fn get_funding_rates(
+        &self,
+        symbol: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<PhoenixFundingRateHistory, BoxError> {
+        self.market_api
+            .get_funding_rates(symbol, start_time, end_time, limit)
+            .await
+    }
+
+    async fn get_funding_overview(
+        &self,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        per_market_limit: Option<u32>,
+    ) -> Result<PhoenixFundingOverview, BoxError> {
+        self.market_api
+            .get_funding_overview(start_time, end_time, per_market_limit)
+            .await
+    }
+
+    async fn get_market_fills(
+        &self,
+        symbol: &str,
+        limit: Option<u32>,
+        cursor: Option<&str>,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+    ) -> Result<PhoenixPaginatedResponse<PhoenixFill>, BoxError> {
+        self.market_api
+            .get_market_fills(symbol, limit, cursor, start_time, end_time)
+            .await
     }
 
     async fn get_candles(
@@ -363,18 +574,28 @@ impl PhoenixApi for PhoenixClient {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<PhoenixCandle>, Box<dyn std::error::Error + Send + Sync>> {
+        enable_external_source: Option<bool>,
+    ) -> Result<Vec<PhoenixCandle>, BoxError> {
         self.market_api
-            .get_candles(symbol, timeframe, start_time, end_time, limit)
+            .get_candles(
+                symbol,
+                timeframe,
+                start_time,
+                end_time,
+                limit,
+                enable_external_source,
+            )
             .await
     }
 
     async fn get_trader_state(
         &self,
         authority: &str,
-        pda_index: Option<u8>,
-    ) -> Result<Vec<PhoenixTraderState>, Box<dyn std::error::Error + Send + Sync>> {
-        self.market_api.get_trader_state(authority, pda_index).await
+        trader_pda_index: Option<u8>,
+    ) -> Result<PhoenixTraderState, BoxError> {
+        self.market_api
+            .get_trader_state(authority, trader_pda_index)
+            .await
     }
 
     async fn get_trader_pnl(
@@ -384,7 +605,7 @@ impl PhoenixApi for PhoenixClient {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<i64>,
-    ) -> Result<Vec<PhoenixPnlPoint>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Vec<PhoenixPnlPoint>, BoxError> {
         self.market_api
             .get_trader_pnl(authority, resolution, start_time, end_time, limit)
             .await
@@ -393,15 +614,13 @@ impl PhoenixApi for PhoenixClient {
     async fn get_order_history(
         &self,
         authority: &str,
+        trader_pda_index: Option<u8>,
         market_symbol: Option<&str>,
-        limit: Option<i64>,
+        limit: i64,
         cursor: Option<&str>,
-    ) -> Result<
-        PhoenixPaginatedResponse<PhoenixOrderHistory>,
-        Box<dyn std::error::Error + Send + Sync>,
-    > {
+    ) -> Result<PhoenixPaginatedResponse<PhoenixOrderHistory>, BoxError> {
         self.market_api
-            .get_order_history(authority, market_symbol, limit, cursor)
+            .get_order_history(authority, trader_pda_index, market_symbol, limit, cursor)
             .await
     }
 
@@ -412,10 +631,7 @@ impl PhoenixApi for PhoenixClient {
         market_symbol: Option<&str>,
         limit: Option<i64>,
         cursor: Option<&str>,
-    ) -> Result<
-        PhoenixPaginatedResponse<PhoenixTradeHistory>,
-        Box<dyn std::error::Error + Send + Sync>,
-    > {
+    ) -> Result<PhoenixPaginatedResponse<PhoenixTradeHistory>, BoxError> {
         self.market_api
             .get_trades_history(authority, pda_index, market_symbol, limit, cursor)
             .await
@@ -429,9 +645,12 @@ impl PhoenixApi for PhoenixClient {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<i64>,
-    ) -> Result<Vec<PhoenixFundingHistory>, Box<dyn std::error::Error + Send + Sync>> {
+        cursor: Option<&str>,
+    ) -> Result<PhoenixFundingHistoryResponse, BoxError> {
         self.market_api
-            .get_funding_history(authority, pda_index, symbol, start_time, end_time, limit)
+            .get_funding_history(
+                authority, pda_index, symbol, start_time, end_time, limit, cursor,
+            )
             .await
     }
 
@@ -439,11 +658,11 @@ impl PhoenixApi for PhoenixClient {
         &self,
         authority: &str,
         pda_index: u8,
-        limit: Option<i64>,
-        cursor: Option<&str>,
-    ) -> Result<Vec<PhoenixCollateralEvent>, Box<dyn std::error::Error + Send + Sync>> {
+        limit: i64,
+        next_cursor: Option<&str>,
+    ) -> Result<PhoenixPaginatedResponse<PhoenixCollateralEvent>, BoxError> {
         self.market_api
-            .get_collateral_history(authority, pda_index, limit, cursor)
+            .get_collateral_history(authority, pda_index, limit, next_cursor)
             .await
     }
 }

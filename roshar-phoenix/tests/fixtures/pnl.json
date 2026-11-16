@@ -1,0 +1,52 @@
+[
+  {
+    "timestamp": 1794175200,
+    "startTime": 1794171600,
+    "endTime": 1794175199,
+    "cumulativePnl": -9935.110999,
+    "unrealizedPnl": -1.078552,
+    "cumulativeFundingPayment": -0.641511,
+    "cumulativeTakerFee": 2195.826562,
+    "cumulativeMakerFee": 0.15157
+  },
+  {
+    "timestamp": 1794178800,
+    "startTime": 1794175200,
+    "endTime": 1794178799,
+    "cumulativePnl": -9939.11316,
+    "unrealizedPnl": -1.386021,
+    "cumulativeFundingPayment": -0.639085,
+    "cumulativeTakerFee": 2195.826562,
+    "cumulativeMakerFee": 0.15249
+  },
+  {
+    "timestamp": 1794182400,
+    "startTime": 1794178800,
+    "endTime": 1794182399,
+    "cumulativePnl": -9942.252296,
+    "unrealizedPnl": -1.294804,
+    "cumulativeFundingPayment": -0.637527,
+    "cumulativeTakerFee": 2195.826562,
+    "cumulativeMakerFee": 0.153532
+  },
+  {
+    "timestamp": 1794186000,
+    "startTime": 1794182400,
+    "endTime": 1794185999,
+    "cumulativePnl": -9947.138245,
+    "unrealizedPnl": 0.076303,
+    "cumulativeFundingPayment": -0.637814,
+    "cumulativeTakerFee": 2195.826562,
+    "cumulativeMakerFee": 0.1543
+  },
+  {
+    "timestamp": 1794189600,
+    "startTime": 1794186000,
+    "endTime": 1794189599,
+    "cumulativePnl": -9951.466889,
+    "unrealizedPnl": 0.315653,
+    "cumulativeFundingPayment": -0.637185,
+    "cumulativeTakerFee": 2195.826562,
+    "cumulativeMakerFee": 0.15485
+  }
+]

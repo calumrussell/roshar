@@ -1,0 +1,62 @@
+{
+  "data": [
+    {
+      "slot": 469888566,
+      "slotIndex": 24,
+      "eventIndex": 15,
+      "traderPdaIndex": 0,
+      "traderSubaccountIndex": 0,
+      "eventType": "transfer",
+      "amount": 63789,
+      "collateralAfter": 72234199,
+      "timestamp": "2026-11-15T21:57:54Z"
+    },
+    {
+      "slot": 469888539,
+      "slotIndex": 52,
+      "eventIndex": 3,
+      "traderPdaIndex": 0,
+      "traderSubaccountIndex": 0,
+      "eventType": "transfer",
+      "amount": -63767,
+      "collateralAfter": 72168710,
+      "timestamp": "2026-11-15T21:57:49Z"
+    },
+    {
+      "slot": 469888395,
+      "slotIndex": 144,
+      "eventIndex": 3,
+      "traderPdaIndex": 0,
+      "traderSubaccountIndex": 0,
+      "eventType": "transfer",
+      "amount": -161852,
+      "collateralAfter": 72259347,
+      "timestamp": "2026-11-15T21:57:19Z"
+    },
+    {
+      "slot": 469888352,
+      "slotIndex": 173,
+      "eventIndex": 3,
+      "traderPdaIndex": 0,
+      "traderSubaccountIndex": 0,
+      "eventType": "transfer",
+      "amount": -40965,
+      "collateralAfter": 72454566,
+      "timestamp": "2026-11-15T21:57:10Z"
+    },
+    {
+      "slot": 469888276,
+      "slotIndex": 221,
+      "eventIndex": 12,
+      "traderPdaIndex": 0,
+      "traderSubaccountIndex": 0,
+      "eventType": "transfer",
+      "amount": 181739,
+      "collateralAfter": 72504811,
+      "timestamp": "2026-11-15T21:56:53Z"
+    }
+  ],
+  "nextCursor": "b2xkZXIsMTc5NDc3Njc0ODAwMCw0Njk4NzQwMDAsMTk4LDE1",
+  "prevCursor": "b2xkZXIsMTc5NDc3OTg3NDAwMCw0Njk4ODg1NjYsMjQsMTU=",
+  "hasMore": true
+}

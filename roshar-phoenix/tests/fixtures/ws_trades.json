@@ -1,0 +1,1 @@
+{"channel": "trades", "symbol": "SOL", "trades": [{"slot": "469888803", "slotIndex": 213, "timestamp": "1794779924", "symbol": "SOL", "taker": "8J2trvSqns4iAfLVgh4MKwaxfwZFxmYyNagbMqvDcyW8", "tradeSequenceNumber": "2371730", "side": "bid", "baseLotsFilled": "4", "quoteLotsFilled": "2878400", "feeInQuoteLots": "0", "baseAmount": 0.04, "quoteAmount": 2.8784, "numFills": 1}]}

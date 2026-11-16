@@ -1,0 +1,47 @@
+{
+  "events": [
+    {
+      "timestamp": "2026-11-15T21:00:02Z",
+      "symbol": "PANW",
+      "fundingPayment": "-0.000018",
+      "fundingRatePercentage": "0.000611",
+      "positionSize": "0.009",
+      "positionSide": "Long"
+    },
+    {
+      "timestamp": "2026-11-15T21:00:02Z",
+      "symbol": "KLAC",
+      "fundingPayment": "0.000120",
+      "fundingRatePercentage": "0.002656",
+      "positionSize": "-0.03",
+      "positionSide": "Short"
+    },
+    {
+      "timestamp": "2026-11-15T21:00:02Z",
+      "symbol": "TXN",
+      "fundingPayment": "-0.000095",
+      "fundingRatePercentage": "0.006253",
+      "positionSize": "0.005",
+      "positionSide": "Long"
+    },
+    {
+      "timestamp": "2026-11-15T21:00:02Z",
+      "symbol": "TXN",
+      "fundingPayment": "-0.000019",
+      "fundingRatePercentage": "0.006253",
+      "positionSize": "0.001",
+      "positionSide": "Long"
+    },
+    {
+      "timestamp": "2026-11-15T21:00:02Z",
+      "symbol": "IBM",
+      "fundingPayment": "-0.000002",
+      "fundingRatePercentage": "0.000405",
+      "positionSize": "0.002",
+      "positionSide": "Long"
+    }
+  ],
+  "prevCursor": "MTc5NDc3NjQwMjAwMCwyMDcxNSw0Njk4NzIzODU=",
+  "nextCursor": "MTc5NDc2OTIwMjAwMCw1ODU1LDQ2OTgzODg3NA==",
+  "hasMore": true
+}
