@@ -3,15 +3,7 @@ use std::time::Duration;
 use anyhow::Result;
 use log::info;
 use roshar_ws_mgr::{Config, Manager, Message};
-use serde::{Deserialize, Serialize};
 use tokio::time::sleep;
-
-#[derive(Debug, Serialize, Deserialize)]
-struct KrakenSubscribe {
-    event: String,
-    product_ids: Vec<String>,
-    feed: String,
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -20,22 +12,17 @@ async fn main() -> Result<()> {
 
     let manager = Manager::new();
 
-    let subscribe = KrakenSubscribe {
-        event: "subscribe".to_string(),
-        feed: "book".to_string(),
-        product_ids: vec!["PF_ETHUSD".to_string()],
-    };
-
-    let subscribe_json = serde_json::to_string(&subscribe)?;
+    // Unified WebSocket v2 subscribe (Kraken deprecated futures.kraken.com/ws/v1; shut down 2027-03-01).
+    let subscribe_json = r#"{"method":"subscribe","params":{"channel":"book","asset_class":"derivatives","symbol":["PF_ETHUSD"],"depth":10,"snapshot":true}}"#.to_string();
 
     let config = Config {
         name: "kraken".to_string(),
-        url: "wss://futures.kraken.com/ws/v1".to_string(),
-        ping_duration: 30,
-        ping_message: r#"{"event":"ping"}"#.to_string(),
-        ping_timeout: 60,
+        url: "wss://uws.kraken.com/v2/public".to_string(),
+        ping_duration: 20,
+        ping_message: r#"{"method":"ping"}"#.to_string(),
+        ping_timeout: 45,
         reconnect_timeout: 5,
-        use_text_ping: None,
+        use_text_ping: Some(false),
         read_buffer_size: None,
         write_buffer_size: None,
         max_message_size: None,
@@ -44,6 +31,7 @@ async fn main() -> Result<()> {
         tcp_send_buffer_size: None,
         tcp_nodelay: None,
         broadcast_channel_size: Some(32_768),
+        headers: vec![],
     };
 
     // Two-stage setup: first setup reader, then create connection

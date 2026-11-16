@@ -82,6 +82,7 @@ async fn main() -> Result<()> {
         tcp_send_buffer_size: None,
         tcp_nodelay: None,
         broadcast_channel_size: Some(16_384),
+        headers: vec![],
     };
 
     let subscribe = HyperliquidSubscribe {

@@ -15,4 +15,6 @@ pub struct Config {
     pub tcp_send_buffer_size: Option<usize>,
     pub tcp_nodelay: Option<bool>,
     pub broadcast_channel_size: Option<usize>,
+    /// Extra HTTP headers sent with the websocket upgrade request (e.g. `User-Agent`).
+    pub headers: Vec<(String, String)>,
 }
