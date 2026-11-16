@@ -1,0 +1,25 @@
+[package]
+name = "roshar-orderly"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "orderly network exchange client for Roshar"
+repository = "https://github.com/calumrussell/roshar"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+async-trait = "0.1"
+base64 = "0.22"
+bs58 = "0.5"
+ed25519-dalek = "2"
+hex = "0.4"
+k256 = { version = "0.13", features = ["ecdsa"] }
+sha3 = "0.10"
+roshar-http = { version = "0.1.0", path = "../roshar-http" }
+roshar-ws-mgr = { workspace = true }
+
+[dev-dependencies]
+env_logger = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
