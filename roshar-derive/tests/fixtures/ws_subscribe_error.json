@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","error":{"code":13000,"message":"Invalid channels","data":"{\"bogus.chan\":\"Channel name `bogus.chan` does not match any patterns\"}"},"id":2}
