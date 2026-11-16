@@ -1,0 +1,7 @@
+{
+ "status": "failure",
+ "signature": "0x1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+ "error_code": 2012,
+ "error": "Request received more than 100 seconds before the 'recv_time'. Ensure that the request is sent no more than 100 seconds prior to the 'recv_time'.",
+ "request_type": "execute_cancel_orders"
+}

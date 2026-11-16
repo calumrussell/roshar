@@ -1,0 +1,128 @@
+{
+  "matches": [
+    {
+      "digest": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "order": {
+        "sender": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "priceX18": "0",
+        "amount": "0",
+        "expiration": "0",
+        "nonce": "0",
+        "appendix": "0"
+      },
+      "base_filled": "-47000000000000000000",
+      "quote_filled": "125066835499999981670",
+      "fee": "0",
+      "sequencer_fee": "0",
+      "cumulative_fee": "0",
+      "cumulative_base_filled": "-47000000000000000000",
+      "cumulative_quote_filled": "125066835499999981670",
+      "pre_balance": {
+        "base": {
+          "perp": {
+            "product_id": 36,
+            "balance": {
+              "amount": "0",
+              "v_quote_balance": "0",
+              "last_cumulative_funding_x18": "227049653400220405"
+            }
+          }
+        },
+        "quote": null
+      },
+      "post_balance": {
+        "base": {
+          "perp": {
+            "product_id": 36,
+            "balance": {
+              "amount": "-47000000000000000000",
+              "v_quote_balance": "125066835499999981670",
+              "last_cumulative_funding_x18": "227049653400220405"
+            }
+          }
+        },
+        "quote": null
+      },
+      "net_entry_unrealized": "-124447692749999981763",
+      "net_entry_cumulative": "23849479755693185211747",
+      "submission_idx": "104261326",
+      "isolated": false,
+      "is_taker": false,
+      "closed_amount": "0",
+      "realized_pnl": "0",
+      "builder_fee": "0",
+      "closed_net_entry": "0",
+      "margin": null
+    },
+    {
+      "digest": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "order": {
+        "sender": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "priceX18": "0",
+        "amount": "0",
+        "expiration": "0",
+        "nonce": "0",
+        "appendix": "0"
+      },
+      "base_filled": "47000000000000000000",
+      "quote_filled": "-125066835499999981670",
+      "fee": "0",
+      "sequencer_fee": "0",
+      "cumulative_fee": "0",
+      "cumulative_base_filled": "47000000000000000000",
+      "cumulative_quote_filled": "-125066835499999981670",
+      "pre_balance": {
+        "base": {
+          "perp": {
+            "product_id": 36,
+            "balance": {
+              "amount": "-94000000000000000000",
+              "v_quote_balance": "174221973424999934342",
+              "last_cumulative_funding_x18": "227049653400220405"
+            }
+          }
+        },
+        "quote": null
+      },
+      "post_balance": {
+        "base": {
+          "perp": {
+            "product_id": 36,
+            "balance": {
+              "amount": "-47000000000000000000",
+              "v_quote_balance": "49155137924999952672",
+              "last_cumulative_funding_x18": "227049653400220405"
+            }
+          }
+        },
+        "quote": null
+      },
+      "net_entry_unrealized": "-112370822770700636942",
+      "net_entry_cumulative": "-49155137924999952672",
+      "submission_idx": "104261326",
+      "isolated": true,
+      "is_taker": false,
+      "closed_amount": "0",
+      "realized_pnl": "0",
+      "builder_fee": "0",
+      "closed_net_entry": "0",
+      "margin": null
+    }
+  ],
+  "txs": [
+    {
+      "tx": {
+        "liquidate_subaccount": {
+          "sender": "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "liquidatee": "0x23984189503a3b61054c5ac41bceb6407a42c11b00000000000000240269736f",
+          "product_id": 36,
+          "is_encoded_spread": false,
+          "amount": "-47000000000000000000",
+          "nonce": 6391
+        }
+      },
+      "submission_idx": "104261326",
+      "timestamp": "1794826498"
+    }
+  ]
+}

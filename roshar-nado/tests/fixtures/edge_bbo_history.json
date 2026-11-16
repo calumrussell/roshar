@@ -1,0 +1,30 @@
+{
+  "status": "success",
+  "data": {
+    "interval_ms": 5000,
+    "limit": 3,
+    "history": [
+      {
+        "product_id": 2,
+        "timestamp": "1794826539528",
+        "bid": "64489000000000000000000",
+        "ask": "64490000000000000000000"
+      },
+      {
+        "product_id": 2,
+        "timestamp": "1794826544529",
+        "bid": "64485000000000000000000",
+        "ask": "64486000000000000000000"
+      },
+      {
+        "product_id": 2,
+        "timestamp": "1794826549528",
+        "bid": "64485000000000000000000",
+        "ask": "64486000000000000000000"
+      }
+    ]
+  },
+  "error_code": null,
+  "error": null,
+  "request_type": "cached_bbo_history"
+}

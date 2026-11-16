@@ -1,0 +1,8 @@
+{
+ "status": "success",
+ "data": {
+  "tx_nonce": "3",
+  "order_nonce": "1881963509087993856"
+ },
+ "request_type": "query_nonces"
+}

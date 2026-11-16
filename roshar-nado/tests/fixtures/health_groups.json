@@ -1,0 +1,24 @@
+{
+  "status": "success",
+  "data": {
+    "health_groups": [
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        159,
+        28
+      ],
+      [
+        189,
+        16
+      ]
+    ]
+  },
+  "request_type": "query_health_groups"
+}

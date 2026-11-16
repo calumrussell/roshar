@@ -1,0 +1,6 @@
+{
+ "status": "failure",
+ "error_code": 2020,
+ "error": "Order with the provided digest (0x0000000000000000000000000000000000000000000000000000000000000000) could not be found. Please verify the order digest and try again.",
+ "request_type": "query_order"
+}

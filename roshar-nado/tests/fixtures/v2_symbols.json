@@ -1,0 +1,161 @@
+{
+ "PENG-PERP": {
+  "type": "perp",
+  "product_id": 162,
+  "symbol": "PENG-PERP",
+  "price_increment_x18": "1000000000000000",
+  "size_increment": "20000000000000000",
+  "min_size": "100000000000000000000",
+  "maker_fee_rate_x18": "100000000000000",
+  "taker_fee_rate_x18": "350000000000000",
+  "long_weight_initial_x18": "800000000000000000",
+  "long_weight_maintenance_x18": "900000000000000000",
+  "max_open_interest_x18": "2500000000000000000000000",
+  "trading_status": "soft_reduce_only",
+  "isolated_only": false,
+  "market_hours": {
+   "is_open": false,
+   "reason": "weekend",
+   "next_close": null,
+   "next_open": "2026-11-16T01:00:00Z"
+  },
+  "boost_type": 1,
+  "taker_multiplier": 0,
+  "maker_multiplier": 4,
+  "price_feed": {
+   "oracle": {
+    "primary": "pyth",
+    "weekend": "ema_nado_orderbook"
+   },
+   "spot_index": {
+    "primary": "pyth",
+    "weekend": "ema_nado_orderbook"
+   }
+  }
+ },
+ "wMSFTx": {
+  "type": "spot",
+  "product_id": 151,
+  "symbol": "wMSFTx",
+  "price_increment_x18": "10000000000000000",
+  "size_increment": "1000000000000000",
+  "min_size": "100000000000000000000",
+  "maker_fee_rate_x18": "100000000000000",
+  "taker_fee_rate_x18": "350000000000000",
+  "long_weight_initial_x18": "0",
+  "long_weight_maintenance_x18": "0",
+  "max_open_interest_x18": null,
+  "trading_status": "not_tradable",
+  "isolated_only": false,
+  "market_hours": null,
+  "exchange_rate_x18": "1005903390478745599",
+  "boost_type": 1,
+  "taker_multiplier": 0,
+  "maker_multiplier": 4,
+  "price_feed": {
+   "oracle": {
+    "primary": "pyth"
+   }
+  }
+ },
+ "NVDA-PERP": {
+  "type": "perp",
+  "product_id": 112,
+  "symbol": "NVDA-PERP",
+  "price_increment_x18": "10000000000000000",
+  "size_increment": "10000000000000000",
+  "min_size": "100000000000000000000",
+  "maker_fee_rate_x18": "100000000000000",
+  "taker_fee_rate_x18": "350000000000000",
+  "long_weight_initial_x18": "950000000000000000",
+  "long_weight_maintenance_x18": "975000000000000000",
+  "max_open_interest_x18": "5000000000000000000000000",
+  "trading_status": "live",
+  "isolated_only": false,
+  "market_hours": null,
+  "boost_type": 2,
+  "taker_multiplier": 0,
+  "maker_multiplier": 3,
+  "price_feed": {
+   "oracle": {
+    "primary": "pyth",
+    "weekend": "median_exchanges"
+   },
+   "spot_index": {
+    "primary": "pyth",
+    "weekend": "median_exchanges"
+   }
+  }
+ },
+ "XAUT0": {
+  "type": "spot",
+  "product_id": 159,
+  "symbol": "XAUT0",
+  "price_increment_x18": "100000000000000000",
+  "size_increment": "1000000000000000",
+  "min_size": "100000000000000000000",
+  "maker_fee_rate_x18": "100000000000000",
+  "taker_fee_rate_x18": "350000000000000",
+  "long_weight_initial_x18": "800000000000000000",
+  "long_weight_maintenance_x18": "900000000000000000",
+  "max_open_interest_x18": null,
+  "trading_status": "live",
+  "isolated_only": false,
+  "market_hours": null,
+  "price_feed": {
+   "oracle": {
+    "primary": "stork"
+   }
+  }
+ },
+ "SKHY-PERP": {
+  "type": "perp",
+  "product_id": 182,
+  "symbol": "SKHY-PERP",
+  "price_increment_x18": "10000000000000000",
+  "size_increment": "10000000000000000",
+  "min_size": "100000000000000000000",
+  "maker_fee_rate_x18": "100000000000000",
+  "taker_fee_rate_x18": "350000000000000",
+  "long_weight_initial_x18": "900000000000000000",
+  "long_weight_maintenance_x18": "950000000000000000",
+  "max_open_interest_x18": "5000000000000000000000000",
+  "trading_status": "live",
+  "isolated_only": false,
+  "market_hours": null,
+  "price_feed": {
+   "oracle": {
+    "primary": "pyth",
+    "weekend": "median_exchanges"
+   },
+   "spot_index": {
+    "primary": "pyth",
+    "weekend": "median_exchanges"
+   }
+  }
+ },
+ "VIRTUAL-PERP": {
+  "type": "perp",
+  "product_id": 84,
+  "symbol": "VIRTUAL-PERP",
+  "price_increment_x18": "10000000000000",
+  "size_increment": "2000000000000000000",
+  "min_size": "100000000000000000000",
+  "maker_fee_rate_x18": "100000000000000",
+  "taker_fee_rate_x18": "350000000000000",
+  "long_weight_initial_x18": "500000000000000000",
+  "long_weight_maintenance_x18": "750000000000000000",
+  "max_open_interest_x18": "1000000000000000000000000",
+  "trading_status": "not_tradable",
+  "isolated_only": false,
+  "market_hours": null,
+  "price_feed": {
+   "oracle": {
+    "primary": "stork"
+   },
+   "spot_index": {
+    "primary": "stork"
+   }
+  }
+ }
+}

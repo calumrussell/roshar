@@ -1,0 +1,137 @@
+{
+  "matches": [
+    {
+      "digest": "0x8690f7a33ef55c97d589e94eee63c1eb9e530de12069464001a2f1c5fde8991a",
+      "order": {
+        "sender": "0xf79ac4339acb5fc523e022df99b17b3ecb9a3b8b64656661756c745f31000000",
+        "priceX18": "64697000000000000000000",
+        "amount": "92700000000000000",
+        "expiration": "4294967295",
+        "nonce": "1882010276074175932",
+        "appendix": "1537"
+      },
+      "base_filled": "2250000000000000",
+      "quote_filled": "-145556605471562275016",
+      "fee": "-11644528437724983",
+      "sequencer_fee": "0",
+      "cumulative_fee": "-11644528437724983",
+      "cumulative_base_filled": "2250000000000000",
+      "cumulative_quote_filled": "-145556605471562275016",
+      "pre_balance": {
+        "base": {
+          "spot": {
+            "product_id": 1,
+            "balance": {
+              "amount": "-2331745525320068002"
+            }
+          }
+        },
+        "quote": null
+      },
+      "post_balance": {
+        "base": {
+          "spot": {
+            "product_id": 1,
+            "balance": {
+              "amount": "-2329495525320068001"
+            }
+          }
+        },
+        "quote": null
+      },
+      "net_entry_unrealized": "0",
+      "net_entry_cumulative": "0",
+      "submission_idx": "104252628",
+      "isolated": false,
+      "is_taker": false,
+      "closed_amount": "-2250000000000000",
+      "realized_pnl": "3456544628302178867",
+      "builder_fee": "0",
+      "closed_net_entry": "-149024794628302243564",
+      "margin": null
+    },
+    {
+      "digest": "0x9ee069c13a05ab748525fd9bbd0eef23e7af71b64c10ad0926535516fef77a77",
+      "order": {
+        "sender": "0xa5dad3c8d181c7cffa267d9fa198eb2c16dc67c564656661756c740000000000",
+        "priceX18": "64374000000000000000000",
+        "amount": "-2250000000000000",
+        "expiration": "4294967295",
+        "nonce": "1882010370966072831",
+        "appendix": "513"
+      },
+      "base_filled": "-2250000000000000",
+      "quote_filled": "145517301112500000000",
+      "fee": "50948887500000000",
+      "sequencer_fee": "0",
+      "cumulative_fee": "50948887500000000",
+      "cumulative_base_filled": "-2250000000000000",
+      "cumulative_quote_filled": "145517301112500000000",
+      "pre_balance": {
+        "base": {
+          "spot": {
+            "product_id": 1,
+            "balance": {
+              "amount": "2250470019691057"
+            }
+          }
+        },
+        "quote": null
+      },
+      "post_balance": {
+        "base": {
+          "spot": {
+            "product_id": 1,
+            "balance": {
+              "amount": "470019691056"
+            }
+          }
+        },
+        "quote": null
+      },
+      "net_entry_unrealized": "0",
+      "net_entry_cumulative": "0",
+      "submission_idx": "104252628",
+      "isolated": false,
+      "is_taker": true,
+      "closed_amount": "2250000000000000",
+      "realized_pnl": "169950047800258919",
+      "builder_fee": "0",
+      "closed_net_entry": "145398299952199805778",
+      "margin": null
+    }
+  ],
+  "txs": [
+    {
+      "tx": {
+        "match_orders": {
+          "product_id": 1,
+          "taker": {
+            "order": {
+              "sender": "0xa5dad3c8d181c7cffa267d9fa198eb2c16dc67c564656661756c740000000000",
+              "price_x18": "64374000000000000000000",
+              "amount": "-2250000000000000",
+              "expiration": 4294967295,
+              "nonce": 1882010370966072831,
+              "appendix": "513"
+            },
+            "signature": "0x"
+          },
+          "maker": {
+            "order": {
+              "sender": "0xf79ac4339acb5fc523e022df99b17b3ecb9a3b8b64656661756c745f31000000",
+              "price_x18": "64697000000000000000000",
+              "amount": "92700000000000000",
+              "expiration": 4294967295,
+              "nonce": 1882010276074175932,
+              "appendix": "1537"
+            },
+            "signature": "0x"
+          }
+        }
+      },
+      "submission_idx": "104252628",
+      "timestamp": "1794824864"
+    }
+  ]
+}

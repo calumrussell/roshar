@@ -1,0 +1,40 @@
+{
+ "interest_payments": [
+  {
+   "product_id": 0,
+   "idx": "104069104",
+   "timestamp": "1794779705",
+   "amount": "61033141988026795",
+   "balance_amount": "256523074012914392284814",
+   "rate_x18": "7597432015794769",
+   "oracle_price_x18": "1000000000000000000",
+   "isolated": false,
+   "isolated_product_id": null
+  },
+  {
+   "product_id": 0,
+   "idx": "104065317",
+   "timestamp": "1794778713",
+   "amount": "24894325907449614",
+   "balance_amount": "256523049118588484835200",
+   "rate_x18": "7590259769348018",
+   "oracle_price_x18": "1000000000000000000",
+   "isolated": false,
+   "isolated_product_id": null
+  }
+ ],
+ "funding_payments": [
+  {
+   "product_id": 2,
+   "idx": "104069833",
+   "timestamp": "1794780000",
+   "amount": "-1304844670098751892",
+   "balance_amount": "7241250000000000000",
+   "rate_x18": "24287480367013920",
+   "oracle_price_x18": "64993050000000001968979",
+   "isolated": false,
+   "isolated_product_id": null
+  }
+ ],
+ "next_idx": "104065317"
+}

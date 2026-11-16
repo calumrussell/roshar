@@ -1,0 +1,5 @@
+{
+  "status": "failure",
+  "error": "interval_ms must be at least 500",
+  "request_type": "cached_bbo_history"
+}

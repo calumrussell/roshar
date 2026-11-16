@@ -1,0 +1,47 @@
+{
+ "result": [
+  {
+   "type": "best_bid_offer",
+   "product_id": 2
+  },
+  {
+   "type": "liquidation",
+   "product_id": null
+  },
+  {
+   "type": "fill",
+   "product_id": null,
+   "subaccount": "0xb4430b4d0b274fa0c641c42dff092f9933d734ae64656661756c740000000000"
+  },
+  {
+   "type": "latest_candlestick",
+   "product_id": 2,
+   "granularity": 60
+  },
+  {
+   "type": "funding_payment",
+   "product_id": 2
+  },
+  {
+   "type": "book_depth",
+   "product_id": 2
+  },
+  {
+   "type": "position_change",
+   "product_id": null,
+   "subaccount": "0xb4430b4d0b274fa0c641c42dff092f9933d734ae64656661756c740000000000"
+  },
+  {
+   "type": "trade",
+   "product_id": 2
+  },
+  {
+   "type": "funding_rate",
+   "product_id": null
+  },
+  {
+   "type": "all_bbo"
+  }
+ ],
+ "id": 100
+}

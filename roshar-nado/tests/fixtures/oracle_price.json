@@ -1,0 +1,14 @@
+{
+ "prices": [
+  {
+   "product_id": 1,
+   "oracle_price_x18": "65006677008604737660297",
+   "update_time": "1794780100"
+  },
+  {
+   "product_id": 2,
+   "oracle_price_x18": "64973250000000003629953",
+   "update_time": "1794780100"
+  }
+ ]
+}
