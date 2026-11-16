@@ -1,0 +1,1 @@
+{"jsonrpc": "2.0", "result": {"stream": "v1.book.s", "subs": ["BTC_USDT_Perp@500-10"], "unsubs": [], "num_snapshots": [1], "first_sequence_number": ["756487"], "latest_sequence_number": ["756486"]}, "id": 1, "method": "subscribe"}
