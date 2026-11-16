@@ -1,0 +1,1 @@
+{"id": 5, "error": {"code": 2, "msg": "Invalid request: unknown method, expected one of SUBSCRIBE, UNSUBSCRIBE, LIST_SUBSCRIPTIONS, SET_PROPERTY, GET_PROPERTY"}}
