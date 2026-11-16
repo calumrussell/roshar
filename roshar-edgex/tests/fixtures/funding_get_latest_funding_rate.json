@@ -1,0 +1,33 @@
+{
+ "code": "SUCCESS",
+ "data": [
+  {
+   "avgPremiumIndex": "-0.00014499",
+   "contractId": "30000001",
+   "forecastFundingRate": "0.00005000",
+   "fundingIndex": "65020.788666446933853739",
+   "fundingRate": "0.00005000",
+   "fundingRateIntervalMin": "240",
+   "fundingTime": "1794772800000",
+   "fundingTimestamp": "1794779940000",
+   "impactAskPrice": "65006.9",
+   "impactBidPrice": "65005.9",
+   "impactMarginNotional": "100",
+   "indexPrice": "65054.0458034596",
+   "interestRate": "0.0003",
+   "isSettlement": false,
+   "markPrice": "65020.788666446933853739",
+   "oraclePrice": "65020.788666446933853739",
+   "predictedFundingRate": "0.00005000",
+   "premiumIndex": "-0.00018117",
+   "premiumIndexTimestamp": "1794779940000",
+   "previousFundingRate": "0.00005000",
+   "previousFundingTimestamp": "1794772740000"
+  }
+ ],
+ "errorParam": null,
+ "msg": null,
+ "requestTime": "1794779992338",
+ "responseTime": "1794779992340",
+ "traceId": ""
+}

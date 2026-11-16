@@ -1,0 +1,27 @@
+[package]
+name = "roshar-edgex"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "edgeX exchange client for Roshar"
+repository = "https://github.com/calumrussell/roshar"
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+base64 = "0.22"
+hex = "0.4"
+hmac = "0.12"
+k256 = { version = "0.13", features = ["ecdsa"] }
+reqwest = { version = "0.11", features = ["json"] }
+roshar-http = { version = "0.1.0", path = "../roshar-http" }
+roshar-ws-mgr = { workspace = true }
+rust_decimal = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+sha3 = "0.10"
+
+[dev-dependencies]
+env_logger = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

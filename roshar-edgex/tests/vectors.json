@@ -1,0 +1,1333 @@
+{
+ "sdk": "edgex-python-sdk 2.0.1",
+ "now_s": 1794780000.123,
+ "base_url": "https://edgex-prod-v2.edgex.exchange",
+ "account_id": "726848798753545541",
+ "api_key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+ "api_passphrase": "6965be71cab14900",
+ "api_secret": "nkJStOSbrsZH5DEVEzG9U9lgPbSngYl1x0g5WL03x38",
+ "trading_private_key": "0xd790c7f3c5feff6b309d6c012a871dd546786d7802a10569f3f2f08ad600e994",
+ "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+ "metadata": {
+  "global": {
+   "chainId": "0xd0f",
+   "nativeChainId": "3343",
+   "contractAddress": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+  },
+  "coinList": [
+   {
+    "coinId": "1000",
+    "coinName": "USDC",
+    "resolution": "0xf4240",
+    "stepSize": "0.000001"
+   }
+  ],
+  "contractList": [
+   {
+    "contractId": "30000001",
+    "contractName": "BTCUSDC",
+    "quoteCoinId": "1000",
+    "resolution": "10000000000",
+    "tickSize": "0.1",
+    "defaultMakerFeeRate": "0.0004",
+    "defaultTakerFeeRate": "0.00045"
+   },
+   {
+    "contractId": "30000002",
+    "contractName": "ETHUSDC",
+    "quoteCoinId": "1000",
+    "resolution": "1000000000",
+    "tickSize": "0.01",
+    "defaultMakerFeeRate": "0.0004",
+    "defaultTakerFeeRate": "0.00045"
+   },
+   {
+    "contractId": "30000046",
+    "contractName": "1000PEPEUSDC",
+    "quoteCoinId": "1000",
+    "resolution": "100000",
+    "tickSize": "0.0000001",
+    "defaultMakerFeeRate": "0.0004",
+    "defaultTakerFeeRate": "0.00045"
+   },
+   {
+    "contractId": "39999999",
+    "contractName": "ZEROFEE",
+    "quoteCoinId": "1000",
+    "resolution": "10000000000",
+    "tickSize": "0.1",
+    "defaultMakerFeeRate": "0",
+    "defaultTakerFeeRate": "0"
+   }
+  ]
+ },
+ "oracle_prices": {
+  "30000001": "64984.035737476061920173",
+  "30000002": "3201.5"
+ },
+ "calc_nonce": [
+  {
+   "client_order_id": "1",
+   "nonce": "1803989619"
+  },
+  {
+   "client_order_id": "1794780000000000001",
+   "nonce": "1167837450"
+  },
+  {
+   "client_order_id": "my-order-42",
+   "nonce": "941541105"
+  },
+  {
+   "client_order_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "nonce": "2095120535"
+  },
+  {
+   "client_order_id": "édge",
+   "nonce": "2984252354"
+  }
+ ],
+ "orders": [
+  {
+   "input": {
+    "contract_id": "30000001",
+    "price": "64979.5",
+    "size": "0.001",
+    "type": "LIMIT",
+    "side": "BUY",
+    "time_in_force": "GOOD_TIL_CANCEL",
+    "client_order_id": "1794780000000000001"
+   },
+   "l2_price": "64979.5",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "1167837450",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "10000000",
+     "amountCollateral": "64979500",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000001",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": true,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0x554cba1853a39e0696078cb163f8c293bc3a816711b878a4e21353e9441b89e7",
+    "signature": "7389bb5eb837fea1c94a709e9cdadc6aa2c3a59f6b4fdd3ccf9985c0dbcc0fda0554ea7249ff19d7afb0db22e36da449b66aaa0560d84288f0ed3ab8dc331cb11b"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "price": "64979.5",
+     "size": "0.001",
+     "type": "LIMIT",
+     "side": "BUY",
+     "timeInForce": "GOOD_TIL_CANCEL",
+     "clientOrderId": "1794780000000000001",
+     "expireTime": "1796680800123",
+     "l2Nonce": "1167837450",
+     "l2Signature": "7389bb5eb837fea1c94a709e9cdadc6aa2c3a59f6b4fdd3ccf9985c0dbcc0fda0554ea7249ff19d7afb0db22e36da449b66aaa0560d84288f0ed3ab8dc331cb11b",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "64.9795",
+     "l2Size": "0.001",
+     "l2LimitFee": "1",
+     "reduceOnly": false,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "7904fa300997957d536631e08c8bd2cf6a9752f9a7f0a243084dbe658ed04fe5",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000001",
+    "price": "65010.0",
+    "size": "0.010",
+    "type": "LIMIT",
+    "side": "SELL",
+    "time_in_force": "POST_ONLY",
+    "client_order_id": "post-only-1",
+    "expire_time": 1797372000000,
+    "reduce_only": true
+   },
+   "l2_price": "65010.0",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "1308884661",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1797372000"
+     },
+     "amountSynthetic": "100000000",
+     "amountCollateral": "650100000",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000001",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": false,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0xb98990d448f64b8c3684aebc54e00e7e793f5f8bf4e9904be25cd13aabb8578f",
+    "signature": "45a173087c485b2ba8073094bf44d09aeb43902dee6249adbd86f2737145a88f27a7168780d36a4388cce83d85c18ac171a8f079d7c55f0839c988ae7d8eeb251c"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "price": "65010.0",
+     "size": "0.010",
+     "type": "LIMIT",
+     "side": "SELL",
+     "timeInForce": "POST_ONLY",
+     "clientOrderId": "post-only-1",
+     "expireTime": "1797372000000",
+     "l2Nonce": "1308884661",
+     "l2Signature": "45a173087c485b2ba8073094bf44d09aeb43902dee6249adbd86f2737145a88f27a7168780d36a4388cce83d85c18ac171a8f079d7c55f0839c988ae7d8eeb251c",
+     "l2ExpireTime": "1798063200000",
+     "l2Value": "650.1000",
+     "l2Size": "0.010",
+     "l2LimitFee": "1",
+     "reduceOnly": true,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "576dd859f0539b61f8e4bd1cb527860cd44f931198a678bcfde79ab172163129",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000002",
+    "price": "3200.50",
+    "size": "0.0100",
+    "type": "LIMIT",
+    "side": "BUY",
+    "time_in_force": "IMMEDIATE_OR_CANCEL",
+    "client_order_id": "ioc-eth-7"
+   },
+   "l2_price": "3200.50",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "3243751969",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "10000000",
+     "amountCollateral": "32005000",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000002",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": true,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0x032509a6a1ddd45dbf8c6b74da45225965be073572983184a7e9944c19fd6002",
+    "signature": "d6c1e48eccd88912996062ef51d263014159f021cb7340988ab255e68ac664a02b924098a7aefeaff4df3a94b5df6f021553ec7bc83d267e19555f3c59431b711c"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000002",
+     "price": "3200.50",
+     "size": "0.0100",
+     "type": "LIMIT",
+     "side": "BUY",
+     "timeInForce": "IMMEDIATE_OR_CANCEL",
+     "clientOrderId": "ioc-eth-7",
+     "expireTime": "1796680800123",
+     "l2Nonce": "3243751969",
+     "l2Signature": "d6c1e48eccd88912996062ef51d263014159f021cb7340988ab255e68ac664a02b924098a7aefeaff4df3a94b5df6f021553ec7bc83d267e19555f3c59431b711c",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "32.005000",
+     "l2Size": "0.0100",
+     "l2LimitFee": "1",
+     "reduceOnly": false,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "97b4497e76d6cbc9bbce312edf9c30b971215d101ec0b56653a90463a6a0b7a7",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000002",
+    "price": "3199.99",
+    "size": "12.34",
+    "type": "LIMIT",
+    "side": "SELL",
+    "time_in_force": "FILL_OR_KILL",
+    "client_order_id": "fok-eth-8"
+   },
+   "l2_price": "3199.99",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "527555197",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "12340000000",
+     "amountCollateral": "39487876600",
+     "amountFee": "18000000",
+     "assetIdSynthetic": "30000002",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": false,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0xfcbb650b7734aad9cf61700f5a698af0d12ffeb1a86958bbff9e39ed2ed3c8a9",
+    "signature": "dfdaefdf6f491534695ebe0a4a26d160219112fd52616018da04223d0bd541cc5a13b7d9fd697e7afe09224c042ef296f4a77d55aea2651de2fd8cd4d7a007b81c"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000002",
+     "price": "3199.99",
+     "size": "12.34",
+     "type": "LIMIT",
+     "side": "SELL",
+     "timeInForce": "FILL_OR_KILL",
+     "clientOrderId": "fok-eth-8",
+     "expireTime": "1796680800123",
+     "l2Nonce": "527555197",
+     "l2Signature": "dfdaefdf6f491534695ebe0a4a26d160219112fd52616018da04223d0bd541cc5a13b7d9fd697e7afe09224c042ef296f4a77d55aea2651de2fd8cd4d7a007b81c",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "39487.8766",
+     "l2Size": "12.34",
+     "l2LimitFee": "18",
+     "reduceOnly": false,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "2deebb4fbf6f646ff59643a84f4a8fadfffc687c8fe896257748b0e35acbf667",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000046",
+    "price": "0.0123457",
+    "size": "1000",
+    "type": "LIMIT",
+    "side": "BUY",
+    "time_in_force": "GOOD_TIL_CANCEL",
+    "client_order_id": "pepe-1"
+   },
+   "l2_price": "0.0123457",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "3020204958",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "100000000",
+     "amountCollateral": "12345700",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000046",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": true,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0xfe6218b988d3db7c54aa64e2d4f59b0b2a035acc82c260695c8ce1fc64fae57f",
+    "signature": "5b5d33ccf21401aa6e8e9dc0b7d84d9f1236f1b8b52eaa72709f714b5ad037fd1782a3016f2a10be5cb1319b4052487c1169e93d443796c982367d962fef52591b"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000046",
+     "price": "0.0123457",
+     "size": "1000",
+     "type": "LIMIT",
+     "side": "BUY",
+     "timeInForce": "GOOD_TIL_CANCEL",
+     "clientOrderId": "pepe-1",
+     "expireTime": "1796680800123",
+     "l2Nonce": "3020204958",
+     "l2Signature": "5b5d33ccf21401aa6e8e9dc0b7d84d9f1236f1b8b52eaa72709f714b5ad037fd1782a3016f2a10be5cb1319b4052487c1169e93d443796c982367d962fef52591b",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "12.3457000",
+     "l2Size": "1000",
+     "l2LimitFee": "1",
+     "reduceOnly": false,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "99ab13dd0d36e76f95286a6353f23f5c15da8d0e71c967fc890fcabf4d545177",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "39999999",
+    "price": "64979.5",
+    "size": "0.5",
+    "type": "LIMIT",
+    "side": "BUY",
+    "time_in_force": "GOOD_TIL_CANCEL",
+    "client_order_id": "zero-fee"
+   },
+   "l2_price": "64979.5",
+   "fee_rate": "0",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "914095",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "5000000000",
+     "amountCollateral": "32489750000",
+     "amountFee": "0",
+     "assetIdSynthetic": "39999999",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": true,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0xd0eefbb4ff978685e55f0c4f3b6c6d58df951655d36a873b400f5735b13b433e",
+    "signature": "8a6eab38abd42cbd947966ab82c9a68582547ed08b441102e3cc506745ae8958756bf832e80773ec00d224d810defbdee829977190b3e8dfcf74bb29ed615e581c"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "39999999",
+     "price": "64979.5",
+     "size": "0.5",
+     "type": "LIMIT",
+     "side": "BUY",
+     "timeInForce": "GOOD_TIL_CANCEL",
+     "clientOrderId": "zero-fee",
+     "expireTime": "1796680800123",
+     "l2Nonce": "914095",
+     "l2Signature": "8a6eab38abd42cbd947966ab82c9a68582547ed08b441102e3cc506745ae8958756bf832e80773ec00d224d810defbdee829977190b3e8dfcf74bb29ed615e581c",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "32489.75",
+     "l2Size": "0.5",
+     "l2LimitFee": "0",
+     "reduceOnly": false,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "aaba5f9407aca1b368fe9f0dde2dd708e2137f9292bb6bba474903f151303dd6",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000001",
+    "price": "0",
+    "size": "0.002",
+    "type": "MARKET",
+    "side": "BUY",
+    "client_order_id": "mkt-buy-1"
+   },
+   "l2_price": "649840.4",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "404687",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "20000000",
+     "amountCollateral": "1299680800",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000001",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": true,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0x9351250f04f6c5b2df6a7ee17e6f2920c04a97404ef8fcc8e92f202cb9fe9cad",
+    "signature": "052c2e75568db1a3640845a3593d4ca4c83c0ab120db83e3688ceb375fa40e781690e8792ad57c393deb5f16f50215989a9cc6825a980a2c5afecb97706a57d61c"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "price": "0",
+     "size": "0.002",
+     "type": "MARKET",
+     "side": "BUY",
+     "timeInForce": "IMMEDIATE_OR_CANCEL",
+     "clientOrderId": "mkt-buy-1",
+     "expireTime": "1796680800123",
+     "l2Nonce": "404687",
+     "l2Signature": "052c2e75568db1a3640845a3593d4ca4c83c0ab120db83e3688ceb375fa40e781690e8792ad57c393deb5f16f50215989a9cc6825a980a2c5afecb97706a57d61c",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "1299.6808",
+     "l2Size": "0.002",
+     "l2LimitFee": "1",
+     "reduceOnly": false,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "747869aafb6bbe6ff8d0a273b0afa4fab61c5231778bd41c93a192bb356637f7",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000001",
+    "price": "0",
+    "size": "0.002",
+    "type": "MARKET",
+    "side": "SELL",
+    "client_order_id": "mkt-sell-1",
+    "reduce_only": true
+   },
+   "l2_price": "0.1",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "2150705682",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "20000000",
+     "amountCollateral": "200",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000001",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": false,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0xa5d2495407c4a4f23a20f180edcc9be56a7cc57fb027f4c8a70638d9dc47becf",
+    "signature": "f97e57fee924c1503f8968811ecf07046cffdc16cfd0f7dc6326ad1650f8a2cc5aa7f8d0fc8575feb9e6b6f95fc76c19ce0869df15dc39cab4d6544eb0a7cf7e1b"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "price": "0",
+     "size": "0.002",
+     "type": "MARKET",
+     "side": "SELL",
+     "timeInForce": "IMMEDIATE_OR_CANCEL",
+     "clientOrderId": "mkt-sell-1",
+     "expireTime": "1796680800123",
+     "l2Nonce": "2150705682",
+     "l2Signature": "f97e57fee924c1503f8968811ecf07046cffdc16cfd0f7dc6326ad1650f8a2cc5aa7f8d0fc8575feb9e6b6f95fc76c19ce0869df15dc39cab4d6544eb0a7cf7e1b",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "0.0002",
+     "l2Size": "0.002",
+     "l2LimitFee": "1",
+     "reduceOnly": true,
+     "triggerPrice": "",
+     "triggerPriceType": "",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "57a51b68fd7bc724682a6b5413f4ece0ea36b39dfb46d101b72868e2f6d7f7f9",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000001",
+    "price": "66000.0",
+    "size": "0.001",
+    "type": "STOP_LIMIT",
+    "side": "BUY",
+    "client_order_id": "stop-limit-1",
+    "trigger_price": "65900.0",
+    "trigger_price_type": "ORACLE_PRICE"
+   },
+   "l2_price": "66000.0",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "1849610476",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "10000000",
+     "amountCollateral": "66000000",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000001",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": true,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0x5b1df7a30fb7046ace10207621a543c0c3f61a387ce602d95f3ae4c23bec7473",
+    "signature": "4a5fd34bd2ffd28de77b8f850ee87fe01573495d2b10aeaab0c057d0dc6f572d2e37dbb61164856484ec1e95ac0639cf6bff07a88f37278a057c65f7190fae4a1c"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "price": "66000.0",
+     "size": "0.001",
+     "type": "STOP_LIMIT",
+     "side": "BUY",
+     "timeInForce": "GOOD_TIL_CANCEL",
+     "clientOrderId": "stop-limit-1",
+     "expireTime": "1796680800123",
+     "l2Nonce": "1849610476",
+     "l2Signature": "4a5fd34bd2ffd28de77b8f850ee87fe01573495d2b10aeaab0c057d0dc6f572d2e37dbb61164856484ec1e95ac0639cf6bff07a88f37278a057c65f7190fae4a1c",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "66.0000",
+     "l2Size": "0.001",
+     "l2LimitFee": "1",
+     "reduceOnly": false,
+     "triggerPrice": "65900.0",
+     "triggerPriceType": "ORACLE_PRICE",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "782e41b1b2c8975124f303ce0713c6e4c18caf4cd155c6c9ae4c20e3a21e4b93",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000002",
+    "price": "0",
+    "size": "0.05",
+    "type": "TAKE_PROFIT_MARKET",
+    "side": "SELL",
+    "client_order_id": "tp-mkt-1",
+    "trigger_price": "3500",
+    "reduce_only": true
+   },
+   "l2_price": "0.01",
+   "fee_rate": "0.00045",
+   "typed_data": {
+    "primary_type": "LimitOrderParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "base": {
+      "nonce": "3134323295",
+      "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+      "accountId": "726848798753545541",
+      "expirationTimestamp": "1796680800"
+     },
+     "amountSynthetic": "50000000",
+     "amountCollateral": "500",
+     "amountFee": "1000000",
+     "assetIdSynthetic": "30000002",
+     "assetIdCollateral": "1000",
+     "isBuyingSynthetic": false,
+     "parentOrderHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "subOrderIndex": "0"
+    },
+    "digest": "0x9a2ac5fb8b76a93c1a9aa1c7ec03dc6d8bab5cfabc7bbcbd9af7992406e2f026",
+    "signature": "961074ed92902c21d29e5afd0fa14a54c73d736bb72278ba694790e42cfbdac73f5b596590c42c340b88595060a3efeb173968274494d8c1ae30d39e37771d501b"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/createOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000002",
+     "price": "0",
+     "size": "0.05",
+     "type": "TAKE_PROFIT_MARKET",
+     "side": "SELL",
+     "timeInForce": "IMMEDIATE_OR_CANCEL",
+     "clientOrderId": "tp-mkt-1",
+     "expireTime": "1796680800123",
+     "l2Nonce": "3134323295",
+     "l2Signature": "961074ed92902c21d29e5afd0fa14a54c73d736bb72278ba694790e42cfbdac73f5b596590c42c340b88595060a3efeb173968274494d8c1ae30d39e37771d501b",
+     "l2ExpireTime": "1797372000123",
+     "l2Value": "0.0005",
+     "l2Size": "0.05",
+     "l2LimitFee": "1",
+     "reduceOnly": true,
+     "triggerPrice": "3500",
+     "triggerPriceType": "LAST_PRICE",
+     "sourceKey": "",
+     "isPositionTpsl": false,
+     "openTpslParentOrderId": "",
+     "isSetOpenTp": false,
+     "openTp": null,
+     "isSetOpenSl": false,
+     "openSl": null,
+     "extraType": "",
+     "extraDataJson": ""
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "b4e76505e760e3fe824d206402ded0877c12102f2be77bcbc06ffaa78c0168ac",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  }
+ ],
+ "requests": [
+  {
+   "label": "cancel_by_id",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/cancelOrderById",
+    "json": {
+     "accountId": "726848798753545541",
+     "orderIdList": [
+      "816966711830904982"
+     ]
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "0e52f2a1be31f199500525386463d014e7173b0d8911a66f6c4703ed9c6056b8",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "cancel_by_client_id",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/cancelOrderByClientOrderId",
+    "json": {
+     "accountId": "726848798753545541",
+     "clientOrderIdList": [
+      "a-1",
+      "b-2"
+     ]
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "d0f90898160d3f110a8bcf172952406daf2eca1d36e53b5829ef54c75459ae8a",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "cancel_all_contract",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/cancelAllOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "filterContractIdList": [
+      "30000001"
+     ]
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "342f78ccf767ec2a5997ea757254ce3980660158d400a9e833233e25b12797e8",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "cancel_all_filters",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/cancelAllOrder",
+    "json": {
+     "accountId": "726848798753545541",
+     "filterCoinIdList": [],
+     "filterContractIdList": [
+      "30000001",
+      "30000002"
+     ],
+     "filterOrderTypeList": [
+      "LIMIT"
+     ],
+     "filterOrderStatusList": [
+      "OPEN",
+      "UNTRIGGERED"
+     ],
+     "filterIsPositionTpsl": [
+      false
+     ]
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "afe5ae6f41c1782c97de344ab313941660b8e6263207f73fa77906b2c1235e5b",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "cancel_all_empty",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/cancelAllOrder",
+    "json": {
+     "accountId": "726848798753545541"
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "94d72de2c9204d0a8fffaed8049be92da0a3e435159787afdf8cbca82810d03e",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "active_orders",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getActiveOrderPage",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "size": "50",
+     "filterContractIdList": "30000001,30000002",
+     "filterStatusList": "OPEN",
+     "filterIsPositionTpslList": "false"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "acafb46273f70c8823509f9e12103632dbfd0c75e76ad261fa42169aa39b01b4",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "active_orders_plain",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getActiveOrderPage",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "afe73bac630ca53dd20145df05eef5d1f4eb755b0802a8e97979d280e13675f8",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "history_orders",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getHistoryOrderPage",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "size": "20",
+     "offsetData": "0880A08A97B532",
+     "filterTypeList": "LIMIT,MARKET"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "b4355a358209886e40e6449e40b21582990da7ed7a457d567a2acb98dfc126ac",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "fills",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getHistoryOrderFillTransactionPage",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "size": "100",
+     "filterOrderIdList": "816966711830904982",
+     "filterStartCreatedTimeInclusive": "1794700000000"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "0725ef0d3b26b08ad2494069ff6f8d124bfbed3db512530c20b3942d97f2a98a",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "orders_by_id",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getOrderById",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "orderIdList": "1,2"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "e10bedb67af31dd8c67b4e1074c5dc2b0255309948baf8a21444a5372075a835",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "orders_by_client_id",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getOrderByClientOrderId",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "clientOrderIdList": "a-1"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "4b8731b61270e4fac8c7da783ae1be3439ddf96fa6cc4a783ee9c892253c69c8",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "max_order_size",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/order/getMaxCreateOrderSize",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "price": "65000.0"
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "fe986244dcbabb94320e637f702a1d1301748c75eb03daf9bb19510800dccdde",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "account_asset",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/getAccountAsset",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "e06e4058ff9cc1d0cc2df7d7daf08b8f23ec7b8f92745a2cbe9dc14249c875aa",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "account_by_id",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/getAccountById",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "a9198a73902d535ff34f8a10ae1f18693aaba55aa946e2d72f20e82c6f883dcd",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "positions_by_contract",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/getPositionByContractId",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "contractIdList": "30000001,30000002"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "5c5f57bad1fa4080241f7597215b4fdad1f0c0790cbac56bdd1d16ffd406f2a0",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "collateral_by_coin",
+   "request": {
+    "method": "GET",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/getCollateralByCoinId",
+    "json": null,
+    "params": {
+     "accountId": "726848798753545541",
+     "coinIdList": "1000"
+    },
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "9ea7347f2dfc4bab43175ff63613a94488c2b38f35ed9754f7606274237775db",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "label": "update_leverage",
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/updateLeverageSetting",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "leverage": "20"
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "ddba9055a02daaad69ca2d76dec04736ee2c0de2126296e57359a4eaff524d66",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  }
+ ],
+ "margin_mode": [
+  {
+   "input": {
+    "contract_id": "30000001",
+    "margin_mode": "1",
+    "client_order_id": "mm-1"
+   },
+   "typed_data": {
+    "primary_type": "SetMarginPreferenceParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "accountId": "726848798753545541",
+     "assetId": "30000001",
+     "marginMode": 1,
+     "nonce": "822721435",
+     "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74"
+    },
+    "digest": "0x9cc73992353eef68ad59883fd77ead212ab6bf999cbcc4a96cac7c9b9453d73c",
+    "signature": "2223877799c42389ca607617352ec74a9545b3e98e5ca8f6972e279ccbe77b65038cb56e1926cb36a5696734f928c52c3f191fa6d28e18f80ff78ce796ad03011b"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/setMarginMode",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000001",
+     "marginMode": "1",
+     "l2Nonce": "822721435",
+     "l2ExpireTime": "1795993200000",
+     "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+     "l2Signature": "2223877799c42389ca607617352ec74a9545b3e98e5ca8f6972e279ccbe77b65038cb56e1926cb36a5696734f928c52c3f191fa6d28e18f80ff78ce796ad03011b"
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "27c942703fc5b00d1f93bb509f0da91fc0eb82486a14bcaf70289bbe60a55efc",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  },
+  {
+   "input": {
+    "contract_id": "30000002",
+    "margin_mode": "0",
+    "client_order_id": "mm-2"
+   },
+   "typed_data": {
+    "primary_type": "SetMarginPreferenceParams",
+    "domain": {
+     "name": "EdgeX",
+     "version": "1",
+     "chainId": 3343,
+     "verifyingContract": "0xeeb3fb05cca17745cbdf193a9b16537efb68fac8"
+    },
+    "message": {
+     "accountId": "726848798753545541",
+     "assetId": "30000002",
+     "marginMode": 0,
+     "nonce": "2728994029",
+     "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74"
+    },
+    "digest": "0x935d8b4b54a26bfed83e8c79dcf8f9e667be3d10f0e7729017c401248b4a4e8d",
+    "signature": "032c1cf3dd40bb7683f331b04d23ed8f6518e42fe453794a65abe761a1263be5696fed55ed2cae617292cb69b1ff44d8e8d63a0cf9b7efd17f6796cde36e8ccc1b"
+   },
+   "request": {
+    "method": "POST",
+    "url": "https://edgex-prod-v2.edgex.exchange/api/v2/private/account/setMarginMode",
+    "json": {
+     "accountId": "726848798753545541",
+     "contractId": "30000002",
+     "marginMode": "0",
+     "l2Nonce": "2728994029",
+     "l2ExpireTime": "1795993200000",
+     "signer": "0x5e2Af981747C7C1d0661E5995182c8F0a85Bdf74",
+     "l2Signature": "032c1cf3dd40bb7683f331b04d23ed8f6518e42fe453794a65abe761a1263be5696fed55ed2cae617292cb69b1ff44d8e8d63a0cf9b7efd17f6796cde36e8ccc1b"
+    },
+    "params": null,
+    "headers": {
+     "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+     "X-edgeX-Passphrase": "6965be71cab14900",
+     "X-edgeX-Signature": "86d1954a83daaa904c0a8db09f5ed04b7a822aba55f8d9099828ff3e30ed34e9",
+     "X-edgeX-Timestamp": "1794780000123"
+    }
+   }
+  }
+ ],
+ "private_ws": {
+  "url": "wss://edgex-quote-prod-v2.edgex.exchange/api/v1/private/ws?accountId=726848798753545541&timestamp=1794780000123",
+  "headers": {
+   "X-edgeX-Api-Key": "c75d6f168a0bdf2668c8380ec7bc6a75",
+   "X-edgeX-Passphrase": "6965be71cab14900",
+   "X-edgeX-Signature": "44e01b1e44d6b3460b565eedb19716b05a0dd8f6bc846298889851746da9ff1f",
+   "X-edgeX-Timestamp": "1794780000123"
+  },
+  "subprotocols": [
+   "eyJYLWVkZ2VYLUFwaS1LZXkiOiAiYzc1ZDZmMTY4YTBiZGYyNjY4YzgzODBlYzdiYzZhNzUiLCAiWC1lZGdlWC1QYXNzcGhyYXNlIjogIjY5NjViZTcxY2FiMTQ5MDAiLCAiWC1lZGdlWC1TaWduYXR1cmUiOiAiNDRlMDFiMWU0NGQ2YjM0NjBiNTY1ZWVkYjE5NzE2YjA1YTBkZDhmNmJjODQ2Mjk4ODg5ODUxNzQ2ZGE5ZmYxZiIsICJYLWVkZ2VYLVRpbWVzdGFtcCI6ICIxNzk0NzgwMDAwMTIzIn0"
+  ]
+ }
+}
