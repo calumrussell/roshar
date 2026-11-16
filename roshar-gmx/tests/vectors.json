@@ -1,0 +1,2385 @@
+{
+ "generator": "@gmx-io/sdk 2.9.1 (signPreparedOrder, PrivateKeySigner), viem 2.57.20",
+ "privateKey": "0x04b1daac0c3f6c68577c0b11a8dfe80f51531c5c4061a3cc1a46ec0439854074",
+ "address": "0x16ddad7dA5bf24d773a323e8d34617BbEAc35722",
+ "orders": [
+  {
+   "fixture": "prepare_increase_limit.json",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "primaryType": "Batch",
+   "domainSeparator": "0x8c7ad0883f79bbe5b955ded7d54e9f1ca464a96f644f2e4d97335c01a636a7ca",
+   "structHash": "0xe4ba68af21d3b83b15485354daffe37715b3268fcdd4d7d8d209ec01671e265f",
+   "digest": "0xaa54eeafe3f68669d2f3d9b0b2731a5a60f9ae760aa80e5cb8679e7971782b21",
+   "signature": "0x7592f3982a2dd2c784563cc06f6407d8a4e8be044873d9b367d64d813772ca0c6e06f419525656b547a022f7dbff89401ddb73c58cf95633bb9c072ccaa2f4cd1b"
+  },
+  {
+   "fixture": "prepare_increase_market.json",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "primaryType": "Batch",
+   "domainSeparator": "0x8c7ad0883f79bbe5b955ded7d54e9f1ca464a96f644f2e4d97335c01a636a7ca",
+   "structHash": "0xad36a615c20faf664e530f78060cd3f5d79edc662228498ed266044a12e5201a",
+   "digest": "0xe03909e30b0b4f3fa4da8a819d695b71cb02b97bb234d23d6f531dc18fa4298a",
+   "signature": "0x37ebec18bb8ca826b79b454a0a8b8070f892626f6af5789bfeed7ff05127020a3bb823f41e3ba51f187e39d922583bd123405dea475c93e43cf9df6a14b484eb1b"
+  },
+  {
+   "fixture": "prepare_decrease_market.json",
+   "chainId": 42161,
+   "account": "0xb7b0a68a674532d7efe39e5a61bdc80b96ba2496",
+   "primaryType": "Batch",
+   "domainSeparator": "0x8c7ad0883f79bbe5b955ded7d54e9f1ca464a96f644f2e4d97335c01a636a7ca",
+   "structHash": "0x89dcb46235e227a7edbe41bd60f0e06732324d2abffb50368e3f100c1f59a2d3",
+   "digest": "0xfa6e2304319edc2c3d5c831db48b209c3cfe077be503e893613a2cf341966c95",
+   "signature": "0x290f005eb7c69a0984bd612b32816e0e4f259811e5fcfaec48869000091acac247c9283a6c319dbea4e37407be03410ad57f543584d156ad80625e2eb595d6b21c"
+  },
+  {
+   "fixture": "prepare_edit.json",
+   "chainId": 42161,
+   "account": "0xb7b0a68a674532d7efe39e5a61bdc80b96ba2496",
+   "primaryType": "Batch",
+   "domainSeparator": "0x8c7ad0883f79bbe5b955ded7d54e9f1ca464a96f644f2e4d97335c01a636a7ca",
+   "structHash": "0x7a7287507890e0a1e77d19482ddd8f8ef77bcf24e224b2489342a5ac11116246",
+   "digest": "0x2941c4774e90f57588283dbec2e43da32e85329c7de6a31724ae0d05405c1541",
+   "signature": "0x5b5ed3c329682d88dd7033ca054e7b9b52dda1e6afe7841c7b57c5c0e594efe82ad89505a0807840e8e4033f2719661f65b0a7e62c220ed7cc76263fbf3eee6f1b"
+  },
+  {
+   "fixture": "prepare_cancel.json",
+   "chainId": 42161,
+   "account": "0xb7b0a68a674532d7efe39e5a61bdc80b96ba2496",
+   "primaryType": "Batch",
+   "domainSeparator": "0x8c7ad0883f79bbe5b955ded7d54e9f1ca464a96f644f2e4d97335c01a636a7ca",
+   "structHash": "0xb67015022f9171e2fcf35dfe25946eceb13c1612bccf3d26cce335f5c20fa8b1",
+   "digest": "0xf2dc4d71d4a2e838be4c6ea819b9f61096bc0ec67a0f0e3286cfc1682ac81ddc",
+   "signature": "0x168d902c8de964f7275dd8edefef4291bf502db45e0dba5637d06286177c0cfd24da9c6ff75a8a99a637d7b62705034dcb3eab48093484445257ddd4bea8faef1b"
+  },
+  {
+   "fixture": "prepare_cancel_all.json",
+   "chainId": 42161,
+   "account": "0xb7b0a68a674532d7efe39e5a61bdc80b96ba2496",
+   "primaryType": "Batch",
+   "domainSeparator": "0x8c7ad0883f79bbe5b955ded7d54e9f1ca464a96f644f2e4d97335c01a636a7ca",
+   "structHash": "0xb67015022f9171e2fcf35dfe25946eceb13c1612bccf3d26cce335f5c20fa8b1",
+   "digest": "0xf2dc4d71d4a2e838be4c6ea819b9f61096bc0ec67a0f0e3286cfc1682ac81ddc",
+   "signature": "0x168d902c8de964f7275dd8edefef4291bf502db45e0dba5637d06286177c0cfd24da9c6ff75a8a99a637d7b62705034dcb3eab48093484445257ddd4bea8faef1b"
+  }
+ ],
+ "validation": [
+  {
+   "name": "valid_with_account",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": true
+  },
+  {
+   "name": "receiver_not_signer_without_account",
+   "chainId": 42161,
+   "account": null,
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "wrong_chain_id",
+   "chainId": 43114,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "wrong_domain_name",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "Evil",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "wrong_domain_version",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "2",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "unknown_verifying_contract",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0x2222222222222222222222222222222222222222"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "legacy_relay_router_from_docs",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0x5503b99308dB6923758F9A22d118207D633c4e87"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "foreign_receiver",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x2222222222222222222222222222222222222222",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "foreign_cancellation_receiver",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x2222222222222222222222222222222222222222",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": false
+  },
+  {
+   "name": "lowercase_verifying_contract",
+   "chainId": 42161,
+   "account": "0x1111111111111111111111111111111111111111",
+   "typedData": {
+    "domain": {
+     "name": "GmxBaseGelatoRelayRouter",
+     "version": "1",
+     "chainId": 42161,
+     "verifyingContract": "0xe6c871230f758f03b39d4fb5ea3fc7b49e9dac64"
+    },
+    "types": {
+     "Batch": [
+      {
+       "name": "account",
+       "type": "address"
+      },
+      {
+       "name": "createOrderParamsList",
+       "type": "CreateOrderParams[]"
+      },
+      {
+       "name": "updateOrderParamsList",
+       "type": "UpdateOrderParams[]"
+      },
+      {
+       "name": "cancelOrderKeys",
+       "type": "bytes32[]"
+      },
+      {
+       "name": "relayParams",
+       "type": "bytes32"
+      },
+      {
+       "name": "subaccountApproval",
+       "type": "bytes32"
+      }
+     ],
+     "CreateOrderParams": [
+      {
+       "name": "addresses",
+       "type": "CreateOrderAddresses"
+      },
+      {
+       "name": "numbers",
+       "type": "CreateOrderNumbers"
+      },
+      {
+       "name": "orderType",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "isLong",
+       "type": "bool"
+      },
+      {
+       "name": "shouldUnwrapNativeToken",
+       "type": "bool"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "referralCode",
+       "type": "bytes32"
+      },
+      {
+       "name": "dataList",
+       "type": "bytes32[]"
+      }
+     ],
+     "CreateOrderAddresses": [
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "cancellationReceiver",
+       "type": "address"
+      },
+      {
+       "name": "callbackContract",
+       "type": "address"
+      },
+      {
+       "name": "uiFeeReceiver",
+       "type": "address"
+      },
+      {
+       "name": "market",
+       "type": "address"
+      },
+      {
+       "name": "initialCollateralToken",
+       "type": "address"
+      },
+      {
+       "name": "swapPath",
+       "type": "address[]"
+      }
+     ],
+     "CreateOrderNumbers": [
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "initialCollateralDeltaAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "executionFee",
+       "type": "uint256"
+      },
+      {
+       "name": "callbackGasLimit",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      }
+     ],
+     "UpdateOrderParams": [
+      {
+       "name": "key",
+       "type": "bytes32"
+      },
+      {
+       "name": "sizeDeltaUsd",
+       "type": "uint256"
+      },
+      {
+       "name": "acceptablePrice",
+       "type": "uint256"
+      },
+      {
+       "name": "triggerPrice",
+       "type": "uint256"
+      },
+      {
+       "name": "minOutputAmount",
+       "type": "uint256"
+      },
+      {
+       "name": "validFromTime",
+       "type": "uint256"
+      },
+      {
+       "name": "decreasePositionSwapType",
+       "type": "uint256"
+      },
+      {
+       "name": "autoCancel",
+       "type": "bool"
+      },
+      {
+       "name": "executionFeeIncrease",
+       "type": "uint256"
+      }
+     ]
+    },
+    "message": {
+     "account": "0x1111111111111111111111111111111111111111",
+     "createOrderParamsList": [
+      {
+       "addresses": {
+        "receiver": "0x1111111111111111111111111111111111111111",
+        "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+        "callbackContract": "0x0000000000000000000000000000000000000000",
+        "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+        "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+        "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "swapPath": []
+       },
+       "numbers": {
+        "sizeDeltaUsd": "10000000000000000000000000000000",
+        "initialCollateralDeltaAmount": "2000000",
+        "triggerPrice": "1000000000000000",
+        "acceptablePrice": "1821976814957815",
+        "executionFee": "108450836384800",
+        "callbackGasLimit": "0",
+        "minOutputAmount": "0",
+        "validFromTime": "0"
+       },
+       "orderType": 3,
+       "decreasePositionSwapType": 0,
+       "isLong": true,
+       "shouldUnwrapNativeToken": false,
+       "autoCancel": true,
+       "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+       "dataList": [
+        "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+        "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+       ]
+      }
+     ],
+     "updateOrderParamsList": [],
+     "cancelOrderKeys": [],
+     "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+     "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "ok": true
+  }
+ ],
+ "synthetic": {
+  "typedData": {
+   "domain": {
+    "name": "Synthetic",
+    "version": "7",
+    "chainId": 43114,
+    "verifyingContract": "0xE9f7E49F7304D36Aae146B5Af7cE6f9421Dac2CF"
+   },
+   "types": {
+    "Mail": [
+     {
+      "name": "from",
+      "type": "Person"
+     },
+     {
+      "name": "to",
+      "type": "Person[]"
+     },
+     {
+      "name": "contents",
+      "type": "string"
+     },
+     {
+      "name": "data",
+      "type": "bytes"
+     },
+     {
+      "name": "delta",
+      "type": "int256"
+     },
+     {
+      "name": "small",
+      "type": "int8"
+     },
+     {
+      "name": "count",
+      "type": "uint8"
+     },
+     {
+      "name": "tag",
+      "type": "bytes4"
+     },
+     {
+      "name": "flags",
+      "type": "bool[2]"
+     },
+     {
+      "name": "nonce",
+      "type": "uint256"
+     }
+    ],
+    "Person": [
+     {
+      "name": "name",
+      "type": "string"
+     },
+     {
+      "name": "wallet",
+      "type": "address"
+     }
+    ]
+   },
+   "message": {
+    "from": {
+     "name": "Cow",
+     "wallet": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
+    },
+    "to": [
+     {
+      "name": "Bob",
+      "wallet": "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
+     },
+     {
+      "name": "Ünïcode ✓",
+      "wallet": "0x0000000000000000000000000000000000000001"
+     }
+    ],
+    "contents": "Hello, Bob!",
+    "data": "0xdeadbeef00",
+    "delta": "-123456789012345678901234567890",
+    "small": -128,
+    "count": 255,
+    "tag": "0x01020304",
+    "flags": [
+     true,
+     false
+    ],
+    "nonce": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+   }
+  },
+  "primaryType": "Mail",
+  "domainSeparator": "0x2ece2e3fefea67954df6f67e2992abd0817e0dc24303959842dc29511d41cb34",
+  "structHash": "0x4c31bc4a056d4697f68aeb169ab0332814b60ac44a8350622aba48404c5d2632",
+  "digest": "0x861b5cf323eb28b6bc27382f147fb4b2af9ad3bc3100565c966fcdde8c26562f",
+  "signature": "0x9fbb331e0be0a0f14f384f611b0b2bc925ccd383675d501b9340c9297a39e0613cca07ce33fe52b659007c43f5d84de7fa5d7b53f9d7faf4ded02f03fe6590e21b"
+ }
+}

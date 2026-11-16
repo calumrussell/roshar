@@ -1,0 +1,412 @@
+{
+ "payloadType": "typed-data",
+ "mode": "express",
+ "requestId": "e4c44a47d90dcab7f4905b83d43abb2c",
+ "payload": {
+  "typedData": {
+   "domain": {
+    "name": "GmxBaseGelatoRelayRouter",
+    "version": "1",
+    "chainId": 42161,
+    "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+   },
+   "types": {
+    "Batch": [
+     {
+      "name": "account",
+      "type": "address"
+     },
+     {
+      "name": "createOrderParamsList",
+      "type": "CreateOrderParams[]"
+     },
+     {
+      "name": "updateOrderParamsList",
+      "type": "UpdateOrderParams[]"
+     },
+     {
+      "name": "cancelOrderKeys",
+      "type": "bytes32[]"
+     },
+     {
+      "name": "relayParams",
+      "type": "bytes32"
+     },
+     {
+      "name": "subaccountApproval",
+      "type": "bytes32"
+     }
+    ],
+    "CreateOrderParams": [
+     {
+      "name": "addresses",
+      "type": "CreateOrderAddresses"
+     },
+     {
+      "name": "numbers",
+      "type": "CreateOrderNumbers"
+     },
+     {
+      "name": "orderType",
+      "type": "uint256"
+     },
+     {
+      "name": "decreasePositionSwapType",
+      "type": "uint256"
+     },
+     {
+      "name": "isLong",
+      "type": "bool"
+     },
+     {
+      "name": "shouldUnwrapNativeToken",
+      "type": "bool"
+     },
+     {
+      "name": "autoCancel",
+      "type": "bool"
+     },
+     {
+      "name": "referralCode",
+      "type": "bytes32"
+     },
+     {
+      "name": "dataList",
+      "type": "bytes32[]"
+     }
+    ],
+    "CreateOrderAddresses": [
+     {
+      "name": "receiver",
+      "type": "address"
+     },
+     {
+      "name": "cancellationReceiver",
+      "type": "address"
+     },
+     {
+      "name": "callbackContract",
+      "type": "address"
+     },
+     {
+      "name": "uiFeeReceiver",
+      "type": "address"
+     },
+     {
+      "name": "market",
+      "type": "address"
+     },
+     {
+      "name": "initialCollateralToken",
+      "type": "address"
+     },
+     {
+      "name": "swapPath",
+      "type": "address[]"
+     }
+    ],
+    "CreateOrderNumbers": [
+     {
+      "name": "sizeDeltaUsd",
+      "type": "uint256"
+     },
+     {
+      "name": "initialCollateralDeltaAmount",
+      "type": "uint256"
+     },
+     {
+      "name": "triggerPrice",
+      "type": "uint256"
+     },
+     {
+      "name": "acceptablePrice",
+      "type": "uint256"
+     },
+     {
+      "name": "executionFee",
+      "type": "uint256"
+     },
+     {
+      "name": "callbackGasLimit",
+      "type": "uint256"
+     },
+     {
+      "name": "minOutputAmount",
+      "type": "uint256"
+     },
+     {
+      "name": "validFromTime",
+      "type": "uint256"
+     }
+    ],
+    "UpdateOrderParams": [
+     {
+      "name": "key",
+      "type": "bytes32"
+     },
+     {
+      "name": "sizeDeltaUsd",
+      "type": "uint256"
+     },
+     {
+      "name": "acceptablePrice",
+      "type": "uint256"
+     },
+     {
+      "name": "triggerPrice",
+      "type": "uint256"
+     },
+     {
+      "name": "minOutputAmount",
+      "type": "uint256"
+     },
+     {
+      "name": "validFromTime",
+      "type": "uint256"
+     },
+     {
+      "name": "decreasePositionSwapType",
+      "type": "uint256"
+     },
+     {
+      "name": "autoCancel",
+      "type": "bool"
+     },
+     {
+      "name": "executionFeeIncrease",
+      "type": "uint256"
+     }
+    ]
+   },
+   "message": {
+    "account": "0x1111111111111111111111111111111111111111",
+    "createOrderParamsList": [
+     {
+      "addresses": {
+       "receiver": "0x1111111111111111111111111111111111111111",
+       "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+       "callbackContract": "0x0000000000000000000000000000000000000000",
+       "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+       "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+       "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+       "swapPath": []
+      },
+      "numbers": {
+       "sizeDeltaUsd": "10000000000000000000000000000000",
+       "initialCollateralDeltaAmount": "2000000",
+       "triggerPrice": "1000000000000000",
+       "acceptablePrice": "1821976814957815",
+       "executionFee": "108450836384800",
+       "callbackGasLimit": "0",
+       "minOutputAmount": "0",
+       "validFromTime": "0"
+      },
+      "orderType": 3,
+      "decreasePositionSwapType": 0,
+      "isLong": true,
+      "shouldUnwrapNativeToken": false,
+      "autoCancel": true,
+      "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "dataList": [
+       "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000",
+       "0x676d786f3a313a303a303030303a30303a303a31000000000000000000000000"
+      ]
+     }
+    ],
+    "updateOrderParamsList": [],
+    "cancelOrderKeys": [],
+    "relayParams": "0x735175f7518fce3bd4bc8f300fd6c13d5004a03ca75c61992582ce719b71bedd",
+    "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "relayParams": {
+   "oracleParams": {
+    "tokens": [
+     "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+    ],
+    "providers": [
+     "0x90218fbb064b1475E4382b041Cc7ccF08AF718B0",
+     "0x90218fbb064b1475E4382b041Cc7ccF08AF718B0"
+    ],
+    "data": [
+     "0x",
+     "0x"
+    ]
+   },
+   "tokenPermits": [],
+   "externalCalls": {
+    "sendTokens": [],
+    "sendAmounts": [],
+    "externalCallTargets": [],
+    "externalCallDataList": [],
+    "refundReceivers": [],
+    "refundTokens": []
+   },
+   "fee": {
+    "feeToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "feeAmount": "319741",
+    "feeSwapPath": [
+     "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336"
+    ]
+   },
+   "desChainId": "42161",
+   "userNonce": "1794780037",
+   "eip6492SignatureWrapperHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "deadline": "1794783637"
+  },
+  "batchParams": {
+   "createOrderParams": [
+    {
+     "params": {
+      "chainId": 42161,
+      "receiver": "0x1111111111111111111111111111111111111111",
+      "executionFeeAmount": "108450836384800",
+      "executionGasLimit": "4132342",
+      "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+      "allowedSlippage": 30,
+      "autoCancel": true,
+      "marketAddress": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+      "indexTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "isLong": true,
+      "sizeDeltaUsd": "10000000000000000000000000000000",
+      "sizeDeltaInTokens": "5503557196837183",
+      "acceptablePrice": "1816527233258041415816415334216246",
+      "triggerPrice": "1000000000000000000000000000000000",
+      "payTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "payTokenAmount": "2000000",
+      "swapPath": [],
+      "collateralDeltaAmount": "1995998",
+      "collateralTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "orderType": 3
+     },
+     "orderPayload": {
+      "addresses": {
+       "receiver": "0x1111111111111111111111111111111111111111",
+       "cancellationReceiver": "0x0000000000000000000000000000000000000000",
+       "callbackContract": "0x0000000000000000000000000000000000000000",
+       "uiFeeReceiver": "0x0000000000000000000000000000000000000000",
+       "market": "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+       "initialCollateralToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+       "swapPath": []
+      },
+      "numbers": {
+       "sizeDeltaUsd": "10000000000000000000000000000000",
+       "initialCollateralDeltaAmount": "2000000",
+       "triggerPrice": "1000000000000000",
+       "acceptablePrice": "1821976814957815",
+       "executionFee": "108450836384800",
+       "callbackGasLimit": "0",
+       "minOutputAmount": "0",
+       "validFromTime": "0"
+      },
+      "orderType": 3,
+      "decreasePositionSwapType": 0,
+      "isLong": true,
+      "shouldUnwrapNativeToken": false,
+      "autoCancel": true,
+      "referralCode": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "dataList": [
+       "0x61706973646be4c44a47d90dcab7f4905b83d43abb2c00000000000000000000"
+      ]
+     },
+     "tokenTransfersParams": {
+      "isNativePayment": false,
+      "isNativeReceive": false,
+      "initialCollateralTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "initialCollateralDeltaAmount": "2000000",
+      "tokenTransfers": [
+       {
+        "tokenAddress": "0x0000000000000000000000000000000000000000",
+        "destination": "0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5",
+        "amount": "108450836384800"
+       },
+       {
+        "tokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "destination": "0x31eF83a530Fde1B38EE9A18093A333D8Bbbc40D5",
+        "amount": "2000000"
+       }
+      ],
+      "payTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "payTokenAmount": "2000000",
+      "minOutputAmount": "0",
+      "swapPath": [],
+      "value": "108450836384800"
+     }
+    }
+   ],
+   "updateOrderParams": [],
+   "cancelOrderParams": []
+  },
+  "gasPaymentParams": {
+   "gasPaymentToken": {
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "decimals": 6,
+    "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "isStable": true,
+    "isV1Available": true,
+    "imageUrl": "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+    "explorerUrl": "https://arbiscan.io/address/0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "isPermitSupported": true,
+    "prices": {
+     "minPrice": "999711049665487900000000000000",
+     "maxPrice": "999711049665487900000000000000",
+     "updatedAt": 1794780036096,
+     "timestamp": 1794780035
+    },
+    "hasPriceFeedProvider": true
+   },
+   "relayFeeToken": {
+    "name": "Wrapped Ethereum",
+    "symbol": "WETH",
+    "decimals": 18,
+    "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    "isWrapped": true,
+    "baseSymbol": "ETH",
+    "imageUrl": "https://assets.coingecko.com/coins/images/2518/thumb/weth.png?1628852295",
+    "isV1Available": true,
+    "isPermitSupported": true,
+    "contractVersion": "1",
+    "prices": {
+     "minPrice": "1817006645401425000000000000000000",
+     "maxPrice": "1817006645401425000000000000000000",
+     "updatedAt": 1794780036096,
+     "timestamp": 1794780035
+    },
+    "hasPriceFeedProvider": true
+   },
+   "gasPaymentTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+   "relayerFeeTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+   "relayerFeeAmount": "63376408005064",
+   "totalRelayerFeeTokenAmount": "171827244389864",
+   "gasPaymentTokenAmount": "319741",
+   "gasPaymentTokenAsCollateralAmount": "2000000"
+  },
+  "relayRouterAddress": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64",
+  "gasLimit": "2667214",
+  "gasPrice": "20188000",
+  "executionFeeAmount": "108450836384800",
+  "relayerFeeAmount": "63376408005064"
+ },
+ "estimates": {
+  "positionPriceImpactDeltaUsd": "2638472151969864218273471607",
+  "swapPriceImpactDeltaUsd": "0",
+  "executionFeeAmount": "108450836384800",
+  "acceptablePrice": "1816527233258041415816415334216246",
+  "sizeDeltaUsd": "10000000000000000000000000000000",
+  "positionFeeUsd": "3999999999999999976728560474",
+  "borrowingFeeUsd": "0",
+  "fundingFeeUsd": "0",
+  "tradingCapacity": {
+   "availableLiquidity": "56897612841407560205309896422110017162",
+   "baseAvailableLiquidity": "56897612841407560205309896422110017162",
+   "jitAvailableLiquidity": "0",
+   "limitingFactor": "reserve",
+   "jitDataStatus": "available",
+   "marketDataStatus": "fresh"
+  }
+ },
+ "expiresAt": 1794783637,
+ "traceId": "3d44a27736dce578b369693c0eab8b51/3794741894844909072"
+}

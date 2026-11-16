@@ -1,0 +1,324 @@
+{
+ "payloadType": "typed-data",
+ "mode": "express",
+ "requestId": "9ea46fb1812d3b402c788ee13950ce0b",
+ "payload": {
+  "typedData": {
+   "domain": {
+    "name": "GmxBaseGelatoRelayRouter",
+    "version": "1",
+    "chainId": 42161,
+    "verifyingContract": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64"
+   },
+   "types": {
+    "Batch": [
+     {
+      "name": "account",
+      "type": "address"
+     },
+     {
+      "name": "createOrderParamsList",
+      "type": "CreateOrderParams[]"
+     },
+     {
+      "name": "updateOrderParamsList",
+      "type": "UpdateOrderParams[]"
+     },
+     {
+      "name": "cancelOrderKeys",
+      "type": "bytes32[]"
+     },
+     {
+      "name": "relayParams",
+      "type": "bytes32"
+     },
+     {
+      "name": "subaccountApproval",
+      "type": "bytes32"
+     }
+    ],
+    "CreateOrderParams": [
+     {
+      "name": "addresses",
+      "type": "CreateOrderAddresses"
+     },
+     {
+      "name": "numbers",
+      "type": "CreateOrderNumbers"
+     },
+     {
+      "name": "orderType",
+      "type": "uint256"
+     },
+     {
+      "name": "decreasePositionSwapType",
+      "type": "uint256"
+     },
+     {
+      "name": "isLong",
+      "type": "bool"
+     },
+     {
+      "name": "shouldUnwrapNativeToken",
+      "type": "bool"
+     },
+     {
+      "name": "autoCancel",
+      "type": "bool"
+     },
+     {
+      "name": "referralCode",
+      "type": "bytes32"
+     },
+     {
+      "name": "dataList",
+      "type": "bytes32[]"
+     }
+    ],
+    "CreateOrderAddresses": [
+     {
+      "name": "receiver",
+      "type": "address"
+     },
+     {
+      "name": "cancellationReceiver",
+      "type": "address"
+     },
+     {
+      "name": "callbackContract",
+      "type": "address"
+     },
+     {
+      "name": "uiFeeReceiver",
+      "type": "address"
+     },
+     {
+      "name": "market",
+      "type": "address"
+     },
+     {
+      "name": "initialCollateralToken",
+      "type": "address"
+     },
+     {
+      "name": "swapPath",
+      "type": "address[]"
+     }
+    ],
+    "CreateOrderNumbers": [
+     {
+      "name": "sizeDeltaUsd",
+      "type": "uint256"
+     },
+     {
+      "name": "initialCollateralDeltaAmount",
+      "type": "uint256"
+     },
+     {
+      "name": "triggerPrice",
+      "type": "uint256"
+     },
+     {
+      "name": "acceptablePrice",
+      "type": "uint256"
+     },
+     {
+      "name": "executionFee",
+      "type": "uint256"
+     },
+     {
+      "name": "callbackGasLimit",
+      "type": "uint256"
+     },
+     {
+      "name": "minOutputAmount",
+      "type": "uint256"
+     },
+     {
+      "name": "validFromTime",
+      "type": "uint256"
+     }
+    ],
+    "UpdateOrderParams": [
+     {
+      "name": "key",
+      "type": "bytes32"
+     },
+     {
+      "name": "sizeDeltaUsd",
+      "type": "uint256"
+     },
+     {
+      "name": "acceptablePrice",
+      "type": "uint256"
+     },
+     {
+      "name": "triggerPrice",
+      "type": "uint256"
+     },
+     {
+      "name": "minOutputAmount",
+      "type": "uint256"
+     },
+     {
+      "name": "validFromTime",
+      "type": "uint256"
+     },
+     {
+      "name": "decreasePositionSwapType",
+      "type": "uint256"
+     },
+     {
+      "name": "autoCancel",
+      "type": "bool"
+     },
+     {
+      "name": "executionFeeIncrease",
+      "type": "uint256"
+     }
+    ]
+   },
+   "message": {
+    "account": "0xb7b0a68a674532d7efe39e5a61bdc80b96ba2496",
+    "createOrderParamsList": [],
+    "updateOrderParamsList": [
+     {
+      "key": "0x97ad5ce9cee6c5cb375962fd33aa9fb1e784c66cca0570dfc285f947836c4cc5",
+      "sizeDeltaUsd": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "acceptablePrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "triggerPrice": "600000000000000000000000000",
+      "minOutputAmount": "0",
+      "validFromTime": "0",
+      "decreasePositionSwapType": 0,
+      "autoCancel": true,
+      "executionFeeIncrease": "0"
+     }
+    ],
+    "cancelOrderKeys": [],
+    "relayParams": "0xb76477d8a520c2cddb5c2491c28144e536242b4bf8fffa03ada6821c36e2e20e",
+    "subaccountApproval": "0x0000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "relayParams": {
+   "oracleParams": {
+    "tokens": [
+     "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+    ],
+    "providers": [
+     "0x90218fbb064b1475E4382b041Cc7ccF08AF718B0",
+     "0x90218fbb064b1475E4382b041Cc7ccF08AF718B0"
+    ],
+    "data": [
+     "0x",
+     "0x"
+    ]
+   },
+   "tokenPermits": [],
+   "externalCalls": {
+    "sendTokens": [],
+    "sendAmounts": [],
+    "externalCallTargets": [],
+    "externalCallDataList": [],
+    "refundReceivers": [],
+    "refundTokens": []
+   },
+   "fee": {
+    "feeToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "feeAmount": "108582",
+    "feeSwapPath": [
+     "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336"
+    ]
+   },
+   "desChainId": "42161",
+   "userNonce": "1794780260",
+   "eip6492SignatureWrapperHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "deadline": "1794783860"
+  },
+  "batchParams": {
+   "createOrderParams": [],
+   "updateOrderParams": [
+    {
+     "params": {
+      "chainId": 42161,
+      "indexTokenAddress": "0x47904963fc8b2340414262125aF798B9655E58Cd",
+      "orderKey": "0x97ad5ce9cee6c5cb375962fd33aa9fb1e784c66cca0570dfc285f947836c4cc5",
+      "orderType": 6,
+      "sizeDeltaUsd": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "triggerPrice": "60000000000000000000000000000000000",
+      "acceptablePrice": "11579208923731619542357098500868790785326998466564056403945758400791312963993500000000",
+      "minOutputAmount": "0",
+      "autoCancel": true,
+      "validFromTime": "0",
+      "decreasePositionSwapType": 0,
+      "executionFeeTopUp": "0"
+     },
+     "updatePayload": {
+      "orderKey": "0x97ad5ce9cee6c5cb375962fd33aa9fb1e784c66cca0570dfc285f947836c4cc5",
+      "sizeDeltaUsd": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "triggerPrice": "600000000000000000000000000",
+      "acceptablePrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+      "minOutputAmount": "0",
+      "autoCancel": true,
+      "validFromTime": "0",
+      "decreasePositionSwapType": 0,
+      "executionFeeTopUp": "0"
+     }
+    }
+   ],
+   "cancelOrderParams": []
+  },
+  "gasPaymentParams": {
+   "gasPaymentToken": {
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "decimals": 6,
+    "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "isStable": true,
+    "isV1Available": true,
+    "imageUrl": "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+    "explorerUrl": "https://arbiscan.io/address/0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "isPermitSupported": true,
+    "prices": {
+     "minPrice": "999750547294975800000000000000",
+     "maxPrice": "999750547294975800000000000000",
+     "updatedAt": 1794780257912,
+     "timestamp": 1794780257
+    },
+    "hasPriceFeedProvider": true
+   },
+   "relayFeeToken": {
+    "name": "Wrapped Ethereum",
+    "symbol": "WETH",
+    "decimals": 18,
+    "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    "isWrapped": true,
+    "baseSymbol": "ETH",
+    "imageUrl": "https://assets.coingecko.com/coins/images/2518/thumb/weth.png?1628852295",
+    "isV1Available": true,
+    "isPermitSupported": true,
+    "contractVersion": "1",
+    "prices": {
+     "minPrice": "1821580971098904000000000000000000",
+     "maxPrice": "1821580971098904000000000000000000",
+     "updatedAt": 1794780257912,
+     "timestamp": 1794780257
+    },
+    "hasPriceFeedProvider": true
+   },
+   "gasPaymentTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+   "relayerFeeTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+   "relayerFeeAmount": "58211797460388",
+   "totalRelayerFeeTokenAmount": "58211797460388",
+   "gasPaymentTokenAmount": "108582",
+   "gasPaymentTokenAsCollateralAmount": "0"
+  },
+  "relayRouterAddress": "0xE6c871230F758F03b39D4Fb5ea3fc7B49E9dAc64",
+  "gasLimit": "2467214",
+  "gasPrice": "20046000",
+  "executionFeeAmount": "0",
+  "relayerFeeAmount": "58211797460388"
+ },
+ "expiresAt": 1794783860,
+ "traceId": "8d07e6cd67e3c595348d3b95a7d166d5/15124976636961840216"
+}

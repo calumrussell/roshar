@@ -1,0 +1,26 @@
+[
+ {
+  "tokenAddress": "0x7f9FBf9bDd3F4105C478b996B648FE6e828a1e98",
+  "tokenSymbol": "APE",
+  "minPrice": "80159794436",
+  "maxPrice": "80213264813",
+  "updatedAt": 1794780163317,
+  "timestamp": 1794780162
+ },
+ {
+  "tokenAddress": "0x74885b4D524d497261259B38900f54e6dbAd2210",
+  "tokenSymbol": "APE_deprecated",
+  "minPrice": "80133059249",
+  "maxPrice": "80240000000",
+  "updatedAt": 1794780163317,
+  "timestamp": 1794780162
+ },
+ {
+  "tokenAddress": "0x3f8f0dCE4dCE4d0D1d0871941e79CDA82cA50d0B",
+  "tokenSymbol": "APT",
+  "minPrice": "4550706088261672250000",
+  "maxPrice": "4552518264785016750000",
+  "updatedAt": 1794780163317,
+  "timestamp": 1794780162
+ }
+]

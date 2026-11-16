@@ -1,0 +1,15 @@
+{
+  "tokens": [
+    {
+      "symbol": "APE",
+      "address": "0x7f9FBf9bDd3F4105C478b996B648FE6e828a1e98",
+      "decimals": 18
+    },
+    {
+      "symbol": "APT",
+      "address": "0x3f8f0dCE4dCE4d0D1d0871941e79CDA82cA50d0B",
+      "decimals": 8,
+      "synthetic": true
+    }
+  ]
+}

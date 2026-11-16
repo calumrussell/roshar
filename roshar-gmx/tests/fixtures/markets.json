@@ -1,0 +1,53 @@
+[
+ {
+  "symbol": "APT/USD [WETH-USDC]",
+  "marketTokenAddress": "0x66A69c8eb98A7efE22A22611d1967dfec786a708",
+  "indexTokenAddress": "0x3f8f0dCE4dCE4d0D1d0871941e79CDA82cA50d0B",
+  "longTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+  "shortTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  "isListed": true,
+  "isSpotOnly": false,
+  "leverageTiers": [
+   {
+    "maxLeverage": "1000000",
+    "minCollateralFactor": "10000000000000000000000000000"
+   }
+  ],
+  "minPositionSizeUsd": "1000000000000000000000000000000",
+  "minCollateralUsd": "1000000000000000000000000000000"
+ },
+ {
+  "symbol": "WLD/USD [WETH-USDC]",
+  "marketTokenAddress": "0x872b5D567a2469Ed92D252eaCB0EB3BB0769e05b",
+  "indexTokenAddress": "0x75B9AdD873641b253718810E6c65dB6d72311FD0",
+  "longTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+  "shortTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  "isListed": true,
+  "isSpotOnly": false,
+  "leverageTiers": [
+   {
+    "maxLeverage": "1000000",
+    "minCollateralFactor": "10000000000000000000000000000"
+   }
+  ],
+  "minPositionSizeUsd": "1000000000000000000000000000000",
+  "minCollateralUsd": "1000000000000000000000000000000"
+ },
+ {
+  "symbol": "SWAP-ONLY [USDC-USDT]",
+  "marketTokenAddress": "0xB686BcB112660343E6d15BDb65297e110C8311c4",
+  "indexTokenAddress": "0x0000000000000000000000000000000000000000",
+  "longTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  "shortTokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+  "isListed": true,
+  "isSpotOnly": true,
+  "leverageTiers": [
+   {
+    "maxLeverage": "1000000",
+    "minCollateralFactor": "0"
+   }
+  ],
+  "minPositionSizeUsd": "1000000000000000000000000000000",
+  "minCollateralUsd": "1000000000000000000000000000000"
+ }
+]

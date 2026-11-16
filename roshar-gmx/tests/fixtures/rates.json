@@ -1,0 +1,66 @@
+[
+ {
+  "marketAddress": "0x0Cf1fb4d1FF67A3D8Ca92c9d6643F8F9be8e03E5",
+  "ratesSnapshots": [
+   {
+    "netRateLong": "-4977022213987637328909",
+    "netRateShort": "2871562703040256954284",
+    "fundingRateLong": "-4977022213987637328909",
+    "fundingRateShort": "3853523842487443664990",
+    "borrowingRateLong": "0",
+    "borrowingRateShort": "981961139447186710706",
+    "timestamp": 1794776400
+   },
+   {
+    "netRateLong": "-9665717025983158229881",
+    "netRateShort": "11969398249476815210503",
+    "fundingRateLong": "-4994054107896856182784",
+    "fundingRateShort": "11969398249476815210503",
+    "borrowingRateLong": "4671662918086302047097",
+    "borrowingRateShort": "0",
+    "timestamp": 1794772800
+   },
+   {
+    "netRateLong": "-9642052243779648211240",
+    "netRateShort": "11969398249476815210503",
+    "fundingRateLong": "-4994054107896856182784",
+    "fundingRateShort": "11969398249476815210503",
+    "borrowingRateLong": "4647998135882792028456",
+    "borrowingRateShort": "0",
+    "timestamp": 1794769200
+   }
+  ]
+ },
+ {
+  "marketAddress": "0x1CbBa6346F110c8A5ea739ef2d1eb182990e4EB2",
+  "ratesSnapshots": [
+   {
+    "netRateLong": "-10654182861255137412712",
+    "netRateShort": "6983502325774215654930",
+    "fundingRateLong": "-4756468797564688269312",
+    "fundingRateShort": "6983502325774215654930",
+    "borrowingRateLong": "5897714063690449143400",
+    "borrowingRateShort": "0",
+    "timestamp": 1794776400
+   },
+   {
+    "netRateLong": "-10625271996707164396941",
+    "netRateShort": "6929398101652209819034",
+    "fundingRateLong": "-4756468797564688269312",
+    "fundingRateShort": "6929398101652209819034",
+    "borrowingRateLong": "5868803199142476127629",
+    "borrowingRateShort": "0",
+    "timestamp": 1794772800
+   },
+   {
+    "netRateLong": "-10625675865563205152608",
+    "netRateShort": "6929398101652209819034",
+    "fundingRateLong": "-4756468797564688269312",
+    "fundingRateShort": "6929398101652209819034",
+    "borrowingRateLong": "5869207067998516883296",
+    "borrowingRateShort": "0",
+    "timestamp": 1794769200
+   }
+  ]
+ }
+]
