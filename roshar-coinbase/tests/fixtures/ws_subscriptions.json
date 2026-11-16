@@ -1,0 +1,1 @@
+{"channel": "subscriptions", "timestamp": "2026-11-16T11:04:02.865271768Z", "sequence_num": 624, "events": [{"subscriptions": {"candles": ["BTC-USD", "ETH-USD"], "heartbeats": ["heartbeats"], "level2": ["ETH-USD", "BTC-USD"], "market_trades": ["ETH-USD", "BTC-USD"], "status": ["BTC-USD"], "ticker": ["BTC-USD"], "ticker_batch": ["BTC-USD", "ETH-USD"]}}]}

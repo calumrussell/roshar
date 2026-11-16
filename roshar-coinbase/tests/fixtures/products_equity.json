@@ -1,0 +1,499 @@
+{
+ "products": [
+  {
+   "product_id": "002dcca01362ae4b9295b0f32eb2fe89d2f93e739f791bae5ebde7b38c90d77d",
+   "price": "",
+   "price_percentage_change_24h": "",
+   "volume_24h": "",
+   "volume_percentage_change_24h": "",
+   "base_increment": "0.00001",
+   "quote_increment": "0.01",
+   "quote_min_size": "0.01",
+   "quote_max_size": "1000000000",
+   "base_min_size": "0.00001",
+   "base_max_size": "1000000000",
+   "base_name": "",
+   "quote_name": "",
+   "watched": false,
+   "is_disabled": false,
+   "new": false,
+   "status": "",
+   "cancel_only": false,
+   "limit_only": false,
+   "post_only": false,
+   "trading_disabled": false,
+   "auction_mode": false,
+   "product_type": "EQUITY",
+   "quote_currency_id": "USD",
+   "base_currency_id": "NINE",
+   "fcm_trading_session_details": null,
+   "mid_market_price": "",
+   "alias": "",
+   "alias_to": [],
+   "base_display_symbol": "",
+   "quote_display_symbol": "",
+   "view_only": false,
+   "price_increment": "0.01",
+   "display_name": "NINE ENERGY SERVICE INC COMMON STOCK",
+   "product_venue": "CCM",
+   "approximate_quote_24h_volume": "",
+   "new_at": null,
+   "market_cap": "",
+   "base_cbrn": "",
+   "quote_cbrn": "",
+   "product_cbrn": "",
+   "icon_color": "",
+   "icon_url": "",
+   "display_name_overwrite": "",
+   "is_alpha_testing": false,
+   "about_description": "",
+   "best_bid_price": "",
+   "best_ask_price": "",
+   "high_24h": "",
+   "low_24h": "",
+   "hidden_from_discovery": false,
+   "equity_product_details": {
+    "equity_subtype": "EQUITY_PRODUCT_SUBTYPE_COMMON_STOCK",
+    "fractionable": false,
+    "liquidate_only": true,
+    "ticker": "NINE",
+    "description": "NINE ENERGY SERVICE INC COMMON STOCK",
+    "trading_halted": false,
+    "trading_halted_start_time": null,
+    "trading_halted_end_time": null,
+    "open_price": "",
+    "volume_today": "",
+    "fractional_notional_min_size": "1",
+    "cik": "1532286",
+    "short_name": "Nine Energy Service",
+    "company_description": "Nine Energy Service Inc is a North American onshore completion and production services provider. It targets unconventional oil and gas resource development. The Company operates as one reportable segment, known as Completions Solutions. The Completions Solutions segment provides services and products integral to the completion of unconventional wells through a full range of tools and methodologies. These services and products are similar in purpose and end use by focusing on preparing and enabling a well to produce oil and gas and must be completed in order for a well to begin producing hydrocarbons. It operates in the U.S, Canada, and other countries where the majority of the revenue is generated from the United States.",
+    "company_website": "https://www.nineenergyservice.com",
+    "trading_day_info": {
+     "venue_id": "apex",
+     "date": "2026-11-16",
+     "trade_date_type": "TRADE_DATE_TYPE_REGULAR",
+     "holiday_name": "",
+     "version_id": "",
+     "trading_sessions": [
+      {
+       "session_type": "EQUITY_TRADING_SESSION_OVERNIGHT",
+       "session_start_time": "2026-11-16T01:00:00Z",
+       "session_end_time": "2026-11-16T09:00:00Z",
+       "support_fractional": false,
+       "limit_only": true
+      },
+      {
+       "session_type": "EQUITY_TRADING_SESSION_PRE_MARKET",
+       "session_start_time": "2026-11-16T09:00:00Z",
+       "session_end_time": "2026-11-16T14:30:00Z",
+       "support_fractional": false,
+       "limit_only": true
+      },
+      {
+       "session_type": "EQUITY_TRADING_SESSION_NORMAL",
+       "session_start_time": "2026-11-16T14:30:00Z",
+       "session_end_time": "2026-11-16T21:00:00Z",
+       "support_fractional": true,
+       "limit_only": false
+      },
+      {
+       "session_type": "EQUITY_TRADING_SESSION_AFTER_HOURS",
+       "session_start_time": "2026-11-16T21:00:00Z",
+       "session_end_time": "2026-11-17T00:44:30Z",
+       "support_fractional": false,
+       "limit_only": true
+      }
+     ],
+     "market_open_price": "",
+     "market_close_price": ""
+    },
+    "current_session": "EQUITY_TRADING_SESSION_PRE_MARKET",
+    "price_percentage_change_market_hours": "",
+    "price_percentage_change_extended_hours": "",
+    "opol": "XASE",
+    "price_percentage_change_market_close": "",
+    "last_market_day_close_price": "",
+    "current_market_day_close_price": "",
+    "recent_trading_days": {
+     "trading_days": [
+      {
+       "venue_id": "apex",
+       "date": "2026-11-16",
+       "trade_date_type": "TRADE_DATE_TYPE_REGULAR",
+       "holiday_name": "",
+       "version_id": "",
+       "trading_sessions": [
+        {
+         "session_type": "EQUITY_TRADING_SESSION_OVERNIGHT",
+         "session_start_time": "2026-11-16T01:00:00Z",
+         "session_end_time": "2026-11-16T09:00:00Z",
+         "support_fractional": false,
+         "limit_only": true
+        },
+        {
+         "session_type": "EQUITY_TRADING_SESSION_PRE_MARKET",
+         "session_start_time": "2026-11-16T09:00:00Z",
+         "session_end_time": "2026-11-16T14:30:00Z",
+         "support_fractional": false,
+         "limit_only": true
+        },
+        {
+         "session_type": "EQUITY_TRADING_SESSION_NORMAL",
+         "session_start_time": "2026-11-16T14:30:00Z",
+         "session_end_time": "2026-11-16T21:00:00Z",
+         "support_fractional": true,
+         "limit_only": false
+        },
+        {
+         "session_type": "EQUITY_TRADING_SESSION_AFTER_HOURS",
+         "session_start_time": "2026-11-16T21:00:00Z",
+         "session_end_time": "2026-11-17T00:44:30Z",
+         "support_fractional": false,
+         "limit_only": true
+        }
+       ],
+       "market_open_price": "",
+       "market_close_price": ""
+      }
+     ]
+    },
+    "equity_trading_flags": {
+     "tradable": true,
+     "searchable": true,
+     "buy_enabled": false,
+     "buy_whole_shares": false,
+     "buy_fractional_shares": false,
+     "buy_notional": false,
+     "sell_enabled": true,
+     "sell_whole_shares": true,
+     "sell_fractional_shares": true,
+     "sell_notional": false
+    },
+    "fundamentals": {
+     "industry": "N",
+     "employee_count": "1072",
+     "headquarters_location": "2001 Kirby Drive, Suite 200, Houston, TX, USA",
+     "year_founded": "2013",
+     "eps": "-0.36",
+     "pe_ratio": "",
+     "cik": "1532286",
+     "short_name": "Nine Energy Service",
+     "company_description": "Nine Energy Service Inc is a North American onshore completion and production services provider. It targets unconventional oil and gas resource development. The Company operates as one reportable segment, known as Completions Solutions. The Completions Solutions segment provides services and products integral to the completion of unconventional wells through a full range of tools and methodologies. These services and products are similar in purpose and end use by focusing on preparing and enabling a well to produce oil and gas and must be completed in order for a well to begin producing hydrocarbons. It operates in the U.S, Canada, and other countries where the majority of the revenue is generated from the United States.",
+     "company_website": "https://www.nineenergyservice.com",
+     "opol": "XASE",
+     "earnings": [
+      {
+       "reference_period": "Q4 2025",
+       "announcement_date": "2026-03-06",
+       "announce_time": "EARNINGS_ANNOUNCE_TIME_UNKNOWN",
+       "status": "EARNINGS_ANNOUNCEMENT_STATUS_ESTIMATED",
+       "eps": "-0.46",
+       "estimated_eps": "",
+       "reported_diluted_eps_final": "-0.46",
+       "adjusted_diluted_eps_final": "",
+       "currency_code": "USD",
+       "announcement_at": ""
+      }
+     ],
+     "quarterly_financials": [
+      {
+       "fiscal_period": "Q2 2025",
+       "period_end_date": "2025-06-30",
+       "total_revenue": "147251000",
+       "net_income": "-10391000",
+       "gross_profit": "17220000",
+       "net_margin": "-0.070567",
+       "currency_code": "USD"
+      }
+     ],
+     "annual_financials": [
+      {
+       "fiscal_period": "FY2021",
+       "period_end_date": "2021-12-31",
+       "total_revenue": "349419000",
+       "net_income": "-64575000",
+       "gross_profit": "-3594000",
+       "net_margin": "-0.184807",
+       "currency_code": "USD"
+      }
+     ],
+     "forward_dividend_yield": "",
+     "sector": "EQUITY_SECTOR_ENERGY",
+     "industry_code": "30910060",
+     "headquarters_city": "Houston",
+     "headquarters_state": "Texas",
+     "headquarters_state_code": "TX",
+     "eps_growth": "",
+     "industry_name": "Oil and Gas Equipment and Services"
+    },
+    "has_tradable_options": false,
+    "option_volume": "",
+    "ipo_details": null,
+    "available_target_sessions": [
+     {
+      "session_type": "EQUITY_TRADING_SESSION_MULTI_SESSION",
+      "session_start_time": "2026-11-16T01:00:00Z",
+      "session_end_time": "2026-11-17T00:44:30Z",
+      "support_fractional": false,
+      "limit_only": true
+     },
+     {
+      "session_type": "EQUITY_TRADING_SESSION_NORMAL",
+      "session_start_time": "2026-11-16T14:30:00Z",
+      "session_end_time": "2026-11-16T21:00:00Z",
+      "support_fractional": true,
+      "limit_only": false
+     }
+    ],
+    "put_call_ratio": "",
+    "volatility_30d": ""
+   }
+  },
+  {
+   "product_id": "2531a955360c3a2abe198e759e2ba19caf347f50df29f4e803c4420c32c433a6",
+   "price": "",
+   "price_percentage_change_24h": "",
+   "volume_24h": "",
+   "volume_percentage_change_24h": "",
+   "base_increment": "0.00001",
+   "quote_increment": "0.01",
+   "quote_min_size": "0.01",
+   "quote_max_size": "1000000000",
+   "base_min_size": "0.00001",
+   "base_max_size": "1000000000",
+   "base_name": "",
+   "quote_name": "",
+   "watched": false,
+   "is_disabled": false,
+   "new": false,
+   "status": "",
+   "cancel_only": false,
+   "limit_only": false,
+   "post_only": false,
+   "trading_disabled": false,
+   "auction_mode": false,
+   "product_type": "EQUITY",
+   "quote_currency_id": "USD",
+   "base_currency_id": "TJGC",
+   "fcm_trading_session_details": null,
+   "mid_market_price": "",
+   "alias": "",
+   "alias_to": [],
+   "base_display_symbol": "",
+   "quote_display_symbol": "",
+   "view_only": false,
+   "price_increment": "0.01",
+   "display_name": "TJGC GROUP LTD ORD CL A SHS",
+   "product_venue": "CCM",
+   "approximate_quote_24h_volume": "",
+   "new_at": null,
+   "market_cap": "",
+   "base_cbrn": "",
+   "quote_cbrn": "",
+   "product_cbrn": "",
+   "icon_color": "",
+   "icon_url": "",
+   "display_name_overwrite": "",
+   "is_alpha_testing": false,
+   "about_description": "",
+   "best_bid_price": "",
+   "best_ask_price": "",
+   "high_24h": "",
+   "low_24h": "",
+   "hidden_from_discovery": false,
+   "equity_product_details": {
+    "equity_subtype": "EQUITY_PRODUCT_SUBTYPE_COMMON_STOCK",
+    "fractionable": false,
+    "liquidate_only": true,
+    "ticker": "TJGC",
+    "description": "TJGC GROUP LTD ORD CL A SHS",
+    "trading_halted": true,
+    "trading_halted_start_time": "2026-10-14T23:50:00Z",
+    "trading_halted_end_time": null,
+    "open_price": "",
+    "volume_today": "",
+    "fractional_notional_min_size": "1",
+    "cik": "1969928",
+    "short_name": "TJGC Group",
+    "company_description": "TJGC Group Ltd is a holding company which is principally engaged in one-stop game advertising. It provide services to mobile game developers, principally developers of mobile gaming applications or apps that gamers download from the developers websites and applicable mobile operating systems, such as Apple Store or Android Google Play Store. It provide one-stop advertising services to its clients throughout the entire advertising process, which comprises the planning, creating, launching, managing and performance monitoring of the advertisements. It has its in-house design and production team to design, create, edit and produce the art and design of various kinds of advertisement materials in different designs, layouts and formats, which include principally digital content.",
+    "company_website": "http://www.ctrl-media.com",
+    "trading_day_info": {
+     "venue_id": "apex",
+     "date": "2026-11-16",
+     "trade_date_type": "TRADE_DATE_TYPE_REGULAR",
+     "holiday_name": "",
+     "version_id": "",
+     "trading_sessions": [
+      {
+       "session_type": "EQUITY_TRADING_SESSION_OVERNIGHT",
+       "session_start_time": "2026-11-16T01:00:00Z",
+       "session_end_time": "2026-11-16T09:00:00Z",
+       "support_fractional": false,
+       "limit_only": true
+      },
+      {
+       "session_type": "EQUITY_TRADING_SESSION_PRE_MARKET",
+       "session_start_time": "2026-11-16T09:00:00Z",
+       "session_end_time": "2026-11-16T14:30:00Z",
+       "support_fractional": false,
+       "limit_only": true
+      },
+      {
+       "session_type": "EQUITY_TRADING_SESSION_NORMAL",
+       "session_start_time": "2026-11-16T14:30:00Z",
+       "session_end_time": "2026-11-16T21:00:00Z",
+       "support_fractional": true,
+       "limit_only": false
+      },
+      {
+       "session_type": "EQUITY_TRADING_SESSION_AFTER_HOURS",
+       "session_start_time": "2026-11-16T21:00:00Z",
+       "session_end_time": "2026-11-17T00:44:30Z",
+       "support_fractional": false,
+       "limit_only": true
+      }
+     ],
+     "market_open_price": "",
+     "market_close_price": ""
+    },
+    "current_session": "EQUITY_TRADING_SESSION_PRE_MARKET",
+    "price_percentage_change_market_hours": "",
+    "price_percentage_change_extended_hours": "",
+    "opol": "XNAS",
+    "price_percentage_change_market_close": "",
+    "last_market_day_close_price": "",
+    "current_market_day_close_price": "",
+    "recent_trading_days": {
+     "trading_days": [
+      {
+       "venue_id": "apex",
+       "date": "2026-11-16",
+       "trade_date_type": "TRADE_DATE_TYPE_REGULAR",
+       "holiday_name": "",
+       "version_id": "",
+       "trading_sessions": [
+        {
+         "session_type": "EQUITY_TRADING_SESSION_OVERNIGHT",
+         "session_start_time": "2026-11-16T01:00:00Z",
+         "session_end_time": "2026-11-16T09:00:00Z",
+         "support_fractional": false,
+         "limit_only": true
+        },
+        {
+         "session_type": "EQUITY_TRADING_SESSION_PRE_MARKET",
+         "session_start_time": "2026-11-16T09:00:00Z",
+         "session_end_time": "2026-11-16T14:30:00Z",
+         "support_fractional": false,
+         "limit_only": true
+        },
+        {
+         "session_type": "EQUITY_TRADING_SESSION_NORMAL",
+         "session_start_time": "2026-11-16T14:30:00Z",
+         "session_end_time": "2026-11-16T21:00:00Z",
+         "support_fractional": true,
+         "limit_only": false
+        },
+        {
+         "session_type": "EQUITY_TRADING_SESSION_AFTER_HOURS",
+         "session_start_time": "2026-11-16T21:00:00Z",
+         "session_end_time": "2026-11-17T00:44:30Z",
+         "support_fractional": false,
+         "limit_only": true
+        }
+       ],
+       "market_open_price": "",
+       "market_close_price": ""
+      }
+     ]
+    },
+    "equity_trading_flags": {
+     "tradable": true,
+     "searchable": true,
+     "buy_enabled": true,
+     "buy_whole_shares": true,
+     "buy_fractional_shares": false,
+     "buy_notional": false,
+     "sell_enabled": true,
+     "sell_whole_shares": true,
+     "sell_fractional_shares": true,
+     "sell_notional": false
+    },
+    "fundamentals": {
+     "industry": "N",
+     "employee_count": "28",
+     "headquarters_location": "41 Man Yue Street, Unit F, 12 floor, Kaiser Estate, Phase 1, Hunghom, Kowloon, Hong Kong, HKG",
+     "year_founded": "2014",
+     "eps": "",
+     "pe_ratio": "",
+     "cik": "1969928",
+     "short_name": "TJGC Group",
+     "company_description": "TJGC Group Ltd is a holding company which is principally engaged in one-stop game advertising. It provide services to mobile game developers, principally developers of mobile gaming applications or apps that gamers download from the developers websites and applicable mobile operating systems, such as Apple Store or Android Google Play Store. It provide one-stop advertising services to its clients throughout the entire advertising process, which comprises the planning, creating, launching, managing and performance monitoring of the advertisements. It has its in-house design and production team to design, create, edit and produce the art and design of various kinds of advertisement materials in different designs, layouts and formats, which include principally digital content.",
+     "company_website": "http://www.ctrl-media.com",
+     "opol": "XNAS",
+     "earnings": [
+      {
+       "reference_period": "Q2 2026",
+       "announcement_date": "2026-04-13",
+       "announce_time": "EARNINGS_ANNOUNCE_TIME_UNKNOWN",
+       "status": "EARNINGS_ANNOUNCEMENT_STATUS_ESTIMATED",
+       "eps": "",
+       "estimated_eps": "",
+       "reported_diluted_eps_final": "",
+       "adjusted_diluted_eps_final": "",
+       "currency_code": "",
+       "announcement_at": ""
+      }
+     ],
+     "quarterly_financials": [],
+     "annual_financials": [
+      {
+       "fiscal_period": "FY2022",
+       "period_end_date": "2022-03-31",
+       "total_revenue": "51348004",
+       "net_income": "6789118",
+       "gross_profit": "12041716",
+       "net_margin": "0.132218",
+       "currency_code": "HKD"
+      }
+     ],
+     "forward_dividend_yield": "",
+     "sector": "EQUITY_SECTOR_COMMUNICATION_SERVICES",
+     "industry_code": "30820010",
+     "headquarters_city": "",
+     "headquarters_state": "",
+     "headquarters_state_code": "",
+     "eps_growth": "",
+     "industry_name": "Advertising Agencies"
+    },
+    "has_tradable_options": false,
+    "option_volume": "",
+    "ipo_details": null,
+    "available_target_sessions": [
+     {
+      "session_type": "EQUITY_TRADING_SESSION_MULTI_SESSION",
+      "session_start_time": "2026-11-16T01:00:00Z",
+      "session_end_time": "2026-11-17T00:44:30Z",
+      "support_fractional": false,
+      "limit_only": true
+     },
+     {
+      "session_type": "EQUITY_TRADING_SESSION_NORMAL",
+      "session_start_time": "2026-11-16T14:30:00Z",
+      "session_end_time": "2026-11-16T21:00:00Z",
+      "support_fractional": true,
+      "limit_only": false
+     }
+    ],
+    "put_call_ratio": "",
+    "volatility_30d": ""
+   }
+  }
+ ],
+ "num_products": 1000,
+ "pagination": {
+  "prev_cursor": "",
+  "next_cursor": "cHJvZHVjdHNfY3Vyc29yOjhkMjJlYjIzZTZiNDJjN2Y2ZjUwZjEwMGFhZDVlYjZlOWJmZGM2NmUwYmE1ODY3YjVhY2U1Mzg2MGNmYzMzYmY=",
+  "has_next": true,
+  "has_prev": false
+ }
+}
