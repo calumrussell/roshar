@@ -1,0 +1,19 @@
+{
+ "status": "ok",
+ "response": {
+  "statuses": [
+   {
+    "filled": {
+     "order": {
+      "venueId": "1948058938469519361",
+      "clientId": "cli-1948058938469519361"
+     },
+     "id": "1948058938469519361",
+     "avgPrice": "50001.25",
+     "totalSize": "0.1"
+    }
+   }
+  ]
+ },
+ "requestId": "5ccf215d37e3ae6d"
+}

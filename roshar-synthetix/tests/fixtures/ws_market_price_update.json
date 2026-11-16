@@ -1,0 +1,1 @@
+{"method":"market_price_update","channel":"marketPriceUpdate","isSnapshot":true,"data":{"symbol":"BTC-USDT","price":"65023","lastUpdateTime":"2026-11-15T22:02:35.160871781Z","updateType":"index"},"seq":1533111,"timestamp":1794780155439}

@@ -1,0 +1,24 @@
+{
+ "status": "ok",
+ "response": {
+  "delegatedSigners": [
+   {
+    "subAccountId": "1867542890123456789",
+    "walletAddress": "0x742d35Cc6634C0532925a3b844Bc9e7595f89590",
+    "permissions": [
+     "session"
+    ],
+    "expiresAt": null
+   },
+   {
+    "subAccountId": "1867542890123456789",
+    "walletAddress": "0x8B3a9A6F8D1e2C4E5B7A9D0F1C3E5A7B9D1F3E5A",
+    "permissions": [
+     "delegate"
+    ],
+    "expiresAt": 1767225600000
+   }
+  ]
+ },
+ "request_id": "5ccf215d37e3ae6d"
+}

@@ -1,0 +1,69 @@
+{
+ "status": "ok",
+ "response": [
+  {
+   "order": {
+    "venueId": "1958787130134106112",
+    "clientId": "cli-1958787130134106112"
+   },
+   "orderId": "1958787130134106112",
+   "symbol": "BTC-USDT",
+   "side": "buy",
+   "type": "LIMIT",
+   "status": "FILLED",
+   "quantity": "0.1",
+   "price": "45000.00",
+   "timeInForce": "GTC",
+   "createdTime": 1755846234000,
+   "updateTime": 1755846290000,
+   "filledQuantity": "0.1",
+   "filledPrice": "44998.50",
+   "triggeredByLiquidation": false,
+   "reduceOnly": false,
+   "postOnly": false
+  },
+  {
+   "order": {
+    "venueId": "1958787130134106113",
+    "clientId": "cli-1958787130134106113"
+   },
+   "orderId": "1958787130134106113",
+   "symbol": "ETH-USDT",
+   "side": "sell",
+   "type": "LIMIT",
+   "status": "PARTIALLY_FILLED",
+   "quantity": "2.0",
+   "price": "2800.00",
+   "timeInForce": "GTC",
+   "reduceOnly": false,
+   "postOnly": false,
+   "createdTime": 1755846235000,
+   "updateTime": 1755846291000,
+   "filledQuantity": "0.5",
+   "filledPrice": "2801.25",
+   "triggeredByLiquidation": false
+  },
+  {
+   "order": {
+    "venueId": "1958787130134106114",
+    "clientId": "cli-1958787130134106114"
+   },
+   "orderId": "1958787130134106114",
+   "symbol": "BTC-USDT",
+   "side": "buy",
+   "type": "LIMIT",
+   "status": "NEW",
+   "timeInForce": "GTC",
+   "quantity": "0.05",
+   "price": "44000.00",
+   "reduceOnly": false,
+   "postOnly": false,
+   "createdTime": 1755846236000,
+   "updateTime": 1755846236000,
+   "filledQuantity": "0.0",
+   "filledPrice": "0.0",
+   "triggeredByLiquidation": false
+  }
+ ],
+ "request_id": "5ccf215d37e3ae6d"
+}

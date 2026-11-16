@@ -1,0 +1,57 @@
+{
+ "status": "ok",
+ "response": [
+  {
+   "adlBucket": 1,
+   "positionId": "pos_12345",
+   "subAccountId": "1867542890123456789",
+   "symbol": "ETH-USDT",
+   "side": "long",
+   "entryPrice": "3000.00",
+   "quantity": "0.5000",
+   "realizedPnl": "150.00",
+   "unrealizedPnl": "0.00",
+   "usedMargin": "0.00",
+   "maintenanceMargin": "0.00",
+   "liquidationPrice": "0.00",
+   "status": "close",
+   "netFunding": "8.50",
+   "takeProfitOrders": [],
+   "takeProfitOrderIds": [],
+   "stopLossOrders": [],
+   "stopLossOrderIds": [],
+   "updatedAt": 1735689600000,
+   "createdAt": 1735686000000
+  },
+  {
+   "adlBucket": 4,
+   "positionId": "pos_12346",
+   "subAccountId": "1867542890123456789",
+   "symbol": "BTC-USDT",
+   "side": "short",
+   "entryPrice": "42000.00",
+   "quantity": "0.1000",
+   "realizedPnl": "0.00",
+   "unrealizedPnl": "-12.50",
+   "usedMargin": "840.00",
+   "maintenanceMargin": "420.00",
+   "liquidationPrice": "45000.00",
+   "status": "open",
+   "netFunding": "8.50",
+   "takeProfitOrders": [],
+   "takeProfitOrderIds": [],
+   "stopLossOrders": [
+    {
+     "venueId": "2026771048053084162",
+     "clientId": "cli-sl_002"
+    }
+   ],
+   "stopLossOrderIds": [
+    "2026771048053084162"
+   ],
+   "updatedAt": 1735689600000,
+   "createdAt": 1735680000000
+  }
+ ],
+ "request_id": "5ccf215d37e3ae6d"
+}

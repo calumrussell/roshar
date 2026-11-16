@@ -1,0 +1,1 @@
+{"id":"getSubAccountIdsDeleg","ipRateLimit":{"requestsCap":10000,"remainingTokens":9750},"requestId":"getSubAccountIdsDeleg","result":{"response":{"delegatedSubAccountIds":[],"managedSubAccountIds":[],"subAccountIds":[]},"status":"success"},"status":200,"timestamp":1794826918949}

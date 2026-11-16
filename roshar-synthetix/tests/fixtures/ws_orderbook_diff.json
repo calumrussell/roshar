@@ -1,0 +1,1 @@
+{"method":"orderbook_depth_update","channel":"orderbookUpdate","meseq":1473612,"prevMeseq":1473608,"met":"1794780159188839","checksum":"80d2afae","type":"diff","data":{"symbol":"BTC-USDT","bids":[{"price":"64969","quantity":"0.01537"},{"price":"64955","quantity":"0"}],"asks":[{"price":"65073","quantity":"0.01537"},{"price":"65059","quantity":"0"}]},"timestamp":1794780159216}

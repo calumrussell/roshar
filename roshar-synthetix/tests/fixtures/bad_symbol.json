@@ -1,0 +1,1 @@
+{"status":"error","error":{"code":"VALIDATION_ERROR","category":"REQUEST","message":"unknown market","retryable":false,"details":{"symbol":"NOPE-USDT"}},"ipRateLimit":{"requestsCap":10000,"remainingTokens":9800},"timestamp":1794779945923}

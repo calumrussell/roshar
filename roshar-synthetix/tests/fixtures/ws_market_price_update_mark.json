@@ -1,0 +1,1 @@
+{"method":"market_price_update","channel":"marketPriceUpdate","data":{"symbol":"BTC-USDT","price":"64541","lastUpdateTime":"2026-11-16T11:04:58.160635902Z","updateType":"mark","fundingRate":"0.0000123661257023817","nextFundingTime":1794830400000},"seq":1673949,"timestamp":1794827101161}

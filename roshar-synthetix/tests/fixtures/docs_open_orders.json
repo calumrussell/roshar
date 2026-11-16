@@ -1,0 +1,80 @@
+{
+ "status": "ok",
+ "response": [
+  {
+   "order": {
+    "venueId": "1958787130134106112",
+    "clientId": "cli-1958787130134106112"
+   },
+   "orderId": "1958787130134106112",
+   "symbol": "BTC-USDT",
+   "side": "buy",
+   "type": "LIMIT",
+   "quantity": "0.1",
+   "price": "45000.00",
+   "triggerPrice": "",
+   "triggerPriceType": "",
+   "timeInForce": "GTC",
+   "reduceOnly": false,
+   "postOnly": false,
+   "closePosition": false,
+   "createdTime": 1755846234000,
+   "updatedTime": 1755846234000,
+   "filledQuantity": "0.0",
+   "takeProfitOrder": {
+    "venueId": "1958787130134106115",
+    "clientId": "cli-1958787130134106115"
+   },
+   "takeProfitOrderId": "1958787130134106115",
+   "stopLossOrder": {
+    "venueId": "1958787130134106116",
+    "clientId": "cli-1958787130134106116"
+   },
+   "stopLossOrderId": "1958787130134106116"
+  },
+  {
+   "order": {
+    "venueId": "1958787130134106113",
+    "clientId": "cli-1958787130134106113"
+   },
+   "orderId": "1958787130134106113",
+   "symbol": "ETH-USDT",
+   "side": "sell",
+   "type": "limit",
+   "quantity": "2.0",
+   "price": "2800.00",
+   "triggerPrice": "",
+   "triggerPriceType": "",
+   "timeInForce": "GTC",
+   "reduceOnly": false,
+   "postOnly": true,
+   "closePosition": false,
+   "createdTime": 1755846235000,
+   "updatedTime": 1755846235000,
+   "filledQuantity": "0.5"
+  },
+  {
+   "order": {
+    "venueId": "1958787130134106120",
+    "clientId": "cli-1958787130134106120"
+   },
+   "orderId": "1958787130134106120",
+   "symbol": "BTC-USDT",
+   "side": "buy",
+   "type": "limit",
+   "quantity": "1.0",
+   "price": "45000.00",
+   "triggerPrice": "",
+   "triggerPriceType": "",
+   "timeInForce": "GTC",
+   "reduceOnly": false,
+   "postOnly": false,
+   "closePosition": false,
+   "createdTime": 1755846236000,
+   "updatedTime": 1755846240000,
+   "filledQuantity": "0.5",
+   "expiresAt": 1755850000000
+  }
+ ],
+ "request_id": "5ccf215d37e3ae6d"
+}

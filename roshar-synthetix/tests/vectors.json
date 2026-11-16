@@ -1,0 +1,688 @@
+{
+ "sdk": "synthetix-sdk 0.7.0",
+ "eth_account": "0.13.7",
+ "private_key": "0x88bee5c0b79b307b5d6f7f10cf08a4f4ec280b92677aa274e55511ae80d0466d",
+ "address": "0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F",
+ "vectors": [
+  {
+   "name": "place_limit_gtc_post_only_cloid",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000001,
+   "expires_after": 1794780060001,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "buy",
+      "orderType": "limitGtc",
+      "price": "64990.5",
+      "triggerPrice": "",
+      "quantity": "0.0015",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "0x0123456789abcdef0123456789abcdef",
+      "closePosition": false,
+      "postOnly": true
+     }
+    ],
+    "grouping": "na"
+   },
+   "digest": "0x72d69120ca22f5c45106046b2589f7272c77f7a19fee51109f912f9524cbd873",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x1128a8c5aa214bfb8cb609936e85be45b65f62e42b2ffe6d682d5674dd6e5641\",\"s\":\"0x32c2e81bf715680522bd0055bbcf4a7cfb011fd2875d20242ae0a225db4cb4a6\"},\"nonce\":1794780000001,\"expiresAfter\":1794780060001,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"limitGtc\",\"price\":\"64990.5\",\"triggerPrice\":\"\",\"quantity\":\"0.0015\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"0x0123456789abcdef0123456789abcdef\",\"closePosition\":false,\"postOnly\":true}],\"grouping\":\"na\"}}",
+   "ws_post": "{\"id\":\"place_limit_gtc_post_only_cloid\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"limitGtc\",\"price\":\"64990.5\",\"triggerPrice\":\"\",\"quantity\":\"0.0015\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"0x0123456789abcdef0123456789abcdef\",\"closePosition\":false,\"postOnly\":true}],\"grouping\":\"na\",\"signature\":{\"v\":27,\"r\":\"0x1128a8c5aa214bfb8cb609936e85be45b65f62e42b2ffe6d682d5674dd6e5641\",\"s\":\"0x32c2e81bf715680522bd0055bbcf4a7cfb011fd2875d20242ae0a225db4cb4a6\"},\"nonce\":1794780000001,\"expiresAfter\":1794780060001}}"
+  },
+  {
+   "name": "place_limit_ioc_reduce_only",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000002,
+   "expires_after": 1794780060002,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "sell",
+      "orderType": "limitIoc",
+      "price": "65100",
+      "triggerPrice": "",
+      "quantity": "0.25",
+      "reduceOnly": true,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false
+     }
+    ],
+    "grouping": "na"
+   },
+   "digest": "0x4ad45bad92fc5a4bbcf5065079211c61a45582e4be044b2e099fb509d48e4779",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x95eb63474798467d71c9376d82aab8bedf694b0d3580fe0b5fd5be364300f78d\",\"s\":\"0x29794988dd58e39d122b49844dadfbebfe7992cde5d10061f6a146883f5e4b3c\"},\"nonce\":1794780000002,\"expiresAfter\":1794780060002,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"limitIoc\",\"price\":\"65100\",\"triggerPrice\":\"\",\"quantity\":\"0.25\",\"reduceOnly\":true,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\"}}",
+   "ws_post": "{\"id\":\"place_limit_ioc_reduce_only\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"limitIoc\",\"price\":\"65100\",\"triggerPrice\":\"\",\"quantity\":\"0.25\",\"reduceOnly\":true,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\",\"signature\":{\"v\":28,\"r\":\"0x95eb63474798467d71c9376d82aab8bedf694b0d3580fe0b5fd5be364300f78d\",\"s\":\"0x29794988dd58e39d122b49844dadfbebfe7992cde5d10061f6a146883f5e4b3c\"},\"nonce\":1794780000002,\"expiresAfter\":1794780060002}}"
+  },
+  {
+   "name": "place_market",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000003,
+   "expires_after": 1794780060003,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "ETH-USDT",
+      "side": "buy",
+      "orderType": "market",
+      "price": "",
+      "triggerPrice": "",
+      "quantity": "1.2345",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false
+     }
+    ],
+    "grouping": "na"
+   },
+   "digest": "0x68441f2eb1cd08da5adc1e6893d8fc661c0b278542b6d6b1914c1643ff2b6342",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0xe0b4592b9ac5b0b3e70a75d28222b7109a7e1b2c09bbca7db5e0b2d89b2aa589\",\"s\":\"0x6e2717cbf0da9a4efbb163eda7be9cda81377f32f7b09830dee5fb9bba92ef5b\"},\"nonce\":1794780000003,\"expiresAfter\":1794780060003,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"ETH-USDT\",\"side\":\"buy\",\"orderType\":\"market\",\"price\":\"\",\"triggerPrice\":\"\",\"quantity\":\"1.2345\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\"}}",
+   "ws_post": "{\"id\":\"place_market\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"ETH-USDT\",\"side\":\"buy\",\"orderType\":\"market\",\"price\":\"\",\"triggerPrice\":\"\",\"quantity\":\"1.2345\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\",\"signature\":{\"v\":27,\"r\":\"0xe0b4592b9ac5b0b3e70a75d28222b7109a7e1b2c09bbca7db5e0b2d89b2aa589\",\"s\":\"0x6e2717cbf0da9a4efbb163eda7be9cda81377f32f7b09830dee5fb9bba92ef5b\"},\"nonce\":1794780000003,\"expiresAfter\":1794780060003}}"
+  },
+  {
+   "name": "place_limit_alo",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000004,
+   "expires_after": 1794780060004,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "SOL-USDT",
+      "side": "buy",
+      "orderType": "limitAlo",
+      "price": "72.03",
+      "triggerPrice": "",
+      "quantity": "10",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false
+     }
+    ],
+    "grouping": "na"
+   },
+   "digest": "0xbc30b33f575550763b711a77e461cf01adeae195b3457897431ff58e424cb411",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x1077e7dacd2eac1530f2f2501ce5423ce570ab2948fd5703d82d8e349b12f5c3\",\"s\":\"0x7e4062457549df8006ad79975a9987414f33b6b5978643f19744e662755cc049\"},\"nonce\":1794780000004,\"expiresAfter\":1794780060004,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"SOL-USDT\",\"side\":\"buy\",\"orderType\":\"limitAlo\",\"price\":\"72.03\",\"triggerPrice\":\"\",\"quantity\":\"10\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\"}}",
+   "ws_post": "{\"id\":\"place_limit_alo\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"SOL-USDT\",\"side\":\"buy\",\"orderType\":\"limitAlo\",\"price\":\"72.03\",\"triggerPrice\":\"\",\"quantity\":\"10\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\",\"signature\":{\"v\":27,\"r\":\"0x1077e7dacd2eac1530f2f2501ce5423ce570ab2948fd5703d82d8e349b12f5c3\",\"s\":\"0x7e4062457549df8006ad79975a9987414f33b6b5978643f19744e662755cc049\"},\"nonce\":1794780000004,\"expiresAfter\":1794780060004}}"
+  },
+  {
+   "name": "place_limit_gtd",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000005,
+   "expires_after": 1794780060005,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "buy",
+      "orderType": "limitGtd",
+      "price": "60000",
+      "triggerPrice": "",
+      "quantity": "0.01",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false,
+      "postOnly": true,
+      "expiresAt": 1794780600
+     }
+    ],
+    "grouping": "na"
+   },
+   "digest": "0xbe267ea29737ece289c79e9eebffd613e1cd23732022d28b86377dc63cf55441",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0xb53d7d1b05eb9e847aa518a52a5043b1603943d1d4df746c5aa45469964d31f6\",\"s\":\"0x03ed4dbed9183b6e93fdc691ee07e9102105c0f9e3273d3640a632e380a5d1c3\"},\"nonce\":1794780000005,\"expiresAfter\":1794780060005,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"limitGtd\",\"price\":\"60000\",\"triggerPrice\":\"\",\"quantity\":\"0.01\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false,\"postOnly\":true,\"expiresAt\":1794780600}],\"grouping\":\"na\"}}",
+   "ws_post": "{\"id\":\"place_limit_gtd\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"limitGtd\",\"price\":\"60000\",\"triggerPrice\":\"\",\"quantity\":\"0.01\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false,\"postOnly\":true,\"expiresAt\":1794780600}],\"grouping\":\"na\",\"signature\":{\"v\":27,\"r\":\"0xb53d7d1b05eb9e847aa518a52a5043b1603943d1d4df746c5aa45469964d31f6\",\"s\":\"0x03ed4dbed9183b6e93fdc691ee07e9102105c0f9e3273d3640a632e380a5d1c3\"},\"nonce\":1794780000005,\"expiresAfter\":1794780060005}}"
+  },
+  {
+   "name": "place_batch_mixed",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000006,
+   "expires_after": 1794780060006,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "buy",
+      "orderType": "limitGtc",
+      "price": "49000.00",
+      "triggerPrice": "",
+      "quantity": "0.05",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "0xfedcba9876543210fedcba9876543210",
+      "closePosition": false
+     },
+     {
+      "symbol": "BTC-USDT",
+      "side": "sell",
+      "orderType": "triggerSl",
+      "price": "",
+      "triggerPrice": "45000",
+      "quantity": "0.15",
+      "reduceOnly": true,
+      "isTriggerMarket": true,
+      "clientOrderId": "",
+      "closePosition": false
+     },
+     {
+      "symbol": "ETH-USDT",
+      "side": "sell",
+      "orderType": "limitGtc",
+      "price": "2800.00",
+      "triggerPrice": "",
+      "quantity": "2.0",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false
+     }
+    ],
+    "grouping": "na"
+   },
+   "digest": "0x4fc8bdbf802a022a05c3ea8e80b58cdb3245e53d3b2b9f0b9ce7d4dde046e3ee",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x1d884d768cfae89c6899c4968932eb1d0aede3ab3f60001ae941eb5d9638aaa1\",\"s\":\"0x52adc71ba61afafe228668798324bb0625b4eefdf317f0f423841e88e3122616\"},\"nonce\":1794780000006,\"expiresAfter\":1794780060006,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"limitGtc\",\"price\":\"49000.00\",\"triggerPrice\":\"\",\"quantity\":\"0.05\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"0xfedcba9876543210fedcba9876543210\",\"closePosition\":false},{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"triggerSl\",\"price\":\"\",\"triggerPrice\":\"45000\",\"quantity\":\"0.15\",\"reduceOnly\":true,\"isTriggerMarket\":true,\"clientOrderId\":\"\",\"closePosition\":false},{\"symbol\":\"ETH-USDT\",\"side\":\"sell\",\"orderType\":\"limitGtc\",\"price\":\"2800.00\",\"triggerPrice\":\"\",\"quantity\":\"2.0\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\"}}",
+   "ws_post": "{\"id\":\"place_batch_mixed\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"limitGtc\",\"price\":\"49000.00\",\"triggerPrice\":\"\",\"quantity\":\"0.05\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"0xfedcba9876543210fedcba9876543210\",\"closePosition\":false},{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"triggerSl\",\"price\":\"\",\"triggerPrice\":\"45000\",\"quantity\":\"0.15\",\"reduceOnly\":true,\"isTriggerMarket\":true,\"clientOrderId\":\"\",\"closePosition\":false},{\"symbol\":\"ETH-USDT\",\"side\":\"sell\",\"orderType\":\"limitGtc\",\"price\":\"2800.00\",\"triggerPrice\":\"\",\"quantity\":\"2.0\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false}],\"grouping\":\"na\",\"signature\":{\"v\":28,\"r\":\"0x1d884d768cfae89c6899c4968932eb1d0aede3ab3f60001ae941eb5d9638aaa1\",\"s\":\"0x52adc71ba61afafe228668798324bb0625b4eefdf317f0f423841e88e3122616\"},\"nonce\":1794780000006,\"expiresAfter\":1794780060006}}"
+  },
+  {
+   "name": "place_position_tpsl",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000007,
+   "expires_after": 1794780060007,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "sell",
+      "orderType": "triggerTp",
+      "price": "70000",
+      "triggerPrice": "70100",
+      "quantity": "0",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": true
+     },
+     {
+      "symbol": "BTC-USDT",
+      "side": "sell",
+      "orderType": "triggerSl",
+      "price": "",
+      "triggerPrice": "60000",
+      "quantity": "0",
+      "reduceOnly": false,
+      "isTriggerMarket": true,
+      "clientOrderId": "",
+      "closePosition": true
+     }
+    ],
+    "grouping": "positionTpsl"
+   },
+   "digest": "0xbdbf71edf6581bf7aa27ded1f1120e3ee41641a09d9678990b473605263b67e4",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0xfd529b392d4dcc2d92bec7dc98196aac3d092ebd04ac32083ab49d2522eb08ad\",\"s\":\"0x161cdb0689290cf04c2c3b861f915cb724d594b28ab869592a1a4057cd362dfa\"},\"nonce\":1794780000007,\"expiresAfter\":1794780060007,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"triggerTp\",\"price\":\"70000\",\"triggerPrice\":\"70100\",\"quantity\":\"0\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":true},{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"triggerSl\",\"price\":\"\",\"triggerPrice\":\"60000\",\"quantity\":\"0\",\"reduceOnly\":false,\"isTriggerMarket\":true,\"clientOrderId\":\"\",\"closePosition\":true}],\"grouping\":\"positionTpsl\"}}",
+   "ws_post": "{\"id\":\"place_position_tpsl\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"triggerTp\",\"price\":\"70000\",\"triggerPrice\":\"70100\",\"quantity\":\"0\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":true},{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"triggerSl\",\"price\":\"\",\"triggerPrice\":\"60000\",\"quantity\":\"0\",\"reduceOnly\":false,\"isTriggerMarket\":true,\"clientOrderId\":\"\",\"closePosition\":true}],\"grouping\":\"positionTpsl\",\"signature\":{\"v\":27,\"r\":\"0xfd529b392d4dcc2d92bec7dc98196aac3d092ebd04ac32083ab49d2522eb08ad\",\"s\":\"0x161cdb0689290cf04c2c3b861f915cb724d594b28ab869592a1a4057cd362dfa\"},\"nonce\":1794780000007,\"expiresAfter\":1794780060007}}"
+  },
+  {
+   "name": "place_twap",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000008,
+   "expires_after": 1794780060008,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "buy",
+      "orderType": "twap",
+      "price": "",
+      "triggerPrice": "",
+      "quantity": "1.5",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false,
+      "durationSeconds": 3600,
+      "intervalSeconds": 60,
+      "intervalVarianceBps": 1000,
+      "sizeVarianceBps": 2000
+     }
+    ],
+    "grouping": "twap"
+   },
+   "digest": "0x36bae458f75e869a364c4a5a6e3d275919b3bfa9b629c114fc6648b06f93a6a6",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0xbc5806237e633a5857b746b613af43a09642014f1a3cad4dce4e980eda910022\",\"s\":\"0x1db459e2d52f29c4fc9d1d3a548c342b94aabc40efcece5ef455a5d8feaf72ab\"},\"nonce\":1794780000008,\"expiresAfter\":1794780060008,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"twap\",\"price\":\"\",\"triggerPrice\":\"\",\"quantity\":\"1.5\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false,\"durationSeconds\":3600,\"intervalSeconds\":60,\"intervalVarianceBps\":1000,\"sizeVarianceBps\":2000}],\"grouping\":\"twap\"}}",
+   "ws_post": "{\"id\":\"place_twap\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"buy\",\"orderType\":\"twap\",\"price\":\"\",\"triggerPrice\":\"\",\"quantity\":\"1.5\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false,\"durationSeconds\":3600,\"intervalSeconds\":60,\"intervalVarianceBps\":1000,\"sizeVarianceBps\":2000}],\"grouping\":\"twap\",\"signature\":{\"v\":27,\"r\":\"0xbc5806237e633a5857b746b613af43a09642014f1a3cad4dce4e980eda910022\",\"s\":\"0x1db459e2d52f29c4fc9d1d3a548c342b94aabc40efcece5ef455a5d8feaf72ab\"},\"nonce\":1794780000008,\"expiresAfter\":1794780060008}}"
+  },
+  {
+   "name": "place_twap_minimal",
+   "kind": "place_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000009,
+   "expires_after": 1794780060009,
+   "inputs": {
+    "orders": [
+     {
+      "symbol": "BTC-USDT",
+      "side": "sell",
+      "orderType": "twap",
+      "price": "66000",
+      "triggerPrice": "",
+      "quantity": "0.5",
+      "reduceOnly": false,
+      "isTriggerMarket": false,
+      "clientOrderId": "",
+      "closePosition": false,
+      "durationSeconds": 300
+     }
+    ],
+    "grouping": "twap"
+   },
+   "digest": "0x6f6360e85138a50c03b25f8ce5e244f1b778a2fc500b2ab71479a152d3775961",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0xcc889ccaf3db0ace7b1b868e57fba6c33617ef359908f9d92da2ffedfea9ff7a\",\"s\":\"0x29c3bbcbf64c3c5d1bec415d2391b1d8bf93874e880f72c6d1543767b626ccbe\"},\"nonce\":1794780000009,\"expiresAfter\":1794780060009,\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"twap\",\"price\":\"66000\",\"triggerPrice\":\"\",\"quantity\":\"0.5\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false,\"durationSeconds\":300}],\"grouping\":\"twap\"}}",
+   "ws_post": "{\"id\":\"place_twap_minimal\",\"method\":\"post\",\"params\":{\"action\":\"placeOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orders\":[{\"symbol\":\"BTC-USDT\",\"side\":\"sell\",\"orderType\":\"twap\",\"price\":\"66000\",\"triggerPrice\":\"\",\"quantity\":\"0.5\",\"reduceOnly\":false,\"isTriggerMarket\":false,\"clientOrderId\":\"\",\"closePosition\":false,\"durationSeconds\":300}],\"grouping\":\"twap\",\"signature\":{\"v\":27,\"r\":\"0xcc889ccaf3db0ace7b1b868e57fba6c33617ef359908f9d92da2ffedfea9ff7a\",\"s\":\"0x29c3bbcbf64c3c5d1bec415d2391b1d8bf93874e880f72c6d1543767b626ccbe\"},\"nonce\":1794780000009,\"expiresAfter\":1794780060009}}"
+  },
+  {
+   "name": "cancel_orders",
+   "kind": "cancel_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000010,
+   "expires_after": 1794780060010,
+   "inputs": {
+    "order_ids": [
+     2122086887672799232,
+     1948058938469519361
+    ]
+   },
+   "digest": "0x5bff7868ff21efdf347ab441ebb6281fdb01b6af0a9be8268c7b1945f215978d",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0xe3bdcf3bfa7d28bd3395a89070a0a396d7cc8d0f7812a7775fd5c00c02ceb376\",\"s\":\"0x195d226715881bee0232f754f58f567ae078051008c183c2e2d9371c63bb0ec5\"},\"nonce\":1794780000010,\"expiresAfter\":1794780060010,\"params\":{\"action\":\"cancelOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orderIds\":[\"2122086887672799232\",\"1948058938469519361\"]}}",
+   "ws_post": "{\"id\":\"cancel_orders\",\"method\":\"post\",\"params\":{\"action\":\"cancelOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orderIds\":[\"2122086887672799232\",\"1948058938469519361\"],\"signature\":{\"v\":28,\"r\":\"0xe3bdcf3bfa7d28bd3395a89070a0a396d7cc8d0f7812a7775fd5c00c02ceb376\",\"s\":\"0x195d226715881bee0232f754f58f567ae078051008c183c2e2d9371c63bb0ec5\"},\"nonce\":1794780000010,\"expiresAfter\":1794780060010}}"
+  },
+  {
+   "name": "cancel_orders_by_cloid",
+   "kind": "cancel_orders_by_cloid",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000011,
+   "expires_after": 1794780060011,
+   "inputs": {
+    "client_order_ids": [
+     "0x0123456789abcdef0123456789abcdef",
+     "my-order-beta"
+    ]
+   },
+   "digest": "0xf3dca667c1fe64a3f5172a609c2575502b7572f09b299f12bd0469636774e58b",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x252896a177c3bb779251150588b0253e7843f489b6096378dd7d488fb33ee3de\",\"s\":\"0x1601fc41a6a3ff927a1d49d82eb9f8f0dc3556b165ccf22d9e020c92230dc743\"},\"nonce\":1794780000011,\"expiresAfter\":1794780060011,\"params\":{\"action\":\"cancelOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"clientOrderIds\":[\"0x0123456789abcdef0123456789abcdef\",\"my-order-beta\"]}}",
+   "ws_post": "{\"id\":\"cancel_orders_by_cloid\",\"method\":\"post\",\"params\":{\"action\":\"cancelOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"clientOrderIds\":[\"0x0123456789abcdef0123456789abcdef\",\"my-order-beta\"],\"signature\":{\"v\":27,\"r\":\"0x252896a177c3bb779251150588b0253e7843f489b6096378dd7d488fb33ee3de\",\"s\":\"0x1601fc41a6a3ff927a1d49d82eb9f8f0dc3556b165ccf22d9e020c92230dc743\"},\"nonce\":1794780000011,\"expiresAfter\":1794780060011}}"
+  },
+  {
+   "name": "cancel_all_wildcard",
+   "kind": "cancel_all_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000012,
+   "expires_after": 1794780060012,
+   "inputs": {
+    "symbols": [
+     "*"
+    ]
+   },
+   "digest": "0x904e5678b23eb16e6d0047840ee21b5d4305eea266919c27acddf604e4689d16",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x4782955d35d9cfe5dec9af44688f683420cde12cdda759f1fe4db3625a5c2f25\",\"s\":\"0x05be697306e9046f2ab82f17acb1a6e50050e6655daafba9e87920c02eeab3a7\"},\"nonce\":1794780000012,\"expiresAfter\":1794780060012,\"params\":{\"action\":\"cancelAllOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbols\":[\"*\"]}}",
+   "ws_post": "{\"id\":\"cancel_all_wildcard\",\"method\":\"post\",\"params\":{\"action\":\"cancelAllOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbols\":[\"*\"],\"signature\":{\"v\":27,\"r\":\"0x4782955d35d9cfe5dec9af44688f683420cde12cdda759f1fe4db3625a5c2f25\",\"s\":\"0x05be697306e9046f2ab82f17acb1a6e50050e6655daafba9e87920c02eeab3a7\"},\"nonce\":1794780000012,\"expiresAfter\":1794780060012}}"
+  },
+  {
+   "name": "cancel_all_symbols",
+   "kind": "cancel_all_orders",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000013,
+   "expires_after": 1794780060013,
+   "inputs": {
+    "symbols": [
+     "BTC-USDT",
+     "ETH-USDT"
+    ]
+   },
+   "digest": "0xe77d0147b137c675ff1080cd3c3c05a138547a838888b3c4f70ae6d6cdce1f6f",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x98f0103ca74f77cdd3b81d97647a5fe093fabee5bcb984bbd930d9644045a6b9\",\"s\":\"0x6aed9c4838f26494fcc347c0d40c571b6ebf756fa6320b6e2d34879b76b5587b\"},\"nonce\":1794780000013,\"expiresAfter\":1794780060013,\"params\":{\"action\":\"cancelAllOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbols\":[\"BTC-USDT\",\"ETH-USDT\"]}}",
+   "ws_post": "{\"id\":\"cancel_all_symbols\",\"method\":\"post\",\"params\":{\"action\":\"cancelAllOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbols\":[\"BTC-USDT\",\"ETH-USDT\"],\"signature\":{\"v\":28,\"r\":\"0x98f0103ca74f77cdd3b81d97647a5fe093fabee5bcb984bbd930d9644045a6b9\",\"s\":\"0x6aed9c4838f26494fcc347c0d40c571b6ebf756fa6320b6e2d34879b76b5587b\"},\"nonce\":1794780000013,\"expiresAfter\":1794780060013}}"
+  },
+  {
+   "name": "modify_price_quantity",
+   "kind": "modify_order",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000014,
+   "expires_after": 1794780060014,
+   "inputs": {
+    "order_id": 2122086887672799232,
+    "price": "65010",
+    "quantity": "0.002",
+    "trigger_price": ""
+   },
+   "digest": "0x64bdfe5fbcc12d95dc698564ff661223c46c74cbbe584fd3e39e2554858daebf",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x1ea29e197762503ecffc0929f2bde78319ce498ead322f00db8afda1929834c3\",\"s\":\"0x19b8de8f5c1ccaf2b52ba70a529385adadcfc86c9ce9cbf78e890dda232e0e57\"},\"nonce\":1794780000014,\"expiresAfter\":1794780060014,\"params\":{\"action\":\"modifyOrder\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orderId\":\"2122086887672799232\",\"price\":\"65010\",\"quantity\":\"0.002\"}}",
+   "ws_post": "{\"id\":\"modify_price_quantity\",\"method\":\"post\",\"params\":{\"action\":\"modifyOrder\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orderId\":\"2122086887672799232\",\"price\":\"65010\",\"quantity\":\"0.002\",\"signature\":{\"v\":28,\"r\":\"0x1ea29e197762503ecffc0929f2bde78319ce498ead322f00db8afda1929834c3\",\"s\":\"0x19b8de8f5c1ccaf2b52ba70a529385adadcfc86c9ce9cbf78e890dda232e0e57\"},\"nonce\":1794780000014,\"expiresAfter\":1794780060014}}"
+  },
+  {
+   "name": "modify_trigger_price",
+   "kind": "modify_order",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000015,
+   "expires_after": 1794780060015,
+   "inputs": {
+    "order_id": 2122086887672799232,
+    "price": "",
+    "quantity": "",
+    "trigger_price": "61000"
+   },
+   "digest": "0xb7d5a459c8f11c9658d2ef896aa9420f4b30272005d85a186a6f2dc140b09ff3",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x2af36470ad659e86b86a36d205c2b5a305f5f4a6836ff714c2c25cea931d820e\",\"s\":\"0x2df7f5ad7c859f2f744504f993ef0d8947cf0605a431320b7420fae920002118\"},\"nonce\":1794780000015,\"expiresAfter\":1794780060015,\"params\":{\"action\":\"modifyOrder\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orderId\":\"2122086887672799232\",\"triggerPrice\":\"61000\"}}",
+   "ws_post": "{\"id\":\"modify_trigger_price\",\"method\":\"post\",\"params\":{\"action\":\"modifyOrder\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"orderId\":\"2122086887672799232\",\"triggerPrice\":\"61000\",\"signature\":{\"v\":28,\"r\":\"0x2af36470ad659e86b86a36d205c2b5a305f5f4a6836ff714c2c25cea931d820e\",\"s\":\"0x2df7f5ad7c859f2f744504f993ef0d8947cf0605a431320b7420fae920002118\"},\"nonce\":1794780000015,\"expiresAfter\":1794780060015}}"
+  },
+  {
+   "name": "modify_by_cloid",
+   "kind": "modify_order_by_cloid",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000016,
+   "expires_after": 1794780060016,
+   "inputs": {
+    "client_order_id": "0x0123456789abcdef0123456789abcdef",
+    "price": "",
+    "quantity": "0.003",
+    "trigger_price": ""
+   },
+   "digest": "0xc372d52a7161ebd917e6846a21fb88826951a33614d515ef9af5dd88f819e959",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x0989288f339627cdec1f806614a00536f39554ef639369ef275be3151dc54e2a\",\"s\":\"0x08878b46b589fc8cb0d9ed3ee7b2c188e3c3187e0c8f9b7feb2a80df0dbbc59d\"},\"nonce\":1794780000016,\"expiresAfter\":1794780060016,\"params\":{\"action\":\"modifyOrder\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"clientOrderId\":\"0x0123456789abcdef0123456789abcdef\",\"quantity\":\"0.003\"}}",
+   "ws_post": "{\"id\":\"modify_by_cloid\",\"method\":\"post\",\"params\":{\"action\":\"modifyOrder\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"clientOrderId\":\"0x0123456789abcdef0123456789abcdef\",\"quantity\":\"0.003\",\"signature\":{\"v\":28,\"r\":\"0x0989288f339627cdec1f806614a00536f39554ef639369ef275be3151dc54e2a\",\"s\":\"0x08878b46b589fc8cb0d9ed3ee7b2c188e3c3187e0c8f9b7feb2a80df0dbbc59d\"},\"nonce\":1794780000016,\"expiresAfter\":1794780060016}}"
+  },
+  {
+   "name": "update_leverage",
+   "kind": "update_leverage",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000017,
+   "expires_after": 1794780060017,
+   "inputs": {
+    "symbol": "BTC-USDT",
+    "leverage": "20"
+   },
+   "digest": "0x4c94a8edc0a511dd784f4f6ef826ec2fdfd3e49c51b72dc558f051c526a8463f",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x715fdc53985b4e370eed6dc32604c8d4fcb4565bd5fd5b127343d867608bd458\",\"s\":\"0x08029ba41c0ab19e5cef20360856767c51c83f6eb2d061818c54c0e406869608\"},\"nonce\":1794780000017,\"expiresAfter\":1794780060017,\"params\":{\"action\":\"updateLeverage\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"leverage\":\"20\"}}",
+   "ws_post": "{\"id\":\"update_leverage\",\"method\":\"post\",\"params\":{\"action\":\"updateLeverage\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"leverage\":\"20\",\"signature\":{\"v\":27,\"r\":\"0x715fdc53985b4e370eed6dc32604c8d4fcb4565bd5fd5b127343d867608bd458\",\"s\":\"0x08029ba41c0ab19e5cef20360856767c51c83f6eb2d061818c54c0e406869608\"},\"nonce\":1794780000017,\"expiresAfter\":1794780060017}}"
+  },
+  {
+   "name": "schedule_cancel_arm",
+   "kind": "schedule_cancel",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000018,
+   "expires_after": 1794780060018,
+   "inputs": {
+    "timeout_seconds": 300
+   },
+   "digest": "0xbbfa9a1db7045b234d88958b513c453df8351a1f371f190ba73fdaaacd94c67d",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x4cdedd5a76105b038131fc9a60760abf4bbc7cd074ecc854832c9b66b57405b8\",\"s\":\"0x75a27d646c3efad92a45311ee2d1915f14062985f3646bbd9c5304fa5f0216d6\"},\"nonce\":1794780000018,\"expiresAfter\":1794780060018,\"params\":{\"action\":\"scheduleCancel\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"timeoutSeconds\":300}}",
+   "ws_post": "{\"id\":\"schedule_cancel_arm\",\"method\":\"post\",\"params\":{\"action\":\"scheduleCancel\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"timeoutSeconds\":300,\"signature\":{\"v\":28,\"r\":\"0x4cdedd5a76105b038131fc9a60760abf4bbc7cd074ecc854832c9b66b57405b8\",\"s\":\"0x75a27d646c3efad92a45311ee2d1915f14062985f3646bbd9c5304fa5f0216d6\"},\"nonce\":1794780000018,\"expiresAfter\":1794780060018}}"
+  },
+  {
+   "name": "schedule_cancel_disarm",
+   "kind": "schedule_cancel",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000019,
+   "expires_after": 1794780060019,
+   "inputs": {
+    "timeout_seconds": 0
+   },
+   "digest": "0x1d5879287d6d524b47f83a27059b3be4d47e7ad03214f145c0d8a958531a99ec",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x3c6c35fcbe3d826a60fe31f5482ce5c5c1d2b1a93145e0015db11d3104384397\",\"s\":\"0x0623cafc94fec433c4fbfb9b0d1eabb0c8eec5e97f045f70631fd6d1b08853a4\"},\"nonce\":1794780000019,\"expiresAfter\":1794780060019,\"params\":{\"action\":\"scheduleCancel\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"timeoutSeconds\":0}}",
+   "ws_post": "{\"id\":\"schedule_cancel_disarm\",\"method\":\"post\",\"params\":{\"action\":\"scheduleCancel\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"timeoutSeconds\":0,\"signature\":{\"v\":27,\"r\":\"0x3c6c35fcbe3d826a60fe31f5482ce5c5c1d2b1a93145e0015db11d3104384397\",\"s\":\"0x0623cafc94fec433c4fbfb9b0d1eabb0c8eec5e97f045f70631fd6d1b08853a4\"},\"nonce\":1794780000019,\"expiresAfter\":1794780060019}}"
+  },
+  {
+   "name": "query_open_orders",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000020,
+   "expires_after": 1794780060020,
+   "inputs": {
+    "action": "getOpenOrders",
+    "params": {
+     "symbol": "BTC-USDT",
+     "limit": 50
+    }
+   },
+   "digest": "0x65b5e6556690bd90c9bae439af26eba3969ffcf7d74224db7527865be9be26b0",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x0aac8a1a9ee8421fc59376991c1d34e8dcd4090791d227eb680dcd9b19cd6b57\",\"s\":\"0x0e9ea936f9530a6c262ba7bd6a50b5c5c72e854a6d4632509bfbdfc1c3cccb75\"},\"nonce\":1794780000020,\"expiresAfter\":1794780060020,\"params\":{\"action\":\"getOpenOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"limit\":50}}",
+   "ws_post": "{\"id\":\"query_open_orders\",\"method\":\"post\",\"params\":{\"action\":\"getOpenOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"limit\":50,\"signature\":{\"v\":27,\"r\":\"0x0aac8a1a9ee8421fc59376991c1d34e8dcd4090791d227eb680dcd9b19cd6b57\",\"s\":\"0x0e9ea936f9530a6c262ba7bd6a50b5c5c72e854a6d4632509bfbdfc1c3cccb75\"},\"nonce\":1794780000020,\"expiresAfter\":1794780060020}}"
+  },
+  {
+   "name": "query_open_orders_cloid",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000021,
+   "expires_after": 1794780060021,
+   "inputs": {
+    "action": "getOpenOrders",
+    "params": {
+     "clientOrderId": "0x0123456789abcdef0123456789abcdef"
+    }
+   },
+   "digest": "0xdb51f510921b6097b17a742464d45663cc18243a7dc1c86a5372a93279679956",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0xd8f3ed4a669190dd5df858bd6d4dcce11ee6cdf4e25805d50889fd6b7722dc1f\",\"s\":\"0x060f6a96fe127d5aa80d7a4420c5fa5c486bc119241a7e6036a7f94493dbcab2\"},\"nonce\":1794780000021,\"expiresAfter\":1794780060021,\"params\":{\"action\":\"getOpenOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"clientOrderId\":\"0x0123456789abcdef0123456789abcdef\"}}",
+   "ws_post": "{\"id\":\"query_open_orders_cloid\",\"method\":\"post\",\"params\":{\"action\":\"getOpenOrders\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"clientOrderId\":\"0x0123456789abcdef0123456789abcdef\",\"signature\":{\"v\":28,\"r\":\"0xd8f3ed4a669190dd5df858bd6d4dcce11ee6cdf4e25805d50889fd6b7722dc1f\",\"s\":\"0x060f6a96fe127d5aa80d7a4420c5fa5c486bc119241a7e6036a7f94493dbcab2\"},\"nonce\":1794780000021,\"expiresAfter\":1794780060021}}"
+  },
+  {
+   "name": "query_positions",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000022,
+   "expires_after": 1794780060022,
+   "inputs": {
+    "action": "getPositions",
+    "params": {}
+   },
+   "digest": "0x40a4ce21d686a30609afd592047240f0460898ec00a6dfc5f2906359f81ece1b",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x0f760e5c07acb641dab42d6a2340c4c88bb02050e18896603d5a4e4ff915f4de\",\"s\":\"0x405b8f2e4f1439023533ba46ad8948bc062e8c1e1a7b4b2941350a4b08ddb9d4\"},\"nonce\":1794780000022,\"expiresAfter\":1794780060022,\"params\":{\"action\":\"getPositions\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\"}}",
+   "ws_post": "{\"id\":\"query_positions\",\"method\":\"post\",\"params\":{\"action\":\"getPositions\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"signature\":{\"v\":28,\"r\":\"0x0f760e5c07acb641dab42d6a2340c4c88bb02050e18896603d5a4e4ff915f4de\",\"s\":\"0x405b8f2e4f1439023533ba46ad8948bc062e8c1e1a7b4b2941350a4b08ddb9d4\"},\"nonce\":1794780000022,\"expiresAfter\":1794780060022}}"
+  },
+  {
+   "name": "query_positions_filtered",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000023,
+   "expires_after": 1794780060023,
+   "inputs": {
+    "action": "getPositions",
+    "params": {
+     "status": "open",
+     "symbol": "ETH-USDT",
+     "limit": 10,
+     "offset": 20
+    }
+   },
+   "digest": "0x97247cca8900f9b37f50a7def0bb2e8721374508c71a456601e5b41e2654b7e9",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x313a56f6c838b8888cf1fcd22de7911124c0a5c2ee85aa5d0a7abcfebff722ee\",\"s\":\"0x67e11d3ec048cd8a8e74c46a33cff0b01d802a4edbee6c79373c512b549098a2\"},\"nonce\":1794780000023,\"expiresAfter\":1794780060023,\"params\":{\"action\":\"getPositions\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"status\":\"open\",\"symbol\":\"ETH-USDT\",\"limit\":10,\"offset\":20}}",
+   "ws_post": "{\"id\":\"query_positions_filtered\",\"method\":\"post\",\"params\":{\"action\":\"getPositions\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"status\":\"open\",\"symbol\":\"ETH-USDT\",\"limit\":10,\"offset\":20,\"signature\":{\"v\":28,\"r\":\"0x313a56f6c838b8888cf1fcd22de7911124c0a5c2ee85aa5d0a7abcfebff722ee\",\"s\":\"0x67e11d3ec048cd8a8e74c46a33cff0b01d802a4edbee6c79373c512b549098a2\"},\"nonce\":1794780000023,\"expiresAfter\":1794780060023}}"
+  },
+  {
+   "name": "query_sub_account",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000024,
+   "expires_after": 1794780060024,
+   "inputs": {
+    "action": "getSubAccount",
+    "params": {}
+   },
+   "digest": "0x8c28b2e575f544624b66189128077a237bd2adb6e014b7225425dda4c504ade3",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x1a8d16ce0564cb452d851191d83c19ffaa79a7952a6bf5204620c273fbcc2ec5\",\"s\":\"0x459543bfb3d8adaeb2a8b3ba95f53d7a7cdd5c734b007ef7b735199fa15b0dcb\"},\"nonce\":1794780000024,\"expiresAfter\":1794780060024,\"params\":{\"action\":\"getSubAccount\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\"}}",
+   "ws_post": "{\"id\":\"query_sub_account\",\"method\":\"post\",\"params\":{\"action\":\"getSubAccount\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"signature\":{\"v\":27,\"r\":\"0x1a8d16ce0564cb452d851191d83c19ffaa79a7952a6bf5204620c273fbcc2ec5\",\"s\":\"0x459543bfb3d8adaeb2a8b3ba95f53d7a7cdd5c734b007ef7b735199fa15b0dcb\"},\"nonce\":1794780000024,\"expiresAfter\":1794780060024}}"
+  },
+  {
+   "name": "query_trades",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000025,
+   "expires_after": 1794780060025,
+   "inputs": {
+    "action": "getTrades",
+    "params": {
+     "symbol": "BTC-USDT",
+     "orderId": "2122086887672799232",
+     "limit": 100
+    }
+   },
+   "digest": "0x63919a378ee806e95ee60424c3b076e40e5112aefc9949e1ef21a97d9f7d5a7f",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x82deb5cefabb6a8a4b2203579239d68edea1046717d413b344c7e3e68d13854f\",\"s\":\"0x69b41b3d0cc9f0f434354b7729c3a1d8720a4faaff44ca75e10700e245f73409\"},\"nonce\":1794780000025,\"expiresAfter\":1794780060025,\"params\":{\"action\":\"getTrades\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"orderId\":\"2122086887672799232\",\"limit\":100}}",
+   "ws_post": "{\"id\":\"query_trades\",\"method\":\"post\",\"params\":{\"action\":\"getTrades\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"orderId\":\"2122086887672799232\",\"limit\":100,\"signature\":{\"v\":27,\"r\":\"0x82deb5cefabb6a8a4b2203579239d68edea1046717d413b344c7e3e68d13854f\",\"s\":\"0x69b41b3d0cc9f0f434354b7729c3a1d8720a4faaff44ca75e10700e245f73409\"},\"nonce\":1794780000025,\"expiresAfter\":1794780060025}}"
+  },
+  {
+   "name": "query_order_history",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000026,
+   "expires_after": 1794780060026,
+   "inputs": {
+    "action": "getOrderHistory",
+    "params": {
+     "status": [
+      "filled",
+      "cancelled"
+     ],
+     "startTime": 1794175200000,
+     "endTime": 1794780000000,
+     "limit": 1000
+    }
+   },
+   "digest": "0x47706133dd188c7d7a07790c7ad9db0ee91171a1e539a263ff2ef54d57172b99",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0xe680bff6b34765dc0aea647cbb23215c6e141dbc006f4bba161554b72413d333\",\"s\":\"0x1ab2ff5cda2abc28c97eaf3a852da9f712b366406f4a86199eca52e38bfe3c79\"},\"nonce\":1794780000026,\"expiresAfter\":1794780060026,\"params\":{\"action\":\"getOrderHistory\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"status\":[\"filled\",\"cancelled\"],\"startTime\":1794175200000,\"endTime\":1794780000000,\"limit\":1000}}",
+   "ws_post": "{\"id\":\"query_order_history\",\"method\":\"post\",\"params\":{\"action\":\"getOrderHistory\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"status\":[\"filled\",\"cancelled\"],\"startTime\":1794175200000,\"endTime\":1794780000000,\"limit\":1000,\"signature\":{\"v\":28,\"r\":\"0xe680bff6b34765dc0aea647cbb23215c6e141dbc006f4bba161554b72413d333\",\"s\":\"0x1ab2ff5cda2abc28c97eaf3a852da9f712b366406f4a86199eca52e38bfe3c79\"},\"nonce\":1794780000026,\"expiresAfter\":1794780060026}}"
+  },
+  {
+   "name": "query_funding_payments",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000027,
+   "expires_after": 1794780060027,
+   "inputs": {
+    "action": "getFundingPayments",
+    "params": {
+     "symbol": "BTC-USDT",
+     "startTime": 1794175200000,
+     "limit": 100
+    }
+   },
+   "digest": "0xaa364df86c45b961aae3d805be323e85122c9e899962bcc674e43d702529acb8",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x7812b42bcaf18973963eec2759a6b774a442848a48b7d617502b38c58defc694\",\"s\":\"0x40c62fee8b7d7e6d031c1bda69d4639dd3532cd6455ebde034a62dabf53af045\"},\"nonce\":1794780000027,\"expiresAfter\":1794780060027,\"params\":{\"action\":\"getFundingPayments\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"startTime\":1794175200000,\"limit\":100}}",
+   "ws_post": "{\"id\":\"query_funding_payments\",\"method\":\"post\",\"params\":{\"action\":\"getFundingPayments\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"symbol\":\"BTC-USDT\",\"startTime\":1794175200000,\"limit\":100,\"signature\":{\"v\":27,\"r\":\"0x7812b42bcaf18973963eec2759a6b774a442848a48b7d617502b38c58defc694\",\"s\":\"0x40c62fee8b7d7e6d031c1bda69d4639dd3532cd6455ebde034a62dabf53af045\"},\"nonce\":1794780000027,\"expiresAfter\":1794780060027}}"
+  },
+  {
+   "name": "query_rate_limits",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000028,
+   "expires_after": 1794780060028,
+   "inputs": {
+    "action": "getRateLimits",
+    "params": {}
+   },
+   "digest": "0xf17ac164fe06e1cc44c2b6e21ce9b183293f956e9a9f2c30b691e2c9bbdbbbfa",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x1e189f2abc3b411c1cadf0b1d7e364840bc54c3d52c1d54472d0e57067ec8d11\",\"s\":\"0x289437cf91e7089942d48411318a24c64973eca3c7f1b017f6a35b1c53e14673\"},\"nonce\":1794780000028,\"expiresAfter\":1794780060028,\"params\":{\"action\":\"getRateLimits\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\"}}",
+   "ws_post": "{\"id\":\"query_rate_limits\",\"method\":\"post\",\"params\":{\"action\":\"getRateLimits\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"signature\":{\"v\":27,\"r\":\"0x1e189f2abc3b411c1cadf0b1d7e364840bc54c3d52c1d54472d0e57067ec8d11\",\"s\":\"0x289437cf91e7089942d48411318a24c64973eca3c7f1b017f6a35b1c53e14673\"},\"nonce\":1794780000028,\"expiresAfter\":1794780060028}}"
+  },
+  {
+   "name": "query_delegated_signers",
+   "kind": "query",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000029,
+   "expires_after": 1794780060029,
+   "inputs": {
+    "action": "getDelegatedSigners",
+    "params": {}
+   },
+   "digest": "0x338d13b9dadd129e6487673cb75a64b0a79aee6a400d3201b14fd7b7adc8fe84",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x0ea5215614fe628593a88182ebe8deb8bb9c27ce158da2395001ae175c4d23d2\",\"s\":\"0x6f5b7048114ed5c07fce2b71a2be397af7ca70a19ebefc9e9c05882a4851c476\"},\"nonce\":1794780000029,\"expiresAfter\":1794780060029,\"params\":{\"action\":\"getDelegatedSigners\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\"}}",
+   "ws_post": "{\"id\":\"query_delegated_signers\",\"method\":\"post\",\"params\":{\"action\":\"getDelegatedSigners\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"signature\":{\"v\":27,\"r\":\"0x0ea5215614fe628593a88182ebe8deb8bb9c27ce158da2395001ae175c4d23d2\",\"s\":\"0x6f5b7048114ed5c07fce2b71a2be397af7ca70a19ebefc9e9c05882a4851c476\"},\"nonce\":1794780000029,\"expiresAfter\":1794780060029}}"
+  },
+  {
+   "name": "add_delegate_session",
+   "kind": "add_delegated_signer",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000030,
+   "expires_after": 1794780060030,
+   "inputs": {
+    "delegate": "0xcC3B5016ecBd07018620E67373046d6F58E4Ef28",
+    "permissions": [
+     "session"
+    ],
+    "expires_at": 0
+   },
+   "digest": "0x943fd7f665b11052cf7eced230aa785c07d6228b5e49b804ab47951092d34af7",
+   "body": "{\"signature\":{\"v\":28,\"r\":\"0x0c75d066d27530b27ce81ac1fdfa6c503bd57d67a261e431db12151f57f92038\",\"s\":\"0x2d3c7498682c750a052715d717bff7af3653ff42701a1062aa58dfb83149e44c\"},\"nonce\":1794780000030,\"expiresAfter\":1794780060030,\"params\":{\"action\":\"addDelegatedSigner\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xcC3B5016ecBd07018620E67373046d6F58E4Ef28\",\"expiresAt\":0,\"permissions\":[\"session\"]}}",
+   "ws_post": "{\"id\":\"add_delegate_session\",\"method\":\"post\",\"params\":{\"action\":\"addDelegatedSigner\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xcC3B5016ecBd07018620E67373046d6F58E4Ef28\",\"expiresAt\":0,\"permissions\":[\"session\"],\"signature\":{\"v\":28,\"r\":\"0x0c75d066d27530b27ce81ac1fdfa6c503bd57d67a261e431db12151f57f92038\",\"s\":\"0x2d3c7498682c750a052715d717bff7af3653ff42701a1062aa58dfb83149e44c\"},\"nonce\":1794780000030,\"expiresAfter\":1794780060030}}"
+  },
+  {
+   "name": "add_delegate_expiring",
+   "kind": "add_delegated_signer",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000031,
+   "expires_after": 1794780060031,
+   "inputs": {
+    "delegate": "0xcC3B5016ecBd07018620E67373046d6F58E4Ef28",
+    "permissions": [
+     "delegate"
+    ],
+    "expires_at": 1797372000000
+   },
+   "digest": "0x76b1493b7087f54185cc077c31edd720a28740a81cc7cdf52510938e253cb654",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x054a3e064ec81ef601bf0c25eef9b4d89ad9a4a7a23eae6a76cf01a518762d36\",\"s\":\"0x13da5ac82aec391411e89796e020333e35f4ea4049f4b5ee180ea070ddff87fb\"},\"nonce\":1794780000031,\"expiresAfter\":1794780060031,\"params\":{\"action\":\"addDelegatedSigner\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xcC3B5016ecBd07018620E67373046d6F58E4Ef28\",\"expiresAt\":1797372000000,\"permissions\":[\"delegate\"]}}",
+   "ws_post": "{\"id\":\"add_delegate_expiring\",\"method\":\"post\",\"params\":{\"action\":\"addDelegatedSigner\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xcC3B5016ecBd07018620E67373046d6F58E4Ef28\",\"expiresAt\":1797372000000,\"permissions\":[\"delegate\"],\"signature\":{\"v\":27,\"r\":\"0x054a3e064ec81ef601bf0c25eef9b4d89ad9a4a7a23eae6a76cf01a518762d36\",\"s\":\"0x13da5ac82aec391411e89796e020333e35f4ea4049f4b5ee180ea070ddff87fb\"},\"nonce\":1794780000031,\"expiresAfter\":1794780060031}}"
+  },
+  {
+   "name": "remove_delegate",
+   "kind": "remove_delegated_signer",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000032,
+   "expires_after": 1794780060032,
+   "inputs": {
+    "delegate": "0xcC3B5016ecBd07018620E67373046d6F58E4Ef28"
+   },
+   "digest": "0x11e00a7bd36552cbbfe39ce871b3dcdb3cf79cef30e9432c6b748846a5c12c4d",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0x349cd0e83af53029db30c4edacfef7b189f7388c333b8ffa661927c253616008\",\"s\":\"0x50d2ae0802fc5d6a64612008b119915daf741b90753d3c1d29f50c3966ed3641\"},\"nonce\":1794780000032,\"expiresAfter\":1794780060032,\"params\":{\"action\":\"removeDelegatedSigner\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xcC3B5016ecBd07018620E67373046d6F58E4Ef28\"}}",
+   "ws_post": "{\"id\":\"remove_delegate\",\"method\":\"post\",\"params\":{\"action\":\"removeDelegatedSigner\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xcC3B5016ecBd07018620E67373046d6F58E4Ef28\",\"signature\":{\"v\":27,\"r\":\"0x349cd0e83af53029db30c4edacfef7b189f7388c333b8ffa661927c253616008\",\"s\":\"0x50d2ae0802fc5d6a64612008b119915daf741b90753d3c1d29f50c3966ed3641\"},\"nonce\":1794780000032,\"expiresAfter\":1794780060032}}"
+  },
+  {
+   "name": "remove_all_delegates",
+   "kind": "remove_all_delegated_signers",
+   "subaccount_id": 1867542890123456789,
+   "nonce": 1794780000033,
+   "expires_after": 1794780060033,
+   "inputs": {},
+   "digest": "0x9cb8dfa0e1d901ff671277ae634f1b2003090835a316ff8996968ca9b2362bcb",
+   "body": "{\"signature\":{\"v\":27,\"r\":\"0xa37a024f730b8b3f508b5b9b860d8e342dfcdec4f249125d2712fff88502528a\",\"s\":\"0x1dea1b358733c4d229bbfa02e4a42498b66a3281a52d0f5ff2ee1f475cab46c3\"},\"nonce\":1794780000033,\"expiresAfter\":1794780060033,\"params\":{\"action\":\"removeAllDelegatedSigners\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\"}}",
+   "ws_post": "{\"id\":\"remove_all_delegates\",\"method\":\"post\",\"params\":{\"action\":\"removeAllDelegatedSigners\",\"subaccountId\":\"1867542890123456789\",\"walletAddress\":\"0xDD772de7F4f0FB84f6d85B0c60715a0bd5B4db4F\",\"signature\":{\"v\":27,\"r\":\"0xa37a024f730b8b3f508b5b9b860d8e342dfcdec4f249125d2712fff88502528a\",\"s\":\"0x1dea1b358733c4d229bbfa02e4a42498b66a3281a52d0f5ff2ee1f475cab46c3\"},\"nonce\":1794780000033,\"expiresAfter\":1794780060033}}"
+  }
+ ],
+ "ws_auth": [
+  {
+   "name": "ws_auth_ms",
+   "subaccount_id": 1867542890123456789,
+   "timestamp": 1794780152316,
+   "digest": "0x35b1c92e7c0bc030a1b5c686a52a77e6fb3f0477c51a1acbde0e4642fa04eb96",
+   "message": "{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"AuthMessage\":[{\"name\":\"subAccountId\",\"type\":\"uint256\"},{\"name\":\"timestamp\",\"type\":\"uint256\"},{\"name\":\"action\",\"type\":\"string\"}]},\"primaryType\":\"AuthMessage\",\"domain\":{\"name\":\"Synthetix\",\"version\":\"1\",\"chainId\":1,\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"message\":{\"subAccountId\":\"0x19ead85d289d7115\",\"timestamp\":\"0x1a1e13bc1fc\",\"action\":\"websocket_auth\"}}",
+   "signature": "0x9ec50cf13e90ddd5ede879794707624a231621617f27f2725493f9e77b925bb807d977a209f5993b7f67fc931e892ae6fa4ebce60033c7b1943f743a8b01b6291c"
+  },
+  {
+   "name": "ws_auth_seconds",
+   "subaccount_id": 1867542890123456789,
+   "timestamp": 1794780153,
+   "digest": "0xd2619b4a4d8f1ddb382a5057f1c974121f89aab1b8e2992cfb121385c9347239",
+   "message": "{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"AuthMessage\":[{\"name\":\"subAccountId\",\"type\":\"uint256\"},{\"name\":\"timestamp\",\"type\":\"uint256\"},{\"name\":\"action\",\"type\":\"string\"}]},\"primaryType\":\"AuthMessage\",\"domain\":{\"name\":\"Synthetix\",\"version\":\"1\",\"chainId\":1,\"verifyingContract\":\"0x0000000000000000000000000000000000000000\"},\"message\":{\"subAccountId\":\"0x19ead85d289d7115\",\"timestamp\":\"0x6afa2bf9\",\"action\":\"websocket_auth\"}}",
+   "signature": "0xdd0dfc0ec70300a366e9abf75bc7255e5c92bda4c8ef105c686632b3a0c81ebd0a887850ceb7540292a0e404679789001a19917de079249f21df2024ab4543cc1b"
+  }
+ ]
+}

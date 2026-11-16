@@ -1,0 +1,12 @@
+{
+ "status": "ok",
+ "response": {
+  "requestsUsed": 45,
+  "requestsCap": 1200
+ },
+ "rateLimit": {
+  "requestsCap": 1200,
+  "remainingTokens": 1155
+ },
+ "request_id": "5ccf215d37e3ae6d"
+}

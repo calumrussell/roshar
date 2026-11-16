@@ -1,0 +1,82 @@
+{
+ "status": "ok",
+ "response": {
+  "trades": [
+   {
+    "tradeId": "123456789",
+    "order": {
+     "venueId": "1948058938469519360",
+     "clientId": "cli-1948058938469519360"
+    },
+    "orderId": "1948058938469519360",
+    "symbol": "BTC-USDT",
+    "side": "buy",
+    "direction": "open long",
+    "orderType": "limit",
+    "price": "50000.50",
+    "quantity": "0.1",
+    "realizedPnl": "125.50",
+    "fee": "5.00",
+    "feeRate": "0.001",
+    "markPrice": "50025.00",
+    "entryPrice": "49500.00",
+    "timestamp": 1704067200500,
+    "maker": false,
+    "reduceOnly": false,
+    "triggeredByLiquidation": false,
+    "postOnly": false
+   },
+   {
+    "tradeId": "123456790",
+    "order": {
+     "venueId": "1948058938469519361",
+     "clientId": "cli-1948058938469519361"
+    },
+    "orderId": "1948058938469519361",
+    "symbol": "ETH-USDT",
+    "side": "sell",
+    "direction": "close long",
+    "orderType": "market",
+    "price": "2999.25",
+    "quantity": "1.5",
+    "realizedPnl": "-75.25",
+    "fee": "4.50",
+    "feeRate": "0.001",
+    "markPrice": "3000.00",
+    "entryPrice": "2950.00",
+    "timestamp": 1704067201000,
+    "maker": true,
+    "reduceOnly": true,
+    "triggeredByLiquidation": false,
+    "postOnly": false
+   },
+   {
+    "tradeId": "123456791",
+    "order": {
+     "venueId": "1948058938469519362",
+     "clientId": "cli-1948058938469519362"
+    },
+    "orderId": "1948058938469519362",
+    "symbol": "BTC-USDT",
+    "side": "sell",
+    "direction": "open short",
+    "orderType": "stopMarket",
+    "price": "49500.00",
+    "quantity": "0.05",
+    "realizedPnl": "0.00",
+    "fee": "2.48",
+    "feeRate": "0.001",
+    "markPrice": "49450.00",
+    "entryPrice": "50000.00",
+    "timestamp": 1704067201500,
+    "maker": false,
+    "reduceOnly": false,
+    "triggeredByLiquidation": true,
+    "postOnly": false
+   }
+  ],
+  "hasMore": false,
+  "total": 3
+ },
+ "request_id": "5ccf215d37e3ae6d"
+}

@@ -1,0 +1,9 @@
+{
+ "status": "ok",
+ "response": {
+  "symbol": "BTC-USDT",
+  "previousLeverage": "10",
+  "newLeverage": "20"
+ },
+ "request_id": "5ccf215d37e3ae6d"
+}

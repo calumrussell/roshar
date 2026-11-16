@@ -1,0 +1,1 @@
+{"status":"ok","response":{"symbol":"BTC-USDT","estimatedFundingRate":"0.0000122916897059892","lastSettlementRate":"0.00001236","lastSettlementTime":1794776400000,"nextFundingTime":1794780000000,"fundingInterval":3600000},"ipRateLimit":{"requestsCap":10000,"remainingTokens":9750},"timestamp":1794779926500}

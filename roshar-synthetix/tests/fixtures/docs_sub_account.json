@@ -1,0 +1,63 @@
+{
+ "status": "ok",
+ "response": {
+  "subAccountId": "1867542890123456789",
+  "masterAccountId": "1867542890123456788",
+  "subAccountName": "Trading Account 1",
+  "collaterals": [
+   {
+    "symbol": "USDC",
+    "quantity": "1000.00000000",
+    "withdrawable": "1000.00000000",
+    "pendingWithdraw": "0.00000000",
+    "adjustedCollateralValue": "1000.00000000",
+    "collateralValue": "1000.00000000",
+    "haircutRate": "0",
+    "haircutAdjustment": "0",
+    "price": "1.00000000",
+    "calculatedAt": 0
+   },
+   {
+    "symbol": "ETH",
+    "quantity": "0.5000",
+    "withdrawable": "0.5000",
+    "pendingWithdraw": "0.0000",
+    "adjustedCollateralValue": "875.00000000",
+    "collateralValue": "1000.00000000",
+    "haircutRate": "0.125",
+    "haircutAdjustment": "125.00000000",
+    "price": "2000.00000000",
+    "calculatedAt": 1735689900000
+   }
+  ],
+  "crossMarginSummary": {
+   "accountValue": "6750.50",
+   "availableMargin": "2415.00",
+   "totalUnrealizedPnl": "75.00",
+   "maintenanceMargin": "1207.50",
+   "initialMargin": "2415.00",
+   "withdrawable": "4335.50",
+   "adjustedAccountValue": "6750.50",
+   "debt": "0.00"
+  },
+  "positions": [],
+  "marketPreferences": {
+   "leverages": {
+    "BTC-USDT": 20,
+    "ETH-USDT": 10
+   }
+  },
+  "feeRates": {
+   "makerFeeRate": "0.0002",
+   "takerFeeRate": "0.0005",
+   "tierName": "Regular User"
+  },
+  "accountLimits": {
+   "maxBorrowCapacity": "100000.00",
+   "maxOrdersPerMarket": 200,
+   "maxSubAccounts": 10,
+   "maxTotalOrders": 1000
+  }
+ },
+ "request_id": "5ccf215d37e3ae6d"
+}

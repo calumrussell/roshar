@@ -1,0 +1,37 @@
+{
+ "status": "ok",
+ "response": {
+  "summary": {
+   "totalFundingReceived": "125.75000000",
+   "totalFundingPaid": "89.25000000",
+   "netFunding": "36.50000000",
+   "totalPayments": "247",
+   "averagePaymentSize": "0.87044534"
+  },
+  "fundingHistory": [
+   {
+    "paymentId": "fp_1958787130134106112",
+    "symbol": "BTC-USDT",
+    "positionSize": "2.50000000",
+    "fundingRate": "0.00001250",
+    "payment": "-1.12500000",
+    "timestamp": 1735689600000,
+    "paymentTime": 1735689600000,
+    "fundingTimestamp": 1735689600000,
+    "fundingTime": 1735689600000
+   },
+   {
+    "paymentId": "fp_1958787130134106111",
+    "symbol": "ETH-USDT",
+    "positionSize": "-5.00000000",
+    "fundingRate": "-0.00002100",
+    "payment": "3.15000000",
+    "timestamp": 1735661200000,
+    "paymentTime": 1735661200000,
+    "fundingTimestamp": 1735661200000,
+    "fundingTime": 1735661200000
+   }
+  ]
+ },
+ "request_id": "a3f7c2d1e9b8x67k"
+}

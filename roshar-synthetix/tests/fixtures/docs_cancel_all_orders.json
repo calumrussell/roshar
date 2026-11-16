@@ -1,0 +1,24 @@
+{
+ "status": "ok",
+ "response": [
+  {
+   "order": {
+    "venueId": "1958787130134106112",
+    "clientId": "cli-1958787130134106112"
+   },
+   "orderId": "1958787130134106112",
+   "message": "",
+   "symbol": "BTC-USDT"
+  },
+  {
+   "order": {
+    "venueId": "1958787130134106113",
+    "clientId": "cli-1958787130134106113"
+   },
+   "orderId": "1958787130134106113",
+   "message": "",
+   "symbol": "ETH-USDT"
+  }
+ ],
+ "request_id": "5ccf215d37e3ae6d"
+}
