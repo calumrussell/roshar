@@ -19,6 +19,17 @@ members = [
     "roshar-paradex",
     "roshar-phoenix",
     "roshar-polymarket",
+    "roshar-variational",
+    "roshar-jupiter-perps",
+    "roshar-bullet",
+    "roshar-gmx",
+    "roshar-grvt",
+    "roshar-orderly",
+    "roshar-nado",
+    "roshar-synthetix",
+    "roshar-edgex",
+    "roshar-polymarket-perps",
+    "roshar-apex",
 ]
 resolver = "2"
 
