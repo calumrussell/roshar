@@ -1,0 +1,97 @@
+{
+  "total_volume_24h": "1055228521.511410",
+  "cumulative_volume": "478307630905.495023",
+  "tvl": "198781839.162989238319",
+  "open_interest": "1391903158.0585299225247729084",
+  "num_markets": 589,
+  "loss_refund": {
+    "pool_size": "0",
+    "refunded_24h": "0"
+  },
+  "listings": [
+    {
+      "ticker": "TNSR",
+      "name": "Tensor",
+      "mark_price": "0.022063711842125",
+      "volume_24h": "908.547290",
+      "open_interest": {
+        "long_open_interest": "186.12147537951682484000000000",
+        "short_open_interest": "1533.9739794158663720540000000"
+      },
+      "funding_rate": "0.1095",
+      "funding_interval_s": 14400,
+      "base_spread_bps": "22.661644766651557432181612000",
+      "quotes": {
+        "updated_at": "2026-11-15T21:57:25.499262440Z",
+        "base": {
+          "bid": "0.02203",
+          "ask": "0.02208"
+        },
+        "size_1k": {
+          "bid": "0.02199",
+          "ask": "0.02211"
+        },
+        "size_100k": {
+          "bid": "0.02065",
+          "ask": "0.02381"
+        }
+      }
+    },
+    {
+      "ticker": "XAUS",
+      "name": "Swap on Gold Spot",
+      "mark_price": "3883.6",
+      "volume_24h": "0",
+      "open_interest": {
+        "long_open_interest": "30867824.9427520000000",
+        "short_open_interest": "3595919.8056600000000"
+      },
+      "funding_rate": "0",
+      "funding_interval_s": 0
+    },
+    {
+      "ticker": "BTC",
+      "name": "Bitcoin",
+      "mark_price": "65085.2007177954",
+      "volume_24h": "665569047.738492",
+      "open_interest": {
+        "long_open_interest": "77778288.215945695702669200000",
+        "short_open_interest": "56120456.053175551358539800000"
+      },
+      "funding_rate": "0.059879",
+      "funding_interval_s": 28800,
+      "base_spread_bps": "1.2890795307489973541482720000",
+      "quotes": {
+        "updated_at": "2026-11-15T21:57:36.327890453Z",
+        "base": {
+          "bid": "65033.72",
+          "ask": "65042.11"
+        },
+        "size_1k": {
+          "bid": "65033.72",
+          "ask": "65042.11"
+        },
+        "size_100k": {
+          "bid": "65033.72",
+          "ask": "65042.11"
+        },
+        "size_1m": {
+          "bid": "65021.72",
+          "ask": "65044.9"
+        }
+      }
+    },
+    {
+      "ticker": "US500S",
+      "name": "Swap on US 500",
+      "mark_price": "7537.25",
+      "volume_24h": "0",
+      "open_interest": {
+        "long_open_interest": "18237084.80112750000000",
+        "short_open_interest": "8869173.80333250000000"
+      },
+      "funding_rate": "0",
+      "funding_interval_s": 0
+    }
+  ]
+}
