@@ -1,0 +1,204 @@
+{
+  "sdk": "github.com/pacifica-fi/python-sdk",
+  "sdk_commit": "126ad9195369a2d1eaaa15cdecd577ca62c0f9c9",
+  "private_key_b58": "6KiRoVM4Q4cVDr9vNv4i5yU1P1FpL1TwvdTcJFm9kDB42zdnfEdmMasiBN6t98RLocqScT9pndNGbpmaYbikYZL",
+  "public_key": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+  "vectors": [
+    {
+      "name": "create_order_cloid_main_key",
+      "type": "create_order",
+      "timestamp": 1748970123456,
+      "expiry_window": 5000,
+      "account": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+      "payload": {
+        "symbol": "BTC",
+        "price": "100000",
+        "reduce_only": false,
+        "amount": "0.1",
+        "side": "bid",
+        "tif": "GTC",
+        "client_order_id": "12345678-1234-1234-1234-123456789abc"
+      },
+      "inputs": {
+        "kind": "limit",
+        "symbol": "BTC",
+        "price": 100000.0,
+        "amount": 0.1,
+        "is_buy": true,
+        "tif": "GTC",
+        "reduce_only": false,
+        "client_order_id": "12345678-1234-1234-1234-123456789abc"
+      },
+      "message": "{\"data\":{\"amount\":\"0.1\",\"client_order_id\":\"12345678-1234-1234-1234-123456789abc\",\"price\":\"100000\",\"reduce_only\":false,\"side\":\"bid\",\"symbol\":\"BTC\",\"tif\":\"GTC\"},\"expiry_window\":5000,\"timestamp\":1748970123456,\"type\":\"create_order\"}",
+      "signature": "4ESNBR49ZeXdqTrHbYoofj4n4oiv7TsNCpVmmh6DHuUrewj4pj5H3aSkLPEeqwdCEA9H1rgrTAhmAnJETgK9QzJQ",
+      "request": {
+        "account": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+        "signature": "4ESNBR49ZeXdqTrHbYoofj4n4oiv7TsNCpVmmh6DHuUrewj4pj5H3aSkLPEeqwdCEA9H1rgrTAhmAnJETgK9QzJQ",
+        "timestamp": 1748970123456,
+        "expiry_window": 5000,
+        "symbol": "BTC",
+        "price": "100000",
+        "reduce_only": false,
+        "amount": "0.1",
+        "side": "bid",
+        "tif": "GTC",
+        "client_order_id": "12345678-1234-1234-1234-123456789abc"
+      }
+    },
+    {
+      "name": "create_order_agent_key",
+      "type": "create_order",
+      "timestamp": 1794779298111,
+      "expiry_window": 30000,
+      "account": "6hGfw1fv6j3ujYosCf1azzsSxmNnqS218FsyJG5TKU5C",
+      "payload": {
+        "symbol": "kPEPE",
+        "price": "0.003849",
+        "reduce_only": true,
+        "amount": "26000",
+        "side": "ask",
+        "tif": "ALO"
+      },
+      "inputs": {
+        "kind": "limit",
+        "symbol": "kPEPE",
+        "price": 0.003849,
+        "amount": 26000.0,
+        "is_buy": false,
+        "tif": "ALO",
+        "reduce_only": true,
+        "client_order_id": null
+      },
+      "message": "{\"data\":{\"amount\":\"26000\",\"price\":\"0.003849\",\"reduce_only\":true,\"side\":\"ask\",\"symbol\":\"kPEPE\",\"tif\":\"ALO\"},\"expiry_window\":30000,\"timestamp\":1794779298111,\"type\":\"create_order\"}",
+      "signature": "4ZgL1dYoTH7tH3DJSUZo15y4xWBbxYbTz9FG1erXQJQ3Mkvsvg2JN4E26aBY89KxRfrV8u314oaKrUM8tLjGUFnu",
+      "request": {
+        "account": "6hGfw1fv6j3ujYosCf1azzsSxmNnqS218FsyJG5TKU5C",
+        "signature": "4ZgL1dYoTH7tH3DJSUZo15y4xWBbxYbTz9FG1erXQJQ3Mkvsvg2JN4E26aBY89KxRfrV8u314oaKrUM8tLjGUFnu",
+        "timestamp": 1794779298111,
+        "expiry_window": 30000,
+        "agent_wallet": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+        "symbol": "kPEPE",
+        "price": "0.003849",
+        "reduce_only": true,
+        "amount": "26000",
+        "side": "ask",
+        "tif": "ALO"
+      }
+    },
+    {
+      "name": "cancel_order",
+      "type": "cancel_order",
+      "timestamp": 1794779443791,
+      "expiry_window": 5000,
+      "account": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+      "payload": {
+        "symbol": "ETH",
+        "order_id": 14589281256
+      },
+      "inputs": {
+        "kind": "cancel",
+        "symbol": "ETH",
+        "order_id": 14589281256
+      },
+      "message": "{\"data\":{\"order_id\":14589281256,\"symbol\":\"ETH\"},\"expiry_window\":5000,\"timestamp\":1794779443791,\"type\":\"cancel_order\"}",
+      "signature": "46xKots5xe9hudihLsxJ2rjQNm4MhgWsdTtkxjEVccRuCyqSizvYUNHJzXk4e9uQyCXfMUoXG1YvLgixQRrzJd8B",
+      "request": {
+        "account": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+        "signature": "46xKots5xe9hudihLsxJ2rjQNm4MhgWsdTtkxjEVccRuCyqSizvYUNHJzXk4e9uQyCXfMUoXG1YvLgixQRrzJd8B",
+        "timestamp": 1794779443791,
+        "expiry_window": 5000,
+        "symbol": "ETH",
+        "order_id": 14589281256
+      }
+    },
+    {
+      "name": "edit_order_agent_key",
+      "type": "edit_order",
+      "timestamp": 1794779500000,
+      "expiry_window": 5000,
+      "account": "6hGfw1fv6j3ujYosCf1azzsSxmNnqS218FsyJG5TKU5C",
+      "payload": {
+        "symbol": "SOL",
+        "price": "100.67",
+        "amount": "12.5",
+        "order_id": 315979358
+      },
+      "inputs": {
+        "kind": "edit",
+        "symbol": "SOL",
+        "price": 100.67,
+        "amount": 12.5,
+        "order_id": 315979358
+      },
+      "message": "{\"data\":{\"amount\":\"12.5\",\"order_id\":315979358,\"price\":\"100.67\",\"symbol\":\"SOL\"},\"expiry_window\":5000,\"timestamp\":1794779500000,\"type\":\"edit_order\"}",
+      "signature": "5ND7UBEtMKTGJucsq9TyJnPAFwZF1EbEoUBQqeTXe2YD26a51Qs3BnMuW89QhFMVjm8WA4dwEEKLA5EZyEDe9h1S",
+      "request": {
+        "account": "6hGfw1fv6j3ujYosCf1azzsSxmNnqS218FsyJG5TKU5C",
+        "signature": "5ND7UBEtMKTGJucsq9TyJnPAFwZF1EbEoUBQqeTXe2YD26a51Qs3BnMuW89QhFMVjm8WA4dwEEKLA5EZyEDe9h1S",
+        "timestamp": 1794779500000,
+        "expiry_window": 5000,
+        "agent_wallet": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+        "symbol": "SOL",
+        "price": "100.67",
+        "amount": "12.5",
+        "order_id": 315979358
+      }
+    },
+    {
+      "name": "sorting_and_escaping",
+      "type": "create_order",
+      "timestamp": 1700000000000,
+      "expiry_window": 5000,
+      "account": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+      "payload": {
+        "symbol": "BTC",
+        "take_profit": {
+          "stop_price": "55000",
+          "limit_price": "54950",
+          "trigger_price_type": "mark_price"
+        },
+        "order_expiry": null,
+        "batch": [
+          {
+            "z": 1,
+            "a": [
+              {
+                "y": "q",
+                "b": false
+              }
+            ]
+          }
+        ],
+        "note": "café ✓ 😀  \"quoted\" back\\slash"
+      },
+      "inputs": null,
+      "message": "{\"data\":{\"batch\":[{\"a\":[{\"b\":false,\"y\":\"q\"}],\"z\":1}],\"note\":\"caf\\u00e9 \\u2713 \\ud83d\\ude00 \\u007f \\\"quoted\\\" back\\\\slash\",\"order_expiry\":null,\"symbol\":\"BTC\",\"take_profit\":{\"limit_price\":\"54950\",\"stop_price\":\"55000\",\"trigger_price_type\":\"mark_price\"}},\"expiry_window\":5000,\"timestamp\":1700000000000,\"type\":\"create_order\"}",
+      "signature": "326VP1esHaW45C5QffYhT7NWZoxYrE6rv6GA9KAQSFAiiVvdjw94ssYAydeofT58hh4cvnGYNS652zXPpzXno1GT",
+      "request": {
+        "account": "ABMFmNLLhHe1hpEG9wdGaMMLXyaXcDsayEvnTNJpydkS",
+        "signature": "326VP1esHaW45C5QffYhT7NWZoxYrE6rv6GA9KAQSFAiiVvdjw94ssYAydeofT58hh4cvnGYNS652zXPpzXno1GT",
+        "timestamp": 1700000000000,
+        "expiry_window": 5000,
+        "symbol": "BTC",
+        "take_profit": {
+          "stop_price": "55000",
+          "limit_price": "54950",
+          "trigger_price_type": "mark_price"
+        },
+        "order_expiry": null,
+        "batch": [
+          {
+            "z": 1,
+            "a": [
+              {
+                "y": "q",
+                "b": false
+              }
+            ]
+          }
+        ],
+        "note": "café ✓ 😀  \"quoted\" back\\slash"
+      }
+    }
+  ]
+}
