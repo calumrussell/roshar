@@ -1,0 +1,11 @@
+{"jsonrpc":"2.0","id":2,"result":{"channel":"markets_summary","markets":["ETH-USD-PERP","SOL-USD-PERP"]},"usIn":1794826602118623,"usDiff":113,"usOut":1794826602118736}
+{"jsonrpc":"2.0","id":7,"result":{"channel":"order_book.ETH-USD-PERP.interactive@15@200ms"},"usIn":1794826602118903,"usDiff":51,"usOut":1794826602118954}
+{"jsonrpc":"2.0","id":11,"result":{"channel":"markets_summary","add":["BTC-USD-PERP"],"remove":["SOL-USD-PERP"]},"usIn":1794826605114402,"usDiff":98,"usOut":1794826605114500}
+{"jsonrpc":"2.0","id":12,"result":{"channel":"bbo.BTC-USD-PERP"},"usIn":1794826605115409,"usDiff":70,"usOut":1794826605115479}
+{"jsonrpc":"2.0","id":13,"result":{"channel":"funding_data.BTC-USD-PERP"},"usIn":1794826605115590,"usDiff":48,"usOut":1794826605115638}
+{"jsonrpc":"2.0","id":15,"result":{"channel":"markets_summary"},"usIn":1794826605115767,"usDiff":22,"usOut":1794826605115789}
+{"jsonrpc":"2.0","id":16,"error":{"code":-32600,"message":"invalid modify_subscription request","data":"modify failed"},"usIn":1794826605115800,"usDiff":51,"usOut":1794826605115851}
+{"jsonrpc":"2.0","id":1,"error":{"code":-32600,"message":"invalid subscribe request","data":"invalid frequency '200ms'. Expecting one of: [50ms 100ms]"},"usIn":1794826628352704,"usDiff":159,"usOut":1794826628352863}
+{"jsonrpc":"2.0","id":2,"error":{"code":-32600,"message":"invalid subscribe request","data":"invalid frequency '50ms'. Expecting one of: [100ms 200ms 400ms]"},"usIn":1794826628352888,"usDiff":53,"usOut":1794826628352941}
+{"jsonrpc":"2.0","id":2,"result":{"channel":"markets_summary","add":["SOL-USD-PERP"]},"usIn":1794826714514830,"usDiff":71,"usOut":1794826714514901}
+{"jsonrpc":"2.0","id":3,"result":{"channel":"markets_summary","remove":["ETH-USD-PERP"]},"usIn":1794826715518190,"usDiff":63,"usOut":1794826715518253}

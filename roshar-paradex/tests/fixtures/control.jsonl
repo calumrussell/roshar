@@ -1,0 +1,8 @@
+{"jsonrpc":"2.0","id":1,"result":{"channel":"trades.BTC-USD-PERP"},"usIn":1794780123680554,"usDiff":132,"usOut":1794780123680686}
+{"jsonrpc":"2.0","id":6,"result":{"channel":"order_book.SOL-USD-PERP.snapshot@15@100ms@0_01"},"usIn":1794780123680891,"usDiff":55,"usOut":1794780123680946}
+{"jsonrpc":"2.0","id":2,"result":{"channel":"trades.BTC-USD-16NOV26-54000-P"},"usIn":1794780367115229,"usDiff":68,"usOut":1794780367115297}
+{"jsonrpc":"2.0","id":11,"error":{"code":-32600,"message":"invalid subscribe request","data":"subscription failed"},"usIn":1794780123681186,"usDiff":56,"usOut":1794780123681242}
+{"jsonrpc":"2.0","id":98,"error":{"code":-32600,"message":"invalid subscribe request","data":"invalid channel"},"usIn":1794780123681255,"usDiff":29,"usOut":1794780123681284}
+{"jsonrpc":"2.0","id":99,"error":{"code":-32601,"message":"method does not exist"},"usIn":1794780123681292,"usDiff":4,"usOut":1794780123681296}
+{"jsonrpc":"2.0","id":0,"error":{"code":-32700,"message":"unable to parse request"},"usIn":0,"usDiff":0,"usOut":0}
+{"jsonrpc":"2.0","method":"subscription","params":{"channel":"system_status","data":{"status":"ok"}}}
