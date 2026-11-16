@@ -1,8 +1,9 @@
 //! Price rounding to Hyperliquid's tick rules. The caller picks the direction.
 //!
-//! TODO: Hyperliquid documents an exemption from the 5-significant-figure rule for integer
-//! prices (https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size).
-//! It is not applied here; confirm against the docs before relying on prices >= 100000.
+//! Hyperliquid also allows any integer price regardless of significant figures
+//! (https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size, checked
+//! 2026-11-15). That exemption is not applied: prices >= 100000 are rounded to 5 significant figures,
+//! which is valid but coarser than necessary. Applying it changes the pinned `to_tick` golden vectors.
 
 /// Price rounding to a valid Hyperliquid perp price in one direction:
 /// <= (6 - sz_decimals) decimals and <= 5 significant figures.

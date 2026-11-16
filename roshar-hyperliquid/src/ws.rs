@@ -28,5 +28,6 @@ pub fn ws_config(mainnet: bool) -> roshar_ws_mgr::Config {
         tcp_send_buffer_size: None,
         tcp_nodelay: None,
         broadcast_channel_size: None,
+        headers: vec![],
     }
 }

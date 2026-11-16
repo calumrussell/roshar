@@ -5,11 +5,11 @@
 //! signature     = secp256k1 over the EIP-712 digest of `Agent(string source,bytes32 connectionId)`
 //!                 in domain {name "Exchange", version "1", chainId 1337, verifyingContract 0x0}.
 
-use anyhow::{anyhow, bail, Context};
-use k256::ecdsa::SigningKey;
 use crate::types::exchange::{
     Action, Cloid, Grouping, OrderRef, OrderReq, OrderType, Tif, Tpsl, TypedOrderReq,
 };
+use anyhow::{anyhow, bail, Context};
+use k256::ecdsa::SigningKey;
 use serde_json::{json, Value};
 use sha3::{Digest, Keccak256};
 

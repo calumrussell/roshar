@@ -53,6 +53,7 @@ pub struct SpotClearinghouseState {
     pub balances: Vec<SpotBalance>,
 }
 
+/// `clearinghouseState` response (one perp dex).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserPerpetualsState {
     #[serde(rename = "assetPositions")]
@@ -61,7 +62,12 @@ pub struct UserPerpetualsState {
     pub cross_maintenance_margin_used: String,
     #[serde(rename = "crossMarginSummary")]
     pub cross_margin_summary: CrossMarginSummary,
+    /// Whole-account summary (cross and isolated).
+    #[serde(rename = "marginSummary")]
+    pub margin_summary: CrossMarginSummary,
     pub withdrawable: String,
+    /// Server time (ms).
+    pub time: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -123,39 +129,90 @@ pub struct MetaAndAssetCtxs(pub Universe, pub Vec<MarketData>);
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Universe {
     pub universe: Vec<Asset>,
+    /// Spot token index of the dex's collateral (0 = USDC).
+    #[serde(rename = "collateralToken")]
+    pub collateral_token: u32,
+    /// `[marginTableId, table]` pairs. HIP-3 dexes may omit tables their assets reference.
+    #[serde(rename = "marginTables")]
+    pub margin_tables: Vec<(u32, MarginTable)>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarginTable {
+    pub description: String,
+    #[serde(rename = "marginTiers")]
+    pub margin_tiers: Vec<MarginTier>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarginTier {
+    #[serde(rename = "lowerBound")]
+    pub lower_bound: String,
+    #[serde(rename = "maxLeverage")]
+    pub max_leverage: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Asset {
+    /// HIP-3 assets are named `{dex}:{coin}`.
     pub name: String,
     #[serde(rename = "szDecimals")]
     pub sz_decimals: u8,
     #[serde(rename = "maxLeverage")]
     pub max_leverage: u32,
+    #[serde(rename = "marginTableId")]
+    pub margin_table_id: u32,
+    /// Absent unless true. Deprecated by the exchange in favour of `marginMode`.
     #[serde(rename = "onlyIsolated", skip_serializing_if = "Option::is_none")]
     pub only_isolated: Option<bool>,
+    /// `"strictIsolated"` or `"noCross"`; absent for cross-capable assets.
+    #[serde(rename = "marginMode", skip_serializing_if = "Option::is_none")]
+    pub margin_mode: Option<String>,
+    /// Absent unless true.
+    #[serde(rename = "isDelisted", skip_serializing_if = "Option::is_none")]
+    pub is_delisted: Option<bool>,
+    /// HIP-3 only (e.g. `"enabled"`); absent otherwise.
+    #[serde(rename = "growthMode", skip_serializing_if = "Option::is_none")]
+    pub growth_mode: Option<String>,
+    /// HIP-3 only (documented; not seen live on 2026-11-16).
+    #[serde(
+        rename = "lastGrowthModeChangeTime",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub last_growth_mode_change_time: Option<String>,
+    /// HIP-3 only.
+    #[serde(
+        rename = "lastFeeScaleChangeTime",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub last_fee_scale_change_time: Option<String>,
+    /// HIP-3 only.
+    #[serde(rename = "deployerFeeScale", skip_serializing_if = "Option::is_none")]
+    pub deployer_fee_scale: Option<String>,
 }
 
+/// Perp asset context. `impactPxs`, `midPx` and `premium` are null when the book is empty (e.g. delisted).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketData {
-    #[serde(rename = "dayNtlVlm", skip_serializing_if = "Option::is_none")]
-    pub day_notional_volume: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub funding: Option<String>,
-    #[serde(rename = "impactPxs", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "dayNtlVlm")]
+    pub day_notional_volume: String,
+    #[serde(rename = "dayBaseVlm")]
+    pub day_base_volume: String,
+    pub funding: String,
+    #[serde(rename = "impactPxs", deserialize_with = "super::nullable")]
     pub impact_prices: Option<Vec<String>>,
-    #[serde(rename = "markPx", skip_serializing_if = "Option::is_none")]
-    pub mark_price: Option<String>,
-    #[serde(rename = "midPx", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "markPx")]
+    pub mark_price: String,
+    #[serde(rename = "midPx", deserialize_with = "super::nullable")]
     pub mid_price: Option<String>,
-    #[serde(rename = "openInterest", skip_serializing_if = "Option::is_none")]
-    pub open_interest: Option<String>,
-    #[serde(rename = "oraclePx", skip_serializing_if = "Option::is_none")]
-    pub oracle_price: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "openInterest")]
+    pub open_interest: String,
+    #[serde(rename = "oraclePx")]
+    pub oracle_price: String,
+    #[serde(deserialize_with = "super::nullable")]
     pub premium: Option<String>,
-    #[serde(rename = "prevDayPx", skip_serializing_if = "Option::is_none")]
-    pub prev_day_price: Option<String>,
+    #[serde(rename = "prevDayPx")]
+    pub prev_day_price: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -186,10 +243,15 @@ pub struct SpotToken {
     pub token_id: String,
     #[serde(rename = "isCanonical")]
     pub is_canonical: bool,
-    #[serde(rename = "evmContract")]
+    #[serde(rename = "evmContract", deserialize_with = "super::nullable")]
     pub evm_contract: Option<EvmContract>,
-    #[serde(rename = "fullName")]
+    #[serde(rename = "fullName", deserialize_with = "super::nullable")]
     pub full_name: Option<String>,
+    #[serde(rename = "deployerTradingFeeShare")]
+    pub deployer_trading_fee_share: String,
+    /// Absent for most tokens.
+    #[serde(rename = "deployerLabel", skip_serializing_if = "Option::is_none")]
+    pub deployer_label: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -213,7 +275,7 @@ pub struct SpotMarketData {
     pub day_notional_volume: String,
     #[serde(rename = "markPx")]
     pub mark_price: String,
-    #[serde(rename = "midPx")]
+    #[serde(rename = "midPx", deserialize_with = "super::nullable")]
     pub mid_price: Option<String>,
     #[serde(rename = "prevDayPx")]
     pub prev_day_price: String,
@@ -232,49 +294,55 @@ pub struct SpotMarketData {
 mod tests {
     use super::*;
 
+    /// Shapes as returned live by `metaAndAssetCtxs` (first perp dex and `dex: "xyz"`), 2026-11-15.
     #[test]
     fn test_asset_meta_ctx_deserialisation() {
         let json = r#"[
             {
                 "universe": [
-                    {
-                        "name": "BTC",
-                        "szDecimals": 5,
-                        "maxLeverage": 50
-                    },
-                    {
-                        "name": "ETH",
-                        "szDecimals": 4,
-                        "maxLeverage": 50
-                    },
-                    {
-                        "name": "HPOS",
-                        "szDecimals": 0,
-                        "maxLeverage": 3,
-                        "onlyIsolated": true
-                    }
-                ]
+                    {"szDecimals": 5, "name": "BTC", "maxLeverage": 40, "marginTableId": 56},
+                    {"szDecimals": 1, "name": "LOOM", "maxLeverage": 3, "marginTableId": 3,
+                     "isDelisted": true, "onlyIsolated": true, "marginMode": "strictIsolated"},
+                    {"szDecimals": 4, "name": "xyz:XYZ100", "maxLeverage": 30, "marginTableId": 30,
+                     "growthMode": "enabled", "deployerFeeScale": "1.0"}
+                ],
+                "marginTables": [[56, {"description": "", "marginTiers": [{"lowerBound": "0.0", "maxLeverage": 40}]}]],
+                "collateralToken": 0
             },
             [
-                {
-                    "dayNtlVlm":"1169046.29406",
-                    "funding":"0.0000125",
-                    "impactPxs":[
-                        "14.3047",
-                        "14.3444"
-                    ],
-                    "markPx":"14.3161",
-                    "midPx":"14.314",
-                    "openInterest":"688.11",
-                    "oraclePx":"14.32",
-                    "premium":"0.00031774",
-                    "prevDayPx":"15.322"
-                }
+                {"funding": "0.0000125", "openInterest": "688.11", "prevDayPx": "15.322", "dayNtlVlm": "1169046.29406",
+                 "premium": "0.00031774", "oraclePx": "14.32", "markPx": "14.3161", "midPx": "14.314",
+                 "impactPxs": ["14.3047", "14.3444"], "dayBaseVlm": "81234.1"},
+                {"funding": "0.0", "openInterest": "0.0", "prevDayPx": "0.1", "dayNtlVlm": "0.0",
+                 "premium": null, "oraclePx": "0.1", "markPx": "0.1", "midPx": null,
+                 "impactPxs": null, "dayBaseVlm": "0.0"},
+                {"funding": "0.00000625", "openInterest": "0.0854", "prevDayPx": "25956.0", "dayNtlVlm": "462.9758",
+                 "premium": "0.0031136686", "oraclePx": "25372.0", "markPx": "25451.0", "midPx": "25451.0",
+                 "impactPxs": ["24946.0", "25956.0"], "dayBaseVlm": "0.0183"}
             ]
         ]"#;
 
         let response: MetaAndAssetCtxs = serde_json::from_str(json).unwrap();
-        assert!(response.0.universe.len() == 3);
+        assert_eq!(response.0.universe.len(), 3);
+        assert_eq!(response.0.collateral_token, 0);
+        assert_eq!(response.0.universe[1].is_delisted, Some(true));
+        assert_eq!(
+            response.0.universe[1].margin_mode.as_deref(),
+            Some("strictIsolated")
+        );
+        assert_eq!(response.0.universe[0].is_delisted, None);
+        assert_eq!(response.1[1].mid_price, None);
+        assert_eq!(response.1[2].day_base_volume, "0.0183");
+    }
+
+    #[test]
+    fn asset_ctx_missing_required_field_is_an_error() {
+        let json = r#"{"funding": "0.0", "openInterest": "0.0", "prevDayPx": "0.1", "dayNtlVlm": "0.0",
+                       "premium": null, "oraclePx": "0.1", "midPx": null, "impactPxs": null, "dayBaseVlm": "0.0"}"#;
+        assert!(
+            serde_json::from_str::<MarketData>(json).is_err(),
+            "markPx is required"
+        );
     }
 
     #[test]
@@ -290,7 +358,8 @@ mod tests {
                         "tokenId": "0x6d1e7cde53ba9467b783cb7c530ce054",
                         "isCanonical": true,
                         "evmContract": null,
-                        "fullName": null
+                        "fullName": null,
+                        "deployerTradingFeeShare": "0.0"
                     },
                     {
                         "name": "PURR",
@@ -300,7 +369,8 @@ mod tests {
                         "tokenId": "0xc1fb593aeffbeb02f85e0308e9956a90",
                         "isCanonical": true,
                         "evmContract": null,
-                        "fullName": null
+                        "fullName": null,
+                        "deployerTradingFeeShare": "0.0"
                     }
                 ],
                 "universe": [

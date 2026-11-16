@@ -15,14 +15,14 @@ pub mod tick;
 pub mod user_stream;
 pub mod ws;
 
-pub use info::{Fill, Info, OpenOrder, HL_INFO_URL, HL_TESTNET_INFO_URL};
+pub use crate::types::exchange::*;
+pub use info::{perp_dex_of, Fill, Info, OpenOrder, HL_INFO_URL, HL_TESTNET_INFO_URL};
 pub use nonce::NonceGen;
 pub use poster::{
     decode_status, is_duplicate_rejection, now_ns, post_frame, spawn_fan_writer, FanJob,
     PendingPost, PostResult, WsPoster,
 };
 pub use rest::{RestPoster, HL_EXCHANGE_URL};
-pub use crate::types::exchange::*;
 pub use signer::{float_to_wire, Signer};
 pub use tick::to_tick;
 pub use user_stream::{
