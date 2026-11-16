@@ -1,0 +1,849 @@
+{
+  "generator": "tests/gen_vectors.mts",
+  "sdk": "@polymarket/client 0.18.0 (github.com/Polymarket/ts-sdk 3f0d9b85532d745b513596f4715aa49647acea1d, packages/client/src)",
+  "proxy_private_key": "0x4a91f5ee09d55757c592129a27f1ab3183680cde2c7b8f24501e2103480b0d12",
+  "proxy_address": "0x7ceA69E4a64e6Cab64EC64F833E76957df073dc6",
+  "owner_private_key": "0xa06e56558d03fc09ed4ba3c20c0ce0596ad27e2b33c7365b2586d24ee8e2a545",
+  "owner_address": "0x4e9aF110C1304F5484fBf0a0B5b2D715F167d232",
+  "commands": [
+    {
+      "name": "create_orders/gtc_post_only_coid",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 1,
+            "side": "BUY",
+            "price": "65000",
+            "quantity": "0.01",
+            "timeInForce": "gtc",
+            "postOnly": true,
+            "clientOrderId": "7f9e4a2b6c8d0e1f1234567890abcdef"
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 234567890,
+      "ts": 1767000010000,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            1,
+            true,
+            "65000",
+            "0.01",
+            "gtc",
+            true,
+            null,
+            "7f9e4a2b6c8d0e1f1234567890abcdef",
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f7264657273919701c3a53635303030a4302e3031a3677463c3d9203766396534613262366338643065316631323334353637383930616263646566",
+      "data": "0x249366f8c9be21d5e4e803cbcb2294a79261c3ae8c2cea0be920442a124948b8",
+      "digest": "0xde2fa7016b35c1624edcdac42a787312172dfdab4c6646a99a9d66fd0d008ad1",
+      "sig": "0x11b3dd7826d0a01aa169b821402a1a7b490bde901625cf52305bd90139b387652dfa689e78f81fe24ff5ef3cd4158eb48c8edd362a1e9fdeb026fb5be5edee581c",
+      "rest_body": "{\"salt\":234567890,\"sig\":\"0x11b3dd7826d0a01aa169b821402a1a7b490bde901625cf52305bd90139b387652dfa689e78f81fe24ff5ef3cd4158eb48c8edd362a1e9fdeb026fb5be5edee581c\",\"ts\":1767000010000,\"op\":{\"args\":[{\"iid\":1,\"buy\":true,\"po\":true,\"qty\":\"0.01\",\"tif\":\"gtc\",\"p\":\"65000\",\"c\":\"7f9e4a2b6c8d0e1f1234567890abcdef\"}],\"type\":\"createOrders\"}}",
+      "ws_id": 1,
+      "ws_frame": "{\"salt\":234567890,\"sig\":\"0x11b3dd7826d0a01aa169b821402a1a7b490bde901625cf52305bd90139b387652dfa689e78f81fe24ff5ef3cd4158eb48c8edd362a1e9fdeb026fb5be5edee581c\",\"ts\":1767000010000,\"id\":1,\"op\":{\"args\":[{\"iid\":1,\"buy\":true,\"po\":true,\"qty\":\"0.01\",\"tif\":\"gtc\",\"p\":\"65000\",\"c\":\"7f9e4a2b6c8d0e1f1234567890abcdef\"}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/gtc_sell_plain",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 6,
+            "side": "SELL",
+            "price": "64999.5",
+            "quantity": "1.25",
+            "timeInForce": "gtc"
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 0,
+      "ts": 1794780000000,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            6,
+            false,
+            "64999.5",
+            "1.25",
+            "gtc",
+            false,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f7264657273919606c2a736343939392e35a4312e3235a3677463c2",
+      "data": "0x4b7c79ca041e505ede5c1e18fe5d1449f88aaebba595bb0e18727f81fafefe11",
+      "digest": "0xcfacb54520d5e40593b181f496063d7cd96e25e8e5ea644e163a21d92ff9c424",
+      "sig": "0xacabd16e6bfe5637c0749e494249082cbe9ad4b7c15e3bac7e4a8e5e1b1eb4d62fb87f486cc56b34f0da215d2698def5aa6b826ef40aa0253e5cc5e27611d6d71b",
+      "rest_body": "{\"salt\":0,\"sig\":\"0xacabd16e6bfe5637c0749e494249082cbe9ad4b7c15e3bac7e4a8e5e1b1eb4d62fb87f486cc56b34f0da215d2698def5aa6b826ef40aa0253e5cc5e27611d6d71b\",\"ts\":1794780000000,\"op\":{\"args\":[{\"iid\":6,\"buy\":false,\"po\":false,\"qty\":\"1.25\",\"tif\":\"gtc\",\"p\":\"64999.5\"}],\"type\":\"createOrders\"}}",
+      "ws_id": 2,
+      "ws_frame": "{\"salt\":0,\"sig\":\"0xacabd16e6bfe5637c0749e494249082cbe9ad4b7c15e3bac7e4a8e5e1b1eb4d62fb87f486cc56b34f0da215d2698def5aa6b826ef40aa0253e5cc5e27611d6d71b\",\"ts\":1794780000000,\"id\":2,\"op\":{\"args\":[{\"iid\":6,\"buy\":false,\"po\":false,\"qty\":\"1.25\",\"tif\":\"gtc\",\"p\":\"64999.5\"}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/ioc_limit_reduce_only",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 300,
+            "side": "SELL",
+            "price": "0.12345",
+            "quantity": "100000",
+            "timeInForce": "ioc",
+            "reduceOnly": true
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 4294967295,
+      "ts": 1794780000001,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            300,
+            false,
+            "0.12345",
+            "100000",
+            "ioc",
+            false,
+            true,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f72646572739197cd012cc2a7302e3132333435a6313030303030a3696f63c2c3",
+      "data": "0x9e3767a2245e1b29805a3bf3fe81d8f18dae5aa78c7f85db686b876183d155af",
+      "digest": "0xc626115edf27f80bca0676106a07f43972b1ab01d2a8d2016b160b6c83ddf3dc",
+      "sig": "0x41ff27ce0b65c189785310edc3fe65453f95fd8aa1d69f6d50878def6741551f1187053eacdf78711f3f3380e01c745227562d65981d329b1ea69f9e7fc57e571c",
+      "rest_body": "{\"salt\":4294967295,\"sig\":\"0x41ff27ce0b65c189785310edc3fe65453f95fd8aa1d69f6d50878def6741551f1187053eacdf78711f3f3380e01c745227562d65981d329b1ea69f9e7fc57e571c\",\"ts\":1794780000001,\"op\":{\"args\":[{\"iid\":300,\"buy\":false,\"po\":false,\"qty\":\"100000\",\"tif\":\"ioc\",\"ro\":true,\"p\":\"0.12345\"}],\"type\":\"createOrders\"}}",
+      "ws_id": 3,
+      "ws_frame": "{\"salt\":4294967295,\"sig\":\"0x41ff27ce0b65c189785310edc3fe65453f95fd8aa1d69f6d50878def6741551f1187053eacdf78711f3f3380e01c745227562d65981d329b1ea69f9e7fc57e571c\",\"ts\":1794780000001,\"id\":3,\"op\":{\"args\":[{\"iid\":300,\"buy\":false,\"po\":false,\"qty\":\"100000\",\"tif\":\"ioc\",\"ro\":true,\"p\":\"0.12345\"}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/ioc_market_no_price",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 7,
+            "side": "BUY",
+            "quantity": "2",
+            "timeInForce": "ioc",
+            "clientOrderId": "00000000000000000000000000000001"
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 127,
+      "ts": 1794780000002,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            7,
+            true,
+            null,
+            "2",
+            "ioc",
+            false,
+            null,
+            "00000000000000000000000000000001",
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f7264657273919607c3a132a3696f63c2d9203030303030303030303030303030303030303030303030303030303030303031",
+      "data": "0x57132ef3da4183b6f31de33cb240b41b56c3fe3d4c9d67db4090f12dd9d55f17",
+      "digest": "0xaf374242a896d107d1c654f381301444629581998da378a8d8a9753b256c4000",
+      "sig": "0x4f10ffecc31017b7c5a83f7f12f508f84f22d9e570c5f4289bb51766dd5b7aa512a2e6ab1aa4427bbda74f04e98a8defff9d0cded00f10abf4ec45c07624e92f1c",
+      "rest_body": "{\"salt\":127,\"sig\":\"0x4f10ffecc31017b7c5a83f7f12f508f84f22d9e570c5f4289bb51766dd5b7aa512a2e6ab1aa4427bbda74f04e98a8defff9d0cded00f10abf4ec45c07624e92f1c\",\"ts\":1794780000002,\"op\":{\"args\":[{\"iid\":7,\"buy\":true,\"po\":false,\"qty\":\"2\",\"tif\":\"ioc\",\"c\":\"00000000000000000000000000000001\"}],\"type\":\"createOrders\"}}",
+      "ws_id": 4,
+      "ws_frame": "{\"salt\":127,\"sig\":\"0x4f10ffecc31017b7c5a83f7f12f508f84f22d9e570c5f4289bb51766dd5b7aa512a2e6ab1aa4427bbda74f04e98a8defff9d0cded00f10abf4ec45c07624e92f1c\",\"ts\":1794780000002,\"id\":4,\"op\":{\"args\":[{\"iid\":7,\"buy\":true,\"po\":false,\"qty\":\"2\",\"tif\":\"ioc\",\"c\":\"00000000000000000000000000000001\"}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/fok_limit",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 65535,
+            "side": "BUY",
+            "price": "3000.1",
+            "quantity": "0.5",
+            "timeInForce": "fok"
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 128,
+      "ts": 1794780000003,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            65535,
+            true,
+            "3000.1",
+            "0.5",
+            "fok",
+            false,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f72646572739196cdffffc3a6333030302e31a3302e35a3666f6bc2",
+      "data": "0x7e0c4cc97f1012a10f305e460eff590bc12aca0468883ecca45e021c1305270d",
+      "digest": "0x9e3805fdf5fc1e64c3ce44c6e699b09a43b7735cfea78ccaa5c7e53226a59284",
+      "sig": "0x57cecabee96b5342df0dbeb1d694be96462f735d13a7bbaff53467bc1ec158ba3a8bee170ccfaf4221385cbf23448fec643cbdb1c1c22bb34e5649b770072df01b",
+      "rest_body": "{\"salt\":128,\"sig\":\"0x57cecabee96b5342df0dbeb1d694be96462f735d13a7bbaff53467bc1ec158ba3a8bee170ccfaf4221385cbf23448fec643cbdb1c1c22bb34e5649b770072df01b\",\"ts\":1794780000003,\"op\":{\"args\":[{\"iid\":65535,\"buy\":true,\"po\":false,\"qty\":\"0.5\",\"tif\":\"fok\",\"p\":\"3000.1\"}],\"type\":\"createOrders\"}}",
+      "ws_id": 5,
+      "ws_frame": "{\"salt\":128,\"sig\":\"0x57cecabee96b5342df0dbeb1d694be96462f735d13a7bbaff53467bc1ec158ba3a8bee170ccfaf4221385cbf23448fec643cbdb1c1c22bb34e5649b770072df01b\",\"ts\":1794780000003,\"id\":5,\"op\":{\"args\":[{\"iid\":65535,\"buy\":true,\"po\":false,\"qty\":\"0.5\",\"tif\":\"fok\",\"p\":\"3000.1\"}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/gtd_with_command_expiry",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 65536,
+            "side": "SELL",
+            "price": "101",
+            "quantity": "3",
+            "timeInForce": "gtd",
+            "gtdExpiry": 1900000000000,
+            "postOnly": true,
+            "reduceOnly": true,
+            "clientOrderId": "7f9e4a2b6c8d0e1f1234567890abcdef"
+          }
+        ],
+        "expires_at": 1794780005000
+      },
+      "chain_id": 137,
+      "salt": 65535,
+      "ts": 1794780000004,
+      "exp": 1794780005000,
+      "op": [
+        "createOrders",
+        [
+          [
+            65536,
+            false,
+            "101",
+            "3",
+            "gtd",
+            true,
+            true,
+            "7f9e4a2b6c8d0e1f1234567890abcdef",
+            null,
+            1900000000000,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f72646572739199ce00010000c2a3313031a133a3677464c3c3d9203766396534613262366338643065316631323334353637383930616263646566cf000001ba60d33800",
+      "data": "0xe168578988ca49ed80de5353b3a59f1e322cdb814124549683a7ad9bf8aacf5b",
+      "digest": "0x246a94e1bb6be3bc9fc8f5530d8c621beb300e04e9dd991488846b72fa33fcf7",
+      "sig": "0xf5fdf0b2143beb2b6edc74ac84de18781c5c5d7f31d128a74081bafe9836cfff132fe7434f41955a44c11babe3b562fa812482f9888360dbc45a4e17dd20b47b1b",
+      "rest_body": "{\"salt\":65535,\"sig\":\"0xf5fdf0b2143beb2b6edc74ac84de18781c5c5d7f31d128a74081bafe9836cfff132fe7434f41955a44c11babe3b562fa812482f9888360dbc45a4e17dd20b47b1b\",\"ts\":1794780000004,\"exp\":1794780005000,\"op\":{\"args\":[{\"iid\":65536,\"buy\":false,\"po\":true,\"qty\":\"3\",\"tif\":\"gtd\",\"ro\":true,\"p\":\"101\",\"c\":\"7f9e4a2b6c8d0e1f1234567890abcdef\",\"gtd_expiry\":1900000000000}],\"type\":\"createOrders\"}}",
+      "ws_id": 6,
+      "ws_frame": "{\"salt\":65535,\"sig\":\"0xf5fdf0b2143beb2b6edc74ac84de18781c5c5d7f31d128a74081bafe9836cfff132fe7434f41955a44c11babe3b562fa812482f9888360dbc45a4e17dd20b47b1b\",\"ts\":1794780000004,\"exp\":1794780005000,\"id\":6,\"op\":{\"args\":[{\"iid\":65536,\"buy\":false,\"po\":true,\"qty\":\"3\",\"tif\":\"gtd\",\"ro\":true,\"p\":\"101\",\"c\":\"7f9e4a2b6c8d0e1f1234567890abcdef\",\"gtd_expiry\":1900000000000}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/batch_three",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 1,
+            "side": "BUY",
+            "price": "100.25",
+            "quantity": "7",
+            "timeInForce": "gtc",
+            "postOnly": true,
+            "clientOrderId": "7f9e4a2b6c8d0e1f1234567890abcdef"
+          },
+          {
+            "instrumentId": 1,
+            "side": "SELL",
+            "price": "101.75",
+            "quantity": "7",
+            "timeInForce": "gtc",
+            "postOnly": true,
+            "clientOrderId": "00000000000000000000000000000001"
+          },
+          {
+            "instrumentId": 2,
+            "side": "BUY",
+            "quantity": "0.001",
+            "timeInForce": "fok",
+            "reduceOnly": true
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 65536,
+      "ts": 1794780000005,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            1,
+            true,
+            "100.25",
+            "7",
+            "gtc",
+            true,
+            null,
+            "7f9e4a2b6c8d0e1f1234567890abcdef",
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            false,
+            "101.75",
+            "7",
+            "gtc",
+            true,
+            null,
+            "00000000000000000000000000000001",
+            null,
+            null,
+            null
+          ],
+          [
+            2,
+            true,
+            null,
+            "0.001",
+            "fok",
+            false,
+            true,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f7264657273939701c3a63130302e3235a137a3677463c3d92037663965346132623663386430653166313233343536373839306162636465669701c2a63130312e3735a137a3677463c3d92030303030303030303030303030303030303030303030303030303030303030319602c3a5302e303031a3666f6bc2c3",
+      "data": "0x3f573ecb6dc6a159855182a05b5b735d4ba558154379a1cc0aa1402faa30e636",
+      "digest": "0x3c8a544d8f48d7563f7e8ac87aab6080c5b9d32d40b3cd0d73412921a8c465cb",
+      "sig": "0x7b1f3d93f4689dbeeaa4aeecf4e37faae198f3790073768b513863f8bde3bab12ce5e8e77e8f0769bb9f4971ed86cc9d2c359acc8fa40d90b0ea1758e3c604e21b",
+      "rest_body": "{\"salt\":65536,\"sig\":\"0x7b1f3d93f4689dbeeaa4aeecf4e37faae198f3790073768b513863f8bde3bab12ce5e8e77e8f0769bb9f4971ed86cc9d2c359acc8fa40d90b0ea1758e3c604e21b\",\"ts\":1794780000005,\"op\":{\"args\":[{\"iid\":1,\"buy\":true,\"po\":true,\"qty\":\"7\",\"tif\":\"gtc\",\"p\":\"100.25\",\"c\":\"7f9e4a2b6c8d0e1f1234567890abcdef\"},{\"iid\":1,\"buy\":false,\"po\":true,\"qty\":\"7\",\"tif\":\"gtc\",\"p\":\"101.75\",\"c\":\"00000000000000000000000000000001\"},{\"iid\":2,\"buy\":true,\"po\":false,\"qty\":\"0.001\",\"tif\":\"fok\",\"ro\":true}],\"type\":\"createOrders\"}}",
+      "ws_id": 7,
+      "ws_frame": "{\"salt\":65536,\"sig\":\"0x7b1f3d93f4689dbeeaa4aeecf4e37faae198f3790073768b513863f8bde3bab12ce5e8e77e8f0769bb9f4971ed86cc9d2c359acc8fa40d90b0ea1758e3c604e21b\",\"ts\":1794780000005,\"id\":7,\"op\":{\"args\":[{\"iid\":1,\"buy\":true,\"po\":true,\"qty\":\"7\",\"tif\":\"gtc\",\"p\":\"100.25\",\"c\":\"7f9e4a2b6c8d0e1f1234567890abcdef\"},{\"iid\":1,\"buy\":false,\"po\":true,\"qty\":\"7\",\"tif\":\"gtc\",\"p\":\"101.75\",\"c\":\"00000000000000000000000000000001\"},{\"iid\":2,\"buy\":true,\"po\":false,\"qty\":\"0.001\",\"tif\":\"fok\",\"ro\":true}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "create_orders/amoy_chain",
+      "input": {
+        "orders": [
+          {
+            "instrumentId": 1,
+            "side": "BUY",
+            "price": "1",
+            "quantity": "1",
+            "timeInForce": "gtc"
+          }
+        ],
+        "expires_at": null
+      },
+      "chain_id": 80002,
+      "salt": 42,
+      "ts": 1794780000006,
+      "exp": null,
+      "op": [
+        "createOrders",
+        [
+          [
+            1,
+            true,
+            "1",
+            "1",
+            "gtc",
+            false,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6372656174654f7264657273919601c3a131a131a3677463c2",
+      "data": "0x15338c934c00e2cf4386e3d5affef04a73a90adbba09fd5069f90415ea32e5c1",
+      "digest": "0x7b772fe2820e58d2cb9724398531a49e16d26a6083df22569167ddf6f0f008aa",
+      "sig": "0x4484c5015f31e7aeded3c9115884f9ec70b98ac25e7db0d71444800504190ab045ecccbef3e6f3f2b6fa5d18938a21ad81558e2d042e596e4a6f4d761dbeb3ce1c",
+      "rest_body": "{\"salt\":42,\"sig\":\"0x4484c5015f31e7aeded3c9115884f9ec70b98ac25e7db0d71444800504190ab045ecccbef3e6f3f2b6fa5d18938a21ad81558e2d042e596e4a6f4d761dbeb3ce1c\",\"ts\":1794780000006,\"op\":{\"args\":[{\"iid\":1,\"buy\":true,\"po\":false,\"qty\":\"1\",\"tif\":\"gtc\",\"p\":\"1\"}],\"type\":\"createOrders\"}}",
+      "ws_id": 8,
+      "ws_frame": "{\"salt\":42,\"sig\":\"0x4484c5015f31e7aeded3c9115884f9ec70b98ac25e7db0d71444800504190ab045ecccbef3e6f3f2b6fa5d18938a21ad81558e2d042e596e4a6f4d761dbeb3ce1c\",\"ts\":1794780000006,\"id\":8,\"op\":{\"args\":[{\"iid\":1,\"buy\":true,\"po\":false,\"qty\":\"1\",\"tif\":\"gtc\",\"p\":\"1\"}],\"type\":\"createOrders\"},\"req\":\"post\"}"
+    },
+    {
+      "name": "cancel_orders/one",
+      "input": {
+        "order_ids": [
+          1234567890
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 234567892,
+      "ts": 1767000030000,
+      "exp": null,
+      "op": [
+        "cancelOrders",
+        [
+          1234567890
+        ]
+      ],
+      "msgpack": "0x92ac63616e63656c4f726465727391ce499602d2",
+      "data": "0xdf923ca425af637c6e50cfcb0fb64ccfc20568d8874d119cba1b13fcd734fae3",
+      "digest": "0xe17ea5cc4151b0d3fbb13842d1af002ca489cab7d2f8888aa1e0f5cdb1d85fd0",
+      "sig": "0xd00571e9f0008c45f731e7d068d0ff4db44854f352315df0e2d63fefd76eb390296d8108c09d47849c33e4446843c0b6ace7979d22e914c2cb497a5b6b4fb52d1b",
+      "rest_body": "{\"salt\":234567892,\"sig\":\"0xd00571e9f0008c45f731e7d068d0ff4db44854f352315df0e2d63fefd76eb390296d8108c09d47849c33e4446843c0b6ace7979d22e914c2cb497a5b6b4fb52d1b\",\"ts\":1767000030000,\"op\":{\"type\":\"cancelOrders\",\"args\":[1234567890]}}",
+      "ws_id": 9,
+      "ws_frame": "{\"salt\":234567892,\"sig\":\"0xd00571e9f0008c45f731e7d068d0ff4db44854f352315df0e2d63fefd76eb390296d8108c09d47849c33e4446843c0b6ace7979d22e914c2cb497a5b6b4fb52d1b\",\"ts\":1767000030000,\"id\":9,\"op\":{\"type\":\"cancelOrders\",\"args\":[1234567890]},\"req\":\"post\"}"
+    },
+    {
+      "name": "cancel_orders/many_with_expiry",
+      "input": {
+        "order_ids": [
+          1,
+          255,
+          9007199254740991
+        ],
+        "expires_at": 1794780009000
+      },
+      "chain_id": 137,
+      "salt": 99,
+      "ts": 1794780000010,
+      "exp": 1794780009000,
+      "op": [
+        "cancelOrders",
+        [
+          1,
+          255,
+          9007199254740991
+        ]
+      ],
+      "msgpack": "0x92ac63616e63656c4f72646572739301ccffcf001fffffffffffff",
+      "data": "0x45b0ce93ced761cd23b9c37109a207494c2771d561274c92a759fa2608ddd439",
+      "digest": "0xf14ce764f9c9f3b4cedad4fbcbb54635680b61d8948441738a36fc12d6df57ea",
+      "sig": "0x5373adb0e0ab00bda09467372362bdde794faceb785bf2b5c26c289a6c63a8802e0d343e8f16330d5757e6e4f1dc5f0a7425a3a50b83cd5d92d772ccbb531d041c",
+      "rest_body": "{\"salt\":99,\"sig\":\"0x5373adb0e0ab00bda09467372362bdde794faceb785bf2b5c26c289a6c63a8802e0d343e8f16330d5757e6e4f1dc5f0a7425a3a50b83cd5d92d772ccbb531d041c\",\"ts\":1794780000010,\"exp\":1794780009000,\"op\":{\"type\":\"cancelOrders\",\"args\":[1,255,9007199254740991]}}",
+      "ws_id": 10,
+      "ws_frame": "{\"salt\":99,\"sig\":\"0x5373adb0e0ab00bda09467372362bdde794faceb785bf2b5c26c289a6c63a8802e0d343e8f16330d5757e6e4f1dc5f0a7425a3a50b83cd5d92d772ccbb531d041c\",\"ts\":1794780000010,\"exp\":1794780009000,\"id\":10,\"op\":{\"type\":\"cancelOrders\",\"args\":[1,255,9007199254740991]},\"req\":\"post\"}"
+    },
+    {
+      "name": "cancel_orders_coid/two",
+      "input": {
+        "client_order_ids": [
+          "7f9e4a2b6c8d0e1f1234567890abcdef",
+          "00000000000000000000000000000001"
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 234567893,
+      "ts": 1767000040000,
+      "exp": null,
+      "op": [
+        "cancelOrdersCOID",
+        [
+          "7f9e4a2b6c8d0e1f1234567890abcdef",
+          "00000000000000000000000000000001"
+        ]
+      ],
+      "msgpack": "0x92b063616e63656c4f7264657273434f494492d9203766396534613262366338643065316631323334353637383930616263646566d9203030303030303030303030303030303030303030303030303030303030303031",
+      "data": "0x01ad7350e5a8b2c2911118e0faa8b9378f9fa246518c6dd9dd79b86babca2ff6",
+      "digest": "0x22bf6cf6151a27a178a882d802e0e029f2682c8947505a32111d05c2cc806e48",
+      "sig": "0x5c57b60cda0c5c49ed5631bdf4d4ad73ee62ab16ec7cd264ce4295ba92d728da233f063b58b453f5b0f1bdcaf2448fbf9f6765ef6dd3507ca88abbf447b781531c",
+      "rest_body": "{\"salt\":234567893,\"sig\":\"0x5c57b60cda0c5c49ed5631bdf4d4ad73ee62ab16ec7cd264ce4295ba92d728da233f063b58b453f5b0f1bdcaf2448fbf9f6765ef6dd3507ca88abbf447b781531c\",\"ts\":1767000040000,\"op\":{\"type\":\"cancelOrdersCOID\",\"args\":[\"7f9e4a2b6c8d0e1f1234567890abcdef\",\"00000000000000000000000000000001\"]}}",
+      "ws_id": 11,
+      "ws_frame": "{\"salt\":234567893,\"sig\":\"0x5c57b60cda0c5c49ed5631bdf4d4ad73ee62ab16ec7cd264ce4295ba92d728da233f063b58b453f5b0f1bdcaf2448fbf9f6765ef6dd3507ca88abbf447b781531c\",\"ts\":1767000040000,\"id\":11,\"op\":{\"type\":\"cancelOrdersCOID\",\"args\":[\"7f9e4a2b6c8d0e1f1234567890abcdef\",\"00000000000000000000000000000001\"]},\"req\":\"post\"}"
+    },
+    {
+      "name": "cancel_all/all",
+      "input": {
+        "instrument_id": null,
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 234567894,
+      "ts": 1767000050000,
+      "exp": null,
+      "op": [
+        "cancelAll",
+        []
+      ],
+      "msgpack": "0x92a963616e63656c416c6c90",
+      "data": "0xea04f4dac482b76aa8accb5285793a12c220d2246c587ca61984d20a52e5bcf5",
+      "digest": "0x8e08ee7b356d86d5c0a2d555d0419f9935ac900ec97ebdcfbff3f21c30ca023f",
+      "sig": "0x95a9465e8dd7b7c59c40ef9eb76d107324330e19659162e6614933e3ccb4d2933f76d14ac79518d0364ad6aa3a71f6baf53d6440dff24405807564d46666fe7b1c",
+      "rest_body": "{\"salt\":234567894,\"sig\":\"0x95a9465e8dd7b7c59c40ef9eb76d107324330e19659162e6614933e3ccb4d2933f76d14ac79518d0364ad6aa3a71f6baf53d6440dff24405807564d46666fe7b1c\",\"ts\":1767000050000,\"op\":{\"type\":\"cancelAll\",\"args\":{}}}",
+      "ws_id": 12,
+      "ws_frame": "{\"salt\":234567894,\"sig\":\"0x95a9465e8dd7b7c59c40ef9eb76d107324330e19659162e6614933e3ccb4d2933f76d14ac79518d0364ad6aa3a71f6baf53d6440dff24405807564d46666fe7b1c\",\"ts\":1767000050000,\"id\":12,\"op\":{\"type\":\"cancelAll\",\"args\":{}},\"req\":\"post\"}",
+      "path": "/v1/trade/orders/all"
+    },
+    {
+      "name": "cancel_all/one_instrument_with_expiry",
+      "input": {
+        "instrument_id": 1,
+        "expires_at": 1794780009000
+      },
+      "chain_id": 137,
+      "salt": 234567895,
+      "ts": 1767000060000,
+      "exp": 1794780009000,
+      "op": [
+        "cancelAll",
+        [
+          1
+        ]
+      ],
+      "msgpack": "0x92a963616e63656c416c6c9101",
+      "data": "0xdf45f58c2ed32ed78e33944f69bd71f253bfde1ad9b7ab736a75e748c36e3a28",
+      "digest": "0x4e1b9b0ccbc0dc64e060182be1a79afe6da60ab2c3e853d8774fb951d77b9803",
+      "sig": "0xca1e771361313dc849d6b0153a127d6deff965f4664fbec8d4b51aa6651e20d049c2cdcd8a6a5609ec7329aa1f1e1e5da9301f77c9eab3395f57f6291621fdb11c",
+      "rest_body": "{\"salt\":234567895,\"sig\":\"0xca1e771361313dc849d6b0153a127d6deff965f4664fbec8d4b51aa6651e20d049c2cdcd8a6a5609ec7329aa1f1e1e5da9301f77c9eab3395f57f6291621fdb11c\",\"ts\":1767000060000,\"exp\":1794780009000,\"op\":{\"type\":\"cancelAll\",\"args\":{\"iid\":1}}}",
+      "ws_id": 13,
+      "ws_frame": "{\"salt\":234567895,\"sig\":\"0xca1e771361313dc849d6b0153a127d6deff965f4664fbec8d4b51aa6651e20d049c2cdcd8a6a5609ec7329aa1f1e1e5da9301f77c9eab3395f57f6291621fdb11c\",\"ts\":1767000060000,\"exp\":1794780009000,\"id\":13,\"op\":{\"type\":\"cancelAll\",\"args\":{\"iid\":1}},\"req\":\"post\"}",
+      "path": "/v1/trade/orders/all"
+    },
+    {
+      "name": "auto_cancel/arm",
+      "input": {
+        "time": 1900000000000
+      },
+      "chain_id": 137,
+      "salt": 234567896,
+      "ts": 1767000070000,
+      "exp": null,
+      "op": [
+        "autoCancel",
+        [
+          1900000000000
+        ]
+      ],
+      "msgpack": "0x92aa6175746f43616e63656c91cf000001ba60d33800",
+      "data": "0x08de112b96162ecaa131e544d77f4be8b4acccbebd6c98f225dea02d41177d42",
+      "digest": "0x2b775476e4961a19855df33a394160ac9a16f348c668458b98ca3e773671db15",
+      "sig": "0xa9ecfd6ab440cd48df28c6954253fe6b3826613749c0e5a443b7946f776c17b10219450923da3a1f3501408b09c6ba129bb35ac5ed2e08163bd25bbdfadeeeb41c",
+      "rest_body": "{\"salt\":234567896,\"sig\":\"0xa9ecfd6ab440cd48df28c6954253fe6b3826613749c0e5a443b7946f776c17b10219450923da3a1f3501408b09c6ba129bb35ac5ed2e08163bd25bbdfadeeeb41c\",\"ts\":1767000070000,\"op\":{\"type\":\"autoCancel\",\"args\":{\"time\":1900000000000}}}",
+      "ws_id": 14,
+      "ws_frame": "{\"salt\":234567896,\"sig\":\"0xa9ecfd6ab440cd48df28c6954253fe6b3826613749c0e5a443b7946f776c17b10219450923da3a1f3501408b09c6ba129bb35ac5ed2e08163bd25bbdfadeeeb41c\",\"ts\":1767000070000,\"id\":14,\"op\":{\"type\":\"autoCancel\",\"args\":{\"time\":1900000000000}},\"req\":\"post\"}",
+      "path": "/v1/trade/auto-cancel"
+    },
+    {
+      "name": "auto_cancel/disarm",
+      "input": {
+        "time": 0
+      },
+      "chain_id": 137,
+      "salt": 234567897,
+      "ts": 1767000080000,
+      "exp": null,
+      "op": [
+        "autoCancel",
+        [
+          0
+        ]
+      ],
+      "msgpack": "0x92aa6175746f43616e63656c9100",
+      "data": "0x569d0f5365d9bb75e7f2218717986828ea553b937a4c901528c70fa173fa539e",
+      "digest": "0x35ed72f47c10fadd2aa3f759fd1fcca355c16e1dec4615307c8df437ca726c9f",
+      "sig": "0xd32590fcd469512c6853d1a704af6963729d616d5c272e9c262c6bfcd7b6c0702ec197020d3ea92f07c2c9694d53fcfc14aaeddbb93c51412ce47c778a7ea8cf1b",
+      "rest_body": "{\"salt\":234567897,\"sig\":\"0xd32590fcd469512c6853d1a704af6963729d616d5c272e9c262c6bfcd7b6c0702ec197020d3ea92f07c2c9694d53fcfc14aaeddbb93c51412ce47c778a7ea8cf1b\",\"ts\":1767000080000,\"op\":{\"type\":\"autoCancel\",\"args\":{\"time\":0}}}",
+      "ws_id": 15,
+      "ws_frame": "{\"salt\":234567897,\"sig\":\"0xd32590fcd469512c6853d1a704af6963729d616d5c272e9c262c6bfcd7b6c0702ec197020d3ea92f07c2c9694d53fcfc14aaeddbb93c51412ce47c778a7ea8cf1b\",\"ts\":1767000080000,\"id\":15,\"op\":{\"type\":\"autoCancel\",\"args\":{\"time\":0}},\"req\":\"post\"}",
+      "path": "/v1/trade/auto-cancel"
+    },
+    {
+      "name": "update_leverage/cross",
+      "input": {
+        "instrument_id": 6,
+        "leverage": 20,
+        "cross": true
+      },
+      "chain_id": 137,
+      "salt": 5,
+      "ts": 1794780000020,
+      "exp": null,
+      "op": [
+        "updateLeverage",
+        [
+          6,
+          20,
+          true
+        ]
+      ],
+      "msgpack": "0x92ae7570646174654c65766572616765930614c3",
+      "data": "0x438d02d22f7258aae4f3e676a9fe5082c19e3b74215151d0c5a526a4fb12ac52",
+      "digest": "0x156e1f831abc8801418e1a37eaee470a419ca12cbf708a169caa294e85c4635b",
+      "sig": "0xc6a349402295de6095851279efb68d62be83b53be2df27f12f781c8f10e3711d55a19d32b6fb8e6e8c697cbb41f44b9ccd7be9ce68bede1952b5fefd3fb99cb01b",
+      "rest_body": "{\"salt\":5,\"sig\":\"0xc6a349402295de6095851279efb68d62be83b53be2df27f12f781c8f10e3711d55a19d32b6fb8e6e8c697cbb41f44b9ccd7be9ce68bede1952b5fefd3fb99cb01b\",\"ts\":1794780000020,\"op\":{\"type\":\"updateLeverage\",\"args\":{\"cross\":true,\"iid\":6,\"lev\":20}}}",
+      "ws_id": 16,
+      "ws_frame": "{\"salt\":5,\"sig\":\"0xc6a349402295de6095851279efb68d62be83b53be2df27f12f781c8f10e3711d55a19d32b6fb8e6e8c697cbb41f44b9ccd7be9ce68bede1952b5fefd3fb99cb01b\",\"ts\":1794780000020,\"id\":16,\"op\":{\"type\":\"updateLeverage\",\"args\":{\"cross\":true,\"iid\":6,\"lev\":20}},\"req\":\"post\"}"
+    },
+    {
+      "name": "update_leverages/batch",
+      "input": {
+        "updates": [
+          [
+            1,
+            50,
+            false
+          ],
+          [
+            6,
+            3,
+            true
+          ]
+        ]
+      },
+      "chain_id": 137,
+      "salt": 6,
+      "ts": 1794780000021,
+      "exp": null,
+      "op": [
+        "updateLeverages",
+        [
+          [
+            1,
+            50,
+            false
+          ],
+          [
+            6,
+            3,
+            true
+          ]
+        ]
+      ],
+      "msgpack": "0x92af7570646174654c657665726167657392930132c2930603c3",
+      "data": "0x5930e0db1858602b44f1cb4ca4e40b4026dd2bc9dd7a398d1c8551407f43464b",
+      "digest": "0x388c85d758d4b4df1d60b88184e141771b9f983516d76bb25f4c1cef49294b12",
+      "sig": "0x1fd0a2ff4049ed6a739d791903a3bef81afcd8c08ea59b4c29649b61575dcdf97062238eeecd53179848af317b0170c8d9ca1b2fe2446cd7f90b661f8233c4551c",
+      "rest_body": "{\"salt\":6,\"sig\":\"0x1fd0a2ff4049ed6a739d791903a3bef81afcd8c08ea59b4c29649b61575dcdf97062238eeecd53179848af317b0170c8d9ca1b2fe2446cd7f90b661f8233c4551c\",\"ts\":1794780000021,\"op\":{\"type\":\"updateLeverages\",\"args\":[{\"cross\":false,\"iid\":1,\"lev\":50},{\"cross\":true,\"iid\":6,\"lev\":3}]}}",
+      "ws_id": 17,
+      "ws_frame": "{\"salt\":6,\"sig\":\"0x1fd0a2ff4049ed6a739d791903a3bef81afcd8c08ea59b4c29649b61575dcdf97062238eeecd53179848af317b0170c8d9ca1b2fe2446cd7f90b661f8233c4551c\",\"ts\":1794780000021,\"id\":17,\"op\":{\"type\":\"updateLeverages\",\"args\":[{\"cross\":false,\"iid\":1,\"lev\":50},{\"cross\":true,\"iid\":6,\"lev\":3}]},\"req\":\"post\"}"
+    },
+    {
+      "name": "update_margin/remove",
+      "input": {
+        "instrument_id": 6,
+        "amount": "-12.5"
+      },
+      "chain_id": 137,
+      "salt": 7,
+      "ts": 1794780000022,
+      "exp": null,
+      "op": [
+        "updateMargin",
+        [
+          6,
+          "-12.5"
+        ]
+      ],
+      "msgpack": "0x92ac7570646174654d617267696e9206a52d31322e35",
+      "data": "0x715bf304438ebb902d72d7ec0dfbff9063ead4a6823038d08aca553db79c2ca9",
+      "digest": "0x82414d7b61036c7a76cd079f14cbd2f4181c2a5b917dcba243e237c4e1ab90ed",
+      "sig": "0xe7b53aaadc39f475f1d20109aa92c17b7be86bd0ea6b4a4971ce41712d40fb294fc0e3ce575a5792a7a9baad10aeba999c922800846c9a995e2cde988e203ef81c",
+      "rest_body": "{\"salt\":7,\"sig\":\"0xe7b53aaadc39f475f1d20109aa92c17b7be86bd0ea6b4a4971ce41712d40fb294fc0e3ce575a5792a7a9baad10aeba999c922800846c9a995e2cde988e203ef81c\",\"ts\":1794780000022,\"op\":{\"type\":\"updateMargin\",\"args\":{\"amt\":\"-12.5\",\"iid\":6}}}",
+      "ws_id": 18,
+      "ws_frame": "{\"salt\":7,\"sig\":\"0xe7b53aaadc39f475f1d20109aa92c17b7be86bd0ea6b4a4971ce41712d40fb294fc0e3ce575a5792a7a9baad10aeba999c922800846c9a995e2cde988e203ef81c\",\"ts\":1794780000022,\"id\":18,\"op\":{\"type\":\"updateMargin\",\"args\":{\"amt\":\"-12.5\",\"iid\":6}},\"req\":\"post\"}"
+    },
+    {
+      "name": "modify_orders/one",
+      "input": {
+        "items": [
+          [
+            1234567890,
+            "100.25",
+            "7"
+          ]
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 234567894,
+      "ts": 1767000050000,
+      "exp": null,
+      "op": [
+        "modifyOrders",
+        [
+          [
+            1234567890,
+            "100.25",
+            "7"
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6d6f646966794f72646572739193ce499602d2a63130302e3235a137",
+      "data": "0xb08ddfd78a820701d0b964ccaf0af38913865d09f2d35c8e57a48c3970a38ecf",
+      "digest": "0x8e19e97614fe2f8c30535a85a868e9dbd82a4f5792ee9dd08e56c034ce94abab",
+      "sig": "0xa878ede03da83d6df27451a6266d17bcc88e3b2834de2ab1b42e30ad9edb06ae48da7bb592a279caf2e18cf970d5340fa490186dcecaa16b7c1b50913674bd011c",
+      "rest_body": "{\"salt\":234567894,\"sig\":\"0xa878ede03da83d6df27451a6266d17bcc88e3b2834de2ab1b42e30ad9edb06ae48da7bb592a279caf2e18cf970d5340fa490186dcecaa16b7c1b50913674bd011c\",\"ts\":1767000050000,\"op\":{\"type\":\"modifyOrders\",\"args\":[{\"oid\":1234567890,\"p\":\"100.25\",\"qty\":\"7\"}]}}",
+      "ws_id": 19,
+      "ws_frame": "{\"salt\":234567894,\"sig\":\"0xa878ede03da83d6df27451a6266d17bcc88e3b2834de2ab1b42e30ad9edb06ae48da7bb592a279caf2e18cf970d5340fa490186dcecaa16b7c1b50913674bd011c\",\"ts\":1767000050000,\"id\":19,\"op\":{\"type\":\"modifyOrders\",\"args\":[{\"oid\":1234567890,\"p\":\"100.25\",\"qty\":\"7\"}]},\"req\":\"post\"}"
+    },
+    {
+      "name": "modify_orders/two_with_expiry",
+      "input": {
+        "items": [
+          [
+            1,
+            "0.5",
+            "10"
+          ],
+          [
+            70000,
+            "65000.1",
+            "0.0001"
+          ]
+        ],
+        "expires_at": 1794780003000
+      },
+      "chain_id": 137,
+      "salt": 8,
+      "ts": 1794780000030,
+      "exp": 1794780003000,
+      "op": [
+        "modifyOrders",
+        [
+          [
+            1,
+            "0.5",
+            "10"
+          ],
+          [
+            70000,
+            "65000.1",
+            "0.0001"
+          ]
+        ]
+      ],
+      "msgpack": "0x92ac6d6f646966794f7264657273929301a3302e35a2313093ce00011170a736353030302e31a6302e30303031",
+      "data": "0x47a7cc6a65624fb17d252b932b12e75a3cee776b5f06e6f34c56f81f6f347928",
+      "digest": "0xabfda53cf79003ca0a1fb7bb6e63f3cd10fd618d51ea3d6514d7fe5cbd98c28c",
+      "sig": "0x82647111debedc455616e8dad07bba351305d4ab45cf7fff91a71c14a854318f12dd4ef534ad8e5e3d3ad757aa4feedc7e523d3760362dc8eaac495e108e788e1c",
+      "rest_body": "{\"salt\":8,\"sig\":\"0x82647111debedc455616e8dad07bba351305d4ab45cf7fff91a71c14a854318f12dd4ef534ad8e5e3d3ad757aa4feedc7e523d3760362dc8eaac495e108e788e1c\",\"ts\":1794780000030,\"exp\":1794780003000,\"op\":{\"type\":\"modifyOrders\",\"args\":[{\"oid\":1,\"p\":\"0.5\",\"qty\":\"10\"},{\"oid\":70000,\"p\":\"65000.1\",\"qty\":\"0.0001\"}]}}",
+      "ws_id": 20,
+      "ws_frame": "{\"salt\":8,\"sig\":\"0x82647111debedc455616e8dad07bba351305d4ab45cf7fff91a71c14a854318f12dd4ef534ad8e5e3d3ad757aa4feedc7e523d3760362dc8eaac495e108e788e1c\",\"ts\":1794780000030,\"exp\":1794780003000,\"id\":20,\"op\":{\"type\":\"modifyOrders\",\"args\":[{\"oid\":1,\"p\":\"0.5\",\"qty\":\"10\"},{\"oid\":70000,\"p\":\"65000.1\",\"qty\":\"0.0001\"}]},\"req\":\"post\"}"
+    },
+    {
+      "name": "modify_orders_coid/one",
+      "input": {
+        "items": [
+          [
+            "7f9e4a2b6c8d0e1f1234567890abcdef",
+            "100.25",
+            "7"
+          ]
+        ],
+        "expires_at": null
+      },
+      "chain_id": 137,
+      "salt": 9,
+      "ts": 1794780000031,
+      "exp": null,
+      "op": [
+        "modifyOrdersCOID",
+        [
+          [
+            "7f9e4a2b6c8d0e1f1234567890abcdef",
+            "100.25",
+            "7"
+          ]
+        ]
+      ],
+      "msgpack": "0x92b06d6f646966794f7264657273434f49449193d9203766396534613262366338643065316631323334353637383930616263646566a63130302e3235a137",
+      "data": "0x42bec81df9e59384cd1b4c5f5ab337a23cd07f628bc2fb4c88f1b037ddf88be6",
+      "digest": "0xec433a2f068d5bd0778a2c4794506720fa0e2a3120f9c6436725e53c705942cc",
+      "sig": "0x043823c470899cb9927c104df7c570d10274c2d47b3d7f457447a1946c316c523de57071645d20917a3af58234339508f75d641e209f26fc5429e0a6dc276bb91c",
+      "rest_body": "{\"salt\":9,\"sig\":\"0x043823c470899cb9927c104df7c570d10274c2d47b3d7f457447a1946c316c523de57071645d20917a3af58234339508f75d641e209f26fc5429e0a6dc276bb91c\",\"ts\":1794780000031,\"op\":{\"type\":\"modifyOrdersCOID\",\"args\":[{\"coid\":\"7f9e4a2b6c8d0e1f1234567890abcdef\",\"p\":\"100.25\",\"qty\":\"7\"}]}}",
+      "ws_id": 21,
+      "ws_frame": "{\"salt\":9,\"sig\":\"0x043823c470899cb9927c104df7c570d10274c2d47b3d7f457447a1946c316c523de57071645d20917a3af58234339508f75d641e209f26fc5429e0a6dc276bb91c\",\"ts\":1794780000031,\"id\":21,\"op\":{\"type\":\"modifyOrdersCOID\",\"args\":[{\"coid\":\"7f9e4a2b6c8d0e1f1234567890abcdef\",\"p\":\"100.25\",\"qty\":\"7\"}]},\"req\":\"post\"}"
+    }
+  ],
+  "owner_ops": [
+    {
+      "name": "create_proxy/no_label",
+      "chain_id": 137,
+      "owner": "0x4e9aF110C1304F5484fBf0a0B5b2D715F167d232",
+      "proxy": "0x6b64a8afbaa0b0d2ea14fa0fe4a8c93324f11f11",
+      "expiry": 1795385264821,
+      "label": null,
+      "salt": 2855603261,
+      "ts": 1794780464821,
+      "digest": "0x432a1dfb56f645ccbf1ffc2bfd33e118417aea56f724ef0468a6ec0cb231314c",
+      "sig": "0xb5e9f0f86797b264e8e9ee77caf8b4ed2c959481ef67fc5c290a6d52a89117f176e36dbce2d9a864bb80f57d99ffda3c39cfc81fe22045f31640ce30a2fe9a9c1b",
+      "path": "/v1/account/proxy",
+      "rest_body": "{\"op\":{\"args\":{\"expiry\":1795385264821,\"owner\":\"0x4e9aF110C1304F5484fBf0a0B5b2D715F167d232\",\"proxy\":\"0x6b64a8afbaa0b0d2ea14fa0fe4a8c93324f11f11\"},\"type\":\"createProxy\"},\"salt\":2855603261,\"sig\":\"0xb5e9f0f86797b264e8e9ee77caf8b4ed2c959481ef67fc5c290a6d52a89117f176e36dbce2d9a864bb80f57d99ffda3c39cfc81fe22045f31640ce30a2fe9a9c1b\",\"ts\":1794780464821}"
+    },
+    {
+      "name": "create_proxy/label",
+      "chain_id": 137,
+      "owner": "0x4e9aF110C1304F5484fBf0a0B5b2D715F167d232",
+      "proxy": "0xfea32806c7b40db630682bf62eeeb0a1aa8b1780",
+      "expiry": 1794784064823,
+      "label": "trading-app",
+      "salt": 609184646,
+      "ts": 1794780464823,
+      "digest": "0x27fc8c6519e0a752743bcdca0e4ef32826fbd50d12aa1513cfc6d6cf593aa08e",
+      "sig": "0xa75ae96d9ae8c4b9b1c4017f78d4638aff6cebf1814982482e31b123b34fca6e41f8f223504719a3b1423d026e5e83756ec342abe2b122dae7e96e6b6a2ed6691c",
+      "path": "/v1/account/proxy",
+      "rest_body": "{\"op\":{\"args\":{\"expiry\":1794784064823,\"owner\":\"0x4e9aF110C1304F5484fBf0a0B5b2D715F167d232\",\"proxy\":\"0xfea32806c7b40db630682bf62eeeb0a1aa8b1780\"},\"type\":\"createProxy\"},\"salt\":609184646,\"sig\":\"0xa75ae96d9ae8c4b9b1c4017f78d4638aff6cebf1814982482e31b123b34fca6e41f8f223504719a3b1423d026e5e83756ec342abe2b122dae7e96e6b6a2ed6691c\",\"ts\":1794780464823,\"label\":\"trading-app\"}"
+    },
+    {
+      "name": "delete_proxy",
+      "chain_id": 137,
+      "proxy": "0x7ceA69E4a64e6Cab64EC64F833E76957df073dc6",
+      "salt": 3523908266,
+      "ts": 1794780464824,
+      "op": [
+        "deleteProxy",
+        [
+          "0x7ceA69E4a64e6Cab64EC64F833E76957df073dc6"
+        ]
+      ],
+      "msgpack": "0x92ab64656c65746550726f787991d92a307837636541363945346136346536436162363445433634463833334537363935376466303733646336",
+      "data": "0x355f156127f24fb3553e77ef7a6ff90784d21316f7d173bcc7a75095996e52dd",
+      "digest": "0x75a1c3bfe9c045e236d5ad2b319272b9f6dca32fce8f764ab16ab36868d8d0c3",
+      "sig": "0x8df694061f852e1d43924fd900326710339d32309fed55deee6b0924f9d4805311ff644603b1dfd3aaff55b2a50b453f351a731157b36d382ef608a42fdea7111b",
+      "path": "/v1/account/proxy",
+      "rest_body": "{\"op\":{\"type\":\"deleteProxy\",\"args\":{\"proxy\":\"0x7ceA69E4a64e6Cab64EC64F833E76957df073dc6\"}},\"salt\":3523908266,\"sig\":\"0x8df694061f852e1d43924fd900326710339d32309fed55deee6b0924f9d4805311ff644603b1dfd3aaff55b2a50b453f351a731157b36d382ef608a42fdea7111b\",\"ts\":1794780464824}"
+    }
+  ]
+}

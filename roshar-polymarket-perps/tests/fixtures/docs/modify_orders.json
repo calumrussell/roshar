@@ -1,0 +1,1 @@
+[{"status":"ok","order":{"oid":1234567890,"iid":1,"buy":true,"p":"100.25","qty":"7","tif":"gtc","po":false,"ro":false,"status":"open","rest":"3","fill":"4","cts":1767000010000,"uts":1767000050000,"coid":"7f9e4a2b6c8d0e1f1234567890abcdef"}},{"status":"err","oid":1234567890,"error":"modify_would_cross"}]
