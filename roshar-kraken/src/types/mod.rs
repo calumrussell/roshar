@@ -1,6 +1,11 @@
 mod ws;
 
 pub use ws::{
-    KrakenBookDeltaMessage, KrakenBookLevel, KrakenBookSnapshotMessage, KrakenSingleTrade,
-    KrakenSubscribeMessage, KrakenTradeDeltaMessage, KrakenTradeSnapshotMessage, KrakenWssMessage,
+    KrakenBookData, KrakenBookDepth, KrakenBookLevel, KrakenBookMessage, KrakenEmergency,
+    KrakenEmergencyStep, KrakenInstrumentData, KrakenInstrumentMessage, KrakenOhlc,
+    KrakenOhlcInterval, KrakenOhlcMessage, KrakenOhlcTickType, KrakenRfq, KrakenRfqLeg,
+    KrakenRfqsMessage, KrakenStatus, KrakenStatusMessage, KrakenTicker, KrakenTickerMessage,
+    KrakenTrade, KrakenTradeMessage, KrakenUpcomingMaintenance, KrakenWsAsset, KrakenWsPair,
+    KrakenWssAck, KrakenWssAckResult, KrakenWssEvent, KrakenWssMessage, KrakenWssParams,
+    KrakenWssPong,
 };

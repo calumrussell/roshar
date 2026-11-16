@@ -40,6 +40,10 @@ impl AuthApi {
         Utc::now().timestamp_millis()
     }
 
+    /// `Authent` per https://docs.kraken.com/exchange/guides/futures/rest#authent:
+    /// base64(HMAC-SHA512(base64decode(secret), SHA256(postData + nonce + endpointPath))), where
+    /// `endpointPath` drops the `/derivatives` prefix (as krakenfx/api-go `derivatives.Sign` does).
+    /// `data` must be the url-encoded string exactly as sent.
     pub fn get_signature(
         private_key: &str,
         nonce: &str,
@@ -82,8 +86,37 @@ impl AuthApi {
         headers.insert("APIKey".to_string(), credentials.public_key.clone());
         headers.insert("Authent".to_string(), signature);
         headers.insert("Nonce".to_string(), nonce);
-        headers.insert("Content-Type".to_string(), "application/json".to_string());
 
         Ok(headers)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Vector from the official docs (Derivatives WebSocket "Sign challenge" example), which uses
+    /// the same SHA-256 then HMAC-SHA-512 pipeline as `Authent` with empty nonce and path:
+    /// https://docs.kraken.com/exchange/guides/futures/websockets#sign-challenge
+    #[test]
+    fn matches_documented_vector() {
+        let secret =
+            "7zxMEF5p/Z8l2p2U7Ghv6x14Af+Fx+92tPgUdVQ748FOIrEoT9bgT+bTRfXc5pz8na+hL/QdrCVG7bh9KpT0eMTm";
+        let sig =
+            AuthApi::get_signature(secret, "", "c100b894-1729-464d-ace1-52dbce11db42", "").unwrap();
+        assert_eq!(
+            sig,
+            "4JEpF3ix66GA2B+ooK128Ift4XQVtc137N9yeg4Kqsn9PI0Kpzbysl9M1IeCEdjg0zl00wkVqcsnG4bmnlMb3A=="
+        );
+    }
+
+    #[test]
+    fn strips_derivatives_prefix() {
+        let secret =
+            "7zxMEF5p/Z8l2p2U7Ghv6x14Af+Fx+92tPgUdVQ748FOIrEoT9bgT+bTRfXc5pz8na+hL/QdrCVG7bh9KpT0eMTm";
+        let a =
+            AuthApi::get_signature(secret, "1", "x=1", "/derivatives/api/v3/sendorder").unwrap();
+        let b = AuthApi::get_signature(secret, "1", "x=1", "/api/v3/sendorder").unwrap();
+        assert_eq!(a, b);
     }
 }
