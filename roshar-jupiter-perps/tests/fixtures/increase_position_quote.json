@@ -1,0 +1,21 @@
+{
+ "positionPubkey": null,
+ "quote": {
+  "averagePriceUsd": "71899175",
+  "collateralUsdDelta": "9987425",
+  "leverage": "1.99",
+  "liquidationPriceUsd": "36143638",
+  "openFeeUsd": "11968",
+  "outstandingBorrowFeeUsd": "0",
+  "positionCollateralUsd": "9973462",
+  "positionSizeUsd": "19946884",
+  "priceImpactFeeBps": "1",
+  "priceImpactFeeUsd": "1995",
+  "side": "long",
+  "sizeUsdDelta": "19946884",
+  "sizeTokenDelta": "277428549"
+ },
+ "serializedTxBase64": null,
+ "tpsl": [],
+ "txMetadata": null
+}

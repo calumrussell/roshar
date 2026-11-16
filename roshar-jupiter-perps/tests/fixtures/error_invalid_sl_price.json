@@ -1,0 +1,8 @@
+{
+ "code": "invalid_sl_price",
+ "message": "Invalid SL price",
+ "metadata": {
+  "minTriggerPriceUsd": "64976548576",
+  "maxTriggerPriceUsd": "95651265111"
+ }
+}

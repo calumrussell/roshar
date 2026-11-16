@@ -1,0 +1,34 @@
+{
+ "positionPubkey": "G2J2cRLgHDuuFt9fYPxLKzUbAmxUawFNcDivnH4mjn6e",
+ "quote": {
+  "averagePriceUsd": "71909224",
+  "collateralUsdDelta": "9987501",
+  "leverage": "1.99",
+  "liquidationPriceUsd": "36148692",
+  "openFeeUsd": "11968",
+  "outstandingBorrowFeeUsd": "0",
+  "positionCollateralUsd": "9973538",
+  "positionSizeUsd": "19947036",
+  "priceImpactFeeBps": "1",
+  "priceImpactFeeUsd": "1995",
+  "side": "long",
+  "sizeUsdDelta": "19947036",
+  "sizeTokenDelta": "277391894"
+ },
+ "serializedTxBase64": "AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzq+2P53pw10Klz4u55DxVI00C7CwgLbxkz1eazrpfhzlXo11QPXvCnUdFflj/x1LqYZvy237yUwPwd04oNRsAYADAgUOfowIh2C/3h3dzzLBfyCbgkLuUqrxMfrNiNDqLG0LBvKPuB0qGDbYUrysLLqQjPfsF3hWtuANsfmvt+D3/4t0uQw1GvIXzKcTVr88ZcQmTNVM4iLYZ6MsJgxi/m7iFdmhbQ/ffN89KMzS1moKr3xD+eaLjFLD93Uu7/6fCChoRW/9TEiHoKMLNkz7PYjZNpEQpuMJyrrxLM6pb90EsXWKldPqjPWsrKjNBSB1EhdcQ871Sl3Znt4goWtVJTc485fc3zQjWEa25rPFPY6vs7fIEJonIJgV+0T+s0Jkb/BMLksMZ8zDr2MXkypGsc/EvnAZSleXitIxEpwVjW6AgWaRb3Y6LMHBWQL0WeR6EC6qdzJUngRbfDg9bKPqrGgPITurAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKkFsfPK8ZRi74dg8Kvedc09nuMbOjLGIOiUEi6cm4FF+s3sHSrPZR4DDoJmysZQdP4tX3EKbHSYW/ZegmKrCf6nCAkABQIU6gUACQAJAywOAAAAAAAACgYAAwATCwwBAQ0DBAMMCORVuXBOT00CDRAABQMUFQ4PFhARFxIMGBkNGMUmVqXHFybqgJaYAAAAAACYVd0HAAAAAA0UAQIAAxUOBhEXFxEXFxIEDQwLGQ0ipH5Ett+mQLccXjABAAAAAAABUDFfBAAAAACjK/pqAAAAAAwDAwAAAQkNFAECAAUVDgYHCBEXFxEaDQwKCxkNMnViQn8eMkm5AAAAAAAAAAAcXjABAAAAAIBKXQUAAAAAAQC27dAmAAAAAKMr+moAAAAAAYUyh9FYKNpVwJxuxIAlkulch5O9q1DuEFCYIgNNiJM1BQMREwUHCAYCAD49IyIS",
+ "tpsl": [
+  {
+   "hasProfit": true,
+   "pnlUsd": "5018234",
+   "pnlPercent": "50.31",
+   "pubkey": "qRhDvTToijEyERqDVt1v6U7UxMN7oaZ1JXJWzyfoo3t",
+   "requestType": "tp"
+  }
+ ],
+ "txMetadata": {
+  "blockhash": "ErqQ7DwpDkwUtYxS3bv3XHdTtF92w6tkARu6HJqcVjug",
+  "lastValidBlockHeight": "447904735",
+  "transactionFeeLamports": "16407",
+  "accountRentLamports": "6959600"
+ }
+}

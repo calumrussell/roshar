@@ -1,0 +1,31 @@
+{
+ "positionPubkey": "8rceJGmfxcpQLVSEdayQbvaKfN2gEkxZzYSFjyTKUKiH",
+ "quote": {
+  "closeFeeUsd": "6000",
+  "collateralUsdDelta": "312460",
+  "leverage": "13.72",
+  "liquidationPriceUsd": "74014938",
+  "outstandingBorrowFeeUsd": "88237",
+  "pnlAfterFeesUsd": "-492258",
+  "pnlAfterFeesPercent": "-0.01",
+  "pnlBeforeFeesUsd": "-397021",
+  "pnlBeforeFeesPercent": "-0.01",
+  "positionCollateralUsd": "6866698226",
+  "positionSizeUsd": "94259860085",
+  "priceImpactFeeBps": "1",
+  "priceImpactFeeUsd": "1000",
+  "side": "short",
+  "sizeUsdDelta": "10000000",
+  "totalFeeUsd": "95237",
+  "transferAmountToken": "217223",
+  "transferAmountUsd": "217223",
+  "transferTokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+ },
+ "serializedTxBase64": "AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAq2COILnTxwaQE0AOuuqxIXdOaEPjSUVvzo5WW+kZLHx2Tazi0DLKOPlSBfHRAGOS6clxoAtM8yZAB/2YqVIeCIADAQYNDZzdrqk+nsf46C5m95TApyPye1E8TqXAge9OyBB4xlePuB0qGDbYUrysLLqQjPfsF3hWtuANsfmvt+D3/4t0uQw1GvIXzKcTVr88ZcQmTNVM4iLYZ6MsJgxi/m7iFdmhscHeYO3ZixI5u0u1XC0JPX3CQwlrX9C1sJPRb1Jx7fd0t5HjG5iwN06a8WLgaldd+O9gJuH1drdtc+t/6ghoepbqWDqJXfSYN79PiunDXt8xu5qWvBroRabvUsXSIl1FhbhQO7PA/6EbceLpJXuhRaaeoGTOwboe/G//4HQ1PXUDBkZv5SEXMv/srbpyw5vnvIzlu8X3EmssQ5s6QAAAAAN9RtZ8k/u+EvlCj4ONQP8FcHRJJ/SKZPzKcESAAAAAA0eIWClhxRd/hBX85IqoEhNMd/lh9iG+TvR8R1Cx7JEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWx88rxlGLvh2Dwq951zT2e4xs6MsYg6JQSLpybgUX6jJclj04kifG7PRApFI4NgwtaE5na/xCEBI572Nvp+FnN7B0qz2UeAw6CZsrGUHT+LV9xCmx0mFv2XoJiqwn+pwYHAAUCetoCAAcACQMoDgAAAAAAAAgAEAEAEAADAFAAAwByADIAAwAJBwEUDRUKFg6oAcs7X7DsFUmZmAAAALkBGoKfiPyLz48LScUiK8ohz3yV44JksOYJM5ZOejyaPE2MeMwBOeVl7oLjS70JMbzcQV/r3yHh2HDP86vprLBUB/sEgO/B9IDFYVrz+2c9Qih+mT2p+8NQa25B36MpUIIMLmwyAHXTx5MA0IvMV2AGAAMBBgAAAAQA0sScrAEAAAAE+P8FbrMfAAAAAAAMAQDQi8xXYAYAAgAAAAkFAQ8OFxgIPUE85euO+nULFgECAAMZGhAEEQ8SGxMcCwUGHQwKHgsyor/IPos+sBGMxAQAAAAAAICWmAAAAAAAUDFfBAAAAAABAKMr+moAAAAAvNfVsTMpzLUBhTKH0Vgo2lXAnG7EgCWS6VyHk72rUO4QUJgiA02IkzUHQVM9AwUREwtAQiM6UAIAPhIlIg==",
+ "txMetadata": {
+  "blockhash": "ErqQ7DwpDkwUtYxS3bv3XHdTtF92w6tkARu6HJqcVjug",
+  "lastValidBlockHeight": "447904735",
+  "transactionFeeLamports": "15678",
+  "accountRentLamports": "5212080"
+ }
+}

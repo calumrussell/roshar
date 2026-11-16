@@ -1,0 +1,5 @@
+{
+    "code": "insufficient_funds",
+    "message": "Insufficient funds to execute the request. Please check your SOL or token balance.",
+    "metadata": null
+}
