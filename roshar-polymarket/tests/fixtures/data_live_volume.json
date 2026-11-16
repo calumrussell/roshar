@@ -1,0 +1,19 @@
+{
+  "data": {
+    "taker_volume_total": 2823047198.476859,
+    "conditions": [
+      {
+        "condition_id": "0x836b850fc838195374862551a36f1c8691d96ff01e58b0a071f0fc1a0e357fb1",
+        "taker_volume": 55184422.314073
+      },
+      {
+        "condition_id": "0xe06a7e94cf2fa8dc2085b7610fe16e9be1cde6654f34d365c13da1149b276c61",
+        "taker_volume": 54604790.468502
+      },
+      {
+        "condition_id": "0x30cfb887558b20373a984da60c372fe5a90c0296aa6d8bb413a8aa7543846da2",
+        "taker_volume": 52984775.396451
+      }
+    ]
+  }
+}

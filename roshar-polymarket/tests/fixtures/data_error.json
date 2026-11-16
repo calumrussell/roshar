@@ -1,0 +1,7 @@
+{
+  "error": "invalid condition id: 0xzz",
+  "code": "invalid_request",
+  "parameter": "condition",
+  "retryable": false,
+  "trace_id": "cbf68783bb224eaca8705e20e709447c"
+}

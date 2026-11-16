@@ -1,0 +1,72 @@
+{
+  "data": [
+    {
+      "token_id": "46777072088650922464797852907503479539785178123001199763117403684202580813104",
+      "holders": [
+        {
+          "proxy_wallet": "0xfd691577dc6a9d21e9611b93ef9177d36738a2e1",
+          "bio": "",
+          "token_id": "46777072088650922464797852907503479539785178123001199763117403684202580813104",
+          "pseudonym": "Grim-Series",
+          "amount": 1372919.271165,
+          "display_username_public": true,
+          "outcome_index": 0,
+          "name": "petanimal",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false
+        },
+        {
+          "proxy_wallet": "0x1e1f17412069c0736adfaadf8ee7f46e5612c855",
+          "bio": "i am broke and jobless",
+          "token_id": "46777072088650922464797852907503479539785178123001199763117403684202580813104",
+          "pseudonym": "Vapid-Validate",
+          "amount": 304000.0,
+          "display_username_public": true,
+          "outcome_index": 0,
+          "name": "Brokie",
+          "profile_image": "https://polymarket-upload.s3.us-east-2.amazonaws.com/profile-image-509382-d995c0da-16e4-4a5b-b4c4-9fac57fc75b8.png",
+          "profile_image_optimized": "",
+          "verified": false
+        }
+      ]
+    },
+    {
+      "token_id": "4872670756822880674944283038882529075210700927252109488954070437890542145542",
+      "holders": [
+        {
+          "proxy_wallet": "0xc52c66b83bece173ecd56d6c3e595c516698ac6e",
+          "bio": "",
+          "token_id": "4872670756822880674944283038882529075210700927252109488954070437890542145542",
+          "pseudonym": "Faraway-Ellipse",
+          "amount": 139739.328326,
+          "display_username_public": true,
+          "outcome_index": 0,
+          "name": "0xc52C66B83bEce173ECd56d6C3e595C516698Ac6E-1789391735322",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false
+        },
+        {
+          "proxy_wallet": "0x77958accec3edfc6ea0194e8fb954647456b9a17",
+          "bio": "",
+          "token_id": "4872670756822880674944283038882529075210700927252109488954070437890542145542",
+          "pseudonym": "",
+          "amount": 42545.805323,
+          "display_username_public": false,
+          "outcome_index": 0,
+          "name": "",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "limit": 50,
+    "offset": 0,
+    "has_more": true,
+    "next_cursor": "eyJkYXRhIjp7InR5cGUiOiJob2xkZXJzIiwicGFyYW1zIjp7ImwiOjUwLCJvIjo1MH19LCJzaWciOiI1OGIyOGEzN2MxNGQzYzA0ZDgwM2I4ZDY3NmU4MTBlNiJ9"
+  }
+}
