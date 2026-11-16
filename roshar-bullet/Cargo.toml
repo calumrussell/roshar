@@ -1,0 +1,26 @@
+[package]
+name = "roshar-bullet"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "bullet exchange client for Roshar"
+repository = "https://github.com/calumrussell/roshar"
+# The vector generator is a standalone cargo project (official SDK); keep it out of the package.
+exclude = ["tests/gen_vectors"]
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+roshar-http = { version = "0.1.0", path = "../roshar-http" }
+roshar-ws-mgr = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rust_decimal = { workspace = true }
+ed25519-dalek = "2"
+bs58 = "0.5"
+base64 = "0.22"
+hex = "0.4"
+
+[dev-dependencies]
+env_logger = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

@@ -1,0 +1,22 @@
+# Generates ../vectors.json with Bullet's official Rust SDK. Not part of the roshar workspace.
+#
+#   cd roshar-bullet/tests/gen_vectors && cargo run --release > ../vectors.json
+#
+# No network: the SDK client is pointed at an in-process wiremock server that serves the
+# schema for the SDK's own transaction type plus the live mainnet/testnet chain hashes.
+[package]
+name = "bullet-gen-vectors"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+bullet-rust-sdk = "=0.0.48"
+bullet-exchange-interface = { version = "=0.16.3", features = ["schema"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+serde_json = "1"
+hex = "0.4"
+rand = "0.8"
+wiremock = "=0.6.5"

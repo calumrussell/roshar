@@ -1,0 +1,523 @@
+{
+  "generator": "tests/gen_vectors (bullet-rust-sdk 0.0.48, bullet-exchange-interface 0.16.3)",
+  "secret_key": "5a83a6d71e4ed547ba9c097f45f94ce33e0f82824771637119187360fd030634",
+  "public_key": "e805725c14070eb1766779c08cd2b6cd2a756e0566d9461df72d50fe14f312fe",
+  "address": "GciQNeFBPBrptd18XRwXAngCTcRDB4ZfDfcAfhP98koo",
+  "cases": [
+    {
+      "name": "place_limit_bid_client_id",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000000
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "place_orders",
+        "market_id": 1,
+        "orders": [
+          {
+            "price": "50000.0",
+            "size": "0.001",
+            "side": "bid",
+            "order_type": "limit",
+            "reduce_only": false,
+            "client_order_id": 1,
+            "pending_tpsl_pair": null
+          }
+        ],
+        "replace": false,
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "00070014010001000000000001000000000020a10700000000000000030000000000010000000000000000000001010000000000000000000002006f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "06f80e645a300bcbeb82eb6c161449fba28105d53bcef5244987186c25af280b38711cb30fb59504dd1ca526919caeffb334a303fff8a3d1d0460b761c99290e",
+      "tx_base64": "AAb4DmRaMAvL64LrbBYUSfuigQXVO871JEmHGGwlrygLOHEcsw+1lQTdHKUmkZyu/7M0owP/+KPR0EYLdhyZKQ7oBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFAEAAQAAAAAAAQAAAAAAIKEHAAAAAAAAAAMAAAAAAAEAAAAAAAAAAAAAAQEAAAAAAAAAAAAAAgBvOeGhAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAALCIl/RbrWcKAA=="
+    },
+    {
+      "name": "replace_two_orders_sub_account_nonce_gas",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "nonce",
+        "value": 7
+      },
+      "details": {
+        "max_priority_fee_bips": 5,
+        "max_fee": "10000000000",
+        "gas_limit": [
+          5000000,
+          5000000
+        ]
+      },
+      "address_override": null,
+      "action": {
+        "type": "place_orders",
+        "market_id": 2,
+        "orders": [
+          {
+            "price": "3125.75",
+            "size": "1.5",
+            "side": "ask",
+            "order_type": "post_only",
+            "reduce_only": true,
+            "client_order_id": 18446744073709551615,
+            "pending_tpsl_pair": null
+          },
+          {
+            "price": "3000",
+            "size": "2",
+            "side": "bid",
+            "order_type": "post_only_front",
+            "reduce_only": false,
+            "client_order_id": null,
+            "pending_tpsl_pair": null
+          }
+        ],
+        "replace": true,
+        "sub_account_index": 3
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "000700140200020000000000020000000000ffc404000000000000000100000000000f0000000000000001010101ffffffffffffffff000000000000000000b80b000000000000000000000000000002000000000000000005000000010103000700000000000000050000000000000000e40b5402000000000000000000000001404b4c0000000000404b4c0000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "0fb38f9e25803b629058fe24fdbbaf5528ad877529fc84a1efd94916045c83188345c3eec545da3c76e739879ed7d2b3933280e68533de6ac788656519dba90a",
+      "tx_base64": "AA+zj54lgDtikFj+JP27r1UorYd1KfyEoe/ZSRYEXIMYg0XD7sVF2jx25zmHntfSs5MygOaFM95qx4hlZRnbqQroBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFAIAAgAAAAAAAgAAAAAA/8QEAAAAAAAAAAEAAAAAAA8AAAAAAAAAAQEBAf//////////AAAAAAAAAAAAuAsAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAUAAAABAQMABwAAAAAAAAAFAAAAAAAAAADkC1QCAAAAAAAAAAAAAAABQEtMAAAAAABAS0wAAAAAALCIl/RbrWcKAA=="
+    },
+    {
+      "name": "place_ioc_with_tpsl_testnet_generation",
+      "network": "testnet",
+      "uniqueness": {
+        "kind": "generation",
+        "value": 42
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "place_orders",
+        "market_id": 1,
+        "orders": [
+          {
+            "price": "64921",
+            "size": "0.0123",
+            "side": "bid",
+            "order_type": "immediate_or_cancel",
+            "reduce_only": false,
+            "client_order_id": 1794300365740858276,
+            "pending_tpsl_pair": {
+              "tp": {
+                "order_price": "70000",
+                "trigger_price": "69999.5",
+                "price_condition": "mark",
+                "order_type": "limit"
+              },
+              "sl": {
+                "order_price": "60000.00",
+                "trigger_price": "60100",
+                "price_condition": "last_trade",
+                "order_type": "immediate_or_cancel"
+              },
+              "dynamic_size": true
+            }
+          }
+        ],
+        "replace": false,
+        "sub_account_index": null
+      },
+      "chain_hash": "2967a8bd109de24b8687dafa9b4694232bb19f0586f0246241808b9aca32d772",
+      "signing_bytes": "00070014010001000000000000000000000099fd00000000000000000400000000007b0000000000000000030001a45b5610ada2e61801010000000000000000701101000000000000000100000000005bae0a00000000000000010000020000000000808d5b00000000000000000000000000c4ea0000000000000203010000012a00000000000000000000000000000000000000000001000000000000000000002967a8bd109de24b002967a8bd109de24b8687dafa9b4694232bb19f0586f0246241808b9aca32d772",
+      "signature": "105cc42a1931c7bf206c5c583203951646b164afb4f9ccca9221dc1427e3bc3b6daeffb5b48639abfedb632d5b5489846381e21903e53caff553767faae46e0c",
+      "tx_base64": "ABBcxCoZMce/IGxcWDIDlRZGsWSvtPnMypIh3BQn47w7ba7/tbSGOav+22MtW1SJhGOB4hkD5Tyv9VN2f6rkbgzoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFAEAAQAAAAAAAAAAAAAAmf0AAAAAAAAAAAQAAAAAAHsAAAAAAAAAAAMAAaRbVhCtouYYAQEAAAAAAAAAAHARAQAAAAAAAAABAAAAAABbrgoAAAAAAAAAAQAAAgAAAAAAgI1bAAAAAAAAAAAAAAAAAMTqAAAAAAAAAgMBAAABKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAKWeovRCd4ksA"
+    },
+    {
+      "name": "place_fok_and_slide_sl_only",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 18446744073709551615
+      },
+      "details": {
+        "max_priority_fee_bips": 18446744073709551615,
+        "max_fee": "340282366920938463463374607431768211455",
+        "gas_limit": [
+          0,
+          18446744073709551615
+        ]
+      },
+      "address_override": null,
+      "action": {
+        "type": "place_orders",
+        "market_id": 8,
+        "orders": [
+          {
+            "price": "123456789012.345678901234567",
+            "size": "0.00000001",
+            "side": "ask",
+            "order_type": "fill_or_kill",
+            "reduce_only": false,
+            "client_order_id": null,
+            "pending_tpsl_pair": null
+          },
+          {
+            "price": "2.8217",
+            "size": "354",
+            "side": "ask",
+            "order_type": "post_only_slide",
+            "reduce_only": false,
+            "client_order_id": null,
+            "pending_tpsl_pair": {
+              "tp": null,
+              "sl": {
+                "order_price": "3.1",
+                "trigger_price": "3.05",
+                "price_condition": "oracle",
+                "order_type": "fill_or_kill"
+              },
+              "dynamic_size": false
+            }
+          }
+        ],
+        "replace": false,
+        "sub_account_index": 255
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "0007001408000200000000000f00fd1e6600874b9f2ca8f258f10000080000000000010000000000000001020000000000040000000000396e000000000000000000000000000062010000000000000104000001000100000100000000001f00000000000000000002000000000031010000000000000102000001ff02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff010000000000000000ffffffffffffffffb08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "635e779a014fd4a1d14c12e04dbee20b1333bed182f49e3711c0ef5e33deb3ef7a0b1577b11fcd625404e81b86171f0278d1cb43d7cc7b3385580c797fbd950b",
+      "tx_base64": "AGNed5oBT9Sh0UwS4E2+4gsTM77RgvSeNxHA714z3rPvegsVd7EfzWJUBOgbhhcfAnjRy0PXzHszhVgMeX+9lQvoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFAgAAgAAAAAADwD9HmYAh0ufLKjyWPEAAAgAAAAAAAEAAAAAAAAAAQIAAAAAAAQAAAAAADluAAAAAAAAAAAAAAAAAABiAQAAAAAAAAEEAAABAAEAAAEAAAAAAB8AAAAAAAAAAAACAAAAAAAxAQAAAAAAAAECAAAB/wL//////////////////////////////////////////wEAAAAAAAAAAP//////////sIiX9FutZwoA"
+    },
+    {
+      "name": "place_with_address_override",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000001
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": "CuHSLVyC4U3QGKjU1vdzDi1MhQcZbyu1v4bCjcd2tNhc",
+      "action": {
+        "type": "place_orders",
+        "market_id": 20003,
+        "orders": [
+          {
+            "price": "139.27",
+            "size": "7.17",
+            "side": "bid",
+            "order_type": "post_only",
+            "reduce_only": false,
+            "client_order_id": null,
+            "pending_tpsl_pair": null
+          }
+        ],
+        "replace": false,
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "00070014234e01000000000002000000000067360000000000000000020000000000cd020000000000000001000000000002016f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a01b0d557ec10ed5d8bb71cee3df7480c7a9f6a4963b20cbf5fb5771e0e0375316fb08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "0ac635e1c1cbb1667574124f2df407b5e0d8951019285468599aa1ec90e40c9c226c3960b15b6e0cf084216c153e0eb07e568d4d3a7c7efae59fed24a401ac07",
+      "tx_base64": "AArGNeHBy7FmdXQSTy30B7Xg2JUQGShUaFmaoeyQ5AycImw5YLFbbgzwhCFsFT4OsH5WjU06fH765Z/tJKQBrAfoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFCNOAQAAAAAAAgAAAAAAZzYAAAAAAAAAAAIAAAAAAM0CAAAAAAAAAAEAAAAAAAIBbznhoQEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAACwiJf0W61nCgGw1VfsEO1di7cc7j33SAx6n2pJY7IMv1+1dx4OA3Uxbw=="
+    },
+    {
+      "name": "place_empty_order_list",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 0
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "0",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "place_orders",
+        "market_id": 0,
+        "orders": [],
+        "replace": true,
+        "sub_account_index": 0
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "0007001400000000000001010002000000000000000000000000000000000000000000000000000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "410922b4746e3b23b1aa793b374d34e9db2342ff5ffa189859c196fc35132edb75e00c7a755f1d7ae85cb8628998432e64f752a17d4cc348432c8d47cfd32108",
+      "tx_base64": "AEEJIrR0bjsjsap5OzdNNOnbI0L/X/oYmFnBlvw1Ey7bdeAMenVfHXroXLhiiZhDLmT3UqF9TMNIQyyNR8/TIQjoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFAAAAAAAAAEBAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwiJf0W61nCgA="
+    },
+    {
+      "name": "cancel_by_order_id_client_id_and_both",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000002
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "cancel_orders",
+        "market_id": 1,
+        "orders": [
+          {
+            "order_id": 12345,
+            "client_order_id": null
+          },
+          {
+            "order_id": null,
+            "client_order_id": 1
+          },
+          {
+            "order_id": 7250149508,
+            "client_order_id": 1794300365740858276
+          }
+        ],
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "00070016010003000000013930000000000000000001010000000000000001848024b00100000001a45b5610ada2e6180002026f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "c23b7fd0bbdbec505cb8046a7f08baf0720c984b5783fb4a588e6c56b383b7c9ced737d1aad5cd702a9eda1a3c83e9ebf3907e49e5196413da8ba741c9686d01",
+      "tx_base64": "AMI7f9C72+xQXLgEan8IuvByDJhLV4P7SliObFazg7fJztc30arVzXAqntoaPIPp6/OQfknlGWQT2ounQclobQHoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFgEAAwAAAAE5MAAAAAAAAAAAAQEAAAAAAAAAAYSAJLABAAAAAaRbVhCtouYYAAICbznhoQEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAACwiJf0W61nCgA="
+    },
+    {
+      "name": "cancel_market_orders",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000003
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "cancel_market_orders",
+        "market_id": 1,
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "0007001701000002036f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "8015ac09103419a803ef0953f11b7bbd5c376a4451064f1030e368fd42b6c57abfaaa9183cda82800c4f15fc97cbf19f085e92e19224cd522175b94618bf040e",
+      "tx_base64": "AIAVrAkQNBmoA+8JU/Ebe71cN2pEUQZPEDDjaP1CtsV6v6qpGDzagoAMTxX8l8vxnwhekuGSJM1SIXW5Rhi/BA7oBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFwEAAAIDbznhoQEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAACwiJf0W61nCgA="
+    },
+    {
+      "name": "cancel_all_orders",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000004
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "cancel_all_orders",
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "0007001d0002046f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "eb7babb3bf30bd3a7f5ffdd9eab236a6a3cd4dea21c067b4fce75f955f887690550f4ad37ff6c794ca37b892557d721620499b5da97886bc58e916b5afa36507",
+      "tx_base64": "AOt7q7O/ML06f1/92eqyNqajzU3qIcBntPznX5VfiHaQVQ9K03/2x5TKN7iSVX1yFiBJm12peIa8WOkWta+jZQfoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAHQACBG854aEBAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAsIiX9FutZwoA"
+    },
+    {
+      "name": "cancel_all_orders_sub_account_testnet",
+      "network": "testnet",
+      "uniqueness": {
+        "kind": "nonce",
+        "value": 1
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": [
+          500000,
+          500000
+        ]
+      },
+      "address_override": null,
+      "action": {
+        "type": "cancel_all_orders",
+        "sub_account_index": 1
+      },
+      "chain_hash": "2967a8bd109de24b8687dafa9b4694232bb19f0586f0246241808b9aca32d772",
+      "signing_bytes": "0007001d01010001000000000000000000000000000000000000000000010000000000000000000120a107000000000020a10700000000002967a8bd109de24b002967a8bd109de24b8687dafa9b4694232bb19f0586f0246241808b9aca32d772",
+      "signature": "d9ca5c52944b7120e65e63d931588d232f5078bff28e20df46251b792fa848423debd671530499c514b3983fd33789a8cb66ef4763bc51cd50f001ff4aa8cf0a",
+      "tx_base64": "ANnKXFKUS3Eg5l5j2TFYjSMvUHi/8o4g30YlG3kvqEhCPevWcVMEmcUUs5g/0zeJqMtm70djvFHNUPAB/0qozwroBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAHQEBAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAASChBwAAAAAAIKEHAAAAAAApZ6i9EJ3iSwA="
+    },
+    {
+      "name": "amend_order",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000005
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "amend_orders",
+        "market_id": 0,
+        "orders": [
+          {
+            "cancel": {
+              "order_id": 12345,
+              "client_order_id": null
+            },
+            "place": {
+              "price": "50500.0",
+              "size": "0.0015",
+              "side": "bid",
+              "order_type": "limit",
+              "reduce_only": false,
+              "client_order_id": 3,
+              "pending_tpsl_pair": null
+            }
+          },
+          {
+            "cancel": {
+              "order_id": null,
+              "client_order_id": 9
+            },
+            "place": {
+              "price": "71.8",
+              "size": "0.10",
+              "side": "ask",
+              "order_type": "post_only",
+              "reduce_only": false,
+              "client_order_id": null,
+              "pending_tpsl_pair": null
+            }
+          }
+        ],
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "00070015000002000000013930000000000000000000010000000000a8b407000000000000000400000000000f0000000000000000000001030000000000000000000109000000000000000000010000000000ce0200000000000000000200000000000a0000000000000001010000000002056f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "5d4abf6ed67172ef0421c79553c74cfa385d45ead78bfaa8df43cd1ed645111ebed5026974162406dad8b64907d8cec9812a8a5425b3fe263f8f5dc8791ddc00",
+      "tx_base64": "AF1Kv27WcXLvBCHHlVPHTPo4XUXq14v6qN9DzR7WRREevtUCaXQWJAba2LZJB9jOyYEqilQls/4mP49dyHkd3ADoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAFQAAAgAAAAE5MAAAAAAAAAAAAAEAAAAAAKi0BwAAAAAAAAAEAAAAAAAPAAAAAAAAAAAAAAEDAAAAAAAAAAAAAQkAAAAAAAAAAAABAAAAAADOAgAAAAAAAAAAAgAAAAAACgAAAAAAAAABAQAAAAACBW854aEBAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAsIiX9FutZwoA"
+    },
+    {
+      "name": "cancel_and_place_with_expiry",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000006
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "cancel_and_place_orders",
+        "market_id": 4,
+        "cancels": [
+          {
+            "server": 7250124078
+          },
+          {
+            "client": 1794300365737696436
+          }
+        ],
+        "places": [
+          {
+            "price": "67.632",
+            "size": "5.72",
+            "side": "ask",
+            "order_type": "post_only",
+            "reduce_only": false,
+            "client_order_id": null,
+            "pending_tpsl_pair": null
+          },
+          {
+            "price": "67.5",
+            "size": "5.72",
+            "side": "bid",
+            "order_type": "post_only",
+            "reduce_only": false,
+            "client_order_id": null,
+            "pending_tpsl_pair": null
+          }
+        ],
+        "expiry_timestamp": 1794780060000000,
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "0007001e040002000000002e1d24b00100000001b41c2610ada2e618020000000000030000000000300801000000000000000200000000003c0200000000000001010000000000010000000000a30200000000000000000200000000003c02000000000000000100000001001fedcb576006000002066f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "4d3fa6c79ed9a8fe7dcc89ac39f34a50a2c925c1760e63ba65858b5cc90ae50c99912c98e86457176adabc25faab3b0012cd3fdaf983571b54c3a91685733c01",
+      "tx_base64": "AE0/psee2aj+fcyJrDnzSlCiySXBdg5jumWFi1zJCuUMmZEsmOhkVxdq2rwl+qs7ABLNP9r5g1cbVMOpFoVzPAHoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAHgQAAgAAAAAuHSSwAQAAAAG0HCYQraLmGAIAAAAAAAMAAAAAADAIAQAAAAAAAAACAAAAAAA8AgAAAAAAAAEBAAAAAAABAAAAAACjAgAAAAAAAAAAAgAAAAAAPAIAAAAAAAAAAQAAAAEAH+3LV2AGAAACBm854aEBAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAsIiX9FutZwoA"
+    },
+    {
+      "name": "cancel_and_place_cancel_only_no_expiry",
+      "network": "testnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000007
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "cancel_and_place_orders",
+        "market_id": 4,
+        "cancels": [
+          {
+            "server": 1
+          }
+        ],
+        "places": [],
+        "expiry_timestamp": null,
+        "sub_account_index": 2
+      },
+      "chain_hash": "2967a8bd109de24b8687dafa9b4694232bb19f0586f0246241808b9aca32d772",
+      "signing_bytes": "0007001e0400010000000001000000000000000000000000010202076f39e1a1010000000000000000000000000000000001000000000000000000002967a8bd109de24b002967a8bd109de24b8687dafa9b4694232bb19f0586f0246241808b9aca32d772",
+      "signature": "8dc81a6fc335d1e92115d79118daaf40578adeb7ef27acac50b3c60a7bf71e1e51bcc0900a3bbd23ad9af17005ed8d68b264516be38b2b701394577a3965730e",
+      "tx_base64": "AI3IGm/DNdHpIRXXkRjar0BXit637yesrFCzxgp79x4eUbzAkAo7vSOtmvFwBe2NaLJkUWvjiytwE5RXejllcw7oBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcAHgQAAQAAAAABAAAAAAAAAAAAAAAAAQICB2854aEBAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAKWeovRCd4ksA"
+    },
+    {
+      "name": "update_max_leverage",
+      "network": "mainnet",
+      "uniqueness": {
+        "kind": "window",
+        "value": 1794780000008
+      },
+      "details": {
+        "max_priority_fee_bips": 0,
+        "max_fee": "281474976710656",
+        "gas_limit": null
+      },
+      "address_override": null,
+      "action": {
+        "type": "update_max_leverage",
+        "market_id": 1,
+        "max_leverage": 20,
+        "sub_account_index": null
+      },
+      "chain_hash": "b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signing_bytes": "0007000a010014000002086f39e1a101000000000000000000000000000000000100000000000000000000b08897f45bad670a00b08897f45bad670afdeb0f9a37f37f6d460903cc9a77a2cf86339416ac0b1b4d",
+      "signature": "e642383d4d436b69785add74399aa6315a60cb084d035b139aab5f36c95da55c3d55a7c5e0e5ad74c484ac910940fb88ab038d9b7e9fb61da047eb3a89059a0c",
+      "tx_base64": "AOZCOD1NQ2tpeFrddDmapjFaYMsITQNbE5qrXzbJXaVcPVWnxeDlrXTEhKyRCUD7iKsDjZt+n7YdoEfrOokFmgzoBXJcFAcOsXZnecCM0rbNKnVuBWbZRh33LVD+FPMS/gcACgEAFAAAAghvOeGhAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAALCIl/RbrWcKAA=="
+    }
+  ]
+}
