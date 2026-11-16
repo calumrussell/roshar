@@ -19,7 +19,51 @@ Same as the other roshar crates (see `roshar-hyperliquid/README.md`):
 | `signer` | Native Lighter signing: Poseidon2 hashing and Schnorr signatures over ECgFp5. `ApiKey`, `Signer`, the tx structs, `SignedTx`, `auth_token`. |
 | `exchange` | `TxApi::new(LIGHTER_API_URL)` provides `send_tx`, `send_tx_batch`, `next_nonce`, `api_key`, `account`, `order_book_detail` and `order_book_orders_raw`. |
 | `ws_tx` | Message builders for the websocket: `send_tx`, `send_tx_batch` (`jsonapi/sendtx[batch]`) and `subscribe_account_orders/market/tx` (authenticated channels). |
-| crate root | `LighterClient` (market REST + `ws_config()` for roshar-ws-mgr), `LIGHTER_WSS_URL`. |
+| crate root | `LighterClient` (market REST + `ws_config()` for roshar-ws-mgr), `LIGHTER_WSS_URL`, `LIGHTER_READONLY_WSS_URL`. `types::LIGHTER_WS_PING` is the keepalive frame. |
+
+## API docs
+
+`apidocs.lighter.xyz` now redirects to `docs.lighter.xyz/api`.
+
+| Area | Reference |
+|---|---|
+| REST | https://docs.lighter.xyz/api (per-endpoint OpenAPI, e.g. https://docs.lighter.xyz/api/orders/orderbooks, https://docs.lighter.xyz/api/transactions/sendtx) |
+| WebSocket | https://docs.lighter.xyz/api/websocket |
+| Endpoints, chain ids | https://docs.lighter.xyz/developers/getting-started/environments |
+| Auth / signing | https://docs.lighter.xyz/developers/integration-guides/signing-transactions, https://docs.lighter.xyz/developers/integration-guides/api-keys (auth token), reference signer https://github.com/elliottech/lighter-go |
+| Tx types, errors | https://docs.lighter.xyz/developers/reference/data-structures-constants-and-errors |
+| Rate limits | https://docs.lighter.xyz/developers/reference/rate-limits |
+| Changelog | None published; API changes are announced in Discord `#api-updates`. |
+
+Checked against these on 2026-11-15. The signer matches `lighter-sdk` 1.1.8 (latest on PyPI) and
+lighter-go up to `74e2b996` (2026-11-13). Later lighter-go commits did not change the create,
+cancel, cancel-all or modify tx formats.
+
+Lighter's terms exclude UK residents. From a UK IP, `wss://…/stream` and `POST /api/v1/sendTx`
+return HTTP 400 with code 20558 ("restricted jurisdiction"). Public REST GETs and
+`LIGHTER_READONLY_WSS_URL` still work.
+
+## Coverage
+
+| Item | Endpoint / channel |
+|---|---|
+| Status / server time | `GET /` |
+| Markets (perp, spot, binary options) | `GET /api/v1/orderBooks` |
+| Market details (perp + spot) | `GET /api/v1/orderBookDetails` (`market_id`, `filter` optional) |
+| Resting orders | `GET /api/v1/orderBookOrders` (`limit` 1..=250, required) |
+| Recent trades | `GET /api/v1/recentTrades` (`limit` 1..=100, required) |
+| Trade history | `GET /api/v1/trades` (public filters: `market_id`, `market_type`, `type`, `ask_filter`, `from`, `cursor`; `sort_by` + `limit` required) |
+| Candles | `GET /api/v1/candles`, `GET /api/v1/markPriceCandles`, `GET /api/v1/marketPriceCharts` |
+| Funding | `GET /api/v1/fundings` (history), `GET /api/v1/funding-rates` (cross-venue current) |
+| Exchange info | `GET /api/v1/exchangeStats`, `/assetDetails`, `/priceOracleInfo` (index/mark sources), `/feeTiers` |
+| Binary options | `GET /api/v1/events`, `GET /api/v1/upDownCandles` (timestamps in **seconds**: ms is rejected with 20001 despite the docs) |
+| Public WS | `order_book/{m}`, `ticker/{m}`, `trade/{m}`, `market_stats/{m}`, `market_stats/all`, `market_stats` + `market_ids`, `spot_market_stats` (same three forms), `partial` updates, `bo_market_stats/{m}`, `bo_market_stats/all`, `candle/{m}/{r}`, `mark_price_candle/{m}/{r}`, `up_down_candle/{s}/{d}/{r}`, `height`. Builders: `types::LighterWssMessage`; parsing: `types::LighterWsMessage::parse` (or `parse_partial` on sockets with `partial` subscriptions: the wire does not mark partial frames) |
+| Tx submission | `POST /api/v1/sendTx`, `POST /api/v1/sendTxBatch`, WS `jsonapi/sendtx`, `jsonapi/sendtxbatch` |
+| Account reads | `GET /api/v1/nextNonce`, `/apikeys`, `/account`, `/orderBookDetails?market_id=` (perp or spot) |
+| Private WS | `account_orders/{m}/{a}`, `account_market/{m}/{a}`, `account_tx/{a}` (auth token) |
+
+`LighterClient` rate-limits its REST calls to 2 every 3 s by default: the Standard tier allows 60
+requests a minute, and `recentTrades` (weight 600) only 40. `TxApi` is not rate-limited.
 
 ## Signing
 
@@ -98,3 +142,12 @@ processes must never share an API key.
 Grouped orders (OTO/OCO), transfers, withdrawals, leverage and margin updates, pool transactions and
 change-pub-key (which needs an L1 signature). Integrator and self-trade attributes, and the
 skip-nonce attribute, are not exposed either. Add each with vectors from `gen_vectors.py`.
+
+Market data: `/api/v1/syntheticSpotInfo` (RWA pricing parameters; SPY, XAU, EURUSD, NVDA and
+BRENTOIL all return 20001 "market does not have a synthetic spot info", so no live shape to build from).
+Deliberately out of scope: `exchangeMetrics`/`executeStats` (analytics), `tokenlist` (logos and
+marketing metadata), `systemConfig`/`info`/`layer1BasicInfo` (pool and L1 contract config),
+`export/historicalTrades` (paid, authenticated), the `pool_data`/`pool_info` channels (vaults)
+and the whitelist-only `rfq` channel. Account channels other than the three above
+(`account_all*`, `user_stats`, `notification`, `pool_*`) and the `sendTx` `price_protection`
+form field are not exposed.
