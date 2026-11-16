@@ -1,0 +1,1 @@
+{"topic":"/contractMarket/limitCandle:XBTUSDTM_1min","type":"message","data":{"symbol":"XBTUSDTM","candles":["1794826800","64539.3","64563.1","64563.1","64537.2","1807.3985","28"],"time":1794826860603},"subject":"candle.stick"}
