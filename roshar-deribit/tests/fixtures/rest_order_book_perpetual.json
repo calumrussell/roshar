@@ -1,0 +1,86 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "timestamp": 1794827221390,
+    "state": "open",
+    "stats": {
+      "high": 65785.5,
+      "low": 64066.5,
+      "price_change": -1.3203,
+      "volume": 37682.46346413,
+      "volume_delayed": 0.0,
+      "volume_realtime": 37682.46346413,
+      "volume_delayed_usd": 0.0,
+      "volume_realtime_usd": 2443496620.0,
+      "volume_usd": 2443496620.0,
+      "volume_delayed_notional": 0.0,
+      "volume_notional": 2443496620.0,
+      "volume_realtime_notional": 2443496620.0
+    },
+    "change_id": 183082038180,
+    "index_price": 64559.7,
+    "instrument_name": "BTC-PERPETUAL",
+    "bids": [
+      [
+        64580.5,
+        10830.0
+      ],
+      [
+        64579.5,
+        3010.0
+      ],
+      [
+        64578.0,
+        2310.0
+      ],
+      [
+        64577.5,
+        800.0
+      ],
+      [
+        64576.5,
+        94390.0
+      ]
+    ],
+    "asks": [
+      [
+        64581.0,
+        38600.0
+      ],
+      [
+        64582.5,
+        800.0
+      ],
+      [
+        64583.0,
+        10.0
+      ],
+      [
+        64584.0,
+        16870.0
+      ],
+      [
+        64586.5,
+        12020.0
+      ]
+    ],
+    "last_price": 64580.5,
+    "settlement_price": 64930.6,
+    "min_price": 63606.5,
+    "max_price": 65544.5,
+    "open_interest": 717832130,
+    "mark_price": 64575.38,
+    "interest_value": 0.000149880344057778,
+    "best_ask_price": 64581.0,
+    "best_bid_price": 64580.5,
+    "current_funding": 0.0,
+    "estimated_delivery_price": 64559.7,
+    "funding_8h": 3.4e-07,
+    "best_ask_amount": 38600.0,
+    "best_bid_amount": 10830.0
+  },
+  "usIn": 1794827222239163,
+  "usOut": 1794827222239371,
+  "usDiff": 208,
+  "testnet": false
+}

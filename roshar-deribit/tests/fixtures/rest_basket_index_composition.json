@@ -1,0 +1,38 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "constituents": [
+      {
+        "amount": "36699593933",
+        "cap_factor": "0.999999998164512",
+        "index_market_cap": "5546926283.913894",
+        "market_cap": "5546926294.09521",
+        "name": "ADA",
+        "rank": 1,
+        "running_weight": "0.006725790465655317",
+        "symbol": "ADA-USD",
+        "weight": "0.006725790465655317"
+      },
+      {
+        "amount": "857933031",
+        "cap_factor": "0.999999997932116",
+        "index_market_cap": "391474082.2019677",
+        "market_cap": "391474083.01149076",
+        "name": "APT",
+        "rank": 2,
+        "running_weight": "0.007200462836416902",
+        "symbol": "APT-USD",
+        "weight": "0.00047467237076158564"
+      }
+    ],
+    "divisor": "3458940467.066527",
+    "inception_timestamp": "2020-12-31T00:00:00Z",
+    "last_rebalance": "2026-05-29T00:00:00Z",
+    "product_id": "COIN50",
+    "timestamp": "2026-11-16T10:00:01Z"
+  },
+  "usIn": 1794827266811508,
+  "usOut": 1794827267146037,
+  "usDiff": 334529,
+  "testnet": false
+}

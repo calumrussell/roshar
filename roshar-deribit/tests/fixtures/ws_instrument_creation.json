@@ -1,0 +1,35 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "instrument.creation.any.any",
+    "data": {
+      "timestamp": 1794827822000,
+      "state": "inactive",
+      "price_index": "btc_usd",
+      "kind": "option_combo",
+      "instrument_name": "BTC-PDIAG-26MAR27_27NOV26-74000_75000",
+      "maker_commission": 0.0,
+      "taker_commission": 0.0,
+      "instrument_type": "reversed",
+      "expiration_timestamp": 1795766400000,
+      "instrument_id": 735053,
+      "underlying_type": "crypto",
+      "product_group": "BTC",
+      "creation_timestamp": 1794827822000,
+      "is_active": false,
+      "contract_size": 1.0,
+      "tick_size": 0.0001,
+      "counter_currency": "USD",
+      "min_trade_amount": 0.1,
+      "settlement_currency": "BTC",
+      "settlement_period": "month",
+      "base_currency": "BTC",
+      "index_id": 1000033,
+      "quote_currency": "BTC",
+      "tick_size_steps": [],
+      "base_currency_uuid": "5b71fc48-3dd3-540c-809b-f8c94d0e68b5",
+      "quote_currency_uuid": "5b71fc48-3dd3-540c-809b-f8c94d0e68b5"
+    }
+  }
+}

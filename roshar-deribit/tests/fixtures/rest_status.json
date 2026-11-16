@@ -1,0 +1,19 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "locked": "partial",
+    "locked_indices": [
+      "btc_usde",
+      "btc_usdt",
+      "eth_usde",
+      "eth_usdt",
+      "sol_eth",
+      "steth_eth",
+      "usde_usdt"
+    ]
+  },
+  "usIn": 1794827224629424,
+  "usOut": 1794827224640116,
+  "usDiff": 10692,
+  "testnet": false
+}

@@ -1,0 +1,39 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "block_rfq.trades.any",
+    "data": {
+      "id": 61049,
+      "timestamp": 1794828381511,
+      "direction": "buy",
+      "amount": 25.0,
+      "mark_price": 0.009742522,
+      "trades": [
+        {
+          "price": 0.0101,
+          "direction": "buy",
+          "amount": 25.0
+        }
+      ],
+      "legs": [
+        {
+          "price": 0.0052,
+          "direction": "sell",
+          "instrument_name": "BTC-27NOV26-58000-P",
+          "ratio": 2
+        },
+        {
+          "price": 0.0205,
+          "direction": "buy",
+          "instrument_name": "BTC-4DEC26-62000-P",
+          "ratio": 1
+        }
+      ],
+      "combo_id": null,
+      "index_prices": {
+        "btc_usd": 64635.33
+      }
+    }
+  }
+}

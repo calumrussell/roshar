@@ -1,0 +1,89 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "deribit_price_ranking.btc_usd",
+    "data": [
+      {
+        "enabled": false,
+        "timestamp": 1794827334599,
+        "identifier": "binance",
+        "price": 64610.29,
+        "original_price": 64610.29,
+        "weight": 0.0
+      },
+      {
+        "enabled": false,
+        "timestamp": 1794827335114,
+        "identifier": "bitfinex",
+        "price": 64671.0,
+        "original_price": 64671.0,
+        "weight": 0.0
+      },
+      {
+        "enabled": true,
+        "timestamp": 1794827334000,
+        "identifier": "coinbase",
+        "price": 64597.27,
+        "original_price": 64597.27,
+        "weight": 33.333333
+      },
+      {
+        "enabled": false,
+        "timestamp": 1794827334571,
+        "identifier": "cryptocom",
+        "price": 64610.88,
+        "original_price": 64610.88,
+        "weight": 0.0
+      },
+      {
+        "enabled": false,
+        "timestamp": 1794827335139,
+        "identifier": "gemini",
+        "price": 64603.88,
+        "original_price": 64603.88,
+        "weight": 0.0
+      },
+      {
+        "enabled": false,
+        "timestamp": 0,
+        "identifier": "itbit",
+        "price": null,
+        "original_price": null,
+        "weight": 0
+      },
+      {
+        "enabled": true,
+        "timestamp": 1794827335065,
+        "identifier": "kraken",
+        "price": 64594.25,
+        "original_price": 64594.25,
+        "weight": 33.333333
+      },
+      {
+        "enabled": true,
+        "timestamp": 1794827334000,
+        "identifier": "lmax",
+        "price": 64600.0,
+        "original_price": 64600.0,
+        "weight": 33.333333
+      },
+      {
+        "enabled": false,
+        "timestamp": 1794827334464,
+        "identifier": "mda_index_source",
+        "price": 64594.12,
+        "original_price": 64594.12,
+        "weight": 0.0
+      },
+      {
+        "enabled": false,
+        "timestamp": 1794827334635,
+        "identifier": "proxy_usdt",
+        "price": 64601.84,
+        "original_price": 64601.84,
+        "weight": 0.0
+      }
+    ]
+  }
+}

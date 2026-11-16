@@ -1,0 +1,20 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "data": [
+      {
+        "day": 20772,
+        "apr": 2.382
+      },
+      {
+        "day": 20771,
+        "apr": 2.265
+      }
+    ],
+    "continuation": 20771
+  },
+  "usIn": 1794827224540983,
+  "usOut": 1794827224541494,
+  "usDiff": 511,
+  "testnet": false
+}

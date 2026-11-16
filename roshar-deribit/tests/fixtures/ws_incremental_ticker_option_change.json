@@ -1,0 +1,23 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "incremental_ticker.BTC-17NOV26-65000-C",
+    "data": {
+      "timestamp": 1794827335150,
+      "type": "change",
+      "greeks": {
+        "delta": 0.40345,
+        "vega": 12.20164,
+        "theta": -306.51208,
+        "rho": 0.60953
+      },
+      "index_price": 64597.17,
+      "instrument_name": "BTC-17NOV26-65000-C",
+      "estimated_delivery_price": 64597.17,
+      "bid_iv": 47.72,
+      "ask_iv": 53.02,
+      "underlying_price": 64592.33
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "data": {
+      "reason": "wrong format",
+      "param": "combo_id"
+    },
+    "message": "Invalid params"
+  },
+  "testnet": false,
+  "usIn": 1794827225235403,
+  "usOut": 1794827225235523,
+  "usDiff": 120
+}

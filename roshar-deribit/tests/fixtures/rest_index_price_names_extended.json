@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "name": "btc_usd",
+      "future_combo_creation_enabled": true,
+      "option_combo_creation_enabled": true
+    },
+    {
+      "name": "ada_usd"
+    }
+  ],
+  "usIn": 1794827223664868,
+  "usOut": 1794827223665787,
+  "usDiff": 919,
+  "testnet": false
+}

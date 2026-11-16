@@ -1,0 +1,11 @@
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": 10030,
+    "message": "must_be_websocket_request"
+  },
+  "testnet": false,
+  "usIn": 1794827224826722,
+  "usOut": 1794827224826820,
+  "usDiff": 98
+}

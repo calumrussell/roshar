@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "platform_state.public_methods_state",
+    "data": {
+      "allow_unauthenticated_public_requests": true
+    }
+  }
+}

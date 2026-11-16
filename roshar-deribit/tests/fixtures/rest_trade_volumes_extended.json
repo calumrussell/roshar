@@ -1,0 +1,38 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "calls_volume": 0.0,
+      "calls_volume_30d": 0.0,
+      "calls_volume_7d": 0.0,
+      "currency": "BUIDL",
+      "currency_pair": "buidl_usd",
+      "futures_volume": 0.0,
+      "futures_volume_30d": 0.0,
+      "futures_volume_7d": 0.0,
+      "puts_volume": 0.0,
+      "puts_volume_30d": 0.0,
+      "puts_volume_7d": 0.0,
+      "spot_volume": 32282.0,
+      "spot_volume_30d": 81628.0,
+      "spot_volume_7d": 45765.0
+    },
+    {
+      "calls_volume": 0.0,
+      "calls_volume_30d": 0.0,
+      "calls_volume_7d": 0.0,
+      "currency": "AAVE",
+      "currency_pair": "aave_usd",
+      "futures_volume": 0.0,
+      "futures_volume_30d": 0.0,
+      "futures_volume_7d": 0.0,
+      "puts_volume": 0.0,
+      "puts_volume_30d": 0.0,
+      "puts_volume_7d": 0.0
+    }
+  ],
+  "usIn": 1794827258159688,
+  "usOut": 1794827258423148,
+  "usDiff": 263460,
+  "testnet": false
+}

@@ -1,0 +1,49 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "incremental_ticker.BTC-17NOV26-65000-C",
+    "data": {
+      "timestamp": 1794827335150,
+      "type": "snapshot",
+      "state": "open",
+      "stats": {
+        "high": 0.0155,
+        "low": 0.0042,
+        "price_change": -51.7241,
+        "volume": 84.2,
+        "volume_delayed": 0.0,
+        "volume_realtime": 84.2,
+        "volume_delayed_usd": 0.0,
+        "volume_realtime_usd": 43908.53,
+        "volume_usd": 43908.53
+      },
+      "greeks": {
+        "delta": 0.40345,
+        "gamma": 0.00024,
+        "vega": 12.20164,
+        "theta": -306.51208,
+        "rho": 0.60953
+      },
+      "index_price": 64597.17,
+      "instrument_name": "BTC-17NOV26-65000-C",
+      "last_price": 0.007,
+      "settlement_price": 0.00969309,
+      "min_price": 0.0001,
+      "max_price": 0.0375,
+      "open_interest": 44.7,
+      "mark_price": 0.007,
+      "interest_rate": 0.0,
+      "best_ask_price": 0.0075,
+      "best_bid_price": 0.0065,
+      "estimated_delivery_price": 64597.17,
+      "mark_iv": 50.24,
+      "bid_iv": 47.72,
+      "ask_iv": 53.02,
+      "underlying_price": 64592.33,
+      "underlying_index": "BTC-17NOV26",
+      "best_ask_amount": 85.3,
+      "best_bid_amount": 93.1
+    }
+  }
+}

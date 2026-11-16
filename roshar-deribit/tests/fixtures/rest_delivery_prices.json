@@ -1,0 +1,20 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "data": [
+      {
+        "date": "2026-11-16",
+        "delivery_price": 64892.46
+      },
+      {
+        "date": "2026-11-15",
+        "delivery_price": 63993.3
+      }
+    ],
+    "records_total": 2671
+  },
+  "usIn": 1794827223758686,
+  "usOut": 1794827223758938,
+  "usDiff": 252,
+  "testnet": false
+}
