@@ -1,0 +1,1 @@
+{"arg":{"channel":"tickers","instId":"BTC-USDT-SWAP"},"data":[{"instType":"SWAP","instId":"BTC-USDT-SWAP","last":"64551","lastSz":"0.77","askPx":"64551","askSz":"1189.79","bidPx":"64550.9","bidSz":"205.52","open24h":"65495.1","high24h":"65782.8","low24h":"64085","sodUtc0":"65310.9","sodUtc8":"64719","volCcy24h":"78119.575","vol24h":"7811957.5","ts":"1794827068768"}]}
