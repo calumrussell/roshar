@@ -204,6 +204,14 @@ fn ws_order_book_ticker_trade_height() {
         m => panic!("{m:?}"),
     }
     assert_ws_required("ws_ticker.json", "/ticker", "a");
+    // Snapshot of a never-updated market: no top-level `last_updated_at`, both sides empty.
+    match ws("ws_ticker_empty_book.json") {
+        LighterWsMessage::Ticker(e) => {
+            assert!(e.snapshot && e.data.last_updated_at == 0);
+            assert!(e.data.ticker.a.price.is_empty() && e.data.ticker.b.price.is_empty());
+        }
+        m => panic!("{m:?}"),
+    }
     match ws("ws_trade_snapshot.json") {
         LighterWsMessage::Trade(e) => assert!(e.snapshot && !e.data.liquidation_trades.is_empty()),
         m => panic!("{m:?}"),
