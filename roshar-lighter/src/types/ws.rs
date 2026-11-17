@@ -90,7 +90,9 @@ pub struct LighterWsOrderBookData {
 #[derive(Debug, Clone, Deserialize)]
 pub struct LighterWsTicker {
     pub channel: String,
-    /// Unix microseconds.
+    /// Unix microseconds. Absent on the subscription snapshot of a market whose book has never
+    /// updated (an empty book, e.g. a closed stock market); 0 then.
+    #[serde(default)]
     pub last_updated_at: i64,
     pub nonce: i64,
     pub ticker: LighterWsTickerData,

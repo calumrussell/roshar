@@ -499,8 +499,8 @@ pub struct AsterSymbolInfo {
     /// Live only.
     #[serde(rename = "twapMinNotional")]
     pub twap_min_notional: String,
-    /// Live only.
-    pub imn: String,
+    /// Live only; `null` on some symbols (e.g. pre-launch stocks).
+    pub imn: Option<String>,
     /// Live only.
     pub tags: Vec<String>,
     #[serde(rename = "settlePlan")]

@@ -652,6 +652,17 @@ pub struct PhoenixMarketConfig {
     pub stats_snapshot: Option<PhoenixMarketStatsSnapshot>,
 }
 
+impl PhoenixMarketConfig {
+    /// Decimals of the quote (USDC) lot: one quote lot is `10^-6` USD.
+    const QUOTE_LOT_DECIMALS: i32 = 6;
+
+    /// Price increment in USD per base unit.
+    pub fn price_tick(&self) -> f64 {
+        self.tick_size as f64
+            * 10f64.powi(i32::from(self.base_lots_decimals) - Self::QUOTE_LOT_DECIMALS)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PhoenixLeverageTier {
