@@ -1,0 +1,199 @@
+{
+ "timezone": "UTC",
+ "serverTime": 1794563758742,
+ "rateLimits": [
+  {
+   "rateLimitType": "REQUEST_WEIGHT",
+   "interval": "MINUTE",
+   "intervalNum": 1,
+   "limit": 6000
+  },
+  {
+   "rateLimitType": "ORDERS",
+   "interval": "MINUTE",
+   "intervalNum": 1,
+   "limit": 6000
+  },
+  {
+   "rateLimitType": "ORDERS",
+   "interval": "SECOND",
+   "intervalNum": 10,
+   "limit": 1000
+  }
+ ],
+ "exchangeFilters": [],
+ "assets": [
+  {
+   "asset": "HAJIMI"
+  },
+  {
+   "asset": "USDT"
+  },
+  {
+   "asset": "CDL"
+  }
+ ],
+ "symbols": [
+  {
+   "status": "TRADING",
+   "baseAsset": "TEST",
+   "quoteAsset": "USDT",
+   "pricePrecision": 2,
+   "quantityPrecision": 5,
+   "baseAssetPrecision": 8,
+   "quotePrecision": 8,
+   "listingTime": 1756289680210,
+   "symbolType": 0,
+   "baseAssetAddress": null,
+   "filters": [
+    {
+     "minPrice": "0.01",
+     "maxPrice": "1000000",
+     "filterType": "PRICE_FILTER",
+     "tickSize": "0.01"
+    },
+    {
+     "stepSize": "0.00001",
+     "filterType": "LOT_SIZE",
+     "maxQty": "9000",
+     "minQty": "0.00001"
+    },
+    {
+     "stepSize": "0.00001",
+     "filterType": "MARKET_LOT_SIZE",
+     "maxQty": "9000",
+     "minQty": "0.00001"
+    },
+    {
+     "limit": 200,
+     "filterType": "MAX_NUM_ORDERS"
+    },
+    {
+     "minNotional": "5",
+     "filterType": "MIN_NOTIONAL"
+    },
+    {
+     "minNotional": "5",
+     "avgPriceMins": 5,
+     "applyMinToMarket": true,
+     "filterType": "NOTIONAL",
+     "applyMaxToMarket": true
+    },
+    {
+     "multiplierDown": "0.2",
+     "multiplierUp": "5",
+     "multiplierDecimal": "1",
+     "filterType": "PERCENT_PRICE"
+    },
+    {
+     "bidMultiplierUp": "5",
+     "askMultiplierUp": "5",
+     "bidMultiplierDown": "0.2",
+     "avgPriceMins": 5,
+     "multiplierDecimal": "1",
+     "filterType": "PERCENT_PRICE_BY_SIDE",
+     "askMultiplierDown": "0.2"
+    }
+   ],
+   "orderTypes": [
+    "LIMIT",
+    "MARKET",
+    "STOP",
+    "STOP_MARKET",
+    "TAKE_PROFIT",
+    "TAKE_PROFIT_MARKET"
+   ],
+   "timeInForce": [
+    "GTC",
+    "IOC",
+    "GTX",
+    "HIDDEN"
+   ],
+   "symbol": "TESTUSDT",
+   "ocoAllowed": false
+  },
+  {
+   "status": "TRADING",
+   "baseAsset": "ASTER",
+   "quoteAsset": "USDT",
+   "pricePrecision": 5,
+   "quantityPrecision": 2,
+   "baseAssetPrecision": 8,
+   "quotePrecision": 8,
+   "listingTime": 1758012731852,
+   "symbolType": 0,
+   "baseAssetAddress": "0x000Ae314E2A2172a039B26378814C252734f556A",
+   "filters": [
+    {
+     "minPrice": "0.00001",
+     "maxPrice": "1000",
+     "filterType": "PRICE_FILTER",
+     "tickSize": "0.00001"
+    },
+    {
+     "stepSize": "0.01",
+     "filterType": "LOT_SIZE",
+     "maxQty": "10000000",
+     "minQty": "0.01"
+    },
+    {
+     "stepSize": "0.01",
+     "filterType": "MARKET_LOT_SIZE",
+     "maxQty": "100000",
+     "minQty": "0.01"
+    },
+    {
+     "limit": 200,
+     "filterType": "MAX_NUM_ORDERS"
+    },
+    {
+     "minNotional": "5",
+     "filterType": "MIN_NOTIONAL"
+    },
+    {
+     "maxNotional": "300000",
+     "filterType": "MAX_NOTIONAL"
+    },
+    {
+     "maxNotional": "300000",
+     "minNotional": "5",
+     "avgPriceMins": 5,
+     "applyMinToMarket": true,
+     "filterType": "NOTIONAL",
+     "applyMaxToMarket": true
+    },
+    {
+     "multiplierDown": "0.2",
+     "multiplierUp": "15",
+     "multiplierDecimal": "1",
+     "filterType": "PERCENT_PRICE"
+    },
+    {
+     "bidMultiplierUp": "15",
+     "askMultiplierUp": "15",
+     "bidMultiplierDown": "0.2",
+     "avgPriceMins": 5,
+     "multiplierDecimal": "1",
+     "filterType": "PERCENT_PRICE_BY_SIDE",
+     "askMultiplierDown": "0.2"
+    }
+   ],
+   "orderTypes": [
+    "LIMIT",
+    "MARKET",
+    "STOP",
+    "STOP_MARKET",
+    "TAKE_PROFIT",
+    "TAKE_PROFIT_MARKET"
+   ],
+   "timeInForce": [
+    "GTC",
+    "IOC",
+    "GTX",
+    "HIDDEN"
+   ],
+   "symbol": "ASTERUSDT",
+   "ocoAllowed": false
+  }
+ ]
+}

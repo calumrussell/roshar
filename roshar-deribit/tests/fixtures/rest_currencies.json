@@ -1,0 +1,53 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "decimals": 8,
+      "currency": "BTC",
+      "apr": 0.0,
+      "withdrawal_fee": 1e-05,
+      "min_withdrawal_fee": 1e-05,
+      "coinbase_networks": [
+        {
+          "display_name": "Bitcoin",
+          "resource_name": "networks/bitcoin-mainnet"
+        }
+      ],
+      "coin_type": "BTC",
+      "withdrawal_priorities": [],
+      "network_fee": 3.072e-06,
+      "network_currency": "BTC",
+      "min_confirmations": 1,
+      "currency_long": "Bitcoin",
+      "in_cross_collateral_pool": true,
+      "onchain_operations_precision": 8,
+      "currency_uuid": "5b71fc48-3dd3-540c-809b-f8c94d0e68b5"
+    },
+    {
+      "decimals": 6,
+      "currency": "ZORA",
+      "apr": 0.0,
+      "withdrawal_fee": 0.0,
+      "min_withdrawal_fee": 0.0,
+      "coinbase_networks": [
+        {
+          "display_name": "Base",
+          "resource_name": "networks/base-mainnet"
+        }
+      ],
+      "coin_type": "ZORA",
+      "withdrawal_priorities": [],
+      "network_fee": 0.0,
+      "network_currency": "ZORA",
+      "min_confirmations": 0,
+      "currency_long": "Zora",
+      "in_cross_collateral_pool": false,
+      "onchain_operations_precision": 6,
+      "currency_uuid": "0c26413b-4404-407d-a8fc-e25d1dd8608e"
+    }
+  ],
+  "usIn": 1794827221950722,
+  "usOut": 1794827221950843,
+  "usDiff": 121,
+  "testnet": false
+}

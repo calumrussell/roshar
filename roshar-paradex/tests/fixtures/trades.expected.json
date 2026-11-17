@@ -1,0 +1,128 @@
+[
+ {
+  "header": {
+   "block_length": 50,
+   "template_id": 1,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "trades.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780220553,
+   "seq_no": 7723909856,
+   "trade_id": -5299250142154703295,
+   "side": "BUY",
+   "price": "64950.60000000",
+   "size": "0.00018000",
+   "created_at": 1794780220553,
+   "trade_type": "FILL",
+   "market": "BTC-USD-PERP",
+   "trade_id_str": "1794780220550201709230440001"
+  }
+ },
+ {
+  "header": {
+   "block_length": 50,
+   "template_id": 1,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "trades.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780220553,
+   "seq_no": 7723909856,
+   "trade_id": -5299250142154703294,
+   "side": "BUY",
+   "price": "64955.70000000",
+   "size": "0.00027000",
+   "created_at": 1794780220553,
+   "trade_type": "FILL",
+   "market": "BTC-USD-PERP",
+   "trade_id_str": "1794780220550201709230440002"
+  }
+ },
+ {
+  "header": {
+   "block_length": 50,
+   "template_id": 1,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "trades.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780220553,
+   "seq_no": 7723909856,
+   "trade_id": -5299250142154703293,
+   "side": "BUY",
+   "price": "64956.10000000",
+   "size": "0.00030000",
+   "created_at": 1794780220553,
+   "trade_type": "FILL",
+   "market": "BTC-USD-PERP",
+   "trade_id_str": "1794780220550201709230440003"
+  }
+ },
+ {
+  "header": {
+   "block_length": 50,
+   "template_id": 1,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "trades.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780220553,
+   "seq_no": 7723909856,
+   "trade_id": -5299250142154703292,
+   "side": "BUY",
+   "price": "64956.10000000",
+   "size": "0.00030000",
+   "created_at": 1794780220553,
+   "trade_type": "FILL",
+   "market": "BTC-USD-PERP",
+   "trade_id_str": "1794780220550201709230440004"
+  }
+ },
+ {
+  "header": {
+   "block_length": 50,
+   "template_id": 1,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "trades.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780241243,
+   "seq_no": 7723910400,
+   "trade_id": -3055994215864254910,
+   "side": "BUY",
+   "price": "64977.10000000",
+   "size": "0.00030000",
+   "created_at": 1794780241243,
+   "trade_type": "FILL",
+   "market": "BTC-USD-PERP",
+   "trade_id_str": "1794780241240201709230440002"
+  }
+ },
+ {
+  "header": {
+   "block_length": 50,
+   "template_id": 1,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "trades.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780241243,
+   "seq_no": 7723910400,
+   "trade_id": -3055994215864254909,
+   "side": "BUY",
+   "price": "64977.20000000",
+   "size": "0.00030000",
+   "created_at": 1794780241243,
+   "trade_type": "FILL",
+   "market": "BTC-USD-PERP",
+   "trade_id_str": "1794780241240201709230440003"
+  }
+ }
+]

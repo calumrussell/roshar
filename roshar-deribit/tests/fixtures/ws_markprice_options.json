@@ -1,0 +1,21 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "markprice.options.btc_usd",
+    "data": [
+      {
+        "timestamp": 1794827335348,
+        "iv": 0.6326,
+        "instrument_name": "BTC-4DEC26-50000-P",
+        "mark_price": 0.0015
+      },
+      {
+        "timestamp": 1794827335348,
+        "iv": 0.3975,
+        "instrument_name": "BTC-26MAR27-68000-P",
+        "mark_price": 0.1131
+      }
+    ]
+  }
+}

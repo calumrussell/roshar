@@ -1,0 +1,46 @@
+[
+ {
+  "product_id": 0,
+  "ticker_id": null,
+  "market_type": null,
+  "name": "USDT0",
+  "symbol": "USDT0",
+  "maker_fee": null,
+  "taker_fee": null,
+  "can_withdraw": true,
+  "can_deposit": true
+ },
+ {
+  "product_id": 102,
+  "ticker_id": "AAPL-PERP_USDT0",
+  "market_type": "perp",
+  "name": "Apple Perp",
+  "symbol": "AAPL-PERP",
+  "maker_fee": 0.0001,
+  "taker_fee": 0.00035,
+  "can_withdraw": false,
+  "can_deposit": false
+ },
+ {
+  "product_id": 26,
+  "ticker_id": "AAVE-PERP_USDT0",
+  "market_type": "perp",
+  "name": "Aave Perp",
+  "symbol": "AAVE-PERP",
+  "maker_fee": 0.0001,
+  "taker_fee": 0.00035,
+  "can_withdraw": false,
+  "can_deposit": false
+ },
+ {
+  "product_id": 60,
+  "ticker_id": "ADA-PERP_USDT0",
+  "market_type": "perp",
+  "name": "Cardano Perp",
+  "symbol": "ADA-PERP",
+  "maker_fee": 0.0001,
+  "taker_fee": 0.00035,
+  "can_withdraw": false,
+  "can_deposit": false
+ }
+]

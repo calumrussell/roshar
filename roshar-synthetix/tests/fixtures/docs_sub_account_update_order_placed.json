@@ -1,0 +1,23 @@
+{
+ "channel": "subAccountUpdate",
+ "data": {
+  "eventType": "orderPlaced",
+  "subAccountId": "1867542890123456789",
+  "orderId": "1948058938469519360",
+  "symbol": "BTC-USDT",
+  "timestamp": 1704067200000,
+  "side": "buy",
+  "orderType": "limit",
+  "price": "50000.00",
+  "quantity": "0.1",
+  "filledQuantity": "0",
+  "remainingQuantity": "0.1",
+  "direction": "long",
+  "status": "OrderStatePlaced",
+  "createdAt": 1704067199998,
+  "placedAt": 1704067200000,
+  "updatedAt": 1704067200000,
+  "clientOrderId": "0x1234567890abcdef1234567890abcdef"
+ },
+ "timestamp": 1704067200000
+}

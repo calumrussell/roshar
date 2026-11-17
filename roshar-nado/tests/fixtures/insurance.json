@@ -1,0 +1,7 @@
+{
+  "status": "success",
+  "data": {
+    "insurance": "1374309845358455651812160"
+  },
+  "request_type": "query_insurance"
+}

@@ -1,0 +1,43 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "id": "BTC-CCAL-18NOV26_17NOV26-66000",
+      "state": "active",
+      "legs": [
+        {
+          "instrument_name": "BTC-17NOV26-66000-C",
+          "amount": -1
+        },
+        {
+          "instrument_name": "BTC-18NOV26-66000-C",
+          "amount": 1
+        }
+      ],
+      "instrument_id": 735042,
+      "creation_timestamp": 1794816878000,
+      "state_timestamp": 1794825530982
+    },
+    {
+      "id": "BTC-CS-29JAN27-77000_91000",
+      "state": "active",
+      "legs": [
+        {
+          "instrument_name": "BTC-29JAN27-77000-C",
+          "amount": 1
+        },
+        {
+          "instrument_name": "BTC-29JAN27-91000-C",
+          "amount": -1
+        }
+      ],
+      "instrument_id": 734760,
+      "creation_timestamp": 1794741872000,
+      "state_timestamp": 1794825530982
+    }
+  ],
+  "usIn": 1794827225020334,
+  "usOut": 1794827225022858,
+  "usDiff": 2524,
+  "testnet": false
+}

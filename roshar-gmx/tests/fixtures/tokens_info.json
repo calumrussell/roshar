@@ -1,0 +1,55 @@
+[
+ {
+  "name": "Ethereum",
+  "symbol": "ETH",
+  "decimals": 18,
+  "address": "0x0000000000000000000000000000000000000000",
+  "isNative": true,
+  "isShortable": true,
+  "categories": [
+   "layer1"
+  ],
+  "imageUrl": "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880",
+  "isV1Available": true,
+  "wrappedAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+  "prices": {
+   "minPrice": "1818437791148216000000000000000000",
+   "maxPrice": "1818437791148216000000000000000000"
+  },
+  "hasPriceFeedProvider": false
+ },
+ {
+  "name": "Wrapped Bitcoin",
+  "symbol": "BTC",
+  "assetSymbol": "WBTC",
+  "baseSymbol": "BTC",
+  "decimals": 8,
+  "address": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+  "isShortable": true,
+  "categories": [
+   "layer1"
+  ],
+  "imageUrl": "https://assets.coingecko.com/coins/images/26115/thumb/btcb.png?1655921693",
+  "explorerUrl": "https://arbiscan.io/address/0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+  "isV1Available": true,
+  "isPermitSupported": true,
+  "contractVersion": "1",
+  "prices": {
+   "minPrice": "64987129916218263500000000000000000",
+   "maxPrice": "64987129916218263500000000000000000"
+  },
+  "hasPriceFeedProvider": true
+ },
+ {
+  "name": "Wrapped stETH",
+  "symbol": "WSTETH",
+  "address": "0x5979D7b546E38E414F7E9822514be443A4800529",
+  "decimals": 18,
+  "imageUrl": "https://assets.coingecko.com/coins/images/18834/standard/wstETH.png?1696518295",
+  "prices": {
+   "minPrice": "2268961158427516000000000000000000",
+   "maxPrice": "2269901803258291000000000000000000"
+  },
+  "hasPriceFeedProvider": false
+ }
+]

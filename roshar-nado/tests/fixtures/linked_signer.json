@@ -1,0 +1,7 @@
+{
+ "status": "success",
+ "data": {
+  "linked_signer": "0x054c9e178b1a779f47aec215cfd8da18fb414cd7"
+ },
+ "request_type": "query_linked_signer"
+}

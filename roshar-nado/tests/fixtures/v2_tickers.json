@@ -1,0 +1,32 @@
+{
+ "GOOGL-PERP_USDT0": {
+  "product_id": 106,
+  "ticker_id": "GOOGL-PERP_USDT0",
+  "base_currency": "GOOGL-PERP",
+  "quote_currency": "USDT0",
+  "last_price": 293.24,
+  "base_volume": 346.44,
+  "quote_volume": 101045.92921930493,
+  "price_change_percent_24h": 1.2177119712536022
+ },
+ "PONS-PERP_USDT0": {
+  "product_id": 188,
+  "ticker_id": "PONS-PERP_USDT0",
+  "base_currency": "PONS-PERP",
+  "quote_currency": "USDT0",
+  "last_price": 0.1196,
+  "base_volume": 2882836.0,
+  "quote_volume": 340998.8725346898,
+  "price_change_percent_24h": 6.67044001121462
+ },
+ "SOL-PERP_USDT0": {
+  "product_id": 8,
+  "ticker_id": "SOL-PERP_USDT0",
+  "base_currency": "SOL-PERP",
+  "quote_currency": "USDT0",
+  "last_price": 71.905,
+  "base_volume": 721636.9,
+  "quote_volume": 50883481.87710881,
+  "price_change_percent_24h": 3.3644087585996325
+ }
+}

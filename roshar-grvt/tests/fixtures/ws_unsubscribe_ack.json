@@ -1,0 +1,1 @@
+{"jsonrpc": "2.0", "result": {"stream": "v1.trade", "unsubs": ["BTC_USDT_Perp@50"]}, "id": 99, "method": "unsubscribe"}

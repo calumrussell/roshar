@@ -1,0 +1,1 @@
+{"channel": "candles", "timestamp": "2026-11-16T11:03:58.933369425Z", "sequence_num": 410, "events": [{"type": "update", "candles": [{"start": "1794826800", "high": "64585.7", "low": "64507.67", "open": "64511.79", "close": "64542.56", "volume": "19.50250026", "product_id": "BTC-USD"}]}]}

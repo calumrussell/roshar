@@ -1,0 +1,35 @@
+{
+ "code": "SUCCESS",
+ "data": [
+  {
+   "close": "64979.5",
+   "contractId": "30000001",
+   "contractName": "BTCUSDC",
+   "endTime": "1794779100000",
+   "fundingRate": "0.00005000",
+   "fundingTime": "1794772800000",
+   "high": "66031.3",
+   "highTime": "1794733925614",
+   "indexPrice": "65019.7787668343",
+   "lastPrice": "64979.5",
+   "low": "61975.1",
+   "lowTime": "1794707141183",
+   "markPrice": "64984.035737476061920173",
+   "nextFundingTime": "1794787200000",
+   "open": "64216.0",
+   "openInterest": "2464.409",
+   "oraclePrice": "64984.035737476061920173",
+   "priceChange": "763.5",
+   "priceChangePercent": "0.011889",
+   "size": "6756.743",
+   "startTime": "1794690900000",
+   "trades": "111266",
+   "value": "434255821.1972"
+  }
+ ],
+ "errorParam": null,
+ "msg": null,
+ "requestTime": "1794779989595",
+ "responseTime": "1794779989596",
+ "traceId": ""
+}

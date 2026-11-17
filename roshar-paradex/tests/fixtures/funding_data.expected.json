@@ -1,0 +1,128 @@
+[
+ {
+  "header": {
+   "block_length": 66,
+   "template_id": 5,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_data.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780128399,
+   "seq_no": 0,
+   "funding_rate": "0.00001195",
+   "funding_index": "25154.15609407",
+   "created_at": 1794780128399,
+   "funding_premium": "0.77662391",
+   "funding_rate8h": "0.00001195",
+   "funding_period_hours": 8,
+   "impact_premium_rate": "-0.00044474",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 66,
+   "template_id": 5,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_data.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780133399,
+   "seq_no": 0,
+   "funding_rate": "0.00001194",
+   "funding_index": "25154.15622884",
+   "created_at": 1794780133399,
+   "funding_premium": "0.77619426",
+   "funding_rate8h": "0.00001194",
+   "funding_period_hours": 8,
+   "impact_premium_rate": "-0.00045635",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 66,
+   "template_id": 5,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_data.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780138399,
+   "seq_no": 0,
+   "funding_rate": "0.00001193",
+   "funding_index": "25154.15636352",
+   "created_at": 1794780138399,
+   "funding_premium": "0.77524485",
+   "funding_rate8h": "0.00001193",
+   "funding_period_hours": 8,
+   "impact_premium_rate": "-0.00047256",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 66,
+   "template_id": 5,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_data.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780143399,
+   "seq_no": 0,
+   "funding_rate": "0.00001205",
+   "funding_index": "25154.15649855",
+   "created_at": 1794780143399,
+   "funding_premium": "0.78366324",
+   "funding_rate8h": "0.00001205",
+   "funding_period_hours": 8,
+   "impact_premium_rate": "-0.00041627",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 66,
+   "template_id": 5,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_data.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780148399,
+   "seq_no": 0,
+   "funding_rate": "0.00001220",
+   "funding_index": "25154.15663523",
+   "created_at": 1794780148399,
+   "funding_premium": "0.79306296",
+   "funding_rate8h": "0.00001220",
+   "funding_period_hours": 8,
+   "impact_premium_rate": "-0.00034222",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 66,
+   "template_id": 5,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_data.AERO-USD-PERP",
+  "data": {
+   "timestamp": 1794780193399,
+   "seq_no": 0,
+   "funding_rate": "-0.00017323",
+   "funding_index": "0.00258201",
+   "created_at": 1794780193399,
+   "funding_premium": "-0.00007544",
+   "funding_rate8h": "-0.00017323",
+   "funding_period_hours": 8,
+   "impact_premium_rate": "-0.00062367",
+   "market": "AERO-USD-PERP"
+  }
+ }
+]

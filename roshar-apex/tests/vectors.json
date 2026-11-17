@@ -1,0 +1,496 @@
+{
+  "sdk": "apexomni (PyPI) / github.com/ApeX-Protocol/apexpro-openapi",
+  "sdk_version": "3.4.2",
+  "credentials": {
+    "key": "3f1c8a52-7e0b-4d6f-9a21-5c0e8b7d4a19",
+    "secret": "gOBMmqsQ8WSoQvQzbdN2tD77GK6xMRTwlxGV05tR",
+    "passphrase": "yJ5TlQ0sLeLHl2BCel3_"
+  },
+  "keys": [
+    {
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "l2_key": "0x85db484bea1bd0bcf5784c3d344c76844ff86d9ab277675146b0072d5c96fd0d",
+      "pub_key_hash": "0x9a5b87c4a362064ad29a68584e275d480525ea3d"
+    },
+    {
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "l2_key": "0xb1adb725aed7d463170fa78d4b1c8abc86a44d45d43fbebe715e4cd2b1a1fe85",
+      "pub_key_hash": "0x02bb28ab379ffd2752a07e1418853813bdac5a67"
+    },
+    {
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "l2_key": "0xc23fbf9f7f871f485d799cef780b8d55342ab6b24fff15318a792e5d20e68292",
+      "pub_key_hash": "0x7460f732bc3d0e3b7068099401cdeeb754eeb977"
+    }
+  ],
+  "musig": [
+    {
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "message": "",
+      "signature": "0xa01d2bff4d0114815be49d4b05c97000cade5babc5b4dd098f0ecceab9b90d0bd3ca4f5639f7c7e1676df50c51d81fa98040d63b0d217a6cb9215c33f8a71f01"
+    },
+    {
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "message": "616263",
+      "signature": "0x357c294d21446a329f083e6532fad610d3116d6a571a9127519161549233590075a8fd1d74c2e770258b57584bc89cb31a9a40b74d50e69e84abbc128f88a604"
+    },
+    {
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "message": "fe0000000100000200000304010001e84800000000000000000000000df8475800020500",
+      "signature": "0x2ad11b51886e5c6ad1d6860d5443f46099521c63d53f5991880800f3ac3ce1999d96ef0e35ce2fbc09023afa0bbc020ffce1195f3fa2a8d4390c3b4fd6a29e04"
+    },
+    {
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "message": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b",
+      "signature": "0x8bc1662b8c700ac18e2586ea96d4741135eb061af9c7810aa79ce404574d082e4a5ec6b6957f4023d61c684c7630526871ce44b020153b07412a06bcdf3f6902"
+    },
+    {
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "message": "",
+      "signature": "0x5c94f0d88cf9371bc339ef9475f0a2078e4e09d78e2c4aa92f0da011cc1ebd08dc989aaefd5d1aaad9f4f0a2ce4306fa869fa024950d8f4de527bf24d701ad04"
+    },
+    {
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "message": "616263",
+      "signature": "0x23e5d04b83aa5ad6f2f3b67ce4c401ae7ae4bdef3df2d6cf80cf80e822324a90c680127e69a65d4580644cd387cdf7c02e0bfe188f88d4279308016210878504"
+    },
+    {
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "message": "fe0000000100000200000304010001e84800000000000000000000000df8475800020500",
+      "signature": "0xbe45e87e9e2066e797104cfb5678a3b30dbd9a5d2da3267a2190afd29296c6106c896daa9125ca5be13087dd9c8b6cf594329f82b9c77f306eb2f2e0aa75f401"
+    },
+    {
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "message": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b",
+      "signature": "0x624fa5bc66179271859ff7f70bb766155585aaa84011348a76749ae068e3501ac8ab58e235fb176e6d935da20fbdeda52c6054e35bf92b025d15bf3594796701"
+    },
+    {
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "message": "",
+      "signature": "0xbe0ae6723c2863c3b5eb87c42418bbaf8473976c9a795c6e18ff056fb9e86dae2425bee3cf5e4f44b4c16b8d696b9838c6383278e20104bea422469443f98a00"
+    },
+    {
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "message": "616263",
+      "signature": "0xf821de55459f0a11ce87e421a9b64f4320c11f180421f324968a6dfb4498bd1346c338827a9aaae074f4f09fbe0528733103e2396bdff73fe22b4a0d22831600"
+    },
+    {
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "message": "fe0000000100000200000304010001e84800000000000000000000000df8475800020500",
+      "signature": "0xc4cc60a13174e7d3c2b7ee985c6e122fc35d0a5be2e16ecc32dc44bf492ce10ebe06962f2da2656ef3c3c57038711e7c02c6fdc6737c3bca2c7423016c0b7a03"
+    },
+    {
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "message": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b",
+      "signature": "0xc5ca0cc8ea4ae8de9e64c9c65c8ed3e126a516d27b294d8d5ea5276799f388911b57987b68599aef41b73822989664685c8ed3ff243eeeda24e391c457c4b705"
+    }
+  ],
+  "orders": [
+    {
+      "name": "limit_buy_gtc",
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "account_id": "584232029671915612",
+      "taker_fee_rate": "0.0005",
+      "maker_fee_rate": "0.0002",
+      "l2_pair_id": "50001",
+      "settle_decimals": 18,
+      "inputs": {
+        "symbol": "BTC-USDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "size": "0.01",
+        "price": "65000.5",
+        "timeInForce": "GOOD_TIL_CANCEL",
+        "clientId": "123456789012345"
+      },
+      "builder": {
+        "account_id": 2333842507,
+        "sub_account_id": 0,
+        "slot_id": 975119402,
+        "nonce": 2246067168,
+        "pair_id": 50001,
+        "size": "10000000000000000",
+        "price": "65000500000000000000000",
+        "direction": true,
+        "taker_fee_rate": 5,
+        "maker_fee_rate": 2,
+        "has_subsidy": false
+      },
+      "contract_bytes": "fe8b1b9c4b00242ae043e051014a817c800600000000000dc3af257a975a520000020500",
+      "signature": "0x6c4dbeda975d1d70345cabc5d6b51cdda593b17dd2d8e39f394ea8eae407e314232ab87def42f43686144ddcecec98a7457897f5b9d285f3a4930e23fc596304",
+      "limit_fee": "0.325003",
+      "expiration": 1797199200000,
+      "endpoint": "/api/v3/order",
+      "form": {
+        "symbol": "BTC-USDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "timeInForce": "GOOD_TIL_CANCEL",
+        "size": "0.01",
+        "price": "65000.5",
+        "limitFee": "0.325003",
+        "expiration": "1797199200000",
+        "clientId": "123456789012345",
+        "signature": "0x6c4dbeda975d1d70345cabc5d6b51cdda593b17dd2d8e39f394ea8eae407e314232ab87def42f43686144ddcecec98a7457897f5b9d285f3a4930e23fc596304",
+        "reduceOnly": "False",
+        "isPositionTpsl": "False",
+        "isOpenTpslOrder": "False",
+        "isSetOpenSl": "False",
+        "isSetOpenTp": "False"
+      },
+      "hmac": {
+        "timestamp": 1794780000000,
+        "signature": "+EQm/xNKTh+1xYS6esGJ6qwn4GqrLzllmMBrlJF7d1Q="
+      }
+    },
+    {
+      "name": "post_only_reduce_only_sell",
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "account_id": "584232029671915612",
+      "taker_fee_rate": "0.00025",
+      "maker_fee_rate": "0.00000000",
+      "l2_pair_id": "50001",
+      "settle_decimals": 18,
+      "inputs": {
+        "symbol": "BTC-USDT",
+        "side": "SELL",
+        "type": "LIMIT",
+        "size": "0.123",
+        "price": "64999.9",
+        "timeInForce": "POST_ONLY",
+        "reduceOnly": true,
+        "clientId": "apexomni-584232029671915612-1794780000000-a1b2c3"
+      },
+      "builder": {
+        "account_id": 2333842507,
+        "sub_account_id": 0,
+        "slot_id": 2387587969,
+        "nonce": 648248277,
+        "pair_id": 50001,
+        "size": "123000000000000000",
+        "price": "64999900000000000000000",
+        "direction": false,
+        "taker_fee_rate": 3,
+        "maker_fee_rate": 0,
+        "has_subsidy": false
+      },
+      "contract_bytes": "fe8b1b9c4b00b381a37bd551005ba463600700000000000dc3a6d1d9c529160000000300",
+      "signature": "0xf8249f8aa0407d000c66227a3586dff4f5dfbef5fb737473f028e3188c1b2e30438241358fd77017ef5ff01098581f8a4a212764d0f7775c100bab61011f0502",
+      "limit_fee": "1.998747",
+      "expiration": 1797199323000,
+      "endpoint": "/api/v3/order",
+      "form": {
+        "symbol": "BTC-USDT",
+        "side": "SELL",
+        "type": "LIMIT",
+        "timeInForce": "POST_ONLY",
+        "size": "0.123",
+        "price": "64999.9",
+        "limitFee": "1.998747",
+        "expiration": "1797199323000",
+        "clientId": "apexomni-584232029671915612-1794780000000-a1b2c3",
+        "signature": "0xf8249f8aa0407d000c66227a3586dff4f5dfbef5fb737473f028e3188c1b2e30438241358fd77017ef5ff01098581f8a4a212764d0f7775c100bab61011f0502",
+        "reduceOnly": "True",
+        "isPositionTpsl": "False",
+        "isOpenTpslOrder": "False",
+        "isSetOpenSl": "False",
+        "isSetOpenTp": "False"
+      },
+      "hmac": {
+        "timestamp": 1794780000001,
+        "signature": "gLABTSeUiBxlPrtrjIvNgOOtaJRhR9s68K7n/UYz55s="
+      }
+    },
+    {
+      "name": "market_ioc_buy_float_slot_rounding",
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "account_id": "713292165948637192",
+      "taker_fee_rate": "0.0005",
+      "maker_fee_rate": "0.0002",
+      "l2_pair_id": "50001",
+      "settle_decimals": 18,
+      "inputs": {
+        "symbol": "BTC-USDT",
+        "side": "BUY",
+        "type": "MARKET",
+        "size": "1.5",
+        "price": "71500.0",
+        "timeInForce": "IMMEDIATE_OR_CANCEL",
+        "clientId": "1970091"
+      },
+      "builder": {
+        "account_id": 643178362,
+        "sub_account_id": 0,
+        "slot_id": 1793084398,
+        "nonce": 4294967053,
+        "pair_id": 50001,
+        "size": "1500000000000000000",
+        "price": "71500000000000000000000",
+        "direction": true,
+        "taker_fee_rate": 5,
+        "maker_fee_rate": 2,
+        "has_subsidy": false
+      },
+      "contract_bytes": "fe26561f7a004beeffff0d51016fc23ac00800000000000f2405d408c3adb00000020500",
+      "signature": "0x948499f12fb2ee90c21f51c381fd60c3c27532d6a3d44b4f163b59b5a0de9c87c5f80cd858167251424aa8ff634b8d240d672dec24037a1b473934da70089d01",
+      "limit_fee": "53.625000",
+      "expiration": 1797199656000,
+      "endpoint": "/api/v3/order",
+      "form": {
+        "symbol": "BTC-USDT",
+        "side": "BUY",
+        "type": "MARKET",
+        "timeInForce": "IMMEDIATE_OR_CANCEL",
+        "size": "1.5",
+        "price": "71500.0",
+        "limitFee": "53.625000",
+        "expiration": "1797199656000",
+        "clientId": "1970091",
+        "signature": "0x948499f12fb2ee90c21f51c381fd60c3c27532d6a3d44b4f163b59b5a0de9c87c5f80cd858167251424aa8ff634b8d240d672dec24037a1b473934da70089d01",
+        "reduceOnly": "False",
+        "isPositionTpsl": "False",
+        "isOpenTpslOrder": "False",
+        "isSetOpenSl": "False",
+        "isSetOpenTp": "False"
+      },
+      "hmac": {
+        "timestamp": 1794780000002,
+        "signature": "+eFgT6jFpzGJ0cnWnjm8+xv9sHA0aWVXmgjucKo5DdE="
+      }
+    },
+    {
+      "name": "stop_market_fok_sell",
+      "seeds": "6cede397d2d4ea7d33f13755ba6d4732403b4fb858892679cb2a50e50591d7f40661789479c9b06b0cd534e80148ff201726e2681cf949e0040ffd619eb5ff46f9",
+      "account_id": "1",
+      "taker_fee_rate": "0.00035",
+      "maker_fee_rate": "0.0001",
+      "l2_pair_id": "50001",
+      "settle_decimals": 18,
+      "inputs": {
+        "symbol": "BTC-USDT",
+        "side": "SELL",
+        "type": "STOP_MARKET",
+        "size": "0.0100",
+        "price": "58500.0",
+        "timeInForce": "FILL_OR_KILL",
+        "reduceOnly": true,
+        "triggerPrice": "60000",
+        "triggerPriceType": "INDEX",
+        "clientId": "9007199254740993"
+      },
+      "builder": {
+        "account_id": 1,
+        "sub_account_id": 0,
+        "slot_id": 398859244,
+        "nonce": 1854410816,
+        "pair_id": 50001,
+        "size": "10000000000000000",
+        "price": "58500000000000000000000",
+        "direction": false,
+        "taker_fee_rate": 4,
+        "maker_fee_rate": 1,
+        "has_subsidy": false
+      },
+      "contract_bytes": "fe00000001001bec88104051004a817c800600000000000c634a9635b75f900000010400",
+      "signature": "0xf262acc0549eb9860eb247f6f170d8364f3832b6bbb86831bab7c74e66feb48d3434083a2152b9a4c0d6b6b000d703d02b1a413c7eb564e2f4038849c216d705",
+      "limit_fee": "0.204750",
+      "expiration": 1702419200000,
+      "endpoint": "/api/v3/order",
+      "form": {
+        "symbol": "BTC-USDT",
+        "side": "SELL",
+        "type": "STOP_MARKET",
+        "timeInForce": "FILL_OR_KILL",
+        "size": "0.0100",
+        "price": "58500.0",
+        "limitFee": "0.204750",
+        "expiration": "1702419200000",
+        "triggerPrice": "60000",
+        "triggerPriceType": "INDEX",
+        "clientId": "9007199254740993",
+        "signature": "0xf262acc0549eb9860eb247f6f170d8364f3832b6bbb86831bab7c74e66feb48d3434083a2152b9a4c0d6b6b000d703d02b1a413c7eb564e2f4038849c216d705",
+        "reduceOnly": "True",
+        "isPositionTpsl": "False",
+        "isOpenTpslOrder": "False",
+        "isSetOpenSl": "False",
+        "isSetOpenTp": "False"
+      },
+      "hmac": {
+        "timestamp": 1794780000003,
+        "signature": "jrhOxYSpAUTJk+Y0NmRfmZVCXEuO+6xLROgXC8sOUzo="
+      }
+    },
+    {
+      "name": "small_price_large_size",
+      "seeds": "97a0cc0f172775dc05920bc8d3cb202acc26f322603915f5db8eae016709abac3653539134c50e2e38b423c27ce1e3ba5bf075a7dc0bf31ebb0295721f57abae6e",
+      "account_id": "4294967295",
+      "taker_fee_rate": "0.0006",
+      "maker_fee_rate": "0.0002",
+      "l2_pair_id": "50017",
+      "settle_decimals": 18,
+      "inputs": {
+        "symbol": "DOGE-USDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "size": "123456",
+        "price": "0.12345",
+        "timeInForce": "GOOD_TIL_CANCEL",
+        "clientId": "doge-1"
+      },
+      "builder": {
+        "account_id": 0,
+        "sub_account_id": 0,
+        "slot_id": 650503010,
+        "nonce": 2419084218,
+        "pair_id": 50017,
+        "size": "123456000000000000000000",
+        "price": "123450000000000000",
+        "direction": true,
+        "taker_fee_rate": 6,
+        "maker_fee_rate": 2,
+        "has_subsidy": false
+      },
+      "contract_bytes": "fe0000000000e362304bba61015bfb5d000d0000000000000001b6951ef585a000020600",
+      "signature": "0xe41d76264c50ced81b12e5b965b2576ffd6019b375369498940e35e53ebdee85e64a78afc77de2f9e1f813d4f877ae1051c65077c46246e52b5e2b17c1c4fd02",
+      "limit_fee": "9.144386",
+      "expiration": 1797199989000,
+      "endpoint": "/api/v3/order",
+      "form": {
+        "symbol": "DOGE-USDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "timeInForce": "GOOD_TIL_CANCEL",
+        "size": "123456",
+        "price": "0.12345",
+        "limitFee": "9.144386",
+        "expiration": "1797199989000",
+        "clientId": "doge-1",
+        "signature": "0xe41d76264c50ced81b12e5b965b2576ffd6019b375369498940e35e53ebdee85e64a78afc77de2f9e1f813d4f877ae1051c65077c46246e52b5e2b17c1c4fd02",
+        "reduceOnly": "False",
+        "isPositionTpsl": "False",
+        "isOpenTpslOrder": "False",
+        "isSetOpenSl": "False",
+        "isSetOpenTp": "False"
+      },
+      "hmac": {
+        "timestamp": 1794780000004,
+        "signature": "uRBVxQz8MUgJjA8V8lT5rq3NI75VkivldljT8DsjDaY="
+      }
+    },
+    {
+      "name": "prediction_contract_six_decimals",
+      "seeds": "6837d9dbf1ffa261249fbdbe5d575962836bd22bf8ede62303ed860051794b07e8d0bd1af5792fd7f473b623def6219e98d1d465c67ba1ca85978eee7b767f2b82",
+      "account_id": "854931562279469100",
+      "taker_fee_rate": "0.001",
+      "maker_fee_rate": "0.0005",
+      "l2_pair_id": "50199",
+      "settle_decimals": 6,
+      "inputs": {
+        "symbol": "Knicks_Win_Against_Celtics_Dec2-USDT",
+        "side": "SELL",
+        "type": "LIMIT",
+        "size": "2000",
+        "price": "0.537",
+        "timeInForce": "GOOD_TIL_CANCEL",
+        "clientId": "42"
+      },
+      "builder": {
+        "account_id": 4174205925,
+        "sub_account_id": 0,
+        "slot_id": 2627667955,
+        "nonce": 1478144643,
+        "pair_id": 50199,
+        "size": "2000000000",
+        "price": "537000",
+        "direction": false,
+        "taker_fee_rate": 10,
+        "maker_fee_rate": 5,
+        "has_subsidy": false
+      },
+      "contract_bytes": "fef8cd53e50007f31ab28317000ee6b280000000000000000000000000000831a8050a00",
+      "signature": "0x6056cec4d6f9f2fafc6ba0f168e73837ac72a5766ef793091539f75e4f0b6983a1fe8e7c3bf297f803bc3a7adb5849ef0353a53dfd0e9994e29674a95ef4e801",
+      "limit_fee": "1.074000",
+      "expiration": 1766419200000,
+      "endpoint": "/api/v3/order",
+      "form": {
+        "symbol": "Knicks_Win_Against_Celtics_Dec2-USDT",
+        "side": "SELL",
+        "type": "LIMIT",
+        "timeInForce": "GOOD_TIL_CANCEL",
+        "size": "2000",
+        "price": "0.537",
+        "limitFee": "1.074000",
+        "expiration": "1766419200000",
+        "clientId": "42",
+        "signature": "0x6056cec4d6f9f2fafc6ba0f168e73837ac72a5766ef793091539f75e4f0b6983a1fe8e7c3bf297f803bc3a7adb5849ef0353a53dfd0e9994e29674a95ef4e801",
+        "reduceOnly": "False",
+        "isPositionTpsl": "False",
+        "isOpenTpslOrder": "False",
+        "isSetOpenSl": "False",
+        "isSetOpenTp": "False"
+      },
+      "hmac": {
+        "timestamp": 1794780000005,
+        "signature": "CCghvJKoOEPuvPZUdhgsL3uvxdXpwJ+9AVDjPuMeNkY="
+      }
+    }
+  ],
+  "hmac": [
+    {
+      "method": "GET",
+      "path": "/api/v3/account",
+      "data": {},
+      "timestamp": 1794780100000,
+      "signature": "tb+tmMetTJGGp7z4EUT1I8P0VlK8vKHmQnUbDto/D80="
+    },
+    {
+      "method": "GET",
+      "path": "/api/v3/history-orders?symbol=BTC-USDT&limit=10&page=0",
+      "data": {},
+      "timestamp": 1794780100001,
+      "signature": "ulWuXD4NlwjyeS9yvc8EIEDTK1GkhNsJ/seGpZXV2rI="
+    },
+    {
+      "method": "POST",
+      "path": "/api/v3/delete-order",
+      "data": {
+        "id": "588326929847812444"
+      },
+      "timestamp": 1794780100002,
+      "signature": "LouOWU/K70SfSgDQxSCqzluqy+Z+ph72agzSdr/er+4="
+    },
+    {
+      "method": "POST",
+      "path": "/api/v3/delete-client-order-id",
+      "data": {
+        "id": "123456789012345"
+      },
+      "timestamp": 1794780100003,
+      "signature": "MBl+/BA2gAJlXaFWFJsEAQAVaUNa1BPL6zWPKztv+zY="
+    },
+    {
+      "method": "POST",
+      "path": "/api/v3/delete-open-orders",
+      "data": {
+        "symbol": "BTC-USDT,ETH-USDT"
+      },
+      "timestamp": 1794780100004,
+      "signature": "CUaW1Cl8OKsDQJuQGVbpAiO3StAsjTpQKhhgyCqzUdI="
+    },
+    {
+      "method": "POST",
+      "path": "/api/v3/set-initial-margin-rate",
+      "data": {
+        "symbol": "BTC-USDT",
+        "initialMarginRate": "0.05"
+      },
+      "timestamp": 1794780100005,
+      "signature": "oyoXhJn0N7fsh0r1GMfYoRVRibYA7IhtwICW4WMQBrk="
+    }
+  ],
+  "ws_login": {
+    "timestamp": 1794780200000,
+    "request_path": "/ws/accounts",
+    "signature": "gkKWHxoVDcHWjQdEIpanCcHQwcNw2RnwoWN0/a2Kdrk="
+  }
+}

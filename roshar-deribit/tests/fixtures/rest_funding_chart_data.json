@@ -1,0 +1,28 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "data": [
+      {
+        "timestamp": 1794798480000,
+        "index_price": 65046.35,
+        "interest_8h": 0.0
+      },
+      {
+        "timestamp": 1794798540000,
+        "index_price": 65046.22,
+        "interest_8h": 0.0
+      },
+      {
+        "timestamp": 1794798600000,
+        "index_price": 65002.4,
+        "interest_8h": 0.0
+      }
+    ],
+    "interest_8h": 3.389022522169615e-07,
+    "current_interest": 0.0
+  },
+  "usIn": 1794827223174825,
+  "usOut": 1794827223184852,
+  "usDiff": 10027,
+  "testnet": false
+}

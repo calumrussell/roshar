@@ -1,0 +1,64 @@
+{
+ "code": "SUCCESS",
+ "data": {
+  "dataList": [
+   {
+    "close": "65077.8",
+    "contractId": "30000001",
+    "contractName": "BTCUSDC",
+    "high": "65147.1",
+    "klineId": "2061584384452489008",
+    "klineTime": "1794772800000",
+    "klineType": "HOUR_1",
+    "low": "64635.9",
+    "makerBuySize": "32.936",
+    "makerBuyValue": "2140857.2188",
+    "open": "64890.1",
+    "priceType": "LAST_PRICE",
+    "size": "55.446",
+    "trades": "2651",
+    "value": "3602480.8409"
+   },
+   {
+    "close": "64890.1",
+    "contractId": "30000001",
+    "contractName": "BTCUSDC",
+    "high": "65113.5",
+    "klineId": "2061584384452488948",
+    "klineTime": "1794769200000",
+    "klineType": "HOUR_1",
+    "low": "64647.2",
+    "makerBuySize": "42.074",
+    "makerBuyValue": "2731239.6933",
+    "open": "64679.3",
+    "priceType": "LAST_PRICE",
+    "size": "110.340",
+    "trades": "2803",
+    "value": "7163006.8131"
+   },
+   {
+    "close": "64679.3",
+    "contractId": "30000001",
+    "contractName": "BTCUSDC",
+    "high": "64753.2",
+    "klineId": "2061584384452488888",
+    "klineTime": "1794765600000",
+    "klineType": "HOUR_1",
+    "low": "64446.1",
+    "makerBuySize": "12.895",
+    "makerBuyValue": "832857.7407",
+    "open": "64521.1",
+    "priceType": "LAST_PRICE",
+    "size": "26.516",
+    "trades": "2412",
+    "value": "1712687.1420"
+   }
+  ],
+  "nextPageOffsetData": "0880EAF6829E3410B8DDA1EEB2828ECE1C"
+ },
+ "errorParam": null,
+ "msg": null,
+ "requestTime": "1794779991660",
+ "responseTime": "1794779991661",
+ "traceId": ""
+}

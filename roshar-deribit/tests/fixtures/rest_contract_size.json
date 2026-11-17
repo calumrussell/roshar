@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "contract_size": 10.0
+  },
+  "usIn": 1794827224068061,
+  "usOut": 1794827224068172,
+  "usDiff": 111,
+  "testnet": false
+}

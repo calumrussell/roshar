@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "estimated_expiration_price.btc_usd",
+    "data": {
+      "seconds": 75064,
+      "timestamp": 1794827336054,
+      "price": 64597.17,
+      "is_estimated": false
+    }
+  }
+}

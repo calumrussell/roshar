@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "instrument.state.any.any",
+    "data": {
+      "timestamp": 1794827822000,
+      "state": "inactive",
+      "instrument_name": "BTC-PDIAG-26MAR27_27NOV26-74000_75000"
+    }
+  }
+}

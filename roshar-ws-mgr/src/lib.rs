@@ -30,6 +30,7 @@ mod test {
             tcp_send_buffer_size: None,
             tcp_nodelay: None,
             broadcast_channel_size: None,
+            headers: vec![],
         }
     }
 

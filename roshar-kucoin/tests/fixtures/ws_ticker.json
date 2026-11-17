@@ -1,0 +1,1 @@
+{"topic":"/contractMarket/ticker:XBTUSDTM","type":"message","subject":"ticker","sn":1955213175846,"data":{"symbol":"XBTUSDTM","sequence":1955213175846,"side":"sell","size":47,"price":"64577.6","bestBidSize":137,"bestBidPrice":"64563.1","bestAskPrice":"64577.7","tradeId":"1955213175846","bestAskSize":3775,"ts":1794826860540000000}}

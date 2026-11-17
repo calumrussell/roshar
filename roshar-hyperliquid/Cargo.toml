@@ -27,6 +27,9 @@ k256 = { version = "0.13", features = ["ecdsa"] }
 sha3 = "0.10"
 rmp = "0.8"
 leaky-bucket = "1.0"
+# fastAssetCtxs payloads: base64 of raw DEFLATE.
+base64 = "0.22"
+flate2 = "1"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "net"] }

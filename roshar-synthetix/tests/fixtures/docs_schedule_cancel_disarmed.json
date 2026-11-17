@@ -1,0 +1,11 @@
+{
+ "status": "ok",
+ "response": {
+  "isActive": false,
+  "message": "dead-man-switch disabled",
+  "timeoutSeconds": 0
+ },
+ "request_id": "5ccf215d37e3ae6d",
+ "requestId": "5ccf215d37e3ae6d",
+ "timestamp": 1704067200456
+}

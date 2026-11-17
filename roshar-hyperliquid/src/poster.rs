@@ -11,10 +11,10 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 
+use crate::types::exchange::OrderStatus;
 use anyhow::{anyhow, bail};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt};
-use crate::types::exchange::OrderStatus;
 use serde_json::{json, Value};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::net::TcpStream;

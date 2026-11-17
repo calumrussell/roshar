@@ -1,0 +1,42 @@
+[
+  {
+    "ticker_id": "AAPL/USD[USDC-USDC]",
+    "base_currency": "AAPL",
+    "target_currency": "USD",
+    "product_type": "Perpetual",
+    "last_price": 356.25,
+    "high": 356.25,
+    "low": 355.64,
+    "base_volume": 0,
+    "target_volume": 0,
+    "pool_id": "GRT3cFnBkNNTs89wC9Q9qjU9JmZ6XTgu7fF4KRHgW5iR",
+    "liquidity_in_usd": 682187.8973002492,
+    "open_interest": 121.18574895,
+    "long_open_interest": 60.5675166,
+    "short_open_interest": 60.61823235,
+    "funding_rate": 0.0001141552511424,
+    "next_funding_rate": 0.0001141552511424,
+    "next_funding_rate_timestamp": 1794826800,
+    "funding_interval_minutes": 60
+  },
+  {
+    "ticker_id": "AAVE/USD[WSOL-USDC]",
+    "base_currency": "AAVE",
+    "target_currency": "USD",
+    "product_type": "Perpetual",
+    "last_price": 109.38906,
+    "high": 110.262785,
+    "low": 105.690165,
+    "base_volume": 467.33989643409774,
+    "target_volume": 51121.8719714233,
+    "pool_id": "2dVHXNgzC7vvcsDi89S6crSkX3Y6HzPgZfmWqttEzvmo",
+    "liquidity_in_usd": 51372.91165727504,
+    "open_interest": 10253.142051340641,
+    "long_open_interest": 1615.201936,
+    "short_open_interest": 8637.940115340642,
+    "funding_rate": 0.006173496348084,
+    "next_funding_rate": 0.006173496348084,
+    "next_funding_rate_timestamp": 1794826800,
+    "funding_interval_minutes": 60
+  }
+]

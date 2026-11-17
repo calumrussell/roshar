@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    "BTC-CCAL-18NOV26_17NOV26-66000",
+    "BTC-CS-29JAN27-77000_91000",
+    "BTC-FS-17NOV26_PERP"
+  ],
+  "usIn": 1794827258519779,
+  "usOut": 1794827258522010,
+  "usDiff": 2231,
+  "testnet": false
+}

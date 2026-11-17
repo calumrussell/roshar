@@ -70,6 +70,7 @@ async fn main() {
             tcp_send_buffer_size: None,
             tcp_nodelay: None,
             broadcast_channel_size: Some(8_192),
+            headers: vec![],
         };
 
         println!("Starting connection: {}", name);

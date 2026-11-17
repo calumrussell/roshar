@@ -1,0 +1,12 @@
+{
+ "status": "error",
+ "error": {
+  "code": "ORDER_NOT_FOUND",
+  "message": "Order not found",
+  "category": "TRADING",
+  "retryable": false
+ },
+ "requestId": "5ccf215d37e3ae6d",
+ "traceId": "abc123def456",
+ "timestamp": 1704067200000
+}

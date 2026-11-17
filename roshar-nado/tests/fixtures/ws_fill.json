@@ -1,0 +1,17 @@
+{
+ "type": "fill",
+ "timestamp": "1794780396109100023",
+ "product_id": 2,
+ "subaccount": "0x2a52884ffef4dcc55cf1e406797c0a514b7e835d64656661756c740000000000",
+ "order_digest": "0x4442a2e145b4c85922c12f01f2f8a5944081b11f1ebff08ba333782291057858",
+ "id": 12843679,
+ "appendix": "513",
+ "filled_qty": "30750000000000000",
+ "remaining_qty": "366700000000000000",
+ "original_qty": "397450000000000000",
+ "price": "65068000000000000000000",
+ "is_taker": true,
+ "is_bid": true,
+ "fee": "300171175676351452",
+ "submission_idx": "104071050"
+}

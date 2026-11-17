@@ -1,0 +1,1 @@
+{"status":"error","error":{"code":"UNAUTHORIZED","category":"AUTH","message":"authentication failed: signature verification failed: failed to recover public key: invalid signature: not for a valid curve point","retryable":false},"ipRateLimit":{"requestsCap":10000,"remainingTokens":9998},"timestamp":1794780022642}

@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    "ada_usd",
+    "ada_usdc",
+    "ada_usdt"
+  ],
+  "usIn": 1794827223569845,
+  "usOut": 1794827223570201,
+  "usDiff": 356,
+  "testnet": false
+}

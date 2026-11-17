@@ -15,7 +15,8 @@ use crate::signer::SignedTx;
 pub const LIGHTER_API_URL: &str = "https://mainnet.zklighter.elliot.ai";
 pub const LIGHTER_TESTNET_API_URL: &str = "https://testnet.zklighter.elliot.ai";
 
-/// Reply to `sendTx`.
+/// Reply to `sendTx` (`RespSendTx`). `volume_quota_remaining` and `remaining_send_tx` are optional
+/// in the schema; `remaining_send_tx` is only returned for Premium/Plus accounts.
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct SendTxResponse {
     pub code: i64,
@@ -23,10 +24,11 @@ pub struct SendTxResponse {
     pub message: Option<String>,
     pub tx_hash: String,
     pub predicted_execution_time_ms: i64,
-    pub volume_quota_remaining: i64,
+    pub volume_quota_remaining: Option<i64>,
+    pub remaining_send_tx: Option<i64>,
 }
 
-/// Reply to `sendTxBatch`.
+/// Reply to `sendTxBatch` (`RespSendTxBatch`). Optional fields as for `SendTxResponse`.
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct SendTxBatchResponse {
     pub code: i64,
@@ -34,7 +36,8 @@ pub struct SendTxBatchResponse {
     pub message: Option<String>,
     pub tx_hash: Vec<String>,
     pub predicted_execution_time_ms: i64,
-    pub volume_quota_remaining: i64,
+    pub volume_quota_remaining: Option<i64>,
+    pub remaining_send_tx: Option<i64>,
 }
 
 /// One registered API key (`/api/v1/apikeys`).
@@ -103,9 +106,11 @@ struct Accounts {
     accounts: Vec<Account>,
 }
 
+/// Perp markets come back in `order_book_details`, spot markets in `spot_order_book_details`.
 #[derive(Deserialize)]
 struct Details {
     order_book_details: Vec<OrderBookDetail>,
+    spot_order_book_details: Vec<OrderBookDetail>,
 }
 
 pub struct TxApi {
@@ -222,11 +227,12 @@ impl TxApi {
             .query(&q)
             .send()
             .await?;
-        let mut d = parse::<Details>(r).await?.order_book_details;
-        match d.iter().position(|x| x.market_id == market_id) {
-            Some(i) => Ok(d.swap_remove(i)),
-            None => bail!("market {market_id} not in orderBookDetails"),
-        }
+        let d = parse::<Details>(r).await?;
+        d.order_book_details
+            .into_iter()
+            .chain(d.spot_order_book_details)
+            .find(|x| x.market_id == market_id)
+            .with_context(|| format!("market {market_id} not in orderBookDetails"))
     }
 
     /// `GET /api/v1/orderBookOrders?market_id=&limit=` as the raw body (status, bytes), for
@@ -296,6 +302,13 @@ mod tests {
         )
         .unwrap();
         assert_eq!(ok.tx_hash, "ab");
+        assert_eq!(ok.volume_quota_remaining, Some(10));
+        let no_quota: SendTxResponse = parse_body(
+            200,
+            r#"{"code":200,"tx_hash":"ab","predicted_execution_time_ms":1763200000000}"#,
+        )
+        .unwrap();
+        assert_eq!(no_quota.volume_quota_remaining, None);
         let err = parse_body::<SendTxResponse>(400, r#"{"code":21120,"message":"invalid nonce"}"#)
             .unwrap_err();
         assert!(err.to_string().contains("invalid nonce"));

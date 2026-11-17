@@ -1,0 +1,206 @@
+[
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780192000,
+   "last_updated_at": 1794780192000,
+   "hourly_funding_rate": "0.000030320000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_PARADEX",
+   "market": "DRAM-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780192000,
+   "last_updated_at": 1794780192000,
+   "hourly_funding_rate": "0.000059070000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_PARADEX",
+   "market": "MSTR-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000000480000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_BINANCE",
+   "market": "LINK-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000012500000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_BINANCE",
+   "market": "XMR-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "-0.000008000000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_LIGHTER",
+   "market": "XRP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000012000000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_LIGHTER",
+   "market": "JTO-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000027140000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_OKX",
+   "market": "MRVL-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000000000000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_OKX",
+   "market": "TSLA-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "-0.000003640000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_BYBIT",
+   "market": "PYTH-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000012500000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_BYBIT",
+   "market": "STRK-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "0.000012500000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_HYPERLIQUID",
+   "market": "PUMP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 26,
+   "template_id": 6,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "funding_rate_comparison",
+  "data": {
+   "timestamp": 1794780193000,
+   "last_updated_at": 1794780193000,
+   "hourly_funding_rate": "-0.000011530000",
+   "asset_kind": "ASSET_KIND_PERPETUAL_FUTURE",
+   "source": "SOURCE_HYPERLIQUID",
+   "market": "AAVE-USD-PERP"
+  }
+ }
+]

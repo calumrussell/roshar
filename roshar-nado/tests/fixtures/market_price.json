@@ -1,0 +1,9 @@
+{
+ "status": "success",
+ "data": {
+  "product_id": 2,
+  "bid_x18": "64993000000000000000000",
+  "ask_x18": "64994000000000000000000"
+ },
+ "request_type": "query_market_price"
+}

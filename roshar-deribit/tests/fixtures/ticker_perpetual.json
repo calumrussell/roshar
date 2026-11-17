@@ -1,0 +1,41 @@
+{
+ "jsonrpc": "2.0",
+ "method": "subscription",
+ "params": {
+  "channel": "ticker.BTC-PERPETUAL.100ms",
+  "data": {
+   "timestamp": 1794779348314,
+   "state": "open",
+   "stats": {
+    "high": 66111.5,
+    "low": 61802.0,
+    "price_change": 1.0076,
+    "volume": 44230.81530168,
+    "volume_delayed": 0.0,
+    "volume_realtime": 44230.81530168,
+    "volume_delayed_usd": 0.0,
+    "volume_realtime_usd": 2848273770.0,
+    "volume_usd": 2848273770.0,
+    "volume_delayed_notional": 0.0,
+    "volume_notional": 2848273770.0,
+    "volume_realtime_notional": 2848273770.0
+   },
+   "index_price": 65095.36,
+   "instrument_name": "BTC-PERPETUAL",
+   "last_price": 65108.5,
+   "settlement_price": 63979.2,
+   "min_price": 64130.5,
+   "max_price": 66084.5,
+   "open_interest": 722421990,
+   "mark_price": 65107.53,
+   "interest_value": 0.0002948715172151451,
+   "best_ask_price": 65109.0,
+   "best_bid_price": 65108.5,
+   "current_funding": 0.0,
+   "estimated_delivery_price": 65095.36,
+   "funding_8h": 6.6e-07,
+   "best_ask_amount": 20530.0,
+   "best_bid_amount": 38250.0
+  }
+ }
+}

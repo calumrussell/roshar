@@ -1,0 +1,12 @@
+{
+ "status": "ok",
+ "response": {
+  "isActive": true,
+  "message": "dead-man-switch armed",
+  "timeoutSeconds": 300,
+  "triggerTime": 1704067500000
+ },
+ "request_id": "5ccf215d37e3ae6d",
+ "requestId": "5ccf215d37e3ae6d",
+ "timestamp": 1704067200123
+}

@@ -1,0 +1,1 @@
+{"success":true,"data":{"rows":[{"timestamp":1685298157704,"type":"liquidated","liquidation_id":1730,"positions_by_perp":[{"symbol":"PERP_BTC_USDC","position_qty":-0.22457,"liquidator_fee":0.015}]}],"meta":{"total":9,"records_per_page":25,"current_page":1}},"timestamp":1702989203989}

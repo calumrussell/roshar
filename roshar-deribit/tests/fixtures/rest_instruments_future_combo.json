@@ -1,0 +1,36 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "state": "open",
+      "price_index": "btc_usd",
+      "kind": "future_combo",
+      "instrument_name": "BTC-FS-17NOV26_PERP",
+      "maker_commission": 0.0,
+      "taker_commission": 0.0,
+      "instrument_type": "reversed",
+      "expiration_timestamp": 1794902400000,
+      "instrument_id": 732805,
+      "product_group": "BTC",
+      "underlying_type": "crypto",
+      "creation_timestamp": 1794557196000,
+      "is_active": true,
+      "contract_size": 10.0,
+      "tick_size": 0.5,
+      "counter_currency": "USD",
+      "min_trade_amount": 10.0,
+      "settlement_currency": "BTC",
+      "settlement_period": "day",
+      "base_currency": "BTC",
+      "index_id": 1000033,
+      "quote_currency": "USD",
+      "tick_size_steps": [],
+      "base_currency_uuid": "5b71fc48-3dd3-540c-809b-f8c94d0e68b5",
+      "quote_currency_uuid": "dc311642-e9fb-4ba9-a312-c75c1aef4ae1"
+    }
+  ],
+  "usIn": 1794827236512756,
+  "usOut": 1794827236512928,
+  "usDiff": 172,
+  "testnet": false
+}

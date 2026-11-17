@@ -1,0 +1,1 @@
+{"action":"update","arg":{"instType":"SPOT","channel":"trade","instId":"BTCUSDT"},"data":[{"ts":"1794827141933","price":"64534.73","size":"0.38332","side":"sell","tradeId":"1506179688721793026"},{"ts":"1794827141933","price":"64534.73","size":"0.015495","side":"sell","tradeId":"1506179688721793024"}],"ts":1794827141934}

@@ -1,0 +1,72 @@
+[
+  {
+    "time": 1794776880000,
+    "low": 71.89,
+    "high": 71.89,
+    "open": 71.89,
+    "close": 71.89,
+    "markOpen": 71.82,
+    "markHigh": 71.92,
+    "markLow": 71.82,
+    "markClose": 71.92,
+    "volume": 0.05,
+    "volumeQuote": 3.5945,
+    "tradeCount": 1
+  },
+  {
+    "time": 1794776940000,
+    "low": 71.89,
+    "high": 71.89999999999999,
+    "open": 71.89,
+    "close": 71.89999999999999,
+    "markOpen": 71.92,
+    "markHigh": 71.92,
+    "markLow": 71.87,
+    "markClose": 71.9,
+    "volume": 0.02,
+    "volumeQuote": 1.438,
+    "tradeCount": 2
+  },
+  {
+    "time": 1794777000000,
+    "low": 71.89999999999999,
+    "high": 71.93,
+    "open": 71.89999999999999,
+    "close": 71.92,
+    "markOpen": 71.9,
+    "markHigh": 71.96,
+    "markLow": 71.9,
+    "markClose": 71.95,
+    "volume": 8.39,
+    "volumeQuote": 603.4644,
+    "tradeCount": 6
+  },
+  {
+    "time": 1794777060000,
+    "low": 71.91,
+    "high": 71.97,
+    "open": 71.92,
+    "close": 71.91,
+    "markOpen": 71.95,
+    "markHigh": 71.97,
+    "markLow": 71.9,
+    "markClose": 71.91,
+    "volume": 9.02,
+    "volumeQuote": 648.9194,
+    "tradeCount": 4
+  },
+  {
+    "time": 1794777120000,
+    "low": 71.89,
+    "high": 71.91999999999999,
+    "open": 71.91,
+    "close": 71.89,
+    "markOpen": 71.91,
+    "markHigh": 71.93,
+    "markLow": 71.88,
+    "markClose": 71.89,
+    "volume": 0.07,
+    "volumeQuote": 5.0329,
+    "tradeCount": 2
+  }
+]

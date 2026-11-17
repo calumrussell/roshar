@@ -1,0 +1,25 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "trades.option.any.agg2",
+    "data": [
+      {
+        "timestamp": 1794827334941,
+        "iv": 57.21,
+        "price": 0.0855,
+        "direction": "buy",
+        "index_price": 64596.92,
+        "instrument_name": "BTC-20NOV26-70000-P",
+        "trade_seq": 598,
+        "amount": 5.0,
+        "mark_price": 0.08443532,
+        "tick_direction": 0,
+        "starbase_match_id": 248041638213988352,
+        "trade_id": "467941333",
+        "contracts": 5.0,
+        "starbase_timestamp": 1794827334941056275
+      }
+    ]
+  }
+}

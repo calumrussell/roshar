@@ -1,0 +1,10 @@
+{
+ "type": "position_change",
+ "timestamp": "1794780396109100023",
+ "product_id": 2,
+ "subaccount": "0x2a52884ffef4dcc55cf1e406797c0a514b7e835d64656661756c740000000000",
+ "isolated": false,
+ "amount": "-2754650000000000000",
+ "v_quote_amount": "178848358347433194316860",
+ "reason": "match_orders"
+}

@@ -1,0 +1,30 @@
+{
+ "order": {
+  "venueId": "10000000123",
+  "clientId": ""
+ },
+ "orderId": "10000000123",
+ "symbol": "BTC-USDT",
+ "side": "buy",
+ "type": "TWAP",
+ "quantity": "1.5",
+ "price": "0",
+ "triggerPrice": "0",
+ "triggerPriceType": "",
+ "timeInForce": "GTC",
+ "reduceOnly": false,
+ "postOnly": false,
+ "closePosition": false,
+ "createdTime": 1713800000000,
+ "updatedTime": 1713800030000,
+ "filledQuantity": "0.5",
+ "twapDetails": {
+  "averagePrice": "63250.50",
+  "intervalMs": 60000,
+  "totalTrades": 60,
+  "tradesFilled": 20,
+  "totalFees": "12.45",
+  "startedAtMs": 1713800000000,
+  "totalDurationMs": 3600000
+ }
+}

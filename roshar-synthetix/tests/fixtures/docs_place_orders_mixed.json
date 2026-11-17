@@ -1,0 +1,38 @@
+{
+ "status": "ok",
+ "response": {
+  "statuses": [
+   {
+    "resting": {
+     "order": {
+      "venueId": "1948058938469519360",
+      "clientId": "cli-1948058938469519360"
+     },
+     "id": "1948058938469519360"
+    }
+   },
+   {
+    "filled": {
+     "order": {
+      "venueId": "1948058938469519361",
+      "clientId": "cli-1948058938469519361"
+     },
+     "id": "1948058938469519361",
+     "avgPrice": "2999.50",
+     "totalSize": "1.0"
+    }
+   },
+   {
+    "error": "insufficient margin: additional needed 500.00, available 100.12",
+    "errorCode": "INSUFFICIENT_MARGIN",
+    "order": {
+     "venueId": null,
+     "clientId": "cli-1948058938469519362"
+    }
+   }
+  ]
+ },
+ "requestId": "5ccf215d37e3ae6d",
+ "traceId": "abc123def456",
+ "timestamp": 1704067200000
+}

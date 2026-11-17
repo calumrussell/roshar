@@ -10,9 +10,9 @@
 use std::time::Duration;
 
 use crate::poster::now_ns;
+use crate::types::exchange::Cloid;
 use anyhow::{anyhow, bail, Context};
 use futures_util::{SinkExt, StreamExt};
-use crate::types::exchange::Cloid;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::sync::mpsc::UnboundedSender;
@@ -85,7 +85,7 @@ pub struct UserFill {
     pub is_buy: bool,
     pub time_ms: u64,
     /// Signed position before this fill.
-    pub start_position: Option<f64>,
+    pub start_position: f64,
     /// e.g. "Open Long", "Close Short".
     pub dir: String,
     pub closed_pnl: f64,
@@ -95,7 +95,7 @@ pub struct UserFill {
     pub crossed: bool,
     /// Fee paid (negative = rebate), in `fee_token`.
     pub fee: f64,
-    pub fee_token: Option<String>,
+    pub fee_token: String,
     pub cloid: Option<Cloid>,
 }
 
@@ -123,7 +123,6 @@ pub enum UserEvent {
 struct RawOrderUpdate {
     order: RawBasicOrder,
     status: String,
-    #[serde(default)]
     status_timestamp: u64,
 }
 
@@ -156,16 +155,14 @@ struct RawFill {
     sz: String,
     side: String,
     time: u64,
-    #[serde(default)]
-    start_position: Option<String>,
+    start_position: String,
     dir: String,
     closed_pnl: String,
     oid: u64,
     tid: u64,
     crossed: bool,
     fee: String,
-    #[serde(default)]
-    fee_token: Option<String>,
+    fee_token: String,
     #[serde(default)]
     cloid: Option<String>,
 }
@@ -233,7 +230,7 @@ pub fn parse_user_frame(text: &str, recv_ns: u64) -> anyhow::Result<Option<UserE
                         sz: num(&f.sz)?,
                         is_buy: side_is_buy(&f.side)?,
                         time_ms: f.time,
-                        start_position: f.start_position.as_deref().map(num).transpose()?,
+                        start_position: num(&f.start_position)?,
                         closed_pnl: num(&f.closed_pnl)?,
                         fee: num(&f.fee)?,
                         cloid: f.cloid.as_deref().and_then(parse_cloid),
@@ -476,11 +473,11 @@ mod tests {
         );
         assert_eq!(
             (f.oid, f.tid, f.crossed, f.fee, f.start_position),
-            (215876543210, 987654321012345, false, -0.00258, Some(0.0))
+            (215876543210, 987654321012345, false, -0.00258, 0.0)
         );
         assert_eq!(
-            (f.dir.as_str(), f.fee_token.as_deref()),
-            ("Open Long", Some("USDC"))
+            (f.dir.as_str(), f.fee_token.as_str()),
+            ("Open Long", "USDC")
         );
         assert!(f.cloid.is_some());
         let f = &fills[1];

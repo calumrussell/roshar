@@ -1,0 +1,18 @@
+{
+  "markets": [
+    {
+      "marketToken": "0xe902D1526c834D5001575b2d0Ef901dfD0aa097A",
+      "isMarketClosed": false,
+      "status": "open",
+      "closingPrice": null,
+      "latestMarketStatusTransitionTimestamp": null
+    },
+    {
+      "marketToken": "0x872b5D567a2469Ed92D252eaCB0EB3BB0769e05b",
+      "isMarketClosed": false,
+      "status": "open",
+      "closingPrice": null,
+      "latestMarketStatusTransitionTimestamp": null
+    }
+  ]
+}

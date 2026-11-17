@@ -1,0 +1,1 @@
+{"arg":{"channel":"liquidation-orders","instType":"SWAP"},"data":[{"details":[{"bkLoss":"-11.4815973888397375","bkPx":"0.00258","ccy":"","posSide":"long","side":"sell","sz":"125","ts":"1794826970326"}],"instFamily":"JCT-USDT","instId":"JCT-USDT-SWAP","instType":"SWAP","uly":"JCT-USDT"}]}

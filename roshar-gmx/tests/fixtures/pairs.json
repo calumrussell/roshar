@@ -1,0 +1,50 @@
+[
+ {
+  "ticker_id": "APT/USD [WETH-USDC]",
+  "base_currency": "APT",
+  "target_currency": "USD",
+  "product_type": "Perpetual",
+  "last_price": 0.45496463494228334,
+  "high": 0.46212757599935456,
+  "low": 0.4319932989639975,
+  "base_volume": 7251.222739545007,
+  "target_volume": 3299.049906582278,
+  "pool_id": "0x66A69c8eb98A7efE22A22611d1967dfec786a708",
+  "liquidity_in_usd": 27870,
+  "open_interest": 9012,
+  "long_open_interest": 4447,
+  "short_open_interest": 4565,
+  "funding_rate": 0.0018697626954232327,
+  "next_funding_rate": 0.0018697626954232327,
+  "next_funding_rate_timestamp": 1794780000,
+  "funding_interval_minutes": 60
+ },
+ {
+  "ticker_id": "ETH-USDC",
+  "base_currency": "ETH",
+  "target_currency": "USDC",
+  "product_type": "Spot",
+  "last_price": 1819.7655199641742,
+  "high": 1843.3386942460156,
+  "low": 1711.755839559891,
+  "base_volume": 0.0011224725118560558,
+  "target_volume": 2.042636774183228,
+  "volume_usd": 2.0420683693983155,
+  "pool_id": "0x66A69c8eb98A7efE22A22611d1967dfec786a708",
+  "liquidity_in_usd": 27870
+ },
+ {
+  "ticker_id": "ETH-USDC",
+  "base_currency": "ETH",
+  "target_currency": "USDC",
+  "product_type": "Spot",
+  "last_price": 1819.7655199641742,
+  "high": 1843.3386942460156,
+  "low": 1711.755839559891,
+  "base_volume": 0.0011224725118560558,
+  "target_volume": 2.042636774183228,
+  "volume_usd": 2.0420683693983155,
+  "pool_id": "0x66A69c8eb98A7efE22A22611d1967dfec786a708",
+  "liquidity_in_usd": 27870
+ }
+]

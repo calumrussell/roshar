@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "question_id": "0xf4805b7ecd560d1d57369d7735365da9ad5af20da422b2ffa3f8ea5be943023d",
+      "condition_id": "0x27c79c557f62d3b320ad6f935dab1548319ddaddd94ae6985abb0df17cf7fb14",
+      "status": "proposed",
+      "extended_review": false,
+      "was_disputed": false,
+      "new_version_q": true,
+      "proposed_price": "1000000000000000000",
+      "reproposed_price": "69",
+      "price": "69",
+      "transaction_hash": "0xe7b375efd2383e0bb076e2922fb45924cae2f17edb8d68ddbffb7435886aca7b",
+      "log_index": "522",
+      "last_update_timestamp": "1794827206",
+      "expected_settlement_time": "2026-11-16T11:36:46Z",
+      "settlement_time_basis": "managed_proposal_expiration"
+    },
+    {
+      "question_id": "0x7c8b7f2930ccd298cd973fb62170158387aa06bf1a6d796361a9f7f596dbe81b",
+      "condition_id": "0x00ad3bb5284b0b2314b1a2d42812fe292f606619c6278bd95c9d905816c240f6",
+      "status": "posed",
+      "extended_review": false,
+      "was_disputed": false,
+      "new_version_q": true,
+      "proposed_price": "69",
+      "reproposed_price": "69",
+      "price": "69",
+      "transaction_hash": "0x5da41b8ae03ff5b8d2e88bbddad5fb1f6963e83810f6c801a433c5e443957607",
+      "log_index": "4",
+      "last_update_timestamp": "1752261808"
+    },
+    {
+      "question_id": "0x14e3045eadfa2f3f2baf0d112a328454f1bcb3ceaddcb773e680671cd4385f00",
+      "condition_id": "0x0113d0358296a69e67537658230489cd70903279c97618a7afdd9e06c5d57b7d",
+      "status": "posed",
+      "extended_review": false,
+      "was_disputed": false,
+      "new_version_q": true,
+      "proposed_price": "69",
+      "reproposed_price": "69",
+      "price": "69",
+      "transaction_hash": "0x95d6971703a318c790bc1ddbc972055867c0f268ceef218e13d04e286b4e3c58",
+      "log_index": "840",
+      "last_update_timestamp": "1794277111"
+    }
+  ]
+}

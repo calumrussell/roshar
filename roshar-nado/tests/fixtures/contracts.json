@@ -1,0 +1,8 @@
+{
+ "status": "success",
+ "data": {
+  "chain_id": "57073",
+  "endpoint_addr": "0x05ec92d78ed421f3d3ada77ffde167106565974e"
+ },
+ "request_type": "query_contracts"
+}

@@ -1,0 +1,1 @@
+{"event":"error","arg":{"instType":"USDT-FUTURES","channel":"nope","instId":"BTCUSDT"},"code":30016,"msg":"Param error","op":"subscribe"}

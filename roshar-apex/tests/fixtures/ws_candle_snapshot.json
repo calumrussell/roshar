@@ -1,0 +1,1 @@
+{"topic": "candle.1.BTCUSDT", "data": [{"start": 1794780240000, "end": 1794780299999, "interval": "1", "open": "65055.3", "close": "65043.7", "high": "65059.8", "low": "65043.7", "volume": "0.789", "turnover": "51326.1456", "confirm": false, "time": 1794780276282}], "ts": 1794780276282, "type": "snapshot"}

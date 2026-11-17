@@ -1,0 +1,7 @@
+{
+ "status": "success",
+ "data": {
+  "max_order_size": "118650287768567346850"
+ },
+ "request_type": "query_max_order_size"
+}

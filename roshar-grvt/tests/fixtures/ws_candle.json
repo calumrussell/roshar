@@ -1,0 +1,1 @@
+{"stream": "v1.candle", "selector": "BTC_USDT_Perp@CI_1_M-TRADE", "sequence_number": "0", "feed": {"open_time": "1794780180000000000", "close_time": "1794780240000000000", "open": "64957.2", "close": "64957.2", "high": "64957.2", "low": "64957.2", "volume_b": "0.0", "volume_q": "0.0", "trades": 0, "instrument": "BTC_USDT_Perp"}, "prev_sequence_number": "0"}

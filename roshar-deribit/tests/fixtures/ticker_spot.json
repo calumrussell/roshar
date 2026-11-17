@@ -1,0 +1,29 @@
+{
+ "jsonrpc": "2.0",
+ "method": "subscription",
+ "params": {
+  "channel": "ticker.BTC_USDC.100ms",
+  "data": {
+   "timestamp": 1794779348286,
+   "state": "open",
+   "stats": {
+    "high": 66100.0,
+    "low": 61946.17,
+    "price_change": 1.0604,
+    "volume": 17115.05253214,
+    "volume_delayed": 0.0,
+    "volume_realtime": 17115.05253214
+   },
+   "index_price": 65095.36,
+   "instrument_name": "BTC_USDC",
+   "last_price": 65151.53,
+   "min_price": 63793.45,
+   "max_price": 66397.27,
+   "mark_price": 65095.36,
+   "best_ask_price": 65091.32,
+   "best_bid_price": 65091.31,
+   "best_ask_amount": 0.08891297,
+   "best_bid_amount": 0.0936
+  }
+ }
+}

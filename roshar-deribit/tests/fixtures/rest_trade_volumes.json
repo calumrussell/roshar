@@ -1,0 +1,24 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "calls_volume": 0.0,
+      "currency": "BUIDL",
+      "currency_pair": "buidl_usd",
+      "futures_volume": 0.0,
+      "puts_volume": 0.0,
+      "spot_volume": 32282.0
+    },
+    {
+      "calls_volume": 0.0,
+      "currency": "AAVE",
+      "currency_pair": "aave_usd",
+      "futures_volume": 0.0,
+      "puts_volume": 0.0
+    }
+  ],
+  "usIn": 1794827225432414,
+  "usOut": 1794827225484464,
+  "usDiff": 52050,
+  "testnet": false
+}

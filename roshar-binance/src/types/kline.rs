@@ -1,11 +1,11 @@
 use serde::{Deserialize, Deserializer, Serialize};
 
-/// Historical kline/candlestick data from Binance REST API.
+/// Kline from `GET /fapi/v1/klines` and `continuousKlines`, also used for `indexPriceKlines`,
+/// `markPriceKlines` and `premiumIndexKlines`. Those three send `"0"` for every volume field and
+/// the number of basic data points in place of the trade count (`num_trades`).
 ///
-/// Binance returns klines as arrays in the format:
+/// Binance returns klines as arrays:
 /// [open_time, open, high, low, close, volume, close_time, quote_volume, num_trades, taker_buy_base_volume, taker_buy_quote_volume, ignore]
-///
-/// Prices and volumes are returned as strings and need to be converted to f64.
 #[derive(Debug, Clone, Serialize)]
 pub struct BinanceKline {
     pub open_time: i64,
@@ -110,8 +110,10 @@ impl<'de> Deserialize<'de> for BinanceKline {
                     .parse::<f64>()
                     .map_err(|_| Error::custom("failed to parse taker_buy_quote_volume as f64"))?;
 
-                // Skip the "ignore" field (12th element)
-                let _ignore: Option<String> = seq.next_element()?;
+                // 12th element is documented as required ("Ignore"); its value is unused.
+                let _ignore: String = seq
+                    .next_element()?
+                    .ok_or_else(|| Error::missing_field("ignore"))?;
 
                 Ok(BinanceKline {
                     open_time,

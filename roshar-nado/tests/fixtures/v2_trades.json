@@ -1,0 +1,42 @@
+[
+ {
+  "product_id": 2,
+  "ticker_id": "BTC-PERP_USDT0",
+  "trade_id": 104070278,
+  "price": 64949.25615,
+  "base_filled": -0.0054,
+  "quote_filled": 350.72598321,
+  "timestamp": 1794780120,
+  "trade_type": "sell"
+ },
+ {
+  "product_id": 2,
+  "ticker_id": "BTC-PERP_USDT0",
+  "trade_id": 104070278,
+  "price": 64953.803695704344,
+  "base_filled": 0.0054,
+  "quote_filled": -350.75053995680344,
+  "timestamp": 1794780120,
+  "trade_type": "buy"
+ },
+ {
+  "product_id": 2,
+  "ticker_id": "BTC-PERP_USDT0",
+  "trade_id": 104070277,
+  "price": 64950.256,
+  "base_filled": -0.0032,
+  "quote_filled": 207.8408192,
+  "timestamp": 1794780120,
+  "trade_type": "sell"
+ },
+ {
+  "product_id": 2,
+  "ticker_id": "BTC-PERP_USDT0",
+  "trade_id": 104070277,
+  "price": 64954.80361571074,
+  "base_filled": 0.0032,
+  "quote_filled": -207.85537157027437,
+  "timestamp": 1794780120,
+  "trade_type": "buy"
+ }
+]

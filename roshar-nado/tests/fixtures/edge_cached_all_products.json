@@ -1,0 +1,120 @@
+{
+  "status": "success",
+  "data": {
+    "spot_products": [
+      {
+        "product_id": 0,
+        "oracle_price_x18": "1000000000000000000",
+        "risk": {
+          "long_weight_initial_x18": "1000000000000000000",
+          "short_weight_initial_x18": "1000000000000000000",
+          "long_weight_maintenance_x18": "1000000000000000000",
+          "short_weight_maintenance_x18": "1000000000000000000",
+          "price_x18": "1000000000000000000"
+        },
+        "config": {
+          "token": "0x0200c29006150606b650577bbe7b6248f58470c1",
+          "interest_inflection_util_x18": "800000000000000000",
+          "interest_floor_x18": "10000000000000000",
+          "interest_small_cap_x18": "40000000000000000",
+          "interest_large_cap_x18": "1000000000000000000",
+          "withdraw_fee_x18": "1000000000000000000",
+          "min_deposit_rate_x18": "0"
+        },
+        "state": {
+          "cumulative_deposits_multiplier_x18": "1002615564312467970",
+          "cumulative_borrows_multiplier_x18": "1018211100318087582",
+          "total_deposits_normalized": "39936441417130878318237190",
+          "total_borrows_normalized": "13613937586364706431082253"
+        },
+        "book_info": {
+          "size_increment": "0",
+          "price_increment_x18": "0",
+          "min_size": "0",
+          "collected_fees": "0"
+        }
+      },
+      {
+        "product_id": 1,
+        "oracle_price_x18": "64505208665727452586298",
+        "risk": {
+          "long_weight_initial_x18": "950000000000000000",
+          "short_weight_initial_x18": "1050000000000000000",
+          "long_weight_maintenance_x18": "970000000000000000",
+          "short_weight_maintenance_x18": "1030000000000000000",
+          "price_x18": "64505208665727452586298"
+        },
+        "config": {
+          "token": "0x73e0c0d45e048d25fc26fa3159b0aa04bfa4db98",
+          "interest_inflection_util_x18": "800000000000000000",
+          "interest_floor_x18": "10000000000000000",
+          "interest_small_cap_x18": "40000000000000000",
+          "interest_large_cap_x18": "1000000000000000000",
+          "withdraw_fee_x18": "10000000000000",
+          "min_deposit_rate_x18": "0"
+        },
+        "state": {
+          "cumulative_deposits_multiplier_x18": "1001016379811485178",
+          "cumulative_borrows_multiplier_x18": "1012297671465484650",
+          "total_deposits_normalized": "148676216519136821043",
+          "total_borrows_normalized": "2406177681444621237"
+        },
+        "book_info": {
+          "size_increment": "50000000000000",
+          "price_increment_x18": "1000000000000000000",
+          "min_size": "100000000000000000000",
+          "collected_fees": "0"
+        }
+      }
+    ],
+    "perp_products": [
+      {
+        "product_id": 2,
+        "oracle_price_x18": "64477350000000005284272",
+        "risk": {
+          "long_weight_initial_x18": "980000000000000000",
+          "short_weight_initial_x18": "1020000000000000000",
+          "long_weight_maintenance_x18": "990000000000000000",
+          "short_weight_maintenance_x18": "1010000000000000000",
+          "price_x18": "64477350000000005284272"
+        },
+        "state": {
+          "cumulative_funding_long_x18": "2713113811200981111873",
+          "cumulative_funding_short_x18": "2713113811200981111873",
+          "available_settle": "446521778994440942546784",
+          "open_interest": "252117500000000000000"
+        },
+        "book_info": {
+          "size_increment": "50000000000000",
+          "price_increment_x18": "1000000000000000000",
+          "min_size": "100000000000000000000",
+          "collected_fees": "0"
+        }
+      },
+      {
+        "product_id": 4,
+        "oracle_price_x18": "1806609999999999920917",
+        "risk": {
+          "long_weight_initial_x18": "980000000000000000",
+          "short_weight_initial_x18": "1020000000000000000",
+          "long_weight_maintenance_x18": "990000000000000000",
+          "short_weight_maintenance_x18": "1010000000000000000",
+          "price_x18": "1806609999999999920917"
+        },
+        "state": {
+          "cumulative_funding_long_x18": "71979570988375859179",
+          "cumulative_funding_short_x18": "71979570988375859179",
+          "available_settle": "138678790957967737390492",
+          "open_interest": "4723552000000000000000"
+        },
+        "book_info": {
+          "size_increment": "1000000000000000",
+          "price_increment_x18": "10000000000000000",
+          "min_size": "100000000000000000000",
+          "collected_fees": "0"
+        }
+      }
+    ]
+  },
+  "request_type": "cached_all_products"
+}

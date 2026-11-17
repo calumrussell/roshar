@@ -1,0 +1,26 @@
+[
+ {
+  "name": "USDT0",
+  "symbol": "USDT0",
+  "product_id": 0,
+  "deposit_apr": 0.007668343585392395,
+  "borrow_apr": 0.027686812003377304,
+  "tvl": 26356056.759491943
+ },
+ {
+  "name": "Kraken Wrapped BTC",
+  "symbol": "KBTC",
+  "product_id": 1,
+  "deposit_apr": 0.000143301219252342,
+  "borrow_apr": 0.010881835054429745,
+  "tvl": 9512432.303196741
+ },
+ {
+  "name": "Wrapped ETH",
+  "symbol": "WETH",
+  "product_id": 3,
+  "deposit_apr": 1.5741719799161e-05,
+  "borrow_apr": 0.010148095062264995,
+  "tvl": 4641020.152911149
+ }
+]

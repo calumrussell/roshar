@@ -1,0 +1,1 @@
+{"method":"subscription","params":{"channel":"spot_feed.ETH","data":{"timestamp":1794827746568,"feeds":{"ETH":{"price":"1809.216064091768","confidence":"1","price_prev_daily":"1829.895149795487","confidence_prev_daily":"1","timestamp_prev_daily":1794741346568}}}}}

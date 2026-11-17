@@ -1,0 +1,84 @@
+{
+  "products": [
+    {
+      "product_id": 2,
+      "submission_idx": "104261551",
+      "product": {
+        "perp": {
+          "product_id": 2,
+          "oracle_price_x18": "64493649999999990988692",
+          "risk": {
+            "long_weight_initial_x18": "980000000000000000",
+            "short_weight_initial_x18": "1020000000000000000",
+            "long_weight_maintenance_x18": "990000000000000000",
+            "short_weight_maintenance_x18": "1010000000000000000",
+            "price_x18": "64493649999999990988692"
+          },
+          "state": {
+            "cumulative_funding_long_x18": "2713113811200981111873",
+            "cumulative_funding_short_x18": "2713113811200981111873",
+            "available_settle": "446521778994440942546784",
+            "open_interest": "251980700000000000000"
+          },
+          "book_info": {
+            "size_increment": "50000000000000",
+            "price_increment_x18": "1000000000000000000",
+            "min_size": "100000000000000000000",
+            "collected_fees": "210763658449952225908618"
+          }
+        }
+      }
+    },
+    {
+      "product_id": 2,
+      "submission_idx": "104261506",
+      "product": {
+        "perp": {
+          "product_id": 2,
+          "oracle_price_x18": "64493649999999990988692",
+          "risk": {
+            "long_weight_initial_x18": "980000000000000000",
+            "short_weight_initial_x18": "1020000000000000000",
+            "long_weight_maintenance_x18": "990000000000000000",
+            "short_weight_maintenance_x18": "1010000000000000000",
+            "price_x18": "64493649999999990988692"
+          },
+          "state": {
+            "cumulative_funding_long_x18": "2713113811200981111873",
+            "cumulative_funding_short_x18": "2713113811200981111873",
+            "available_settle": "446521778994440942546784",
+            "open_interest": "251912900000000000000"
+          },
+          "book_info": {
+            "size_increment": "50000000000000",
+            "price_increment_x18": "1000000000000000000",
+            "min_size": "100000000000000000000",
+            "collected_fees": "210763261328969623128792"
+          }
+        }
+      }
+    }
+  ],
+  "txs": [
+    {
+      "tx": {
+        "update_price": {
+          "product_id": 2,
+          "price_x18": "64493649999999990988692"
+        }
+      },
+      "submission_idx": "104261551",
+      "timestamp": "1794826552"
+    },
+    {
+      "tx": {
+        "update_price": {
+          "product_id": 2,
+          "price_x18": "64493649999999990988692"
+        }
+      },
+      "submission_idx": "104261506",
+      "timestamp": "1794826543"
+    }
+  ]
+}

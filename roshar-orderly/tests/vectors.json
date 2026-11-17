@@ -1,0 +1,575 @@
+{
+  "sdk": "github.com/OrderlyNetwork/orderly-evm-connector-python",
+  "sdk_version": "0.2.8 (pyproject at commit)",
+  "sdk_commit": "fb7def397e6e04c1de9a90d14393949602694d90",
+  "python": "3.12.14",
+  "orderly_secret": "ed25519:8qvp5WeUPed34Zi6nRpr8798mAhdw1kBsnRGL4AE9wAj",
+  "orderly_key": "ed25519:Fi9QpEMPevSVGooX1gMBvqNPB9YH3vajZMmWo99iXfNK",
+  "wallet_private_key": "e7a837b2af5f15b6e8634c29d98ab369e06d039d603761cd89f6a8ed541d44be",
+  "wallet_address": "0x359429a9ABDC73b770F10e4BD926177896950e60",
+  "broker_id": "woofi_pro",
+  "account_id": "0x5fcb4c7a888fd20b93255e49857c1cf4a2b298f1bdae38e285ac8a18bce5053a",
+  "requests": [
+    {
+      "name": "create_limit_cloid",
+      "timestamp": 1794780001111,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"LIMIT\", \"side\": \"BUY\", \"client_order_id\": \"roshar-0001\", \"order_price\": 65000.5, \"order_quantity\": 0.0015, \"reduce_only\": false}",
+      "message": "1794780001111POST/v1/order{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"LIMIT\", \"side\": \"BUY\", \"client_order_id\": \"roshar-0001\", \"order_price\": 65000.5, \"order_quantity\": 0.0015, \"reduce_only\": false}",
+      "signature": "ACSYhjvJ6hIwyB++72kw14Dtrh78H4YdulsoZOjN5oIwzFzTpRwgu88zYo44+XGSaG2+jHguyHEbt9L/iBYuBQ==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "order_type": "LIMIT",
+        "side": "BUY",
+        "client_order_id": "roshar-0001",
+        "order_price": "65000.5",
+        "order_quantity": "0.0015",
+        "reduce_only": false
+      }
+    },
+    {
+      "name": "create_post_only",
+      "timestamp": 1794780002222,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_ETH_USDC\", \"order_type\": \"POST_ONLY\", \"side\": \"SELL\", \"order_price\": 1850.25, \"order_quantity\": 1.2}",
+      "message": "1794780002222POST/v1/order{\"symbol\": \"PERP_ETH_USDC\", \"order_type\": \"POST_ONLY\", \"side\": \"SELL\", \"order_price\": 1850.25, \"order_quantity\": 1.2}",
+      "signature": "3+K3VCMBvtlYuedzA4Xr8RkSLFwQsBG5DJi744dFYTbPYlYC/DpIHhZgDXzJBckbbiFlWVA5aq8+TXaEWxLXDA==",
+      "inputs": {
+        "symbol": "PERP_ETH_USDC",
+        "order_type": "POST_ONLY",
+        "side": "SELL",
+        "order_price": "1850.25",
+        "order_quantity": "1.2"
+      }
+    },
+    {
+      "name": "create_ioc_reduce_only",
+      "timestamp": 1794780003333,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_SOL_USDC\", \"order_type\": \"IOC\", \"side\": \"SELL\", \"client_order_id\": \"ioc-7\", \"order_price\": 120, \"order_quantity\": 3, \"reduce_only\": true}",
+      "message": "1794780003333POST/v1/order{\"symbol\": \"PERP_SOL_USDC\", \"order_type\": \"IOC\", \"side\": \"SELL\", \"client_order_id\": \"ioc-7\", \"order_price\": 120, \"order_quantity\": 3, \"reduce_only\": true}",
+      "signature": "w1bp8rRQbjnDrzMn3P5u/tHWR38aM4TSMEm4e7ExPatJVuXH9hdvN00Bgf79rGhzNRr4xyQasxOHRV6f7EzhCw==",
+      "inputs": {
+        "symbol": "PERP_SOL_USDC",
+        "order_type": "IOC",
+        "side": "SELL",
+        "client_order_id": "ioc-7",
+        "order_price": "120",
+        "order_quantity": "3",
+        "reduce_only": true
+      }
+    },
+    {
+      "name": "create_market_amount_tag",
+      "timestamp": 1794780004444,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"MARKET\", \"side\": \"BUY\", \"order_amount\": 250.75, \"visible_quantity\": 0, \"order_tag\": \"enum:woofi_pro:GRID\"}",
+      "message": "1794780004444POST/v1/order{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"MARKET\", \"side\": \"BUY\", \"order_amount\": 250.75, \"visible_quantity\": 0, \"order_tag\": \"enum:woofi_pro:GRID\"}",
+      "signature": "MDToDsGN+/oUJb+Yxrs2/oLACr3VwUb+l/9SjhCtImzYlLiUUYqq2qJ5PWc2/NTx8eiU2Q/QIo7iZU0OObFMCQ==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "order_type": "MARKET",
+        "side": "BUY",
+        "order_amount": "250.75",
+        "visible_quantity": "0",
+        "order_tag": "enum:woofi_pro:GRID"
+      }
+    },
+    {
+      "name": "create_tiny_quantity",
+      "timestamp": 1794780005555,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"FOK\", \"side\": \"BUY\", \"order_price\": 64999.9, \"order_quantity\": 1e-05}",
+      "message": "1794780005555POST/v1/order{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"FOK\", \"side\": \"BUY\", \"order_price\": 64999.9, \"order_quantity\": 1e-05}",
+      "signature": "i63YKcSCEGXrVsG8fIlbVCn13uGSOO2X8N0wSV6u+GPQlSeprZddqmBuluoxjSeIoSyghjyCghkb7vaydhUhDA==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "order_type": "FOK",
+        "side": "BUY",
+        "order_price": "64999.9",
+        "order_quantity": "1e-05"
+      }
+    },
+    {
+      "name": "create_extended_fields",
+      "timestamp": 1794780006666,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_ETH_USDC\", \"order_type\": \"POST_ONLY\", \"side\": \"BUY\", \"client_order_id\": \"ext-1\", \"order_price\": 1700.1, \"order_quantity\": 0.5, \"reduce_only\": false, \"post_only_adjust\": true, \"margin_mode\": \"ISOLATED\"}",
+      "message": "1794780006666POST/v1/order{\"symbol\": \"PERP_ETH_USDC\", \"order_type\": \"POST_ONLY\", \"side\": \"BUY\", \"client_order_id\": \"ext-1\", \"order_price\": 1700.1, \"order_quantity\": 0.5, \"reduce_only\": false, \"post_only_adjust\": true, \"margin_mode\": \"ISOLATED\"}",
+      "signature": "SYkAmOf6fikfrPGsZcTyJIGqOiBJIcsQ0IwF31yqSdFLkgEUdfrro7oNFjyxHq0wBus4AWtdovSxObW+a9kXCQ==",
+      "inputs": {
+        "symbol": "PERP_ETH_USDC",
+        "order_type": "POST_ONLY",
+        "side": "BUY",
+        "client_order_id": "ext-1",
+        "order_price": "1700.1",
+        "order_quantity": "0.5",
+        "reduce_only": false,
+        "post_only_adjust": true,
+        "margin_mode": "ISOLATED"
+      }
+    },
+    {
+      "name": "create_market_slippage",
+      "timestamp": 1794780007777,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"MARKET\", \"side\": \"SELL\", \"order_quantity\": 0.01, \"slippage\": 0.005, \"margin_mode\": \"CROSS\"}",
+      "message": "1794780007777POST/v1/order{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"MARKET\", \"side\": \"SELL\", \"order_quantity\": 0.01, \"slippage\": 0.005, \"margin_mode\": \"CROSS\"}",
+      "signature": "Lobw6XmO+dgihNHsqLsMOlKQ2Bla+6WQcwpDrAxUcPNTxIap3u3jtI/K9BSUYgP4UGLZsz96JUk5aTgPzTqdDw==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "order_type": "MARKET",
+        "side": "SELL",
+        "order_quantity": "0.01",
+        "slippage": "0.005",
+        "margin_mode": "CROSS"
+      }
+    },
+    {
+      "name": "create_bid_level",
+      "timestamp": 1794780008888,
+      "method": "POST",
+      "path": "/v1/order",
+      "body": "{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"BID\", \"side\": \"BUY\", \"order_quantity\": 0.002, \"level\": 2}",
+      "message": "1794780008888POST/v1/order{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"BID\", \"side\": \"BUY\", \"order_quantity\": 0.002, \"level\": 2}",
+      "signature": "Z/0ZuQ1BcCb/Qa07tNBEJjmcsHwHyzQgmMX3xS/Ej5rK1HGoaxM10W5YErxIgqv+EXGlMsp/qACpzzAbro6PBw==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "order_type": "BID",
+        "side": "BUY",
+        "order_quantity": "0.002",
+        "level": 2
+      }
+    },
+    {
+      "name": "batch_create",
+      "timestamp": 1794780009999,
+      "method": "POST",
+      "path": "/v1/batch-order",
+      "body": "{\"orders\": [{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"LIMIT\", \"side\": \"BUY\", \"client_order_id\": \"b-1\", \"order_price\": 64000, \"order_quantity\": 0.001}, {\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"POST_ONLY\", \"side\": \"SELL\", \"client_order_id\": \"b-2\", \"order_price\": 66000.1, \"order_quantity\": 0.001, \"reduce_only\": true}]}",
+      "message": "1794780009999POST/v1/batch-order{\"orders\": [{\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"LIMIT\", \"side\": \"BUY\", \"client_order_id\": \"b-1\", \"order_price\": 64000, \"order_quantity\": 0.001}, {\"symbol\": \"PERP_BTC_USDC\", \"order_type\": \"POST_ONLY\", \"side\": \"SELL\", \"client_order_id\": \"b-2\", \"order_price\": 66000.1, \"order_quantity\": 0.001, \"reduce_only\": true}]}",
+      "signature": "R6E95scGy1xc6uRcWz3Ww4s7UtL5HNEhowcG0oQ21s9hRQgEIMPBoAmZvgHxL5oz45kffqpr0AKTeOsjINN3DQ==",
+      "inputs": {
+        "orders": [
+          {
+            "symbol": "PERP_BTC_USDC",
+            "order_type": "LIMIT",
+            "side": "BUY",
+            "client_order_id": "b-1",
+            "order_price": "64000",
+            "order_quantity": "0.001"
+          },
+          {
+            "symbol": "PERP_BTC_USDC",
+            "order_type": "POST_ONLY",
+            "side": "SELL",
+            "client_order_id": "b-2",
+            "order_price": "66000.1",
+            "order_quantity": "0.001",
+            "reduce_only": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "edit_order",
+      "timestamp": 1794780011110,
+      "method": "PUT",
+      "path": "/v1/order",
+      "body": "{\"order_id\": \"292820969\", \"order_price\": 64950.1, \"order_quantity\": 0.002, \"order_type\": \"LIMIT\", \"side\": \"BUY\", \"symbol\": \"PERP_BTC_USDC\"}",
+      "message": "1794780011110PUT/v1/order{\"order_id\": \"292820969\", \"order_price\": 64950.1, \"order_quantity\": 0.002, \"order_type\": \"LIMIT\", \"side\": \"BUY\", \"symbol\": \"PERP_BTC_USDC\"}",
+      "signature": "JIzSKmtIlKHMaagz8XnSmsn25LgOvyJEFTJbN1fZ44KOWZoiogiuymMN/rk/DjUz1i/LYE3pLjDs6uGoMkQdDA==",
+      "inputs": {
+        "order_id": 292820969,
+        "symbol": "PERP_BTC_USDC",
+        "order_type": "LIMIT",
+        "side": "BUY",
+        "order_price": "64950.1",
+        "order_quantity": "0.002"
+      }
+    },
+    {
+      "name": "edit_order_cloid_reduce_only",
+      "timestamp": 1794780012221,
+      "method": "PUT",
+      "path": "/v1/order",
+      "body": "{\"order_id\": \"77\", \"order_price\": 1900, \"order_quantity\": 0.75, \"order_type\": \"POST_ONLY\", \"side\": \"SELL\", \"symbol\": \"PERP_ETH_USDC\", \"client_order_id\": \"edit-9\", \"reduce_only\": true, \"visible_quantity\": 0.25}",
+      "message": "1794780012221PUT/v1/order{\"order_id\": \"77\", \"order_price\": 1900, \"order_quantity\": 0.75, \"order_type\": \"POST_ONLY\", \"side\": \"SELL\", \"symbol\": \"PERP_ETH_USDC\", \"client_order_id\": \"edit-9\", \"reduce_only\": true, \"visible_quantity\": 0.25}",
+      "signature": "TP8PaUbFE/64rxYMV9MHVvMP1M14FF6Fxf61mYvmw2yBVUrvvm/OyfvoM89Hfmc2uvQA0DiI8iGVhJVpCgHpCQ==",
+      "inputs": {
+        "order_id": 77,
+        "symbol": "PERP_ETH_USDC",
+        "order_type": "POST_ONLY",
+        "side": "SELL",
+        "client_order_id": "edit-9",
+        "order_price": "1900",
+        "order_quantity": "0.75",
+        "reduce_only": true,
+        "visible_quantity": "0.25"
+      }
+    },
+    {
+      "name": "cancel_order",
+      "timestamp": 1794780013332,
+      "method": "DELETE",
+      "path": "/v1/order?order_id=292820969&symbol=PERP_BTC_USDC",
+      "body": null,
+      "message": "1794780013332DELETE/v1/order?order_id=292820969&symbol=PERP_BTC_USDC",
+      "signature": "lEm+OuvW8YtnrnmsTC/FFiEg/tcFIqYP+gH6RBjToyKX2N4i233b/HG2rFavyHoGfs5HhxHhRDbGd6NnTKYLDQ==",
+      "inputs": {
+        "order_id": 292820969,
+        "symbol": "PERP_BTC_USDC"
+      }
+    },
+    {
+      "name": "cancel_order_by_client_order_id",
+      "timestamp": 1794780014443,
+      "method": "DELETE",
+      "path": "/v1/client/order?client_order_id=roshar-0001&symbol=PERP_BTC_USDC",
+      "body": null,
+      "message": "1794780014443DELETE/v1/client/order?client_order_id=roshar-0001&symbol=PERP_BTC_USDC",
+      "signature": "0RdInvPn6FTfViE9Swvtb9Z7er3op6QUPwTIzM9UNXqkahoHmgGtXMsT8AmTgFv8Dp9zeho+pW2fOXvmujCzCw==",
+      "inputs": {
+        "client_order_id": "roshar-0001",
+        "symbol": "PERP_BTC_USDC"
+      }
+    },
+    {
+      "name": "cancel_all_symbol",
+      "timestamp": 1794780015554,
+      "method": "DELETE",
+      "path": "/v1/orders?symbol=PERP_ETH_USDC",
+      "body": null,
+      "message": "1794780015554DELETE/v1/orders?symbol=PERP_ETH_USDC",
+      "signature": "H/GYqxdXmbAUJYRHhP0vTqK7rug/9AZdkOTQCzXILhfpGep80g5555MPDGXi6ygcQRm1he1xccwjO+FnJbPDCQ==",
+      "inputs": {
+        "symbol": "PERP_ETH_USDC"
+      }
+    },
+    {
+      "name": "cancel_all",
+      "timestamp": 1794780016665,
+      "method": "DELETE",
+      "path": "/v1/orders",
+      "body": null,
+      "message": "1794780016665DELETE/v1/orders",
+      "signature": "z12xn/DnXkOQNCzPp4r3l7igexJ0AY53NT/R7y5AmHnmZX6+oAGovB1Laf5vrIyqlUeDbMsTI07zB1PyonUiAQ==",
+      "inputs": {
+        "symbol": null
+      }
+    },
+    {
+      "name": "batch_cancel",
+      "timestamp": 1794780017776,
+      "method": "DELETE",
+      "path": "/v1/batch-order?order_ids=101,102,103",
+      "body": null,
+      "message": "1794780017776DELETE/v1/batch-order?order_ids=101,102,103",
+      "signature": "jfbd9OWd8lwqHl9ngsislRx1+icZbLaEgrgyWtKEzIBiV2A2+BQpj6PSefX3zgHlXaVYK1ocIJhfS3YtMUBPCQ==",
+      "inputs": {
+        "order_ids": [
+          101,
+          102,
+          103
+        ]
+      }
+    },
+    {
+      "name": "batch_cancel_by_client_order_id",
+      "timestamp": 1794780018887,
+      "method": "DELETE",
+      "path": "/v1/client/batch-order?client_order_ids=b-1,b-2",
+      "body": null,
+      "message": "1794780018887DELETE/v1/client/batch-order?client_order_ids=b-1,b-2",
+      "signature": "X+pH3A6bQCiN1UPJD71/Aj+NBROb3FjL1iCtwZJLuVhY+lIgvN44sG/2XmLAaaZi4478bdJ5DIxjZSTHuTcECg==",
+      "inputs": {
+        "client_order_ids": [
+          "b-1",
+          "b-2"
+        ]
+      }
+    },
+    {
+      "name": "cancel_all_after",
+      "timestamp": 1794780019998,
+      "method": "POST",
+      "path": "/v1/order/cancel_all_after",
+      "body": "{\"trigger_after\": 30000}",
+      "message": "1794780019998POST/v1/order/cancel_all_after{\"trigger_after\": 30000}",
+      "signature": "hpk6CvUaDoUdm8hfzwgCI2EwB8xRXcSuLKLOe7MZ13oQLcEs3TNRT0anzFNu2UwZ7CWQyIG0Bwt9GgXe5QdBBA==",
+      "inputs": {
+        "trigger_after": 30000
+      }
+    },
+    {
+      "name": "get_orders",
+      "timestamp": 1794780021109,
+      "method": "GET",
+      "path": "/v1/orders?symbol=PERP_BTC_USDC&status=INCOMPLETE&page=1&size=100",
+      "body": null,
+      "message": "1794780021109GET/v1/orders?symbol=PERP_BTC_USDC&status=INCOMPLETE&page=1&size=100",
+      "signature": "xOuf7z/OewMngJEbbMi9wbuMh3EjapSKIaYblI6gbXOzsTtXus7DhRsOwFJF3kviGV4Yq8mc2Q52ywHIAEMZCg==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "status": "INCOMPLETE",
+        "page": 1,
+        "size": 100
+      }
+    },
+    {
+      "name": "get_orders_time_range",
+      "timestamp": 1794780022220,
+      "method": "GET",
+      "path": "/v1/orders?order_type=LIMIT&side=SELL&start_t=1794700000000&end_t=1794780000000&sort_by=CREATED_TIME_ASC",
+      "body": null,
+      "message": "1794780022220GET/v1/orders?order_type=LIMIT&side=SELL&start_t=1794700000000&end_t=1794780000000&sort_by=CREATED_TIME_ASC",
+      "signature": "DBzRPStm5zYE4VNX0k+2qu6MP/Rh6TTygA0xxfspeTeHrlnUywwxzuAerVaT4aXfOFWTw0TecgmyPcA1yRhhAg==",
+      "inputs": {
+        "side": "SELL",
+        "order_type": "LIMIT",
+        "start_t": 1794700000000,
+        "end_t": 1794780000000,
+        "sort_by": "CREATED_TIME_ASC"
+      }
+    },
+    {
+      "name": "get_orders_all",
+      "timestamp": 1794780023331,
+      "method": "GET",
+      "path": "/v1/orders",
+      "body": null,
+      "message": "1794780023331GET/v1/orders",
+      "signature": "d+DfNwPGQPKfEUqS+5BdfJ//pl8Ru5JVpMWmYyUO9dsqYKX3hDSCMO4+0TsUCBfpjChMdm9iec5TV/x49Q6oAg==",
+      "inputs": {}
+    },
+    {
+      "name": "get_order",
+      "timestamp": 1794780024442,
+      "method": "GET",
+      "path": "/v1/order/292820969",
+      "body": null,
+      "message": "1794780024442GET/v1/order/292820969",
+      "signature": "n46gYcb9o4Tt5lPVo/kFJ+OkZpqHA7U38LgZl12CXWXFaC9Fdi/pxT/y2fCQs4FgRBXh5BOzmCC5Tj74k0UIAQ==",
+      "inputs": {
+        "order_id": 292820969
+      }
+    },
+    {
+      "name": "get_order_by_client_order_id",
+      "timestamp": 1794780025553,
+      "method": "GET",
+      "path": "/v1/client/order/roshar-0001",
+      "body": null,
+      "message": "1794780025553GET/v1/client/order/roshar-0001",
+      "signature": "0wkJt1Z4B5zbgKPVGqBUkzA2ro/dPIGIqK5iDRiH5uroGHGVA/oYobmO2v7a95OzJmxVuKzspac63+vk8O5XDg==",
+      "inputs": {
+        "client_order_id": "roshar-0001"
+      }
+    },
+    {
+      "name": "get_order_trades",
+      "timestamp": 1794780026664,
+      "method": "GET",
+      "path": "/v1/order/292820969/trades",
+      "body": null,
+      "message": "1794780026664GET/v1/order/292820969/trades",
+      "signature": "7GUj6XilXOMPklCyAVVDbuRA5wIfoyvaiMRWdQ+wUll2CWVw6x8LpFs+7R3tUj6F4kKJ0aqGbvbO33jx4GHbCQ==",
+      "inputs": {
+        "order_id": 292820969
+      }
+    },
+    {
+      "name": "get_trades",
+      "timestamp": 1794780027775,
+      "method": "GET",
+      "path": "/v1/trades?symbol=PERP_ETH_USDC&start_t=1794700000000&size=50",
+      "body": null,
+      "message": "1794780027775GET/v1/trades?symbol=PERP_ETH_USDC&start_t=1794700000000&size=50",
+      "signature": "OVWfdOJVdUuhHRctC8xzssFSTo53pM1fV5E9sF3fk5ekqfRJ65wb9toqlzNXOjsqF/vUNYunKWh24wgsVIyIAA==",
+      "inputs": {
+        "symbol": "PERP_ETH_USDC",
+        "start_t": 1794700000000,
+        "size": 50
+      }
+    },
+    {
+      "name": "get_trade",
+      "timestamp": 1794780028886,
+      "method": "GET",
+      "path": "/v1/trade/555",
+      "body": null,
+      "message": "1794780028886GET/v1/trade/555",
+      "signature": "bOMj1NgSQ6NN0XP9sneOqMjc2T7oqacokKtCASNLVmNcnE0JC4P+gmgSXddAdw77f/u+WRcqgc/0cmVPdvtuDA==",
+      "inputs": {
+        "trade_id": 555
+      }
+    },
+    {
+      "name": "get_positions",
+      "timestamp": 1794780029997,
+      "method": "GET",
+      "path": "/v1/positions",
+      "body": null,
+      "message": "1794780029997GET/v1/positions",
+      "signature": "KNsB30Zj7/AzPiwVsox9/NS7n05WYKx1HtvHCYNdo9h0bhN8rv2bV1FaK6KTO1Fx6cVuA2Q4qzgB32nXyBN6DA==",
+      "inputs": {}
+    },
+    {
+      "name": "get_position",
+      "timestamp": 1794780031108,
+      "method": "GET",
+      "path": "/v1/position/PERP_BTC_USDC",
+      "body": null,
+      "message": "1794780031108GET/v1/position/PERP_BTC_USDC",
+      "signature": "eD3zvsm4tADUv9poX9/4ygLyYrFLpXA8PjsqFciAfW32ERu9EgPL1SRglC/Ej4zJ5IaXa6TmSw4bWgSmqoo4DQ==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC"
+      }
+    },
+    {
+      "name": "get_holding",
+      "timestamp": 1794780032219,
+      "method": "GET",
+      "path": "/v1/client/holding",
+      "body": null,
+      "message": "1794780032219GET/v1/client/holding",
+      "signature": "PaKSH4NEcA+uUWPYtGKffy0PQyjs8K2zRcscBHftBgyCToyph6ywg0683SCcOoGsRDzIHg1/GYnNdwNeyFRCAQ==",
+      "inputs": {}
+    },
+    {
+      "name": "get_client_info",
+      "timestamp": 1794780033330,
+      "method": "GET",
+      "path": "/v1/client/info",
+      "body": null,
+      "message": "1794780033330GET/v1/client/info",
+      "signature": "JbONVUjWllkbUfrD2iCEZmeywQWZN451scH4QrM31zSlOAzw9S3WF/erjYx1Xfmb9hXi33kewamwEorPomLkBg==",
+      "inputs": {}
+    },
+    {
+      "name": "get_account_info",
+      "timestamp": 1794780034441,
+      "method": "GET",
+      "path": "/v1/account_info",
+      "body": null,
+      "message": "1794780034441GET/v1/account_info",
+      "signature": "V6fiq5njxo6Sp90UbLVXTR3TVyOPB7WldxRs+5cKwTRcocnyU/NAP+wj6Dym8zZH7P+MWZAYb0PUvbn0aws0Bg==",
+      "inputs": {}
+    },
+    {
+      "name": "get_funding_fee_history",
+      "timestamp": 1794780035552,
+      "method": "GET",
+      "path": "/v1/funding_fee/history?symbol=PERP_BTC_USDC&page=2&size=20",
+      "body": null,
+      "message": "1794780035552GET/v1/funding_fee/history?symbol=PERP_BTC_USDC&page=2&size=20",
+      "signature": "Pdr52rLibww3tsxs57DQ5zCEpUyO8phxCt6SBnCm2AIg6DojwZkxEKHbTw3WXi9ysVcsTzSxB9TqJdpcKH+RAw==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "page": 2,
+        "size": 20
+      }
+    },
+    {
+      "name": "get_key_info",
+      "timestamp": 1794780036663,
+      "method": "GET",
+      "path": "/v1/client/key_info?key_status=ACTIVE",
+      "body": null,
+      "message": "1794780036663GET/v1/client/key_info?key_status=ACTIVE",
+      "signature": "QZMPpJKyCWXY3+4ZpyuTGWSA1Fb+nmKOxgYFwd2GZvNoXZlFR9/bKtNTBas4yQdmaUD2tal7HjjnskZwXoncBg==",
+      "inputs": {
+        "key_status": "ACTIVE"
+      }
+    },
+    {
+      "name": "get_orderbook",
+      "timestamp": 1794780037774,
+      "method": "GET",
+      "path": "/v1/orderbook/PERP_BTC_USDC?max_level=5",
+      "body": null,
+      "message": "1794780037774GET/v1/orderbook/PERP_BTC_USDC?max_level=5",
+      "signature": "whofK/7mdlKnVah/0+akSgRvLzxm5lapgXaIzPIyO7/46StAT+1SXrWbWTRnQleJqx2DcnF//qpNqL0ZMk4HCg==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "max_level": 5
+      }
+    },
+    {
+      "name": "get_orderbook_default_depth",
+      "timestamp": 1794780038885,
+      "method": "GET",
+      "path": "/v1/orderbook/PERP_ETH_USDC",
+      "body": null,
+      "message": "1794780038885GET/v1/orderbook/PERP_ETH_USDC",
+      "signature": "Hz8h32TFVrLovVOMLYhvi/q8H2V5VQOarumFJwWyTQFSa6GZ1YGYxeuo4Ct1uUlLvY3WAQEN6YdUmrrgEJXbDA==",
+      "inputs": {
+        "symbol": "PERP_ETH_USDC"
+      }
+    },
+    {
+      "name": "get_kline",
+      "timestamp": 1794780039996,
+      "method": "GET",
+      "path": "/v1/kline?symbol=PERP_BTC_USDC&type=1m&limit=10",
+      "body": null,
+      "message": "1794780039996GET/v1/kline?symbol=PERP_BTC_USDC&type=1m&limit=10",
+      "signature": "wD4GW9IbuduWTv0iwg5Wx5alHu8pYvwBoQhZ/OT1vW5d5RUd6rnoTsQjZoq6zciEGkKWiTqkq+LaplgO/sdQBQ==",
+      "inputs": {
+        "symbol": "PERP_BTC_USDC",
+        "type": "1m",
+        "limit": 10
+      }
+    },
+    {
+      "name": "get_kline_no_limit",
+      "timestamp": 1794780041107,
+      "method": "GET",
+      "path": "/v1/kline?symbol=PERP_ETH_USDC&type=1h",
+      "body": null,
+      "message": "1794780041107GET/v1/kline?symbol=PERP_ETH_USDC&type=1h",
+      "signature": "PGFsZ8bheXNX6AvBdpNLOTbodJak+YPgJVmj9ftpovwaYBo7QpGCHDE5Ldfwcf7lz8DAPC/j1GokEAUztYLrCw==",
+      "inputs": {
+        "symbol": "PERP_ETH_USDC",
+        "type": "1h"
+      }
+    }
+  ],
+  "ws_auth": {
+    "timestamp": 1794780123456,
+    "id": "roshar-auth-1",
+    "sign": "Mbu/hQlNKVI7gFIopTuZHnjTuYzmWctqGm5z801R3nPqU/lDXKrrr2AD7gu2r4FzqyZcgqAbR6LE07/wl2W7Aw==",
+    "message": "{\"id\": \"roshar-auth-1\", \"event\": \"auth\", \"params\": {\"orderly_key\": \"ed25519:Fi9QpEMPevSVGooX1gMBvqNPB9YH3vajZMmWo99iXfNK\", \"sign\": \"Mbu/hQlNKVI7gFIopTuZHnjTuYzmWctqGm5z801R3nPqU/lDXKrrr2AD7gu2r4FzqyZcgqAbR6LE07/wl2W7Aw==\", \"timestamp\": 1794780123456}}"
+  },
+  "add_orderly_key": [
+    {
+      "broker_id": "woofi_pro",
+      "chain_id": 42161,
+      "orderly_key": "ed25519:23oJJ8NAMdEmVZAc8niogyHuRpVmaY27D2PShSch2ezL",
+      "scope": "read,trading",
+      "timestamp": 1794780200000,
+      "expiration": 1826316200000,
+      "user_address": "0x359429a9ABDC73b770F10e4BD926177896950e60",
+      "signature": "0x593e56361f351f0b92ec536d8a09f62daf11fe3e4ce33052cff6bd48a32b38c52b32d79299a83656812413c2fce2431ed8cd73b9574c1adeb836430abcf05ace1b",
+      "body": "{\"message\": {\"brokerId\": \"woofi_pro\", \"chainId\": 42161, \"orderlyKey\": \"ed25519:23oJJ8NAMdEmVZAc8niogyHuRpVmaY27D2PShSch2ezL\", \"scope\": \"read,trading\", \"timestamp\": 1794780200000, \"expiration\": 1826316200000}, \"signature\": \"0x593e56361f351f0b92ec536d8a09f62daf11fe3e4ce33052cff6bd48a32b38c52b32d79299a83656812413c2fce2431ed8cd73b9574c1adeb836430abcf05ace1b\", \"userAddress\": \"0x359429a9ABDC73b770F10e4BD926177896950e60\"}"
+    },
+    {
+      "broker_id": "woofi_pro",
+      "chain_id": 8453,
+      "orderly_key": "ed25519:4Nu3sydVW661d8gR8UiKJ7CtRtK5HFrBSZQkvHTxPn6f",
+      "scope": "trading",
+      "timestamp": 1794780300000,
+      "expiration": 1797372300000,
+      "user_address": "0x359429a9ABDC73b770F10e4BD926177896950e60",
+      "signature": "0x89817854692f1f91ef57a2179254318b5544c25354c5dbb1616ac7081369d250715b6bea3f2f9d1ff12483bdbb1d4436e89172fd1456546cb2121662ab55421c1c",
+      "body": "{\"message\": {\"brokerId\": \"woofi_pro\", \"chainId\": 8453, \"orderlyKey\": \"ed25519:4Nu3sydVW661d8gR8UiKJ7CtRtK5HFrBSZQkvHTxPn6f\", \"scope\": \"trading\", \"timestamp\": 1794780300000, \"expiration\": 1797372300000}, \"signature\": \"0x89817854692f1f91ef57a2179254318b5544c25354c5dbb1616ac7081369d250715b6bea3f2f9d1ff12483bdbb1d4436e89172fd1456546cb2121662ab55421c1c\", \"userAddress\": \"0x359429a9ABDC73b770F10e4BD926177896950e60\"}"
+    }
+  ]
+}

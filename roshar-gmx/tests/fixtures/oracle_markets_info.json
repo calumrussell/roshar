@@ -1,0 +1,40 @@
+{
+  "markets": [
+    {
+      "name": "BTC/USD [WBTC.b-USDC]",
+      "marketToken": "0x47c031236e19d024b42f8AE6780E44A573170703",
+      "indexToken": "0x47904963fc8b2340414262125aF798B9655E58Cd",
+      "longToken": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+      "shortToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "isListed": true,
+      "listingDate": "2023-08-08T00:00:00.000Z",
+      "openInterestLong": "7783500051978746075823163475000000000",
+      "openInterestShort": "6691160360706903546163150862500000000",
+      "availableLiquidityLong": "80110847729292571607937071741875000000",
+      "availableLiquidityShort": "83956510634340807916690603070051380088",
+      "poolAmountLong": "39539577043",
+      "poolAmountShort": "26391652302018",
+      "fundingRateLong": "135169161431688528456566160000",
+      "fundingRateShort": "-157235683844576207121159405453",
+      "borrowingRateLong": "39849832347658316482935456000",
+      "borrowingRateShort": "0",
+      "netRateLong": "175018993779346844939501616000",
+      "netRateShort": "-157235683844576207121159405453"
+    },
+    {
+      "name": "SWAP-ONLY [USDC-USDC.e]",
+      "marketToken": "0x9C2433dFD71096C435Be9465220BB2B189375eA7",
+      "indexToken": "0x0000000000000000000000000000000000000000",
+      "longToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "shortToken": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "isListed": true,
+      "listingDate": "2023-08-08T00:00:00.000Z",
+      "openInterestLong": "0",
+      "openInterestShort": "0",
+      "availableLiquidityLong": "0",
+      "availableLiquidityShort": "0",
+      "poolAmountLong": "10165222",
+      "poolAmountShort": "13617758129"
+    }
+  ]
+}

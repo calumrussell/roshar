@@ -1,0 +1,48 @@
+{
+ "jsonrpc": "2.0",
+ "method": "subscription",
+ "params": {
+  "channel": "book.BTC-PERPETUAL.100ms",
+  "data": {
+   "timestamp": 1794779348375,
+   "type": "change",
+   "change_id": 182990674670,
+   "instrument_name": "BTC-PERPETUAL",
+   "bids": [
+    [
+     "delete",
+     65107.5,
+     0.0
+    ],
+    [
+     "change",
+     65094.5,
+     40870.0
+    ],
+    [
+     "change",
+     65093.0,
+     55670.0
+    ]
+   ],
+   "asks": [
+    [
+     "change",
+     65123.0,
+     10.0
+    ],
+    [
+     "change",
+     65124.0,
+     81040.0
+    ],
+    [
+     "delete",
+     65922.5,
+     0.0
+    ]
+   ],
+   "prev_change_id": 182990674279
+  }
+ }
+}

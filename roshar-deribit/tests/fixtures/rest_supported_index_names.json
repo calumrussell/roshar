@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "result": [
+    "aave_usdc",
+    "ada_usdc",
+    "aero_usdc"
+  ],
+  "usIn": 1794827224256787,
+  "usOut": 1794827224257903,
+  "usDiff": 1116,
+  "testnet": false
+}

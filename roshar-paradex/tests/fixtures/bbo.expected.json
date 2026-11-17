@@ -1,0 +1,146 @@
+[
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123613,
+   "seq_no": 7723907455,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.40000000",
+   "ask_size": "0.05378000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123664,
+   "seq_no": 7723907456,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.60000000",
+   "ask_size": "0.00018000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123664,
+   "seq_no": 7723907457,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.50000000",
+   "ask_size": "0.05378000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123772,
+   "seq_no": 7723907458,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.60000000",
+   "ask_size": "0.00018000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123825,
+   "seq_no": 7723907459,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.50000000",
+   "ask_size": "0.05378000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123889,
+   "seq_no": 7723907460,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.60000000",
+   "ask_size": "0.00018000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123937,
+   "seq_no": 7723907461,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.50000000",
+   "ask_size": "0.05378000",
+   "market": "BTC-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 48,
+   "template_id": 2,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "bbo.BTC-USD-PERP",
+  "data": {
+   "timestamp": 1794780123968,
+   "seq_no": 7723907462,
+   "bid_price": "64893.20000000",
+   "bid_size": "0.00016000",
+   "ask_price": "64950.60000000",
+   "ask_size": "0.00018000",
+   "market": "BTC-USD-PERP"
+  }
+ }
+]

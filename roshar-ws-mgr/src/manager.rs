@@ -12,6 +12,10 @@ use dashmap::DashMap;
 use futures_util::StreamExt;
 use log::{debug, error};
 use tokio::{net::TcpSocket, task::JoinHandle, time::sleep};
+use tokio_tungstenite::tungstenite::{
+    client::IntoClientRequest,
+    http::{HeaderName, HeaderValue},
+};
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
@@ -137,6 +141,14 @@ impl Manager {
             ws_config.max_frame_size = Some(max_frame);
         }
 
+        let mut request = config.url.as_str().into_client_request()?;
+        for (name, value) in &config.headers {
+            request.headers_mut().insert(
+                HeaderName::from_bytes(name.as_bytes())?,
+                HeaderValue::from_str(value)?,
+            );
+        }
+
         let (ws_stream, response) = if config.tcp_recv_buffer_size.is_some()
             || config.tcp_send_buffer_size.is_some()
             || config.tcp_nodelay.is_some()
@@ -177,7 +189,7 @@ impl Manager {
             match tokio::time::timeout(
                 Duration::from_secs(30),
                 tokio_tungstenite::client_async_tls_with_config(
-                    &config.url,
+                    request,
                     tcp_stream,
                     Some(ws_config),
                     None,
@@ -199,7 +211,7 @@ impl Manager {
             // Standard connection without custom TCP configuration
             match tokio::time::timeout(
                 Duration::from_secs(30),
-                tokio_tungstenite::connect_async_with_config(&config.url, Some(ws_config), false),
+                tokio_tungstenite::connect_async_with_config(request, Some(ws_config), false),
             )
             .await
             {

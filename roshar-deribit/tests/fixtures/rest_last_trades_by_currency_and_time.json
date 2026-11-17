@@ -1,0 +1,44 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "trades": [
+      {
+        "timestamp": 1794823697822,
+        "iv": 39.51,
+        "price": 0.2905,
+        "direction": "buy",
+        "index_price": 64302.81,
+        "instrument_name": "BTC-24SEP27-82000-P",
+        "trade_seq": 36,
+        "amount": 0.9,
+        "mark_price": 0.29195949,
+        "tick_direction": 1,
+        "starbase_match_id": 248026383031218176,
+        "trade_id": "467921527",
+        "contracts": 0.9,
+        "starbase_timestamp": 1794823697822960736
+      },
+      {
+        "timestamp": 1794823702482,
+        "iv": 42.85,
+        "price": 0.049,
+        "direction": "sell",
+        "index_price": 64292.84,
+        "instrument_name": "BTC-26MAR27-58000-P",
+        "trade_seq": 328,
+        "amount": 0.5,
+        "mark_price": 0.04880572,
+        "tick_direction": 1,
+        "starbase_match_id": 248026402576674816,
+        "trade_id": "467921709",
+        "contracts": 0.5,
+        "starbase_timestamp": 1794823702482559910
+      }
+    ],
+    "has_more": true
+  },
+  "usIn": 1794827257004228,
+  "usOut": 1794827257004609,
+  "usDiff": 381,
+  "testnet": false
+}

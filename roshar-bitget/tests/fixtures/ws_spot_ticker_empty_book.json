@@ -1,0 +1,1 @@
+{"action":"snapshot","arg":{"instType":"SPOT","channel":"ticker","instId":"WLFIUSD1"},"data":[{"instId":"WLFIUSD1","lastPr":"0.1788","open24h":"0","high24h":"0","low24h":"0","change24h":"0","baseVolume":"0","quoteVolume":"0","openUtc":"0.0000","changeUtc24h":"0","ts":"1794829157171"}],"ts":1794829157175}

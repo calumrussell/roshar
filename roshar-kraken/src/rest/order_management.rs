@@ -5,9 +5,11 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 use super::auth::{AuthApi, KrakenCredentials};
+use super::parse_response;
 
 const BASE_URL: &str = "https://futures.kraken.com";
 
+/// Envelope of every `/derivatives/api/v3` success reply.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenResponse<T> {
     pub result: String,
@@ -17,39 +19,45 @@ pub struct KrakenResponse<T> {
     pub server_time: String,
 }
 
+/// Parameters of `POST /sendorder`. Numbers are decimal strings, sent as given.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenOrderRequest {
+    /// `lmt`, `post`, `ioc`, `mkt`, `stp`, `take_profit`, `trailing_stop` or `fok`.
     #[serde(rename = "orderType")]
-    pub order_type: String, // "lmt", "mkt", "stp", "take"
+    pub order_type: String,
     pub symbol: String,
-    pub side: String, // "buy" or "sell"
+    /// `buy` or `sell`.
+    pub side: String,
     pub size: String,
-    #[serde(rename = "limitPrice")]
-    pub limit_price: String,
-    #[serde(rename = "cliOrdId", skip_serializing_if = "Option::is_none")]
-    pub cli_ord_id: Option<String>, // Client order ID - optional
+    #[serde(rename = "limitPrice", skip_serializing_if = "Option::is_none")]
+    pub limit_price: Option<String>,
     #[serde(rename = "stopPrice", skip_serializing_if = "Option::is_none")]
     pub stop_price: Option<String>,
+    #[serde(rename = "cliOrdId", skip_serializing_if = "Option::is_none")]
+    pub cli_ord_id: Option<String>,
+    /// `mark`, `index` or `last`, for trigger orders.
+    #[serde(rename = "triggerSignal", skip_serializing_if = "Option::is_none")]
+    pub trigger_signal: Option<String>,
     #[serde(rename = "reduceOnly", skip_serializing_if = "Option::is_none")]
     pub reduce_only: Option<bool>,
-    #[serde(rename = "timeInForce", skip_serializing_if = "Option::is_none")]
-    pub time_in_force: Option<String>, // "gtc", "ioc", "fok"
-    #[serde(rename = "postOnly", skip_serializing_if = "Option::is_none")]
-    pub post_only: Option<bool>,
 }
 
+/// Parameters of `POST /editorder`. One of `orderId` / `cliOrdId` is required.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenModifyOrderRequest {
-    #[serde(rename = "orderId")]
-    pub order_id: String,
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    pub order_id: Option<String>,
+    #[serde(rename = "cliOrdId", skip_serializing_if = "Option::is_none")]
+    pub cli_ord_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub size: Option<f64>,
+    pub size: Option<String>,
     #[serde(rename = "limitPrice", skip_serializing_if = "Option::is_none")]
-    pub limit_price: Option<f64>,
+    pub limit_price: Option<String>,
     #[serde(rename = "stopPrice", skip_serializing_if = "Option::is_none")]
-    pub stop_price: Option<f64>,
+    pub stop_price: Option<String>,
 }
 
+/// Parameters of `POST /cancelorder`. One of `order_id` / `cliOrdId` is required.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenCancelOrderRequest {
     #[serde(rename = "order_id", skip_serializing_if = "Option::is_none")]
@@ -60,7 +68,126 @@ pub struct KrakenCancelOrderRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenDeadMansSwitchRequest {
-    pub timeout: u32, // timeout in seconds
+    /// Seconds; 0 disables the switch.
+    pub timeout: u32,
+}
+
+/// Order as it appears in order events (`order`, `old`, `new`, `orderPriorExecution`, ...).
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenOrder {
+    #[serde(rename = "orderId")]
+    pub order_id: String,
+    #[serde(rename = "cliOrdId")]
+    pub cli_ord_id: Option<String>,
+    #[serde(rename = "type")]
+    pub order_type: String,
+    pub symbol: String,
+    pub side: String,
+    pub quantity: f64,
+    pub filled: f64,
+    #[serde(rename = "limitPrice")]
+    pub limit_price: f64,
+    #[serde(rename = "reduceOnly")]
+    pub reduce_only: bool,
+    pub timestamp: String,
+    #[serde(rename = "lastUpdateTimestamp")]
+    pub last_update_timestamp: String,
+    #[serde(rename = "algoId")]
+    pub algo_id: Option<String>,
+}
+
+/// Trigger order as it appears in order events (`orderTrigger`).
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenOrderTrigger {
+    pub uid: String,
+    #[serde(rename = "clientId")]
+    pub client_id: Option<String>,
+    #[serde(rename = "type")]
+    pub order_type: String,
+    pub symbol: String,
+    pub side: String,
+    pub quantity: Option<f64>,
+    #[serde(rename = "limitPrice")]
+    pub limit_price: Option<f64>,
+    #[serde(rename = "triggerPrice")]
+    pub trigger_price: Option<f64>,
+    /// `trigger_above` or `trigger_below`.
+    #[serde(rename = "triggerSide")]
+    pub trigger_side: Option<String>,
+    /// `mark_price`, `last_price` or `spot_price`.
+    #[serde(rename = "triggerSignal")]
+    pub trigger_signal: Option<String>,
+    #[serde(rename = "reduceOnly")]
+    pub reduce_only: bool,
+    pub timestamp: String,
+    #[serde(rename = "lastUpdateTimestamp")]
+    pub last_update_timestamp: String,
+    #[serde(rename = "startTime")]
+    pub start_time: Option<String>,
+}
+
+/// One entry of `orderEvents` in send/edit/cancel replies, keyed by `type`. Events about a
+/// trigger order carry `order_trigger` instead of `order`.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(tag = "type")]
+pub enum KrakenOrderEvent {
+    #[serde(rename = "PLACE")]
+    Place {
+        order: Option<KrakenOrder>,
+        #[serde(rename = "orderTrigger")]
+        order_trigger: Option<KrakenOrderTrigger>,
+        #[serde(rename = "reducedQuantity")]
+        reduced_quantity: Option<f64>,
+    },
+    #[serde(rename = "CANCEL")]
+    Cancel {
+        uid: String,
+        order: Option<KrakenOrder>,
+        #[serde(rename = "orderTrigger")]
+        order_trigger: Option<KrakenOrderTrigger>,
+    },
+    #[serde(rename = "EDIT")]
+    Edit {
+        old: KrakenOrder,
+        new: KrakenOrder,
+        #[serde(rename = "reducedQuantity")]
+        reduced_quantity: Option<f64>,
+    },
+    #[serde(rename = "REJECT")]
+    Reject {
+        uid: String,
+        order: Option<KrakenOrder>,
+        #[serde(rename = "orderTrigger")]
+        order_trigger: Option<KrakenOrderTrigger>,
+        reason: String,
+    },
+    #[serde(rename = "EXECUTION")]
+    Execution {
+        #[serde(rename = "executionId")]
+        execution_id: String,
+        price: f64,
+        amount: f64,
+        #[serde(rename = "orderPriorEdit")]
+        order_prior_edit: Option<KrakenOrder>,
+        #[serde(rename = "orderPriorExecution")]
+        order_prior_execution: KrakenOrder,
+        #[serde(rename = "takerReducedQuantity")]
+        taker_reduced_quantity: Option<f64>,
+    },
+}
+
+/// `sendStatus`. `status` other than `placed`/`partiallyFilled`/`filled` means the order was
+/// not accepted; `order_id` and `orderEvents` may then be absent.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenSendStatus {
+    pub order_id: Option<String>,
+    #[serde(rename = "cliOrdId")]
+    pub cli_ord_id: Option<String>,
+    pub status: String,
+    #[serde(rename = "receivedTime")]
+    pub received_time: Option<String>,
+    #[serde(rename = "orderEvents")]
+    pub order_events: Option<Vec<KrakenOrderEvent>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -71,26 +198,17 @@ pub struct KrakenOrderData {
 
 pub type KrakenOrderResponse = KrakenResponse<KrakenOrderData>;
 
+/// `cancelStatus`. `status` is `cancelled`, `filled` or `notFound`.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KrakenOperationStatus<T> {
-    #[serde(rename = "order_id", alias = "orderId")]
-    pub order_id: String,
+pub struct KrakenCancelStatus {
+    pub order_id: Option<String>,
+    #[serde(rename = "cliOrdId")]
+    pub cli_ord_id: Option<String>,
     pub status: String,
     #[serde(rename = "receivedTime")]
-    pub received_time: String,
+    pub received_time: Option<String>,
     #[serde(rename = "orderEvents")]
-    pub order_events: Vec<T>,
-}
-
-pub type KrakenSendStatus = KrakenOperationStatus<KrakenOrderEvent>;
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KrakenOrderEvent {
-    pub order: KrakenOrder,
-    #[serde(rename = "reducedQuantity")]
-    pub reduced_quantity: Option<f64>,
-    #[serde(rename = "type")]
-    pub event_type: String,
+    pub order_events: Option<Vec<KrakenOrderEvent>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -101,57 +219,126 @@ pub struct KrakenCancelData {
 
 pub type KrakenCancelResponse = KrakenResponse<KrakenCancelData>;
 
-pub type KrakenCancelStatus = KrakenOperationStatus<KrakenCancelEvent>;
+/// `editStatus`.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenEditStatus {
+    #[serde(rename = "orderId")]
+    pub order_id: Option<String>,
+    #[serde(rename = "cliOrdId")]
+    pub cli_ord_id: Option<String>,
+    pub status: String,
+    #[serde(rename = "receivedTime")]
+    pub received_time: Option<String>,
+    #[serde(rename = "orderEvents")]
+    pub order_events: Vec<KrakenOrderEvent>,
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KrakenCancelEvent {
-    pub uid: String,
-    pub order: KrakenOrder,
-    #[serde(rename = "type")]
-    pub event_type: String,
+pub struct KrakenModifyData {
+    #[serde(rename = "editStatus")]
+    pub edit_status: KrakenEditStatus,
+}
+
+pub type KrakenModifyResponse = KrakenResponse<KrakenModifyData>;
+
+/// One entry of `GET /openorders`.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenOpenOrder {
+    pub order_id: String,
+    #[serde(rename = "cliOrdId")]
+    pub cli_ord_id: Option<String>,
+    /// `untouched` or `partiallyFilled`.
+    pub status: String,
+    pub side: String,
+    /// `lmt`, `stop` or `take_profit`.
+    #[serde(rename = "orderType")]
+    pub order_type: String,
+    pub symbol: String,
+    #[serde(rename = "limitPrice")]
+    pub limit_price: Option<f64>,
+    #[serde(rename = "stopPrice")]
+    pub stop_price: Option<f64>,
+    #[serde(rename = "filledSize")]
+    pub filled_size: f64,
+    #[serde(rename = "unfilledSize")]
+    pub unfilled_size: Option<f64>,
+    #[serde(rename = "reduceOnly")]
+    pub reduce_only: bool,
+    /// `mark`, `last` or `spot`.
+    #[serde(rename = "triggerSignal")]
+    pub trigger_signal: Option<String>,
+    #[serde(rename = "lastUpdateTime")]
+    pub last_update_time: String,
+    #[serde(rename = "receivedTime")]
+    pub received_time: String,
+    #[serde(rename = "algoId")]
+    pub algo_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenOpenOrdersData {
     #[serde(rename = "openOrders")]
-    pub open_orders: Vec<KrakenOrder>,
+    pub open_orders: Vec<KrakenOpenOrder>,
 }
 
 pub type KrakenOpenOrdersResponse = KrakenResponse<KrakenOpenOrdersData>;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KrakenOrder {
-    #[serde(rename = "orderId", alias = "order_id")]
+pub struct KrakenTrailingStopOptions {
+    #[serde(rename = "maxDeviation")]
+    pub max_deviation: f64,
+    /// `PERCENT` or `QUOTE_CURRENCY`.
+    pub unit: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenPriceTriggerOptions {
+    #[serde(rename = "triggerPrice")]
+    pub trigger_price: f64,
+    /// `TRIGGER_ABOVE` or `TRIGGER_BELOW`.
+    #[serde(rename = "triggerSide")]
+    pub trigger_side: String,
+    /// `MARK_PRICE`, `LAST_PRICE` or `SPOT_PRICE`.
+    #[serde(rename = "triggerSignal")]
+    pub trigger_signal: String,
+    #[serde(rename = "trailingStopOptions")]
+    pub trailing_stop_options: Option<KrakenTrailingStopOptions>,
+}
+
+/// `order` of a `POST /orders/status` entry.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KrakenOrderStatusOrder {
+    /// `ORDER` or `TRIGGER_ORDER`.
+    #[serde(rename = "type")]
+    pub order_type: String,
+    #[serde(rename = "orderId")]
     pub order_id: String,
-    #[serde(rename = "cliOrdId", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "cliOrdId")]
     pub cli_ord_id: Option<String>,
-    #[serde(
-        rename = "type",
-        alias = "orderType",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub order_type: Option<String>,
     pub symbol: String,
     pub side: String,
-    #[serde(alias = "quantity", alias = "unfilledSize")]
-    pub size: f64,
-    #[serde(alias = "filled", alias = "filledSize")]
-    pub filled_size: f64,
+    pub quantity: Option<f64>,
+    pub filled: Option<f64>,
     #[serde(rename = "limitPrice")]
-    pub limit_price: f64,
+    pub limit_price: Option<f64>,
     #[serde(rename = "reduceOnly")]
     pub reduce_only: bool,
-    #[serde(alias = "timestamp", alias = "receivedTime")]
-    pub received_time: String,
-    #[serde(rename = "lastUpdateTimestamp", alias = "lastUpdateTime")]
-    pub last_update_time: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub timestamp: String,
+    #[serde(rename = "lastUpdateTimestamp")]
+    pub last_update_timestamp: String,
+    #[serde(rename = "algoId")]
+    pub algo_id: Option<String>,
+    #[serde(rename = "priceTriggerOptions")]
+    pub price_trigger_options: Option<KrakenPriceTriggerOptions>,
+    #[serde(rename = "triggerTime")]
+    pub trigger_time: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KrakenOrderStatusItem {
-    pub order: KrakenOrder,
+    pub order: KrakenOrderStatusOrder,
+    /// `ENTERED_BOOK`, `FULLY_EXECUTED`, `REJECTED`, `CANCELLED`, `TRIGGER_PLACED` or
+    /// `TRIGGER_ACTIVATION_FAILURE`.
     pub status: String,
     #[serde(rename = "updateReason")]
     pub update_reason: Option<String>,
@@ -180,27 +367,7 @@ pub struct KrakenDeadMansSwitchStatus {
     pub trigger_time: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KrakenModifyData {
-    #[serde(rename = "editStatus")]
-    pub edit_status: KrakenEditStatus,
-}
-
-pub type KrakenModifyResponse = KrakenResponse<KrakenModifyData>;
-
-pub type KrakenEditStatus = KrakenOperationStatus<KrakenEditEvent>;
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct KrakenEditEvent {
-    pub old: KrakenOrder,
-    pub new: KrakenOrder,
-    #[serde(rename = "reducedQuantity")]
-    pub reduced_quantity: Option<f64>,
-    #[serde(rename = "type")]
-    pub event_type: String,
-}
-
-/// Kraken Order Management API
+/// Kraken Futures order management (`/derivatives/api/v3`).
 pub struct OrderManagementApi {
     client: Arc<RateLimitedClient>,
     credentials: KrakenCredentials,
@@ -214,13 +381,14 @@ impl OrderManagementApi {
         }
     }
 
+    /// Signed POST with the parameters form-encoded in the body.
     async fn make_request<T, R>(
         &self,
         endpoint: &str,
         request_data: &T,
     ) -> Result<R, Box<dyn std::error::Error>>
     where
-        T: Serialize,
+        T: Serialize + ?Sized,
         R: for<'de> Deserialize<'de>,
     {
         let post_data = serde_urlencoded::to_string(request_data)?;
@@ -236,11 +404,8 @@ impl OrderManagementApi {
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(post_data);
 
-        let response = request.send().await?;
-        let text = response.text().await?;
-
-        let parsed: R = serde_json::from_str(&text)?;
-        Ok(parsed)
+        let text = request.send().await?.text().await?;
+        parse_response(&text)
     }
 
     async fn make_get_request<R>(&self, endpoint: &str) -> Result<R, Box<dyn std::error::Error>>
@@ -258,43 +423,40 @@ impl OrderManagementApi {
             request = request.header(key, value);
         }
 
-        let response = request.send().await?;
-        let text = response.text().await?;
-
-        let parsed: R = serde_json::from_str(&text)?;
-        Ok(parsed)
+        let text = request.send().await?.text().await?;
+        parse_response(&text)
     }
 
+    /// `POST /sendorder`. Post-only is `order_type = "post"`; IOC and FOK are `ioc` / `fok`.
     pub async fn create_order(
         &self,
         symbol: &str,
         side: &str,
         order_type: &str,
         size: &str,
-        limit_price: &str,
+        limit_price: Option<&str>,
+        stop_price: Option<&str>,
         cli_ord_id: Option<&str>,
-        stop_price: Option<String>,
+        trigger_signal: Option<&str>,
         reduce_only: Option<bool>,
-        time_in_force: Option<&str>,
-        post_only: Option<bool>,
     ) -> Result<KrakenOrderResponse, Box<dyn std::error::Error>> {
         let order_request = KrakenOrderRequest {
             order_type: order_type.to_string(),
             symbol: symbol.to_string(),
             side: side.to_string(),
             size: size.to_string(),
-            limit_price: limit_price.to_string(),
-            cli_ord_id: cli_ord_id.map(|s| s.to_string()),
-            stop_price,
+            limit_price: limit_price.map(str::to_string),
+            stop_price: stop_price.map(str::to_string),
+            cli_ord_id: cli_ord_id.map(str::to_string),
+            trigger_signal: trigger_signal.map(str::to_string),
             reduce_only,
-            time_in_force: time_in_force.map(|t| t.to_string()),
-            post_only,
         };
 
         self.make_request("/derivatives/api/v3/sendorder", &order_request)
             .await
     }
 
+    /// `POST /cancelorder`, by exchange order id or client order id.
     pub async fn cancel_order(
         &self,
         order_id: Option<&str>,
@@ -305,26 +467,33 @@ impl OrderManagementApi {
         }
 
         let cancel_request = KrakenCancelOrderRequest {
-            order_id: order_id.map(|s| s.to_string()),
-            cli_ord_id: None,
+            order_id: order_id.map(str::to_string),
+            cli_ord_id: cli_ord_id.map(str::to_string),
         };
 
         self.make_request("/derivatives/api/v3/cancelorder", &cancel_request)
             .await
     }
 
+    /// `POST /editorder`, by exchange order id or client order id. Numbers are decimal strings.
     pub async fn modify_order(
         &self,
-        order_id: &str,
-        size: Option<f64>,
-        limit_price: Option<f64>,
-        stop_price: Option<f64>,
+        order_id: Option<&str>,
+        cli_ord_id: Option<&str>,
+        size: Option<&str>,
+        limit_price: Option<&str>,
+        stop_price: Option<&str>,
     ) -> Result<KrakenModifyResponse, Box<dyn std::error::Error>> {
+        if order_id.is_none() && cli_ord_id.is_none() {
+            return Err("Either order_id or cli_ord_id must be provided".into());
+        }
+
         let modify_request = KrakenModifyOrderRequest {
-            order_id: order_id.to_string(),
-            size,
-            limit_price,
-            stop_price,
+            order_id: order_id.map(str::to_string),
+            cli_ord_id: cli_ord_id.map(str::to_string),
+            size: size.map(str::to_string),
+            limit_price: limit_price.map(str::to_string),
+            stop_price: stop_price.map(str::to_string),
         };
 
         self.make_request("/derivatives/api/v3/editorder", &modify_request)
@@ -338,6 +507,7 @@ impl OrderManagementApi {
             .await
     }
 
+    /// `POST /orders/status`: orders open now or closed in the last 5 seconds.
     pub async fn get_order_status(
         &self,
         order_ids: Option<Vec<String>>,
@@ -347,42 +517,20 @@ impl OrderManagementApi {
             return Err("Either order_ids or cli_ord_ids must be provided".into());
         }
 
-        // Build form data manually for array handling
-        let mut form_data = Vec::new();
-
-        if let Some(ids) = order_ids {
-            for id in ids {
-                form_data.push(("orderIds".to_string(), id));
-            }
+        // Arrays are sent as repeated keys.
+        let mut form_data: Vec<(&str, String)> = Vec::new();
+        for id in order_ids.into_iter().flatten() {
+            form_data.push(("orderIds", id));
+        }
+        for id in cli_ord_ids.into_iter().flatten() {
+            form_data.push(("cliOrdIds", id));
         }
 
-        if let Some(ids) = cli_ord_ids {
-            for id in ids {
-                form_data.push(("cliOrdIds".to_string(), id));
-            }
-        }
-
-        let post_data = serde_urlencoded::to_string(&form_data)?;
-        let endpoint = "/derivatives/api/v3/orders/status";
-        let headers = AuthApi::create_headers(&self.credentials, endpoint, &post_data)?;
-
-        let mut request = self.client.post(&format!("{BASE_URL}{endpoint}")).await;
-
-        for (key, value) in headers {
-            request = request.header(key, value);
-        }
-
-        request = request
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(post_data);
-
-        let response = request.send().await?;
-        let text = response.text().await?;
-
-        let parsed: KrakenOrderStatusResponse = serde_json::from_str(&text)?;
-        Ok(parsed)
+        self.make_request("/derivatives/api/v3/orders/status", &form_data)
+            .await
     }
 
+    /// `POST /cancelallordersafter`. `timeout` 0 disables the switch.
     pub async fn dead_mans_switch(
         &self,
         timeout: u32,
@@ -397,6 +545,75 @@ impl OrderManagementApi {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Response examples from the official OpenAPI spec,
+    // https://docs.kraken.com/openapi/futures-rest.yaml (components/examples).
+
+    #[test]
+    fn parses_placed_order() {
+        let text = r#"{"result":"success","sendStatus":{"order_id":"179f9af8-e45e-469d-b3e9-2fd4675cb7d0","status":"placed","receivedTime":"2019-09-05T16:33:50.734Z","orderEvents":[{"type":"PLACE","order":{"orderId":"179f9af8-e45e-469d-b3e9-2fd4675cb7d0","cliOrdId":null,"type":"lmt","symbol":"PI_XBTUSD","side":"buy","quantity":10000,"filled":0,"limitPrice":9400,"reduceOnly":false,"timestamp":"2019-09-05T16:33:50.734Z","lastUpdateTimestamp":"2019-09-05T16:33:50.734Z"},"reducedQuantity":null}]},"serverTime":"2019-09-05T16:33:50.734Z"}"#;
+        let r: KrakenOrderResponse = parse_response(text).unwrap();
+        let events = r.data.send_status.order_events.unwrap();
+        assert!(
+            matches!(&events[0], KrakenOrderEvent::Place { order: Some(o), .. } if o.limit_price == 9400.0)
+        );
+    }
+
+    #[test]
+    fn parses_executed_order() {
+        let text = r#"{"result":"success","sendStatus":{"order_id":"61ca5732-3478-42fe-8362-abbfd9465294","status":"placed","receivedTime":"2019-12-11T17:17:33.888Z","orderEvents":[{"type":"EXECUTION","executionId":"e1ec9f63-2338-4c44-b40a-43486c6732d7","price":7244.5,"amount":10,"orderPriorEdit":null,"orderPriorExecution":{"orderId":"61ca5732-3478-42fe-8362-abbfd9465294","cliOrdId":null,"type":"lmt","symbol":"PI_XBTUSD","side":"buy","quantity":10,"filled":0,"limitPrice":7500,"reduceOnly":false,"timestamp":"2019-12-11T17:17:33.888Z","lastUpdateTimestamp":"2019-12-11T17:17:33.888Z"},"takerReducedQuantity":null}]},"serverTime":"2019-12-11T17:17:33.888Z"}"#;
+        let r: KrakenOrderResponse = parse_response(text).unwrap();
+        let events = r.data.send_status.order_events.unwrap();
+        assert!(
+            matches!(&events[0], KrakenOrderEvent::Execution { price, .. } if *price == 7244.5)
+        );
+    }
+
+    #[test]
+    fn parses_rejected_order() {
+        let text = r#"{"result":"success","sendStatus":{"order_id":"614a5298-0071-450f-83c6-0617ce8c6bc4","status":"iocWouldNotExecute","receivedTime":"2019-09-05T16:32:54.076Z","orderEvents":[{"type":"REJECT","uid":"614a5298-0071-450f-83c6-0617ce8c6bc4","reason":"IOC_WOULD_NOT_EXECUTE","order":{"orderId":"614a5298-0071-450f-83c6-0617ce8c6bc4","cliOrdId":null,"type":"lmt","symbol":"PI_XBTUSD","side":"buy","quantity":10000,"filled":0,"limitPrice":9400,"reduceOnly":true,"timestamp":"2019-09-05T16:32:54.076Z","lastUpdateTimestamp":"2019-09-05T16:32:54.076Z"}}]},"serverTime":"2019-09-05T16:32:54.077Z"}"#;
+        let r: KrakenOrderResponse = parse_response(text).unwrap();
+        assert_eq!(r.data.send_status.status, "iocWouldNotExecute");
+    }
+
+    #[test]
+    fn parses_unaccepted_order_without_id() {
+        // Documented in https://docs.kraken.com/exchange/guides/futures/rest#returns
+        let text = r#"{"result":"success","serverTime":"2016-02-25T09:45:53.818Z","sendStatus":{"receivedTime":"2016-02-25T09:45:53.601Z","status":"insufficientAvailableFunds"}}"#;
+        let r: KrakenOrderResponse = parse_response(text).unwrap();
+        assert!(r.data.send_status.order_id.is_none());
+    }
+
+    #[test]
+    fn parses_edit() {
+        let text = r#"{"result":"success","editStatus":{"status":"edited","orderId":"022774bc-2c4a-4f26-9317-436c8d85746d","receivedTime":"2019-09-05T16:47:47.521Z","orderEvents":[{"type":"EDIT","old":{"orderId":"022774bc-2c4a-4f26-9317-436c8d85746d","cliOrdId":null,"type":"lmt","symbol":"PI_XBTUSD","side":"buy","quantity":1000,"filled":0,"limitPrice":9400,"reduceOnly":false,"timestamp":"2019-09-05T16:41:35.173Z","lastUpdateTimestamp":"2019-09-05T16:41:35.173Z"},"new":{"orderId":"022774bc-2c4a-4f26-9317-436c8d85746d","cliOrdId":null,"type":"lmt","symbol":"PI_XBTUSD","side":"buy","quantity":1501,"filled":0,"limitPrice":7200,"reduceOnly":false,"timestamp":"2019-09-05T16:41:35.173Z","lastUpdateTimestamp":"2019-09-05T16:47:47.519Z"},"reducedQuantity":null}]},"serverTime":"2019-09-05T16:47:47.521Z"}"#;
+        let r: KrakenModifyResponse = parse_response(text).unwrap();
+        assert_eq!(
+            r.data.edit_status.order_id.as_deref(),
+            Some("022774bc-2c4a-4f26-9317-436c8d85746d")
+        );
+    }
+
+    #[test]
+    fn parses_cancel() {
+        let text = r#"{"result":"success","cancelStatus":{"status":"cancelled","order_id":"cb4e34f6-4eb3-4d4b-9724-4c3035b99d47","receivedTime":"2020-07-22T13:26:20.806Z","orderEvents":[{"type":"CANCEL","uid":"cb4e34f6-4eb3-4d4b-9724-4c3035b99d47","order":{"orderId":"cb4e34f6-4eb3-4d4b-9724-4c3035b99d47","cliOrdId":"1234568","type":"lmt","symbol":"PI_XBTUSD","side":"buy","quantity":5500,"filled":0,"limitPrice":8000,"reduceOnly":false,"timestamp":"2020-07-22T13:25:56.366Z","lastUpdateTimestamp":"2020-07-22T13:25:56.366Z"}}]},"serverTime":"2020-07-22T13:26:20.806Z"}"#;
+        let r: KrakenCancelResponse = parse_response(text).unwrap();
+        assert_eq!(r.data.cancel_status.status, "cancelled");
+    }
+
+    #[test]
+    fn parses_open_orders() {
+        let text = r#"{"result":"success","openOrders":[{"order_id":"59302619-41d2-4f0b-941f-7e7914760ad3","symbol":"PI_XBTUSD","side":"sell","orderType":"lmt","limitPrice":10640,"unfilledSize":304,"receivedTime":"2019-09-05T17:01:17.410Z","status":"untouched","filledSize":0,"reduceOnly":true,"lastUpdateTime":"2019-09-05T17:01:17.410Z"}],"serverTime":"2019-09-05T17:08:18.138Z"}"#;
+        let r: KrakenOpenOrdersResponse = parse_response(text).unwrap();
+        assert_eq!(r.data.open_orders[0].unfilled_size, Some(304.0));
+    }
+
+    #[test]
+    fn parses_dead_mans_switch() {
+        let text = r#"{"result":"success","status":{"currentTime":"2018-06-19T16:51:23.839Z","triggerTime":"2018-06-19T16:52:23.839Z"},"serverTime":"2018-06-19T16:51:23.839Z"}"#;
+        let r: KrakenDeadMansSwitchResponse = parse_response(text).unwrap();
+        assert_eq!(r.data.status.trigger_time, "2018-06-19T16:52:23.839Z");
+    }
 
     fn create_test_client() -> Arc<RateLimitedClient> {
         Arc::new(RateLimitedClient::new(10, 1))
@@ -421,42 +638,36 @@ mod tests {
                 "buy",
                 "post",
                 "0.0001",
-                "50000",
+                Some("50000"),
                 None,
                 None,
                 None,
-                Some("gtc"),
                 None,
             )
             .await?;
+        assert_eq!(order_result.data.send_status.status, "placed");
+        let order_id = order_result
+            .data
+            .send_status
+            .order_id
+            .clone()
+            .expect("placed order has an id");
 
         let open_orders = api.get_open_orders().await?;
         assert_eq!(open_orders.result, "success");
 
         let modify_result = api
-            .modify_order(
-                &order_result.data.send_status.order_id,
-                Some(0.0002),
-                Some(29000.0),
-                None,
-            )
+            .modify_order(Some(&order_id), None, Some("0.0002"), Some("49000"), None)
             .await?;
         assert_eq!(modify_result.result, "success");
 
         let status_result = api
-            .get_order_status(
-                Some(vec![order_result.data.send_status.order_id.clone()]),
-                None,
-            )
+            .get_order_status(Some(vec![order_id.clone()]), None)
             .await?;
         assert_eq!(status_result.result, "success");
 
-        let cancel_result = api
-            .cancel_order(Some(&order_result.data.send_status.order_id), None)
-            .await?;
-        assert_eq!(cancel_result.result, "success");
-
-        assert_eq!(order_result.result, "success");
+        let cancel_result = api.cancel_order(Some(&order_id), None).await?;
+        assert_eq!(cancel_result.data.cancel_status.status, "cancelled");
         Ok(())
     }
 

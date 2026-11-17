@@ -1,0 +1,1 @@
+{"status":"error","error":{"code":"VALIDATION_ERROR","category":"REQUEST","message":"Invalid request type","retryable":false,"details":{"details":"Unsupported type: getNope"}},"timestamp":1794779944878}

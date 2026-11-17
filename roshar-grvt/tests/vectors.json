@@ -1,0 +1,622 @@
+{
+  "private_key": "0xded162d617db3274ef6a548231fba3f1c1035c3c2efecaf5c2e3dff853699968",
+  "address": "0xC06899F502A4759913a410913f6B903a7ce36560",
+  "orders": [
+    {
+      "name": "gtt_post_only_buy",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0x96bd31c98b075d5ed19232410c6b094f49c258554f552364c8d8ab8876d3467f",
+      "digest": "0x4542a6080298752574c8b91f33b4c1628c5084c1d8087bf1ae0474785dee1ff9",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "1",
+        "postOnly": true,
+        "reduceOnly": false,
+        "nonce": "305419896",
+        "expiration": "1794780000000000000"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "GOOD_TILL_TIME",
+          "legs": [
+            {
+              "instrument": "BTC_USDT_Perp",
+              "size": "0.001",
+              "is_buying_asset": true,
+              "limit_price": "65038.1"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0x4bb389e718f140499152575391d59a2bf7010e16746201e5f00edf692a98525b",
+            "s": "0x4b3488dd92440cef2ad970f20097b571b3405fd022c8a4663b0bf0b84c870b69",
+            "v": 27,
+            "expiration": "1794780000000000000",
+            "nonce": 305419896
+          },
+          "metadata": {
+            "client_order_id": "9223372036854775809"
+          },
+          "is_market": false,
+          "post_only": true,
+          "reduce_only": false
+        }
+      }
+    },
+    {
+      "name": "ioc_reduce_only_sell",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0x6c91dbe81d225c12a8a084c6a4d5ce3691863f631711c75e69f68aefc14e54e7",
+      "digest": "0x8abb4500b42160ef32f45d315cd674a97d6e7cd614a905468a51c3471f9dade5",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "3",
+        "postOnly": false,
+        "reduceOnly": true,
+        "nonce": "1",
+        "expiration": "1794780000123456789"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "IMMEDIATE_OR_CANCEL",
+          "legs": [
+            {
+              "instrument": "ETH_USDT_Perp",
+              "size": "1.25",
+              "is_buying_asset": false,
+              "limit_price": "3120.55"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0xbe9aa8a2341beb74ab0f40db885323f1e1b58db59158fa000929c656f096e3ea",
+            "s": "0x32cdb50570bb931f75781986c61a1ab3ef624286ea9488f1c18eced3aa87a33b",
+            "v": 27,
+            "expiration": "1794780000123456789",
+            "nonce": 1
+          },
+          "metadata": {
+            "client_order_id": "18446744073709551615"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": true
+        }
+      }
+    },
+    {
+      "name": "fok_market_buy",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0x55244784d69c1582353ebb2a51de11a94c3a8374ea2501ffc77ea75302cfee6b",
+      "digest": "0x8222c97d4df1bb06a52d1b65840fc9c3bbfc019dc73d002be7d40db6133b3d81",
+      "message": {
+        "subAccountID": "77",
+        "isMarket": true,
+        "timeInForce": "4",
+        "postOnly": false,
+        "reduceOnly": false,
+        "nonce": "4294967295",
+        "expiration": "1794780000000000001"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "77",
+          "time_in_force": "FILL_OR_KILL",
+          "legs": [
+            {
+              "instrument": "BTC_USDT_Perp",
+              "size": "0.5",
+              "is_buying_asset": true,
+              "limit_price": "0"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0xb4b814d62bb93843140be080886bb02960595825e5b4fed6215ecf848c27f661",
+            "s": "0x64fe0eb52ace8ef34cea8cded1e1fab8e2c6261c5e80378180261b65fa8e34f7",
+            "v": 28,
+            "expiration": "1794780000000000001",
+            "nonce": 4294967295
+          },
+          "metadata": {
+            "client_order_id": "12345"
+          },
+          "is_market": true,
+          "post_only": false,
+          "reduce_only": false
+        }
+      }
+    },
+    {
+      "name": "aon_testnet",
+      "chain_id": 326,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x1254f97f8495f704630a238cbcd898a4b8ab20d77bb93e17049d3445f4f81f16",
+      "struct_hash": "0xf7f742e834ddb20dece13f374667ad9322a7e371e31db9e118b8d659c72e03c8",
+      "digest": "0x25235be1b7a40b0c9313607b080842ead1a419ebcbda8b797dab4cafa2f6ecc9",
+      "message": {
+        "subAccountID": "18446744073709551615",
+        "isMarket": false,
+        "timeInForce": "2",
+        "postOnly": false,
+        "reduceOnly": false,
+        "nonce": "0",
+        "expiration": "1"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "18446744073709551615",
+          "time_in_force": "ALL_OR_NONE",
+          "legs": [
+            {
+              "instrument": "ETH_USDT_Perp",
+              "size": "10",
+              "is_buying_asset": true,
+              "limit_price": "2999.999999999"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0x182352dc43362f20d7c5e16928d62b9d4acfa33a6326f58493469463b3d15526",
+            "s": "0x63e56542c9fcc5e8627b541ec102c08dc550f01e315f419ab8ae54ca361cbc70",
+            "v": 28,
+            "expiration": "1",
+            "nonce": 0
+          },
+          "metadata": {
+            "client_order_id": "1"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": false
+        }
+      }
+    },
+    {
+      "name": "six_decimal_base",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0xe49d2c9e310e2e60f4adb5d35ffd92ea63a3a7cc34cd274fb356ac96d3d6fbfb",
+      "digest": "0x5c547b9af19d7a3d6ab7540b12627c537d0b259440465fbd9842319cac9a0d45",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "1",
+        "postOnly": false,
+        "reduceOnly": false,
+        "nonce": "42",
+        "expiration": "1794780000000000000"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "GOOD_TILL_TIME",
+          "legs": [
+            {
+              "instrument": "XAG_USDC_SFP",
+              "size": "50.000001",
+              "is_buying_asset": false,
+              "limit_price": "31.123"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0x7afb6ed6fef87bbcbf7622df1b7ff877a3bde8c83db311847bdff06644e266ea",
+            "s": "0x7ccf02dd6bc8c8ec2f4446638ce751b451aaff5c5e00e2788b7d03974f1b709b",
+            "v": 27,
+            "expiration": "1794780000000000000",
+            "nonce": 42
+          },
+          "metadata": {
+            "client_order_id": "9300000000000000000"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": false
+        }
+      }
+    },
+    {
+      "name": "spot_swap",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0x541eae353c2ecb63e112b6096c1e7fa5420633f55e39e62f7364e7a517667880",
+      "digest": "0x96a34d5bb00c09de86b112886d7a26a0054294f8c6a9dcdb707272fb8de2c442",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "3",
+        "postOnly": false,
+        "reduceOnly": false,
+        "nonce": "7",
+        "expiration": "1794780000000000000"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "IMMEDIATE_OR_CANCEL",
+          "legs": [
+            {
+              "instrument": "USDC_USDT_SpotSwap",
+              "size": "1000",
+              "is_buying_asset": true,
+              "limit_price": "0.99991"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0x0f93b7c075fe9428a9d4416a5bcaed52727fbff9cbda0b1e75f23f8e13f6b25d",
+            "s": "0x13630441ef50a9a175e0dc2232e5e7fe928dcde0a2839ad0a7d1c97b965a33bb",
+            "v": 28,
+            "expiration": "1794780000000000000",
+            "nonce": 7
+          },
+          "metadata": {
+            "client_order_id": "9300000000000000001"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": false
+        }
+      }
+    },
+    {
+      "name": "two_legs",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0x63d674246b316af07f2d53520f61cc69ae69534b4f5a4acf9beb8b13ba5494b8",
+      "digest": "0x53ef08b46dd8c42aad879e1ca5bd4933afbd9416d4c0453b2a3cde3dfb9502d6",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "1",
+        "postOnly": false,
+        "reduceOnly": false,
+        "nonce": "99",
+        "expiration": "1794780000000000000"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "GOOD_TILL_TIME",
+          "legs": [
+            {
+              "instrument": "BTC_USDT_Perp",
+              "size": "0.002",
+              "is_buying_asset": true,
+              "limit_price": "64000"
+            },
+            {
+              "instrument": "ETH_USDT_Perp",
+              "size": "0.03",
+              "is_buying_asset": false,
+              "limit_price": "3100.5"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0x6c42bc77bbcad5b73892726199bec5fd020e608c23f1be0570f7e8ab30c25ffa",
+            "s": "0x528284df8dca03c30fcbadc3e08c6063199cb887442d9bea0ed569310022b198",
+            "v": 27,
+            "expiration": "1794780000000000000",
+            "nonce": 99
+          },
+          "metadata": {
+            "client_order_id": "9300000000000000002"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": false
+        }
+      }
+    },
+    {
+      "name": "builder_fee",
+      "chain_id": 325,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0x31ffb3da43a2ae8503289d869f099a64d3fc015787d4f739f84b10ed9a3104c1",
+      "digest": "0xa0292a70456243f80fc3f3afbeebc8f60bab8877e04b96b6e6cf4e7bf46ed22d",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "1",
+        "postOnly": false,
+        "reduceOnly": false,
+        "builder": "0xdc93ed3bc9932915a5bc7f6313b946091afc7e86",
+        "builderFee": "10",
+        "nonce": "123456",
+        "expiration": "1794780000000000000"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "GOOD_TILL_TIME",
+          "legs": [
+            {
+              "instrument": "BTC_USDT_Perp",
+              "size": "0.1",
+              "is_buying_asset": true,
+              "limit_price": "65000.5"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0x7dffc60dacb01d19cd4ac9d23dc0e50776aee4ae8759202c061b88edd0172334",
+            "s": "0x4c38b4137992ad1db59cdebb6b38687e2b400b6b5b9f7bdca582da0ece612bb4",
+            "v": 27,
+            "expiration": "1794780000000000000",
+            "nonce": 123456
+          },
+          "metadata": {
+            "client_order_id": "9300000000000000003"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": false,
+          "builder": "0xdc93ed3bc9932915a5bc7f6313b946091afc7e86",
+          "builder_fee": "0.001"
+        }
+      }
+    },
+    {
+      "name": "builder_fee_testnet_ioc",
+      "chain_id": 326,
+      "instruments": {
+        "BTC_USDT_Perp": {
+          "instrument_hash": "0x030501",
+          "base_decimals": 9
+        },
+        "ETH_USDT_Perp": {
+          "instrument_hash": "0x030401",
+          "base_decimals": 9
+        },
+        "XAG_USDC_SFP": {
+          "instrument_hash": "0x025609",
+          "base_decimals": 6
+        },
+        "USDC_USDT_SpotSwap": {
+          "instrument_hash": "0x030208",
+          "base_decimals": 6
+        }
+      },
+      "domain_separator": "0x1254f97f8495f704630a238cbcd898a4b8ab20d77bb93e17049d3445f4f81f16",
+      "struct_hash": "0x1e46acb6a5502b5d350beb2e8563c35225721dc973f436a1bf1209bfeb8c02af",
+      "digest": "0x094d7a04f1e20f11388c1c8f0bb97a261aaab61fa72bd0da0c964ebfaa9eacb1",
+      "message": {
+        "subAccountID": "4110889093865147",
+        "isMarket": false,
+        "timeInForce": "3",
+        "postOnly": false,
+        "reduceOnly": true,
+        "builder": "0x00000000000000000000000000000000000000FF",
+        "builderFee": "125",
+        "nonce": "9",
+        "expiration": "1794780000000000000"
+      },
+      "request": {
+        "order": {
+          "sub_account_id": "4110889093865147",
+          "time_in_force": "IMMEDIATE_OR_CANCEL",
+          "legs": [
+            {
+              "instrument": "ETH_USDT_Perp",
+              "size": "0.25",
+              "is_buying_asset": false,
+              "limit_price": "3001"
+            }
+          ],
+          "signature": {
+            "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+            "r": "0xe992e98750e54510798af6eace85a45e358b5b1b7b7c9bed8997d38379f27cf5",
+            "s": "0x61c558ae3a9ba0b2be375a5e1f3333b1b176310c8c920898031200116f6a8e6e",
+            "v": 28,
+            "expiration": "1794780000000000000",
+            "nonce": 9
+          },
+          "metadata": {
+            "client_order_id": "9300000000000000004"
+          },
+          "is_market": false,
+          "post_only": false,
+          "reduce_only": true,
+          "builder": "0x00000000000000000000000000000000000000FF",
+          "builder_fee": "0.0125"
+        }
+      }
+    }
+  ],
+  "wallet_logins": [
+    {
+      "name": "login_prod",
+      "chain_id": 325,
+      "nonce": 305419896,
+      "expiration": "1794780300000000000",
+      "domain_separator": "0x72fe716bb0105cb5a449731f4eb044bed644eb0d796360108a39c47064e17247",
+      "struct_hash": "0xa8c94a01a7450e1c25e8e5f73118e5ad9340e3c8ad8750b25598291eb98c55de",
+      "digest": "0x76a13751ff9c34f9a7bfd0f8487aa60cc2d6d7e8093be98928079a2de7ede21c",
+      "request": {
+        "address": "0xC06899F502A4759913a410913f6B903a7ce36560",
+        "signature": {
+          "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+          "v": 27,
+          "r": "0xc2f7ebdd9780075faacee739904f1d60b339a427f05fa9f6f769a6a78b45f2a9",
+          "s": "0x5959f19412085190229bbdb4416859ac4b456048b52f7137e610ca6f07ee8517",
+          "nonce": 305419896,
+          "expiration": "1794780300000000000",
+          "chain_id": "325"
+        }
+      }
+    },
+    {
+      "name": "login_testnet",
+      "chain_id": 326,
+      "nonce": 4294967295,
+      "expiration": "1794780000000000001",
+      "domain_separator": "0x1254f97f8495f704630a238cbcd898a4b8ab20d77bb93e17049d3445f4f81f16",
+      "struct_hash": "0xe4cc850e546626e16745c946acf61b2297ac6c7a048775da90f24f846fd379a8",
+      "digest": "0x3bde04ce4c913a2826eea3e075ac7999051969cef7ab50ca01bc91e69546bf9a",
+      "request": {
+        "address": "0xC06899F502A4759913a410913f6B903a7ce36560",
+        "signature": {
+          "signer": "0xC06899F502A4759913a410913f6B903a7ce36560",
+          "v": 28,
+          "r": "0xa9d0a1040cf2fad6806cb6d73851948b134f381962b22dd835e74fe52362f483",
+          "s": "0x03f2f1c84aa5031dfe9ee22f416c1470c21c3696b8b15037147728c7c5c69b32",
+          "nonce": 4294967295,
+          "expiration": "1794780000000000001",
+          "chain_id": "326"
+        }
+      }
+    }
+  ]
+}

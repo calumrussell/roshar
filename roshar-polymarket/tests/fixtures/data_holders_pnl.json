@@ -1,0 +1,100 @@
+{
+  "data": [
+    {
+      "token_id": "45714870634090908403813747458214625542376052548606303175331201110938821302832",
+      "holders": [
+        {
+          "proxy_wallet": "0x9660f0ad8a52eaf301f70900e21b397e064c32a7",
+          "bio": "",
+          "token_id": "45714870634090908403813747458214625542376052548606303175331201110938821302832",
+          "pseudonym": "Rough-Difficulty",
+          "amount": 5111.0,
+          "display_username_public": true,
+          "outcome_index": 0,
+          "name": "stacy",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false,
+          "avg_price": 0.989,
+          "entry_cost_usdc": 5054.779,
+          "current_price": 1.0,
+          "current_value": 5111.0,
+          "realized_pnl": 0.0,
+          "unrealized_pnl": 56.221,
+          "total_pnl": 56.221
+        },
+        {
+          "proxy_wallet": "0x32aef75a26d17262e166020f0b687226b289619c",
+          "bio": "",
+          "token_id": "45714870634090908403813747458214625542376052548606303175331201110938821302832",
+          "pseudonym": "Competent-Pug",
+          "amount": 2092.050208,
+          "display_username_public": true,
+          "outcome_index": 0,
+          "name": "chsmo69",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false,
+          "avg_price": 0.9559,
+          "entry_cost_usdc": 1999.9979,
+          "current_price": 1.0,
+          "current_value": 2092.0502,
+          "realized_pnl": 0.0001,
+          "unrealized_pnl": 92.0522,
+          "total_pnl": 92.0523
+        }
+      ]
+    },
+    {
+      "token_id": "81903344213938200361285862519406650037576398044514748634670292917494365866240",
+      "holders": [
+        {
+          "proxy_wallet": "0xa5ef39c3d3e10d0b270233af41cac69796b12966",
+          "bio": "",
+          "token_id": "81903344213938200361285862519406650037576398044514748634670292917494365866240",
+          "pseudonym": "Rapid-Alphabet-Winner",
+          "amount": 6497604.964996,
+          "display_username_public": false,
+          "outcome_index": 1,
+          "name": "rw0ajdugzw",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false,
+          "avg_price": 0.0,
+          "entry_cost_usdc": 0.0,
+          "current_price": 0.0,
+          "current_value": 0.0,
+          "realized_pnl": 0.0,
+          "unrealized_pnl": 0.0,
+          "total_pnl": 0.0
+        },
+        {
+          "proxy_wallet": "0x280f91e6616ad339d85bc3e395cb365346d295b5",
+          "bio": "",
+          "token_id": "81903344213938200361285862519406650037576398044514748634670292917494365866240",
+          "pseudonym": "Equal-Poisoning",
+          "amount": 2284293.784077,
+          "display_username_public": true,
+          "outcome_index": 1,
+          "name": "BrightHorizon",
+          "profile_image": "",
+          "profile_image_optimized": "",
+          "verified": false,
+          "avg_price": 0.0112,
+          "entry_cost_usdc": 25757.6967,
+          "current_price": 0.0,
+          "current_value": 0.0,
+          "realized_pnl": 1637.2363,
+          "unrealized_pnl": -25757.6967,
+          "total_pnl": -24120.4604
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "limit": 100,
+    "offset": 0,
+    "has_more": true,
+    "next_cursor": "eyJkYXRhIjp7InR5cGUiOiJob2xkZXJzIiwicGFyYW1zIjp7ImwiOjEwMCwibyI6MTAwfX0sInNpZyI6IjE0ODAzYjhjMjM0Y2Q3MWQwODI1MWJiZjhlMTlhNjkwIn0"
+  }
+}

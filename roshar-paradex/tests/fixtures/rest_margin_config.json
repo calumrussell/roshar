@@ -1,0 +1,146 @@
+{
+  "results": [
+    {
+      "base_asset": "BTC",
+      "mmf_factor": 0.5,
+      "hedged_margin_factor": 0.001,
+      "unhedged_margin_factor": 0.002,
+      "funding_provision_hour": 8,
+      "scenarios": [
+        {
+          "spot_shock": 0.14,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0.105,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0.105,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0.07,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0.07,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0.035,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0.035,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": 0,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.035,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.035,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.07,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.07,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.105,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.105,
+          "vol_shock": -0.22,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.14,
+          "vol_shock": 0.4,
+          "weight": 1
+        },
+        {
+          "spot_shock": -0.66,
+          "vol_shock": 0.4,
+          "weight": 0.1061
+        },
+        {
+          "spot_shock": -0.33,
+          "vol_shock": 0.4,
+          "weight": 0.2121
+        },
+        {
+          "spot_shock": 0.5,
+          "vol_shock": 0.4,
+          "weight": 0.14
+        },
+        {
+          "spot_shock": 1,
+          "vol_shock": 0.4,
+          "weight": 0.07
+        },
+        {
+          "spot_shock": 2,
+          "vol_shock": 0.4,
+          "weight": 0.0175
+        },
+        {
+          "spot_shock": 3,
+          "vol_shock": 0.4,
+          "weight": 0.0078
+        },
+        {
+          "spot_shock": 4,
+          "vol_shock": 0.4,
+          "weight": 0.0044
+        },
+        {
+          "spot_shock": 5,
+          "vol_shock": 0.4,
+          "weight": 0.0028
+        }
+      ],
+      "vol_shock_params": {
+        "vega_power_short_dte": 0.3,
+        "vega_power_long_dte": 0.13,
+        "dte_floor_days": 1,
+        "min_vol_shock_up": 0.4
+      },
+      "rfq_max_slippage": "0.0005"
+    },
+    {
+      "base_asset": "AAVE",
+      "scenarios": [],
+      "vol_shock_params": null,
+      "rfq_max_slippage": "0.005"
+    }
+  ]
+}

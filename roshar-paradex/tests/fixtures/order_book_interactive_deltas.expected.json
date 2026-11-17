@@ -1,0 +1,305 @@
+[
+ {
+  "header": {
+   "block_length": 89,
+   "template_id": 3,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "order_book.XRP-USD-PERP",
+  "data": {
+   "timestamp": 1794780122671,
+   "seq_no": 1673115654,
+   "pkg_type": "SNAPSHOT",
+   "best_bid_price": null,
+   "best_bid_size": null,
+   "best_ask_price": null,
+   "best_ask_size": null,
+   "relative_spread": null,
+   "best_bid_api_price": "0.95380000",
+   "best_bid_api_size": "1565.00000000",
+   "best_ask_api_price": "0.97270000",
+   "best_ask_api_size": "1424.80000000",
+   "bids": [
+    [
+     "0.96290000",
+     "26885.40000000"
+    ],
+    [
+     "0.95470000",
+     "53302.60000000"
+    ],
+    [
+     "0.95380000",
+     "1565.00000000"
+    ],
+    [
+     "0.95370000",
+     "1453.20000000"
+    ],
+    [
+     "0.95230000",
+     "1190.80000000"
+    ],
+    [
+     "0.94420000",
+     "5241.00000000"
+    ],
+    [
+     "0.94410000",
+     "5189.90000000"
+    ],
+    [
+     "0.92690000",
+     "345.30000000"
+    ],
+    [
+     "0.92680000",
+     "10357.30000000"
+    ],
+    [
+     "0.91780000",
+     "11384.80000000"
+    ],
+    [
+     "0.90010000",
+     "344.70000000"
+    ],
+    [
+     "0.90000000",
+     "555.60000000"
+    ],
+    [
+     "0.83270000",
+     "691.80000000"
+    ],
+    [
+     "0.81450000",
+     "23.50000000"
+    ],
+    [
+     "0.70000000",
+     "42.90000000"
+    ],
+    [
+     "0.64600000",
+     "5218.30000000"
+    ]
+   ],
+   "asks": [
+    [
+     "0.96360000",
+     "26865.90000000"
+    ],
+    [
+     "0.96990000",
+     "52467.20000000"
+    ],
+    [
+     "0.97270000",
+     "1424.80000000"
+    ],
+    [
+     "0.97400000",
+     "1566.00000000"
+    ],
+    [
+     "0.97410000",
+     "1164.10000000"
+    ],
+    [
+     "0.98260000",
+     "5242.00000000"
+    ],
+    [
+     "0.98270000",
+     "5189.40000000"
+    ],
+    [
+     "1.00400000",
+     "345.30000000"
+    ],
+    [
+     "1.00420000",
+     "10356.20000000"
+    ],
+    [
+     "1.01450000",
+     "344.70000000"
+    ],
+    [
+     "1.01460000",
+     "11383.60000000"
+    ],
+    [
+     "1.09400000",
+     "690.90000000"
+    ],
+    [
+     "1.31500000",
+     "350.00000000"
+    ],
+    [
+     "3.87650000",
+     "869.60000000"
+    ]
+   ],
+   "market": "XRP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 89,
+   "template_id": 3,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "order_book.XRP-USD-PERP",
+  "data": {
+   "timestamp": 1794780124009,
+   "seq_no": 1673115655,
+   "pkg_type": "DELTA",
+   "best_bid_price": null,
+   "best_bid_size": null,
+   "best_ask_price": null,
+   "best_ask_size": null,
+   "relative_spread": null,
+   "best_bid_api_price": null,
+   "best_bid_api_size": null,
+   "best_ask_api_price": null,
+   "best_ask_api_size": null,
+   "bids": [],
+   "asks": [
+    [
+     "0.96360000",
+     "0.00000000"
+    ]
+   ],
+   "market": "XRP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 89,
+   "template_id": 3,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "order_book.XRP-USD-PERP",
+  "data": {
+   "timestamp": 1794780124009,
+   "seq_no": 1673115656,
+   "pkg_type": "DELTA",
+   "best_bid_price": null,
+   "best_bid_size": null,
+   "best_ask_price": null,
+   "best_ask_size": null,
+   "relative_spread": null,
+   "best_bid_api_price": null,
+   "best_bid_api_size": null,
+   "best_ask_api_price": null,
+   "best_ask_api_size": null,
+   "bids": [
+    [
+     "0.96290000",
+     "0.00000000"
+    ]
+   ],
+   "asks": [],
+   "market": "XRP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 89,
+   "template_id": 3,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "order_book.XRP-USD-PERP",
+  "data": {
+   "timestamp": 1794780124044,
+   "seq_no": 1673115657,
+   "pkg_type": "DELTA",
+   "best_bid_price": null,
+   "best_bid_size": null,
+   "best_ask_price": null,
+   "best_ask_size": null,
+   "relative_spread": null,
+   "best_bid_api_price": null,
+   "best_bid_api_size": null,
+   "best_ask_api_price": null,
+   "best_ask_api_size": null,
+   "bids": [
+    [
+     "0.96260000",
+     "26893.80000000"
+    ]
+   ],
+   "asks": [],
+   "market": "XRP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 89,
+   "template_id": 3,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "order_book.XRP-USD-PERP",
+  "data": {
+   "timestamp": 1794780124044,
+   "seq_no": 1673115658,
+   "pkg_type": "DELTA",
+   "best_bid_price": null,
+   "best_bid_size": null,
+   "best_ask_price": null,
+   "best_ask_size": null,
+   "relative_spread": null,
+   "best_bid_api_price": null,
+   "best_bid_api_size": null,
+   "best_ask_api_price": null,
+   "best_ask_api_size": null,
+   "bids": [],
+   "asks": [
+    [
+     "0.96360000",
+     "26865.90000000"
+    ]
+   ],
+   "market": "XRP-USD-PERP"
+  }
+ },
+ {
+  "header": {
+   "block_length": 89,
+   "template_id": 3,
+   "schema_id": 1,
+   "version": 3
+  },
+  "channel": "order_book.XRP-USD-PERP",
+  "data": {
+   "timestamp": 1794780124134,
+   "seq_no": 1673115659,
+   "pkg_type": "DELTA",
+   "best_bid_price": null,
+   "best_bid_size": null,
+   "best_ask_price": null,
+   "best_ask_size": null,
+   "relative_spread": null,
+   "best_bid_api_price": null,
+   "best_bid_api_size": null,
+   "best_ask_api_price": null,
+   "best_ask_api_size": null,
+   "bids": [
+    [
+     "0.96260000",
+     "0.00000000"
+    ]
+   ],
+   "asks": [],
+   "market": "XRP-USD-PERP"
+  }
+ }
+]

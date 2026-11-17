@@ -1,0 +1,32 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "continuation": "Uf27wEZZ6LaaXBWN9YNkNQ5oGskChWJurLYPAaNZe5WNmqaVFEGMaT7Zw2a4",
+    "settlements": [
+      {
+        "timestamp": 1668326400052,
+        "type": "bankruptcy",
+        "funded": 0.017050394,
+        "session_bankruptcy": 0.017050394,
+        "session_tax": 0.017050394,
+        "session_tax_rate": 0.0,
+        "socialized": 0.0,
+        "session_profit_loss": 85.393331367
+      },
+      {
+        "timestamp": 1668240000037,
+        "type": "bankruptcy",
+        "funded": 0.221065659,
+        "session_bankruptcy": 0.221065659,
+        "session_tax": 0.221065659,
+        "session_tax_rate": 0.0,
+        "socialized": 0.0,
+        "session_profit_loss": 1012.965047147
+      }
+    ]
+  },
+  "usIn": 1794828316805599,
+  "usOut": 1794828320796161,
+  "usDiff": 3990562,
+  "testnet": false
+}

@@ -1,8 +1,14 @@
 mod market;
+pub(crate) mod types;
+
+#[cfg(test)]
+mod fixture_tests;
 
 pub use market::{
-    ByBitInstrumentInfo, ByBitLeverageFilter, ByBitLotSizeFilter, ByBitPriceFilter,
-    ByBitTickerData, ByBitTickersResponse, MarketApi,
+    ByBitAuctionFeeInfo, ByBitInstrumentInfo, ByBitLeverageFilter, ByBitLotSizeFilter,
+    ByBitPreListingInfo, ByBitPreListingPhase, ByBitPriceFilter, ByBitRiskParameters,
+    ByBitTickerData, MarketApi,
 };
+pub use types::*;
 
 pub(crate) const BYBIT_REST_URL: &str = "https://api.bybit.com";

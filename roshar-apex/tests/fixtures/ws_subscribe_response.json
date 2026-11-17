@@ -1,0 +1,1 @@
+{"success": true, "ret_msg": "", "conn_id": "79ea5777-dd0a-4dee-a572-9a54c47962dd", "request": {"op": "subscribe", "args": ["orderBook25.H.BTCUSDT", "recentlyTrade.H.BTCUSDT", "instrumentInfo.H.BTCUSDT", "candle.1.BTCUSDT", "instrumentInfo.all", "orderBook200.H.BTCUSDT"]}}

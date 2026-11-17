@@ -1,0 +1,14 @@
+[
+  {
+    "name": "BTC/USD [WBTC-USDC]",
+    "market_token": "0x47c031236e19d024b42f8AE6780E44A573170703"
+  },
+  {
+    "name": "BTC/USD [WBTC-WBTC]",
+    "market_token": "0x7C11F78Ce78768518D743E81Fdfa2F860C6b9A77"
+  },
+  {
+    "name": "BTC/USD [TBTC-TBTC]",
+    "market_token": "0xd62068697bCc92AF253225676D618B0C9f17C663"
+  }
+]

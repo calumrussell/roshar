@@ -1,0 +1,738 @@
+{
+ "subscribed": {
+  "type": "subscribed",
+  "channel": "ticker.30000001",
+  "request": "{\"type\": \"subscribe\", \"channel\": \"ticker.30000001\"}"
+ },
+ "ticker_snapshot": {
+  "type": "quote-event",
+  "channel": "ticker.30000001",
+  "content": {
+   "channel": "ticker.30000001",
+   "data": [
+    {
+     "bestAskPrice": "64934.2",
+     "bestBidPrice": "64933.3",
+     "close": "64933.8",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "66031.3",
+     "highTime": "1794733925614",
+     "indexPrice": "64970.4376337546",
+     "lastPrice": "64933.8",
+     "low": "61975.1",
+     "lowTime": "1794707141183",
+     "markPrice": "64924.951561033284284133",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "64565.9",
+     "openInterest": "2464.335",
+     "oraclePrice": "64924.951561033284284133",
+     "priceChange": "367.9",
+     "priceChangePercent": "0.005698",
+     "size": "6575.256",
+     "startTime": "1794691800000",
+     "trades": "109477",
+     "value": "422572604.7880"
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "ticker_all_snapshot": {
+  "type": "quote-event",
+  "channel": "ticker.all.1s",
+  "content": {
+   "channel": "ticker.all.1s",
+   "data": [
+    {
+     "bestAskPrice": "64934.2",
+     "bestBidPrice": "64933.3",
+     "close": "64933.8",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "66031.3",
+     "highTime": "1794733925614",
+     "indexPrice": "64970.4376337546",
+     "lastPrice": "64933.8",
+     "low": "61975.1",
+     "lowTime": "1794707141183",
+     "markPrice": "64924.951561033284284133",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "64565.9",
+     "openInterest": "2464.335",
+     "oraclePrice": "64924.951561033284284133",
+     "priceChange": "367.9",
+     "priceChangePercent": "0.005698",
+     "size": "6575.256",
+     "startTime": "1794691800000",
+     "trades": "109477",
+     "value": "422572604.7880"
+    },
+    {
+     "bestAskPrice": "1817.86",
+     "bestBidPrice": "1817.80",
+     "close": "1817.85",
+     "contractId": "30000002",
+     "contractName": "ETHUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "1842.78",
+     "highTime": "1794733923556",
+     "indexPrice": "1818.9002195396",
+     "lastPrice": "1817.85",
+     "low": "1710.00",
+     "lowTime": "1794707140856",
+     "markPrice": "1817.533593322054697352",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "1780.43",
+     "openInterest": "28254.79",
+     "oraclePrice": "1817.533593322054697352",
+     "priceChange": "37.42",
+     "priceChangePercent": "0.021017",
+     "size": "179991.77",
+     "startTime": "1794691800000",
+     "trades": "113260",
+     "value": "319998333.2684"
+    },
+    {
+     "bestAskPrice": "71.88",
+     "bestBidPrice": "71.85",
+     "close": "71.85",
+     "contractId": "30000003",
+     "contractName": "SOLUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "73.21",
+     "highTime": "1794748891623",
+     "indexPrice": "71.9111845670",
+     "lastPrice": "71.85",
+     "low": "67.34",
+     "lowTime": "1794707145611",
+     "markPrice": "71.850408795098883786",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "70.09",
+     "openInterest": "308102.40",
+     "oraclePrice": "71.850408795098883786",
+     "priceChange": "1.76",
+     "priceChangePercent": "0.025110",
+     "size": "1110218.0",
+     "startTime": "1794691800000",
+     "trades": "95286",
+     "value": "78396902.361"
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "depth_snapshot": {
+  "type": "quote-event",
+  "channel": "depth.30000001.15",
+  "content": {
+   "channel": "depth.30000001.15",
+   "data": [
+    {
+     "asks": [
+      {
+       "price": "64934.2",
+       "size": "1.261"
+      },
+      {
+       "price": "64934.3",
+       "size": "1.243"
+      },
+      {
+       "price": "64934.4",
+       "size": "1.375"
+      },
+      {
+       "price": "64934.5",
+       "size": "0.910"
+      },
+      {
+       "price": "64934.6",
+       "size": "1.054"
+      }
+     ],
+     "bids": [
+      {
+       "price": "64933.3",
+       "size": "0.778"
+      },
+      {
+       "price": "64933.2",
+       "size": "1.181"
+      },
+      {
+       "price": "64933.1",
+       "size": "0.769"
+      },
+      {
+       "price": "64933.0",
+       "size": "0.785"
+      },
+      {
+       "price": "64932.9",
+       "size": "0.937"
+      }
+     ],
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "depthType": "SNAPSHOT",
+     "endVersion": "2867106412",
+     "level": 15,
+     "startVersion": "2867106410"
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "trades_snapshot": {
+  "type": "quote-event",
+  "channel": "trades.30000001",
+  "content": {
+   "channel": "trades.30000001",
+   "data": [
+    {
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "isBestMatch": true,
+     "isBuyerMaker": false,
+     "makerOrderId": "816966888117502102",
+     "price": "64933.8",
+     "size": "0.003",
+     "takerOrderId": "816966888117503126",
+     "ticketId": "703abd41-b6f5-4bc7-a24e-5508276b1dbd",
+     "time": "1794780084639",
+     "value": "194.8014"
+    },
+    {
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "isBestMatch": true,
+     "isBuyerMaker": true,
+     "makerOrderId": "816966879867309601",
+     "price": "64933.3",
+     "size": "0.026",
+     "takerOrderId": "816966883927393430",
+     "ticketId": "5ff1ead8-fa29-45bd-b254-08790d12ebda",
+     "time": "1794780083640",
+     "value": "1688.2658"
+    },
+    {
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "isBestMatch": true,
+     "isBuyerMaker": true,
+     "makerOrderId": "816966879867309601",
+     "price": "64933.3",
+     "size": "0.005",
+     "takerOrderId": "816966883927392406",
+     "ticketId": "64a97fbc-e3f0-47e2-bf94-e7e512f2654a",
+     "time": "1794780083640",
+     "value": "324.6665"
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "kline_snapshot": {
+  "type": "quote-event",
+  "channel": "kline.LAST_PRICE.30000001.MINUTE_1",
+  "content": {
+   "channel": "kline.LAST_PRICE.30000001.MINUTE_1",
+   "data": [
+    {
+     "close": "64933.8",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "high": "64942.5",
+     "klineId": "2061584383781400489",
+     "klineTime": "1794780060000",
+     "klineType": "MINUTE_1",
+     "low": "64925.9",
+     "makerBuySize": "0.152",
+     "makerBuyValue": "9870.5366",
+     "open": "64929.3",
+     "priceType": "LAST_PRICE",
+     "size": "0.358",
+     "trades": "26",
+     "value": "23247.6934"
+    },
+    {
+     "close": "64929.3",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "high": "64966.2",
+     "klineId": "2061584383781400488",
+     "klineTime": "1794780000000",
+     "klineType": "MINUTE_1",
+     "low": "64888.3",
+     "makerBuySize": "0.695",
+     "makerBuyValue": "45106.4408",
+     "open": "64966.2",
+     "priceType": "LAST_PRICE",
+     "size": "1.236",
+     "trades": "80",
+     "value": "80223.4223"
+    },
+    {
+     "close": "64966.2",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "high": "65012.3",
+     "klineId": "2061584383781400487",
+     "klineTime": "1794779940000",
+     "klineType": "MINUTE_1",
+     "low": "64966.2",
+     "makerBuySize": "0.340",
+     "makerBuyValue": "22095.7061",
+     "open": "65012.3",
+     "priceType": "LAST_PRICE",
+     "size": "0.652",
+     "trades": "43",
+     "value": "42373.0727"
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "fundingRate_snapshot": {
+  "type": "quote-event",
+  "channel": "fundingRate.30000001",
+  "content": {
+   "channel": "fundingRate.30000001",
+   "data": [
+    {
+     "avgPremiumIndex": "-0.00014466",
+     "contractId": "30000001",
+     "fundingIndex": "64906.10968840121628935",
+     "fundingRate": "0.00005000",
+     "fundingRateIntervalMin": "240",
+     "fundingTime": "1794772800000",
+     "fundingTimestamp": "1794780060000",
+     "impactAskPrice": "64929.6",
+     "impactBidPrice": "64926.2",
+     "impactMarginNotional": "100",
+     "indexPrice": "64950.7026579116",
+     "interestRate": "0.0003",
+     "markPrice": "64906.10968840121628935",
+     "oraclePrice": "64906.10968840121628935",
+     "predictedFundingRate": "0.00005000",
+     "premiumIndex": "-0.00008122",
+     "premiumIndexTimestamp": "1794780060000",
+     "previousFundingRate": "0.00005000",
+     "previousFundingTimestamp": "1794772740000",
+     "settlement": false
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "fundingRate_all_snapshot": {
+  "type": "quote-event",
+  "channel": "fundingRate.all",
+  "content": {
+   "channel": "fundingRate.all",
+   "data": [
+    {
+     "avgPremiumIndex": "-0.00014466",
+     "contractId": "30000001",
+     "fundingIndex": "64906.10968840121628935",
+     "fundingRate": "0.00005000",
+     "fundingRateIntervalMin": "240",
+     "fundingTime": "1794772800000",
+     "fundingTimestamp": "1794780060000",
+     "impactAskPrice": "64929.6",
+     "impactBidPrice": "64926.2",
+     "impactMarginNotional": "100",
+     "indexPrice": "64950.7026579116",
+     "interestRate": "0.0003",
+     "markPrice": "64906.10968840121628935",
+     "oraclePrice": "64906.10968840121628935",
+     "predictedFundingRate": "0.00005000",
+     "premiumIndex": "-0.00008122",
+     "premiumIndexTimestamp": "1794780060000",
+     "previousFundingRate": "0.00005000",
+     "previousFundingTimestamp": "1794772740000",
+     "settlement": false
+    },
+    {
+     "avgPremiumIndex": "-0.00014305",
+     "contractId": "30000002",
+     "fundingIndex": "1816.876344939944918211",
+     "fundingRate": "0.00005000",
+     "fundingRateIntervalMin": "240",
+     "fundingTime": "1794772800000",
+     "fundingTimestamp": "1794780060000",
+     "impactAskPrice": "1818.00",
+     "impactBidPrice": "1817.93",
+     "impactMarginNotional": "100",
+     "indexPrice": "1818.4768257254",
+     "interestRate": "0.0003",
+     "markPrice": "1816.876344939944918211",
+     "oraclePrice": "1816.876344939944918211",
+     "predictedFundingRate": "0.00005000",
+     "premiumIndex": "-0.00006555",
+     "premiumIndexTimestamp": "1794780060000",
+     "previousFundingRate": "0.00005000",
+     "previousFundingTimestamp": "1794772740000",
+     "settlement": false
+    },
+    {
+     "avgPremiumIndex": "-0.00005795",
+     "contractId": "30000003",
+     "fundingIndex": "71.818934452907011599",
+     "fundingRate": "0.00005000",
+     "fundingRateIntervalMin": "240",
+     "fundingTime": "1794772800000",
+     "fundingTimestamp": "1794780060000",
+     "impactAskPrice": "71.88",
+     "impactBidPrice": "71.84",
+     "impactMarginNotional": "100",
+     "indexPrice": "71.8770529267",
+     "interestRate": "0.0003",
+     "markPrice": "71.818934452907011599",
+     "oraclePrice": "71.818934452907011599",
+     "predictedFundingRate": "0.00005000",
+     "premiumIndex": "0.00000000",
+     "premiumIndexTimestamp": "1794780060000",
+     "previousFundingRate": "0.00005000",
+     "previousFundingTimestamp": "1794772740000",
+     "settlement": false
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ },
+ "depth_changed": {
+  "type": "quote-event",
+  "channel": "depth.30000001.15",
+  "content": {
+   "channel": "depth.30000001.15",
+   "data": [
+    {
+     "asks": [
+      {
+       "price": "64934.2",
+       "size": "0.683"
+      },
+      {
+       "price": "64934.3",
+       "size": "0.556"
+      },
+      {
+       "price": "64934.4",
+       "size": "1.162"
+      },
+      {
+       "price": "64934.5",
+       "size": "0.826"
+      },
+      {
+       "price": "64934.6",
+       "size": "1.440"
+      }
+     ],
+     "bids": [
+      {
+       "price": "64927.4",
+       "size": "26.000"
+      }
+     ],
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "depthType": "CHANGED",
+     "endVersion": "2867106726",
+     "level": 15,
+     "startVersion": "2867106412"
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "ticker_all_changed": {
+  "type": "quote-event",
+  "channel": "ticker.all",
+  "content": {
+   "channel": "ticker.all",
+   "data": [
+    {
+     "close": "593.6",
+     "contractId": "30000050",
+     "contractName": "BNBUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "599.7",
+     "highTime": "1794733923060",
+     "indexPrice": "593.2583426077",
+     "lastPrice": "593.6",
+     "low": "565.8",
+     "lowTime": "1794707147049",
+     "markPrice": "593.424224575957275301",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "579.4",
+     "openInterest": "4502.92",
+     "oraclePrice": "593.424224575957275301",
+     "priceChange": "14.2",
+     "priceChangePercent": "0.024508",
+     "size": "42419.69",
+     "startTime": "1794691800000",
+     "trades": "45938",
+     "value": "24867725.462"
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "ticker_changed": {
+  "type": "quote-event",
+  "channel": "ticker.30000001",
+  "content": {
+   "channel": "ticker.30000001",
+   "data": [
+    {
+     "close": "64933.8",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "66031.3",
+     "highTime": "1794733925614",
+     "indexPrice": "64970.4389377565",
+     "lastPrice": "64933.8",
+     "low": "61975.1",
+     "lowTime": "1794707141183",
+     "markPrice": "64924.951561033284284133",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "64565.9",
+     "openInterest": "2464.335",
+     "oraclePrice": "64924.951561033284284133",
+     "priceChange": "367.9",
+     "priceChangePercent": "0.005698",
+     "size": "6575.256",
+     "startTime": "1794691800000",
+     "trades": "109477",
+     "value": "422572604.7880"
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "kline_changed": {
+  "type": "quote-event",
+  "channel": "kline.LAST_PRICE.30000001.MINUTE_1",
+  "content": {
+   "channel": "kline.LAST_PRICE.30000001.MINUTE_1",
+   "data": [
+    {
+     "close": "64938.2",
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "high": "64942.5",
+     "klineId": "2061584383781400489",
+     "klineTime": "1794780060000",
+     "klineType": "MINUTE_1",
+     "low": "64925.9",
+     "makerBuySize": "0.152",
+     "makerBuyValue": "9870.5366",
+     "open": "64929.3",
+     "priceType": "LAST_PRICE",
+     "size": "0.363",
+     "trades": "27",
+     "value": "23572.3844"
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "trades_changed": {
+  "type": "quote-event",
+  "channel": "trades.30000001",
+  "content": {
+   "channel": "trades.30000001",
+   "data": [
+    {
+     "contractId": "30000001",
+     "contractName": "BTCUSDC",
+     "isBestMatch": true,
+     "isBuyerMaker": false,
+     "makerOrderId": "816966893662376481",
+     "price": "64938.2",
+     "size": "0.005",
+     "takerOrderId": "816966896371892374",
+     "ticketId": "7e756773-20a0-448a-877e-d79683348a83",
+     "time": "1794780086607",
+     "value": "324.6910"
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "ping": {
+  "type": "ping",
+  "time": "1794780093738"
+ },
+ "fundingRate_all_changed": {
+  "type": "quote-event",
+  "channel": "fundingRate.all",
+  "content": {
+   "channel": "fundingRate.all",
+   "data": [
+    {
+     "avgPremiumIndex": "0.00000000",
+     "contractId": "30000117",
+     "fundingIndex": "40.373738856163482899",
+     "fundingRate": "0.00048023",
+     "fundingRateIntervalMin": "240",
+     "fundingTime": "1794772800000",
+     "fundingTimestamp": "1794780120000",
+     "impactAskPrice": "40.45",
+     "impactBidPrice": "40.32",
+     "impactMarginNotional": "100",
+     "indexPrice": "40.3615553878",
+     "interestRate": "0.0003",
+     "markPrice": "40.373738856163482899",
+     "oraclePrice": "40.373738856163482899",
+     "predictedFundingRate": "0.00005000",
+     "premiumIndex": "0.00000000",
+     "premiumIndexTimestamp": "1794780120000",
+     "previousFundingRate": "0.00028957",
+     "previousFundingTimestamp": "1794772740000",
+     "settlement": false
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "fundingRate_changed": {
+  "type": "quote-event",
+  "channel": "fundingRate.30000001",
+  "content": {
+   "channel": "fundingRate.30000001",
+   "data": [
+    {
+     "avgPremiumIndex": "-0.00014509",
+     "contractId": "30000001",
+     "fundingIndex": "64949.470333857750250764",
+     "fundingRate": "0.00005000",
+     "fundingRateIntervalMin": "240",
+     "fundingTime": "1794772800000",
+     "fundingTimestamp": "1794780120000",
+     "impactAskPrice": "64942.3",
+     "impactBidPrice": "64941.3",
+     "impactMarginNotional": "100",
+     "indexPrice": "64993.6377072026",
+     "interestRate": "0.0003",
+     "markPrice": "64949.470333857750250764",
+     "oraclePrice": "64949.470333857750250764",
+     "predictedFundingRate": "0.00005000",
+     "premiumIndex": "-0.00019747",
+     "premiumIndexTimestamp": "1794780120000",
+     "previousFundingRate": "0.00005000",
+     "previousFundingTimestamp": "1794772740000",
+     "settlement": false
+    }
+   ],
+   "dataType": "changed"
+  }
+ },
+ "connected": {
+  "sid": "0e096552-bf91-4be1-90ce-ab32c2f7088b",
+  "type": "connected"
+ },
+ "error": {
+  "type": "error",
+  "request": "{\"type\": \"subscribe\", \"channel\": \"bogus.channel\"}",
+  "content": {
+   "code": "GATEWAY_INVALID_CHANNEL",
+   "msg": "invalid channel : bogus.channel"
+  }
+ },
+ "unsubscribed": {
+  "type": "unsubscribed",
+  "channel": "trades.30000001",
+  "request": "{\"type\": \"unsubscribe\", \"channel\": \"trades.30000001\"}"
+ },
+ "ticker_all_mixed": {
+  "type": "quote-event",
+  "channel": "ticker.all.1s",
+  "content": {
+   "channel": "ticker.all.1s",
+   "data": [
+    {
+     "close": "0",
+     "contractId": "30000162",
+     "contractName": "EURUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00005000",
+     "fundingTime": "1794772800000",
+     "high": "0",
+     "highTime": "0",
+     "indexPrice": "1.1009582461",
+     "lastPrice": "0",
+     "liquidity": "MEDIUM",
+     "low": "0",
+     "lowTime": "0",
+     "markPrice": "1.102649566020630165",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "0",
+     "openInterest": "0",
+     "oraclePrice": "1.102649566020630165",
+     "priceChange": "0",
+     "priceChangePercent": "0",
+     "size": "0",
+     "startTime": "1794691800000",
+     "trades": "0",
+     "value": "0"
+    },
+    {
+     "bestAskPrice": "0",
+     "bestBidPrice": "0",
+     "close": "0.006445",
+     "contractId": "30000161",
+     "contractName": "JPYUSDC",
+     "endTime": "1794780000000",
+     "fundingRate": "0.00012284",
+     "fundingTime": "1794772800000",
+     "high": "0.006445",
+     "highTime": "1789563141860",
+     "indexPrice": "0.006261250494244104",
+     "lastPrice": "0.006445",
+     "liquidity": "MEDIUM",
+     "low": "0.006445",
+     "lowTime": "1789563141860",
+     "markPrice": "0.006261042778392135",
+     "marketOpen": true,
+     "nextFundingTime": "1794787200000",
+     "open": "0.006445",
+     "openInterest": "0",
+     "oraclePrice": "0.006261042778392135",
+     "priceChange": "-0.000042",
+     "priceChangePercent": "-0.006474",
+     "size": "0",
+     "startTime": "1794691800000",
+     "trades": "0",
+     "value": "0"
+    }
+   ],
+   "dataType": "Snapshot"
+  }
+ }
+}

@@ -1,11 +1,63 @@
 use crate::types::{
-    ParadexFundingEntry, ParadexKline, ParadexListResponse, ParadexMarket, ParadexMarketSummary,
-    ParadexOrderBook, ParadexTrade,
+    ParadexBbo, ParadexExchangeStats, ParadexFundingEntry, ParadexImpactPrice,
+    ParadexInsuranceFund, ParadexInteractiveOrderBook, ParadexKline, ParadexListResponse,
+    ParadexMarginConfig, ParadexMarket, ParadexMarketEvent, ParadexMarketSummary, ParadexOrderBook,
+    ParadexPageQuery, ParadexSettlementPrice, ParadexSystemConfig, ParadexSystemState,
+    ParadexSystemTime, ParadexTrade,
 };
 use roshar_http::RateLimitedClient;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
 use std::collections::HashMap;
+use std::fmt::Display;
 
 const BASE_URL: &str = "https://api.prod.paradex.trade/v1";
+
+type ApiResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+/// `{"results": [...]}` wrapper of the non-paginated endpoints.
+#[derive(Deserialize)]
+struct Results<T> {
+    results: Vec<T>,
+}
+
+/// Builds `BASE_URL/{path}?k=v&...`, skipping unset parameters.
+struct Query {
+    url: String,
+    has_params: bool,
+}
+
+impl Query {
+    fn new(path: &str) -> Self {
+        Self {
+            url: format!("{BASE_URL}/{path}"),
+            has_params: false,
+        }
+    }
+
+    fn param(mut self, key: &str, value: impl Display) -> Self {
+        self.url.push(if self.has_params { '&' } else { '?' });
+        self.url.push_str(key);
+        self.url.push('=');
+        self.url.push_str(&value.to_string());
+        self.has_params = true;
+        self
+    }
+
+    fn opt(self, key: &str, value: Option<impl Display>) -> Self {
+        match value {
+            Some(v) => self.param(key, v),
+            None => self,
+        }
+    }
+
+    fn page(self, page: &ParadexPageQuery) -> Self {
+        self.opt("start_at", page.start_at)
+            .opt("end_at", page.end_at)
+            .opt("page_size", page.page_size)
+            .opt("cursor", page.cursor.as_deref())
+    }
+}
 
 pub struct MarketApi {
     client: RateLimitedClient,
@@ -18,46 +70,58 @@ impl MarketApi {
         }
     }
 
-    /// Fetch static market definitions (contract specs, fee config, margin params).
-    /// `GET /v1/markets`
-    pub async fn get_markets(
-        &self,
-    ) -> Result<Vec<ParadexMarket>, Box<dyn std::error::Error + Send + Sync>> {
-        let url = format!("{BASE_URL}/markets");
-        let response = self.client.get(&url).await?;
+    async fn get_json<T: DeserializeOwned>(&self, url: &str, what: &str) -> ApiResult<T> {
+        let response = self.client.get(url).await?;
 
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(format!("Paradex markets failed ({status}): {body}").into());
+            return Err(format!("Paradex {what} failed ({status}): {body}").into());
         }
 
         let text = response.text().await?;
-        let wrapper: ParadexListResponse<ParadexMarket> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Paradex markets: {e}"))?;
+        let parsed = serde_json::from_str(&text)
+            .map_err(|e| format!("Failed to parse Paradex {what}: {e}"))?;
+        Ok(parsed)
+    }
+
+    /// Fetch static market definitions (contract specs, margin params).
+    /// `GET /v1/markets[?market=..|?asset_kind=..&base_asset=..]`
+    ///
+    /// `asset_kind` and `base_asset` are comma-separated lists and apply only without `market`.
+    /// Unfiltered requests draw on a per-client budget (HTTP 429 past it).
+    pub async fn get_markets(
+        &self,
+        market: Option<&str>,
+        asset_kind: Option<&str>,
+        base_asset: Option<&str>,
+    ) -> ApiResult<Vec<ParadexMarket>> {
+        let url = Query::new("markets")
+            .opt("market", market)
+            .opt("asset_kind", asset_kind)
+            .opt("base_asset", base_asset)
+            .url;
+        let wrapper: Results<ParadexMarket> = self.get_json(&url, "markets").await?;
         Ok(wrapper.results)
     }
 
-    /// Fetch live ticker data for all or a single market, keyed by symbol.
-    /// `GET /v1/markets/summary?market=ALL`
+    /// Fetch live ticker data, keyed by symbol.
+    /// `GET /v1/markets/summary?market={market|ALL}[&asset_kind=..&base_asset=..]`
+    ///
+    /// `market: None` requests `ALL`. `asset_kind` and `base_asset` are comma-separated lists and
+    /// apply only to `ALL`. Unfiltered `ALL` requests draw on a per-client budget (HTTP 429 past it).
     pub async fn get_markets_summary(
         &self,
         market: Option<&str>,
-    ) -> Result<HashMap<String, ParadexMarketSummary>, Box<dyn std::error::Error + Send + Sync>>
-    {
-        let param = market.unwrap_or("ALL");
-        let url = format!("{BASE_URL}/markets/summary?market={param}");
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Paradex markets/summary failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let wrapper: ParadexListResponse<ParadexMarketSummary> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Paradex markets summary: {e}"))?;
+        asset_kind: Option<&str>,
+        base_asset: Option<&str>,
+    ) -> ApiResult<HashMap<String, ParadexMarketSummary>> {
+        let url = Query::new("markets/summary")
+            .param("market", market.unwrap_or("ALL"))
+            .opt("asset_kind", asset_kind)
+            .opt("base_asset", base_asset)
+            .url;
+        let wrapper: Results<ParadexMarketSummary> = self.get_json(&url, "markets summary").await?;
         Ok(wrapper
             .results
             .into_iter()
@@ -65,136 +129,181 @@ impl MarketApi {
             .collect())
     }
 
-    /// Fetch order book snapshot for a market.
-    /// `GET /v1/orderbook/{market}?depth=...`
-    /// Paradex defaults to 20 levels when unspecified; we request 50.
+    /// Fetch an order book snapshot for a market.
+    /// `GET /v1/orderbook/{market}[?depth=..&price_tick=..]`
+    ///
+    /// Unset `depth` uses the exchange default (20 levels). `price_tick` aggregates levels.
     pub async fn get_orderbook(
         &self,
         market: &str,
         depth: Option<u32>,
-    ) -> Result<ParadexOrderBook, Box<dyn std::error::Error + Send + Sync>> {
-        let levels = depth.unwrap_or(50);
-        let url = format!("{BASE_URL}/orderbook/{market}?depth={levels}");
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Paradex orderbook failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let book: ParadexOrderBook = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Paradex order book: {e}"))?;
-        Ok(book)
+        price_tick: Option<&str>,
+    ) -> ApiResult<ParadexOrderBook> {
+        let url = Query::new(&format!("orderbook/{market}"))
+            .opt("depth", depth)
+            .opt("price_tick", price_tick)
+            .url;
+        self.get_json(&url, "orderbook").await
     }
 
-    /// Fetch recent public trades for a market.
-    /// `GET /v1/markets/{market}/trades`
+    /// Fetch one page of public trades for a market, newest first.
+    /// `GET /v1/trades?market={market}[&start_at=..&end_at=..&page_size=..&cursor=..]`
     pub async fn get_trades(
         &self,
         market: &str,
-        limit: Option<u32>,
-    ) -> Result<Vec<ParadexTrade>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/markets/{market}/trades");
-        if let Some(lim) = limit {
-            url.push_str(&format!("?page_size={lim}"));
-        }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Paradex trades failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let wrapper: ParadexListResponse<ParadexTrade> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Paradex trades: {e}"))?;
-        Ok(wrapper.results)
+        page: &ParadexPageQuery,
+    ) -> ApiResult<ParadexListResponse<ParadexTrade>> {
+        let url = Query::new("trades").param("market", market).page(page).url;
+        self.get_json(&url, "trades").await
     }
 
     /// Fetch OHLCV klines for a market.
-    /// Resolution is in minutes: 1, 3, 5, 15, 30, 60.
-    /// `GET /v1/markets/{market}/klines?resolution=...&start_at=...&end_at=...`
+    /// `GET /v1/markets/klines?symbol=..&resolution=..&start_at=..&end_at=..[&price_kind=..]`
+    ///
+    /// `resolution` is in minutes: 1, 3, 5, 15, 30 or 60. `start_at` / `end_at` are unix ms.
+    /// `price_kind` is `last`, `mark` or `underlying`; unset uses the exchange default.
     pub async fn get_klines(
         &self,
         market: &str,
         resolution: u32,
-        start_at: Option<i64>,
-        end_at: Option<i64>,
-    ) -> Result<Vec<ParadexKline>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/markets/{market}/klines?resolution={resolution}");
-
-        if let Some(start) = start_at {
-            url.push_str(&format!("&start_at={start}"));
-        }
-        if let Some(end) = end_at {
-            url.push_str(&format!("&end_at={end}"));
-        }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Paradex klines failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let wrapper: ParadexListResponse<ParadexKline> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Paradex klines: {e}"))?;
+        start_at: i64,
+        end_at: i64,
+        price_kind: Option<&str>,
+    ) -> ApiResult<Vec<ParadexKline>> {
+        let url = Query::new("markets/klines")
+            .param("symbol", market)
+            .param("resolution", resolution)
+            .param("start_at", start_at)
+            .param("end_at", end_at)
+            .opt("price_kind", price_kind)
+            .url;
+        let wrapper: Results<ParadexKline> = self.get_json(&url, "klines").await?;
         Ok(wrapper.results)
     }
 
-    /// Fetch historical funding rate data for a market (paginated).
-    /// `GET /v1/markets/{market}/funding`
+    /// Fetch one page of historical funding data for a market, newest first.
+    /// `GET /v1/funding/data?market={market}[&start_at=..&end_at=..&page_size=..&cursor=..]`
     pub async fn get_funding_history(
         &self,
         market: &str,
-        start_at: Option<i64>,
-        end_at: Option<i64>,
-    ) -> Result<Vec<ParadexFundingEntry>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut all: Vec<ParadexFundingEntry> = Vec::new();
-        let mut cursor: Option<String> = None;
+        page: &ParadexPageQuery,
+    ) -> ApiResult<ParadexListResponse<ParadexFundingEntry>> {
+        let url = Query::new("funding/data")
+            .param("market", market)
+            .page(page)
+            .url;
+        self.get_json(&url, "funding data").await
+    }
 
-        loop {
-            let mut url = format!("{BASE_URL}/markets/{market}/funding?page_size=100");
-            if let Some(start) = start_at {
-                url.push_str(&format!("&start_at={start}"));
-            }
-            if let Some(end) = end_at {
-                url.push_str(&format!("&end_at={end}"));
-            }
-            if let Some(ref c) = cursor {
-                url.push_str(&format!("&cursor={c}"));
-            }
+    /// Fetch the best bid/offer (API orders, excluding RPI).
+    /// `GET /v1/bbo/{market}`
+    pub async fn get_bbo(&self, market: &str) -> ApiResult<ParadexBbo> {
+        let url = Query::new(&format!("bbo/{market}")).url;
+        self.get_json(&url, "bbo").await
+    }
 
-            let response = self.client.get(&url).await?;
+    /// Fetch the best bid/offer including RPI orders (as shown in the UI).
+    /// `GET /v1/bbo/{market}/interactive`
+    pub async fn get_bbo_interactive(&self, market: &str) -> ApiResult<ParadexBbo> {
+        let url = Query::new(&format!("bbo/{market}/interactive")).url;
+        self.get_json(&url, "interactive bbo").await
+    }
 
-            if !response.status().is_success() {
-                let status = response.status();
-                let body = response.text().await.unwrap_or_default();
-                return Err(format!("Paradex funding history failed ({status}): {body}").into());
-            }
+    /// Fetch an order book snapshot including RPI orders.
+    /// `GET /v1/orderbook/{market}/interactive[?depth=..&price_tick=..]`
+    pub async fn get_orderbook_interactive(
+        &self,
+        market: &str,
+        depth: Option<u32>,
+        price_tick: Option<&str>,
+    ) -> ApiResult<ParadexInteractiveOrderBook> {
+        let url = Query::new(&format!("orderbook/{market}/interactive"))
+            .opt("depth", depth)
+            .opt("price_tick", price_tick)
+            .url;
+        self.get_json(&url, "interactive orderbook").await
+    }
 
-            let text = response.text().await?;
-            let wrapper: ParadexListResponse<ParadexFundingEntry> = serde_json::from_str(&text)
-                .map_err(|e| format!("Failed to parse Paradex funding history: {e}"))?;
+    /// Fetch the average fill price of a market order of `size` on `side` (`BUY` or `SELL`).
+    /// `GET /v1/orderbook/{market}/impact-price?side=..&size=..`
+    ///
+    /// The docs list only `size`; the exchange also requires `side`. An empty book side
+    /// returns HTTP 500 `filled size is zero`.
+    pub async fn get_impact_price(
+        &self,
+        market: &str,
+        side: &str,
+        size: &str,
+    ) -> ApiResult<ParadexImpactPrice> {
+        let url = Query::new(&format!("orderbook/{market}/impact-price"))
+            .param("side", side)
+            .param("size", size)
+            .url;
+        self.get_json(&url, "impact price").await
+    }
 
-            let batch_size = wrapper.results.len();
-            all.extend(wrapper.results);
+    /// Fetch market spec change events of the last 7 days, newest first.
+    /// `GET /v1/markets/history[?market=..]`
+    ///
+    /// `market: None` (or `"ALL"`) returns every market.
+    pub async fn get_markets_history(
+        &self,
+        market: Option<&str>,
+    ) -> ApiResult<Vec<ParadexMarketEvent>> {
+        let url = Query::new("markets/history").opt("market", market).url;
+        let wrapper: Results<ParadexMarketEvent> = self.get_json(&url, "markets history").await?;
+        Ok(wrapper.results)
+    }
 
-            match wrapper.next {
-                Some(next_cursor) if batch_size == 100 => {
-                    cursor = Some(next_cursor);
-                }
-                _ => break,
-            }
-        }
+    /// Fetch the settlement price of a settled market.
+    /// `GET /v1/markets/settlement-price?market=..` (HTTP 404 `MARKET_NOT_SETTLED` before).
+    pub async fn get_settlement_price(&self, market: &str) -> ApiResult<ParadexSettlementPrice> {
+        let url = Query::new("markets/settlement-price")
+            .param("market", market)
+            .url;
+        self.get_json(&url, "settlement price").await
+    }
 
-        Ok(all)
+    /// Fetch the insurance fund account. `GET /v1/insurance`
+    pub async fn get_insurance_fund(&self) -> ApiResult<ParadexInsuranceFund> {
+        self.get_json(&Query::new("insurance").url, "insurance fund")
+            .await
+    }
+
+    /// Fetch the clearing and settlement layer config. `GET /v1/system/config`
+    pub async fn get_system_config(&self) -> ApiResult<ParadexSystemConfig> {
+        self.get_json(&Query::new("system/config").url, "system config")
+            .await
+    }
+
+    /// Fetch the exchange status. `GET /v1/system/state`
+    pub async fn get_system_state(&self) -> ApiResult<ParadexSystemState> {
+        self.get_json(&Query::new("system/state").url, "system state")
+            .await
+    }
+
+    /// Fetch the server time. `GET /v1/system/time`
+    pub async fn get_system_time(&self) -> ApiResult<ParadexSystemTime> {
+        self.get_json(&Query::new("system/time").url, "system time")
+            .await
+    }
+
+    /// Fetch exchange-wide stats. `GET /v1/system/stats`
+    pub async fn get_exchange_stats(&self) -> ApiResult<ParadexExchangeStats> {
+        self.get_json(&Query::new("system/stats").url, "exchange stats")
+            .await
+    }
+
+    /// Fetch margin configuration per base asset.
+    /// `GET /v1/system/margin-config[?base_asset=..]`
+    pub async fn get_margin_config(
+        &self,
+        base_asset: Option<&str>,
+    ) -> ApiResult<Vec<ParadexMarginConfig>> {
+        let url = Query::new("system/margin-config")
+            .opt("base_asset", base_asset)
+            .url;
+        let wrapper: Results<ParadexMarginConfig> = self.get_json(&url, "margin config").await?;
+        Ok(wrapper.results)
     }
 }

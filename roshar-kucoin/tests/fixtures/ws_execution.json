@@ -1,0 +1,1 @@
+{"topic":"/contractMarket/execution:ETHUSDTM","type":"message","subject":"match","sn":1837646903990,"data":{"symbol":"ETHUSDTM","sequence":1837646903990,"side":"sell","size":1,"price":"1808.81","takerOrderId":"511762364018814976","makerOrderId":"511762362466942978","tradeId":"1837646903990","ts":1794826857671000000}}

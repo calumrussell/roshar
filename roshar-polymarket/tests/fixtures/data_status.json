@@ -1,0 +1,65 @@
+{
+  "data": {
+    "computed_at": "2026-11-16T11:35:42Z",
+    "age_seconds": 7,
+    "serving": {
+      "lag_seconds": 2,
+      "worst": "pnl",
+      "mechanisms": [
+        {
+          "name": "activity_feed",
+          "age_seconds": 0
+        },
+        {
+          "name": "custody_balances",
+          "age_seconds": 1,
+          "blocks_behind": 1
+        },
+        {
+          "name": "pnl",
+          "age_seconds": 2,
+          "blocks_behind": 2
+        }
+      ]
+    },
+    "ingestion": {
+      "cursors": 201,
+      "network": "polygon",
+      "chain_id": 137,
+      "max_synced_block": 97415648,
+      "min_synced_block": 97415647,
+      "most_lagged": {
+        "source": "auto_redeem_v2_neg_risk_redemption",
+        "block": 97415647,
+        "behind_max": 1
+      },
+      "lagging": [
+        {
+          "source": "auto_redeem_v2_neg_risk_redemption",
+          "block": 97415647,
+          "behind_max": 1
+        },
+        {
+          "source": "binary_module_condition_resolved",
+          "block": 97415647,
+          "behind_max": 1
+        },
+        {
+          "source": "binary_module_legacy_collateral_settled",
+          "block": 97415647,
+          "behind_max": 1
+        },
+        {
+          "source": "binary_module_position_migrated",
+          "block": 97415647,
+          "behind_max": 1
+        },
+        {
+          "source": "binary_module_position_redeemed",
+          "block": 97415647,
+          "behind_max": 1
+        }
+      ]
+    }
+  }
+}

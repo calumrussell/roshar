@@ -1,11 +1,17 @@
 use crate::types::{
-    PhoenixCandle, PhoenixCollateralEvent, PhoenixExchange, PhoenixFundingHistory,
-    PhoenixMarketConfig, PhoenixOrderBook, PhoenixOrderHistory, PhoenixPaginatedResponse,
-    PhoenixPnlPoint, PhoenixTradeHistory, PhoenixTraderState,
+    PhoenixCandle, PhoenixCollateralEvent, PhoenixCommodityCalendar, PhoenixExchange,
+    PhoenixExchangeKeys, PhoenixExchangeSnapshot, PhoenixExchangeStatus, PhoenixFill,
+    PhoenixFundingHistoryResponse, PhoenixFundingOverview, PhoenixFundingRateHistory,
+    PhoenixMarkPrice, PhoenixMarketCalendarRecord, PhoenixMarketCalendarResponse,
+    PhoenixMarketConfig, PhoenixMarketStatsHistory, PhoenixNextCommodityMarketTransition,
+    PhoenixNextMarketCalendarTransition, PhoenixOrderBook, PhoenixOrderHistory,
+    PhoenixPaginatedResponse, PhoenixPnlPoint, PhoenixTradeHistory, PhoenixTraderState,
 };
+use crate::PHOENIX_REST_URL;
 use roshar_http::RateLimitedClient;
+use serde::de::DeserializeOwned;
 
-const BASE_URL: &str = "https://perp-api.phoenix.trade";
+type BoxError = Box<dyn std::error::Error + Send + Sync>;
 
 pub struct MarketApi {
     client: RateLimitedClient,
@@ -18,95 +24,244 @@ impl MarketApi {
         }
     }
 
-    /// Full exchange state including on-chain keys and all market configs.
-    /// `GET /exchange`
-    pub async fn get_exchange(
+    /// Rate-limited GET of `PHOENIX_REST_URL + path` with URL-encoded query pairs.
+    async fn get_json<T: DeserializeOwned>(
         &self,
-    ) -> Result<PhoenixExchange, Box<dyn std::error::Error + Send + Sync>> {
-        let url = format!("{BASE_URL}/exchange");
-        let response = self.client.get(&url).await?;
+        path: &str,
+        query: &[(&str, String)],
+    ) -> Result<T, BoxError> {
+        let url = format!("{PHOENIX_REST_URL}{path}");
+        self.client.acquire().await;
+        let response = self.client.inner().get(&url).query(query).send().await?;
 
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /exchange failed ({status}): {body}").into());
+            return Err(format!("Phoenix GET {path} failed ({status}): {body}").into());
         }
 
         let text = response.text().await?;
-        let exchange: PhoenixExchange = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix exchange: {e}"))?;
-        Ok(exchange)
+        serde_json::from_str(&text)
+            .map_err(|e| format!("Failed to parse Phoenix GET {path} response: {e}").into())
+    }
+
+    /// Exchange keys and all market configs.
+    /// `GET /v1/view/exchange`
+    pub async fn get_exchange(&self) -> Result<PhoenixExchange, BoxError> {
+        self.get_json("/v1/view/exchange", &[]).await
     }
 
     /// All market configurations.
-    /// `GET /exchange/markets`
-    pub async fn get_markets(
-        &self,
-    ) -> Result<Vec<PhoenixMarketConfig>, Box<dyn std::error::Error + Send + Sync>> {
-        let url = format!("{BASE_URL}/exchange/markets");
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /exchange/markets failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let markets: Vec<PhoenixMarketConfig> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix markets: {e}"))?;
-        Ok(markets)
+    /// `GET /v1/view/exchange/markets`
+    pub async fn get_markets(&self) -> Result<Vec<PhoenixMarketConfig>, BoxError> {
+        self.get_json("/v1/view/exchange/markets", &[]).await
     }
 
-    /// Single market configuration by symbol (case-insensitive, uppercased server-side).
-    /// `GET /exchange/market/{symbol}`
-    pub async fn get_market(
-        &self,
-        symbol: &str,
-    ) -> Result<PhoenixMarketConfig, Box<dyn std::error::Error + Send + Sync>> {
-        let symbol = symbol.to_uppercase();
-        let url = format!("{BASE_URL}/exchange/market/{symbol}");
-        let response = self.client.get(&url).await?;
+    /// Single market configuration. The server matches `symbol` case-insensitively.
+    /// `GET /v1/view/exchange/market/{symbol}`
+    pub async fn get_market(&self, symbol: &str) -> Result<PhoenixMarketConfig, BoxError> {
+        self.get_json(&format!("/v1/view/exchange/market/{symbol}"), &[])
+            .await
+    }
 
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(
-                format!("Phoenix /exchange/market/{symbol} failed ({status}): {body}").into(),
-            );
-        }
+    /// Exchange account and authority keys.
+    /// `GET /v1/view/exchange/keys`
+    pub async fn get_exchange_keys(&self) -> Result<PhoenixExchangeKeys, BoxError> {
+        self.get_json("/v1/view/exchange/keys", &[]).await
+    }
 
-        let text = response.text().await?;
-        let market: PhoenixMarketConfig = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix market config: {e}"))?;
-        Ok(market)
+    /// Exchange running/gated/withdrawal status.
+    /// `GET /v1/view/exchange/status`
+    pub async fn get_exchange_status(&self) -> Result<PhoenixExchangeStatus, BoxError> {
+        self.get_json("/v1/view/exchange/status", &[]).await
+    }
+
+    /// Exchange state and full market parameters (large: ~0.5 MB).
+    /// `GET /v1/exchange/snapshot`
+    pub async fn get_exchange_snapshot(&self) -> Result<PhoenixExchangeSnapshot, BoxError> {
+        self.get_json("/v1/exchange/snapshot", &[]).await
     }
 
     /// L2 orderbook snapshot for a market.
-    /// `GET /orderbook?symbol={symbol}`
+    /// `include_splines`: also return spline liquidity. `bypass_execution_band`: full
+    /// book during commodities after-hours. The server only honours the camelCase
+    /// query names (`includeSplines`, `bypassExecutionBand`); the snake_case names in
+    /// the OpenAPI document are silently ignored.
+    /// `GET /v1/view/orderbook/{symbol}?includeSplines=&bypassExecutionBand=`
     pub async fn get_orderbook(
         &self,
         symbol: &str,
-    ) -> Result<PhoenixOrderBook, Box<dyn std::error::Error + Send + Sync>> {
-        let symbol = symbol.to_uppercase();
-        let url = format!("{BASE_URL}/orderbook?symbol={symbol}");
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /orderbook failed ({status}): {body}").into());
+        include_splines: Option<bool>,
+        bypass_execution_band: Option<bool>,
+    ) -> Result<PhoenixOrderBook, BoxError> {
+        let mut query = Vec::new();
+        if let Some(v) = include_splines {
+            query.push(("includeSplines", v.to_string()));
         }
-
-        let text = response.text().await?;
-        let book: PhoenixOrderBook = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix orderbook: {e}"))?;
-        Ok(book)
+        if let Some(v) = bypass_execution_band {
+            query.push(("bypassExecutionBand", v.to_string()));
+        }
+        self.get_json(&format!("/v1/view/orderbook/{symbol}"), &query)
+            .await
     }
 
-    /// OHLCV candles for a market and timeframe.
-    /// Valid timeframes: "1s","5s","1m","5m","15m","30m","1h","4h","1d".
-    /// `GET /candles?symbol={symbol}&timeframe={timeframe}&start_time=...&end_time=...&limit=...`
+    /// Current mark price.
+    /// `GET /v1/market/{symbol}/mark-price`
+    pub async fn get_mark_price(&self, symbol: &str) -> Result<PhoenixMarkPrice, BoxError> {
+        self.get_json(&format!("/v1/market/{symbol}/mark-price"), &[])
+            .await
+    }
+
+    /// Market stats history (OI, mark/spot price, cumulative fees). Times are RFC 3339
+    /// strings. Server defaults: last hour, limit 1000 (max 10000), raw points.
+    /// `GET /v1/market/{symbol}/stats?start_time=&end_time=&limit=&timeframe=`
+    pub async fn get_market_stats(
+        &self,
+        symbol: &str,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
+        limit: Option<u32>,
+        timeframe: Option<&str>,
+    ) -> Result<PhoenixMarketStatsHistory, BoxError> {
+        let mut query = Vec::new();
+        if let Some(v) = start_time {
+            query.push(("start_time", v.to_string()));
+        }
+        if let Some(v) = end_time {
+            query.push(("end_time", v.to_string()));
+        }
+        if let Some(v) = limit {
+            query.push(("limit", v.to_string()));
+        }
+        if let Some(v) = timeframe {
+            query.push(("timeframe", v.to_string()));
+        }
+        self.get_json(&format!("/v1/market/{symbol}/stats"), &query)
+            .await
+    }
+
+    /// Calendar for a market (404 `market_calendar_not_configured` if it has none).
+    /// `GET /v1/market/{symbol}/market-calendar`
+    pub async fn get_market_calendar(
+        &self,
+        symbol: &str,
+    ) -> Result<PhoenixMarketCalendarResponse, BoxError> {
+        self.get_json(&format!("/v1/market/{symbol}/market-calendar"), &[])
+            .await
+    }
+
+    /// Calendar by id (e.g. `cme_commodities`, `us_equities_extended`).
+    /// `GET /v1/market-calendar/{market_calendar_id}`
+    pub async fn get_market_calendar_by_id(
+        &self,
+        market_calendar_id: &str,
+    ) -> Result<PhoenixMarketCalendarRecord, BoxError> {
+        self.get_json(&format!("/v1/market-calendar/{market_calendar_id}"), &[])
+            .await
+    }
+
+    /// `GET /v1/market/commodity-calendar`
+    pub async fn get_commodity_calendar(&self) -> Result<PhoenixCommodityCalendar, BoxError> {
+        self.get_json("/v1/market/commodity-calendar", &[]).await
+    }
+
+    /// `GET /v1/market/{symbol}/next-market-calendar-transition`
+    pub async fn get_next_market_calendar_transition(
+        &self,
+        symbol: &str,
+    ) -> Result<PhoenixNextMarketCalendarTransition, BoxError> {
+        self.get_json(
+            &format!("/v1/market/{symbol}/next-market-calendar-transition"),
+            &[],
+        )
+        .await
+    }
+
+    /// `GET /v1/market/next-commodity-market-transition`
+    pub async fn get_next_commodity_market_transition(
+        &self,
+    ) -> Result<PhoenixNextCommodityMarketTransition, BoxError> {
+        self.get_json("/v1/market/next-commodity-market-transition", &[])
+            .await
+    }
+
+    /// Funding rate history. Times are unix milliseconds. Server defaults: last 7 days,
+    /// limit 1000 (max 10000).
+    /// `GET /v1/funding/{symbol}/rates?startTime=&endTime=&limit=`
+    pub async fn get_funding_rates(
+        &self,
+        symbol: &str,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        limit: Option<u32>,
+    ) -> Result<PhoenixFundingRateHistory, BoxError> {
+        let mut query = Vec::new();
+        if let Some(v) = start_time {
+            query.push(("startTime", v.to_string()));
+        }
+        if let Some(v) = end_time {
+            query.push(("endTime", v.to_string()));
+        }
+        if let Some(v) = limit {
+            query.push(("limit", v.to_string()));
+        }
+        self.get_json(&format!("/v1/funding/{symbol}/rates"), &query)
+            .await
+    }
+
+    /// Funding series for all markets. Times are unix milliseconds. Server defaults:
+    /// last 7 days, 500 points per market (max 5000).
+    /// `GET /v1/funding/overview?startTime=&endTime=&perMarketLimit=`
+    pub async fn get_funding_overview(
+        &self,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+        per_market_limit: Option<u32>,
+    ) -> Result<PhoenixFundingOverview, BoxError> {
+        let mut query = Vec::new();
+        if let Some(v) = start_time {
+            query.push(("startTime", v.to_string()));
+        }
+        if let Some(v) = end_time {
+            query.push(("endTime", v.to_string()));
+        }
+        if let Some(v) = per_market_limit {
+            query.push(("perMarketLimit", v.to_string()));
+        }
+        self.get_json("/v1/funding/overview", &query).await
+    }
+
+    /// Public market fills, newest first. Times are unix milliseconds (`end_time`
+    /// exclusive). Server default limit 100 (max 10000). Page with `next_cursor`.
+    /// `GET /v1/trades/{symbol}/fills?limit=&cursor=&startTime=&endTime=`
+    pub async fn get_market_fills(
+        &self,
+        symbol: &str,
+        limit: Option<u32>,
+        cursor: Option<&str>,
+        start_time: Option<i64>,
+        end_time: Option<i64>,
+    ) -> Result<PhoenixPaginatedResponse<PhoenixFill>, BoxError> {
+        let mut query = Vec::new();
+        if let Some(v) = limit {
+            query.push(("limit", v.to_string()));
+        }
+        if let Some(v) = cursor {
+            query.push(("cursor", v.to_string()));
+        }
+        if let Some(v) = start_time {
+            query.push(("startTime", v.to_string()));
+        }
+        if let Some(v) = end_time {
+            query.push(("endTime", v.to_string()));
+        }
+        self.get_json(&format!("/v1/trades/{symbol}/fills"), &query)
+            .await
+    }
+
+    /// OHLCV candles. Times are unix milliseconds.
+    /// Documented timeframes: "1s","5s","1m","5m","15m","30m","1h","4h","1d".
+    /// `GET /v1/candles/{symbol}?timeframe=&startTime=&endTime=&limit=`
     pub async fn get_candles(
         &self,
         symbol: &str,
@@ -114,62 +269,44 @@ impl MarketApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<u32>,
-    ) -> Result<Vec<PhoenixCandle>, Box<dyn std::error::Error + Send + Sync>> {
-        let symbol = symbol.to_uppercase();
-        let mut url = format!("{BASE_URL}/candles?symbol={symbol}&timeframe={timeframe}");
+        enable_external_source: Option<bool>,
+    ) -> Result<Vec<PhoenixCandle>, BoxError> {
+        let mut query = vec![("timeframe", timeframe.to_string())];
         if let Some(st) = start_time {
-            url.push_str(&format!("&start_time={st}"));
+            query.push(("startTime", st.to_string()));
         }
         if let Some(et) = end_time {
-            url.push_str(&format!("&end_time={et}"));
+            query.push(("endTime", et.to_string()));
         }
         if let Some(lim) = limit {
-            url.push_str(&format!("&limit={lim}"));
+            query.push(("limit", lim.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /candles failed ({status}): {body}").into());
+        if let Some(v) = enable_external_source {
+            query.push(("enableExternalSource", v.to_string()));
         }
-
-        let text = response.text().await?;
-        let candles: Vec<PhoenixCandle> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix candles: {e}"))?;
-        Ok(candles)
+        self.get_json(&format!("/v1/candles/{symbol}"), &query)
+            .await
     }
 
-    /// Trader account state (positions, orders, collateral).
-    /// `GET /trader/{authority}/state?pda_index={pda_index}`
+    /// Trader state snapshot (all subaccounts) for one trader PDA under an authority.
+    /// The server uses PDA index 0 when `trader_pda_index` is `None`.
+    /// `GET /v1/trader/state/{authority}?traderPdaIndex=`
     pub async fn get_trader_state(
         &self,
         authority: &str,
-        pda_index: Option<u8>,
-    ) -> Result<Vec<PhoenixTraderState>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/trader/{authority}/state");
-        if let Some(idx) = pda_index {
-            url.push_str(&format!("?pda_index={idx}"));
+        trader_pda_index: Option<u8>,
+    ) -> Result<PhoenixTraderState, BoxError> {
+        let mut query = Vec::new();
+        if let Some(idx) = trader_pda_index {
+            query.push(("traderPdaIndex", idx.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /trader/state failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let state: Vec<PhoenixTraderState> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix trader state: {e}"))?;
-        Ok(state)
+        self.get_json(&format!("/v1/trader/state/{authority}"), &query)
+            .await
     }
 
-    /// PnL time-series for a trader.
-    /// `GET /trader/{authority}/pnl?resolution={resolution}&start_time=...&end_time=...&limit=...`
-    /// Valid resolutions: "Minute1","Minute5","Minute15","Hour1","Hour4","Day1","Week1","Month1".
+    /// PnL time series for an authority (all trader PDAs).
+    /// Resolutions: "1m","5m","15m","1h","4h","1d","1w","1M".
+    /// `GET /v1/users/{authority}/pnl?resolution=&startTime=&endTime=&limit=`
     pub async fn get_trader_pnl(
         &self,
         authority: &str,
@@ -177,69 +314,47 @@ impl MarketApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<i64>,
-    ) -> Result<Vec<PhoenixPnlPoint>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url = format!("{BASE_URL}/trader/{authority}/pnl?resolution={resolution}");
+    ) -> Result<Vec<PhoenixPnlPoint>, BoxError> {
+        let mut query = vec![("resolution", resolution.to_string())];
         if let Some(st) = start_time {
-            url.push_str(&format!("&start_time={st}"));
+            query.push(("startTime", st.to_string()));
         }
         if let Some(et) = end_time {
-            url.push_str(&format!("&end_time={et}"));
+            query.push(("endTime", et.to_string()));
         }
         if let Some(lim) = limit {
-            url.push_str(&format!("&limit={lim}"));
+            query.push(("limit", lim.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /trader/pnl failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let pnl: Vec<PhoenixPnlPoint> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix trader PnL: {e}"))?;
-        Ok(pnl)
+        self.get_json(&format!("/v1/users/{authority}/pnl"), &query)
+            .await
     }
 
-    /// Paginated order history for a trader.
-    /// `GET /trader/{authority}/order-history?limit={limit}&market_symbol=...&cursor=...`
+    /// Paginated order history. `limit` is required by the API.
+    /// `GET /v1/trader/{authority}/order-history?limit=&traderPdaIndex=&marketSymbol=&cursor=`
     pub async fn get_order_history(
         &self,
         authority: &str,
+        trader_pda_index: Option<u8>,
         market_symbol: Option<&str>,
-        limit: Option<i64>,
+        limit: i64,
         cursor: Option<&str>,
-    ) -> Result<
-        PhoenixPaginatedResponse<PhoenixOrderHistory>,
-        Box<dyn std::error::Error + Send + Sync>,
-    > {
-        let lim = limit.unwrap_or(50);
-        let mut url = format!("{BASE_URL}/trader/{authority}/order-history?limit={lim}");
+    ) -> Result<PhoenixPaginatedResponse<PhoenixOrderHistory>, BoxError> {
+        let mut query = vec![("limit", limit.to_string())];
+        if let Some(idx) = trader_pda_index {
+            query.push(("traderPdaIndex", idx.to_string()));
+        }
         if let Some(sym) = market_symbol {
-            url.push_str(&format!("&market_symbol={sym}"));
+            query.push(("marketSymbol", sym.to_string()));
         }
         if let Some(c) = cursor {
-            url.push_str(&format!("&cursor={c}"));
+            query.push(("cursor", c.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /trader/order-history failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let result: PhoenixPaginatedResponse<PhoenixOrderHistory> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix order history: {e}"))?;
-        Ok(result)
+        self.get_json(&format!("/v1/trader/{authority}/order-history"), &query)
+            .await
     }
 
-    /// Paginated trade history for a trader.
-    /// `GET /trader/{authority}/trades-history?pda_index={pda_index}&market_symbol=...&limit=...&cursor=...`
+    /// Paginated trade (fill) history.
+    /// `GET /v1/trader/{authority}/trades-history?pdaIndex=&marketSymbol=&limit=&cursor=`
     pub async fn get_trades_history(
         &self,
         authority: &str,
@@ -247,37 +362,25 @@ impl MarketApi {
         market_symbol: Option<&str>,
         limit: Option<i64>,
         cursor: Option<&str>,
-    ) -> Result<
-        PhoenixPaginatedResponse<PhoenixTradeHistory>,
-        Box<dyn std::error::Error + Send + Sync>,
-    > {
-        let mut url = format!("{BASE_URL}/trader/{authority}/trades-history?pda_index={pda_index}");
+    ) -> Result<PhoenixPaginatedResponse<PhoenixTradeHistory>, BoxError> {
+        let mut query = vec![("pdaIndex", pda_index.to_string())];
         if let Some(sym) = market_symbol {
-            url.push_str(&format!("&market_symbol={sym}"));
+            query.push(("marketSymbol", sym.to_string()));
         }
         if let Some(lim) = limit {
-            url.push_str(&format!("&limit={lim}"));
+            query.push(("limit", lim.to_string()));
         }
         if let Some(c) = cursor {
-            url.push_str(&format!("&cursor={c}"));
+            query.push(("cursor", c.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(format!("Phoenix /trader/trades-history failed ({status}): {body}").into());
-        }
-
-        let text = response.text().await?;
-        let result: PhoenixPaginatedResponse<PhoenixTradeHistory> = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix trades history: {e}"))?;
-        Ok(result)
+        self.get_json(&format!("/v1/trader/{authority}/trades-history"), &query)
+            .await
     }
 
-    /// Funding payment history for a trader.
-    /// `GET /trader/{authority}/funding-history?pda_index={pda_index}&symbol=...&start_time=...&end_time=...&limit=...`
+    /// Funding payment history. Times are unix milliseconds; `cursor` and
+    /// `start_time` are mutually exclusive.
+    /// `GET /v1/trader/{authority}/funding-history?traderPdaIndex=&symbol=&startTime=&endTime=&limit=&cursor=`
+    #[allow(clippy::too_many_arguments)]
     pub async fn get_funding_history(
         &self,
         authority: &str,
@@ -286,81 +389,49 @@ impl MarketApi {
         start_time: Option<i64>,
         end_time: Option<i64>,
         limit: Option<i64>,
-    ) -> Result<Vec<PhoenixFundingHistory>, Box<dyn std::error::Error + Send + Sync>> {
-        let mut url =
-            format!("{BASE_URL}/trader/{authority}/funding-history?pda_index={pda_index}");
+        cursor: Option<&str>,
+    ) -> Result<PhoenixFundingHistoryResponse, BoxError> {
+        let mut query = vec![("traderPdaIndex", pda_index.to_string())];
         if let Some(sym) = symbol {
-            url.push_str(&format!("&symbol={sym}"));
+            query.push(("symbol", sym.to_string()));
         }
         if let Some(st) = start_time {
-            url.push_str(&format!("&start_time={st}"));
+            query.push(("startTime", st.to_string()));
         }
         if let Some(et) = end_time {
-            url.push_str(&format!("&end_time={et}"));
+            query.push(("endTime", et.to_string()));
         }
         if let Some(lim) = limit {
-            url.push_str(&format!("&limit={lim}"));
+            query.push(("limit", lim.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(
-                format!("Phoenix /trader/funding-history failed ({status}): {body}").into(),
-            );
+        if let Some(c) = cursor {
+            query.push(("cursor", c.to_string()));
         }
-
-        let text = response.text().await?;
-        // Response may be wrapped: {"items": [...]} or a bare array
-        let wrapper: serde_json::Value = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix funding history response: {e}"))?;
-        let items = if wrapper.is_array() {
-            serde_json::from_value(wrapper)
-        } else {
-            serde_json::from_value(wrapper["items"].clone())
-        }
-        .map_err(|e| format!("Failed to parse Phoenix funding history items: {e}"))?;
-        Ok(items)
+        self.get_json(&format!("/v1/trader/{authority}/funding-history"), &query)
+            .await
     }
 
-    /// Collateral deposit/withdrawal history for a trader.
-    /// `GET /trader/{authority}/collateral-history?pdaIndex={pda_index}&limit={limit}&cursor=...`
+    /// Paginated collateral deposit/withdrawal/transfer history. `limit` is required
+    /// by the API; `next_cursor` fetches older events.
+    /// `GET /v1/trader/{authority}/collateral-history?pdaIndex=&limit=&nextCursor=`
     pub async fn get_collateral_history(
         &self,
         authority: &str,
         pda_index: u8,
-        limit: Option<i64>,
-        cursor: Option<&str>,
-    ) -> Result<Vec<PhoenixCollateralEvent>, Box<dyn std::error::Error + Send + Sync>> {
-        let lim = limit.unwrap_or(50);
-        let mut url = format!(
-            "{BASE_URL}/trader/{authority}/collateral-history?pdaIndex={pda_index}&limit={lim}"
-        );
-        if let Some(c) = cursor {
-            url.push_str(&format!("&cursor={c}"));
+        limit: i64,
+        next_cursor: Option<&str>,
+    ) -> Result<PhoenixPaginatedResponse<PhoenixCollateralEvent>, BoxError> {
+        let mut query = vec![
+            ("pdaIndex", pda_index.to_string()),
+            ("limit", limit.to_string()),
+        ];
+        if let Some(c) = next_cursor {
+            query.push(("nextCursor", c.to_string()));
         }
-
-        let response = self.client.get(&url).await?;
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(
-                format!("Phoenix /trader/collateral-history failed ({status}): {body}").into(),
-            );
-        }
-
-        let text = response.text().await?;
-        let wrapper: serde_json::Value = serde_json::from_str(&text)
-            .map_err(|e| format!("Failed to parse Phoenix collateral history response: {e}"))?;
-        let items = if wrapper.is_array() {
-            serde_json::from_value(wrapper)
-        } else {
-            serde_json::from_value(wrapper["items"].clone())
-        }
-        .map_err(|e| format!("Failed to parse Phoenix collateral history items: {e}"))?;
-        Ok(items)
+        self.get_json(
+            &format!("/v1/trader/{authority}/collateral-history"),
+            &query,
+        )
+        .await
     }
 }

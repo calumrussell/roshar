@@ -1,0 +1,20 @@
+[
+ {
+  "product_id": 2,
+  "ticker_id": "BTC-PERP_USDT0",
+  "base": "BTC-PERP",
+  "quote": "USDT0"
+ },
+ {
+  "product_id": 4,
+  "ticker_id": "ETH-PERP_USDT0",
+  "base": "ETH-PERP",
+  "quote": "USDT0"
+ },
+ {
+  "product_id": 8,
+  "ticker_id": "SOL-PERP_USDT0",
+  "base": "SOL-PERP",
+  "quote": "USDT0"
+ }
+]

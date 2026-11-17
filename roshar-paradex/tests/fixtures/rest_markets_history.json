@@ -1,0 +1,134 @@
+{
+  "results": [
+    {
+      "symbol": "ETH-USD-20NOV26-1760-P",
+      "event_type": "CREATED",
+      "updated_at": 1794823204123,
+      "changed_fields": {
+        "base_currency": "ETH",
+        "quote_currency": "USD",
+        "settlement_currency": "USDC",
+        "order_size_increment": "0.1",
+        "price_tick_size": "0.01",
+        "min_notional": "20",
+        "open_at": 1794824103109,
+        "expiry_at": 1795161600000,
+        "asset_kind": "OPTION",
+        "market_kind": "cross",
+        "option_type": "PUT",
+        "strike_price": "1760",
+        "position_limit": "100000",
+        "price_bands_width": 0.4,
+        "max_slippage": 0,
+        "max_open_orders": 150,
+        "max_funding_rate": 0,
+        "option_cross_margin_params": {
+          "imf": {
+            "long_itm": 0.2,
+            "premium_multiplier": 1,
+            "short_itm": 0.15,
+            "short_otm": 0.1,
+            "short_put_cap": 0.5
+          },
+          "mmf": {
+            "long_itm": 0.1,
+            "premium_multiplier": 0.5,
+            "short_itm": 0.075,
+            "short_otm": 0.05,
+            "short_put_cap": 0.5
+          },
+          "unpaired_scale_im": "1.2",
+          "unpaired_scale_mm": "1"
+        },
+        "oracle_ewma_factor": 0.043647610787352464,
+        "max_order_size": "1000",
+        "max_funding_rate_change": 0,
+        "max_tob_spread": 2,
+        "interest_rate": 0,
+        "clamp_rate": 0,
+        "funding_period_hours": 0,
+        "funding_multiplier": 1,
+        "fee_config": {
+          "api_fee": {
+            "maker_fee": {
+              "fee": "0.0001",
+              "fee_cap": "0.125",
+              "fee_floor": "-0.125"
+            },
+            "taker_fee": {
+              "fee": "0.0001",
+              "fee_cap": "0.125",
+              "fee_floor": "-0.125"
+            }
+          },
+          "interactive_fee": {
+            "maker_fee": {
+              "fee": "0",
+              "fee_cap": "0.125",
+              "fee_floor": "-0.125"
+            },
+            "taker_fee": {
+              "fee": "0",
+              "fee_cap": "0.125",
+              "fee_floor": "-0.125"
+            }
+          },
+          "rpi_fee": {
+            "maker_fee": {
+              "fee": "0.0001",
+              "fee_cap": "0.125",
+              "fee_floor": "-0.125"
+            },
+            "taker_fee": {
+              "fee": "0.0001",
+              "fee_cap": "0.125",
+              "fee_floor": "-0.125"
+            }
+          }
+        }
+      }
+    },
+    {
+      "symbol": "SNDK-USD-PERP",
+      "event_type": "SETTLED",
+      "updated_at": 1794817801348,
+      "changed_fields": {
+        "settlement_price": 845.2929065185375,
+        "underlying_twap_price": 845.2929065185375
+      }
+    },
+    {
+      "symbol": "NVDA-USD-27NOV26-154-P",
+      "event_type": "UPDATED",
+      "updated_at": 1794578412749,
+      "changed_fields": {
+        "option_cross_margin_params": {
+          "imf": {
+            "long_itm": 0.5,
+            "premium_multiplier": 1,
+            "short_itm": 0.35,
+            "short_otm": 0.25,
+            "short_put_cap": 0.5
+          },
+          "mmf": {
+            "long_itm": 0.25,
+            "premium_multiplier": 0.5,
+            "short_itm": 0.175,
+            "short_otm": 0.125,
+            "short_put_cap": 0.25
+          },
+          "unpaired_scale_im": "1.2",
+          "unpaired_scale_mm": "1"
+        }
+      }
+    },
+    {
+      "symbol": "SNDK-USD-PERP",
+      "event_type": "UPDATED",
+      "updated_at": 1794489848611,
+      "changed_fields": {
+        "expiry_at": 1794817800000
+      }
+    }
+  ]
+}

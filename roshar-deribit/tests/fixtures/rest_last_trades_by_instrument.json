@@ -1,0 +1,42 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "trades": [
+      {
+        "timestamp": 1794827221870,
+        "price": 64581.0,
+        "direction": "buy",
+        "index_price": 64561.21,
+        "instrument_name": "BTC-PERPETUAL",
+        "trade_seq": 320654647,
+        "amount": 5220.0,
+        "mark_price": 64576.89,
+        "tick_direction": 1,
+        "starbase_match_id": 248041163959840781,
+        "trade_id": "467940590",
+        "contracts": 522.0,
+        "starbase_timestamp": 1794827221870918245
+      },
+      {
+        "timestamp": 1794827221870,
+        "price": 64581.0,
+        "direction": "buy",
+        "index_price": 64561.21,
+        "instrument_name": "BTC-PERPETUAL",
+        "trade_seq": 320654646,
+        "amount": 60.0,
+        "mark_price": 64576.89,
+        "tick_direction": 1,
+        "starbase_match_id": 248041163959840780,
+        "trade_id": "467940589",
+        "contracts": 6.0,
+        "starbase_timestamp": 1794827221870918245
+      }
+    ],
+    "has_more": true
+  },
+  "usIn": 1794827222516705,
+  "usOut": 1794827222517047,
+  "usDiff": 342,
+  "testnet": false
+}

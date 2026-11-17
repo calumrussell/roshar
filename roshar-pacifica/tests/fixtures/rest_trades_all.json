@@ -1,0 +1,1 @@
+{"success":true,"data":[{"event_type":"fulfill_taker","price":"745.15","amount":"0.001","side":"close_short","cause":"normal","created_at":1794828131659},{"event_type":"fulfill_maker","price":"745.15","amount":"0.001","side":"close_long","cause":"normal","created_at":1794828131659}],"error":null,"code":null,"last_order_id":16296570536}

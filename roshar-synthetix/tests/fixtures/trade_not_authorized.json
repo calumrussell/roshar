@@ -1,0 +1,1 @@
+{"status":"error","error":{"code":"UNAUTHORIZED","category":"AUTH","message":"authentication failed: account ownership verification failed: wallet 0xda6...925 is not authorized to act on this subaccount","retryable":false},"ipRateLimit":{"requestsCap":10000,"remainingTokens":9998},"timestamp":1794780054795}

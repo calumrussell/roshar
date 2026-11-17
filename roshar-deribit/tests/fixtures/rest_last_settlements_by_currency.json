@@ -1,0 +1,32 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "continuation": "3JbvTsVzSKUkgtCfB3F2WXWGCwskSqSZtBa9ViCiHf5KohYR1KCd1EPmsbd2r6F8N3fnbzWiZs39B",
+    "settlements": [
+      {
+        "position": 49532790.0,
+        "timestamp": 1794816000137,
+        "type": "delivery",
+        "index_price": 64892.46,
+        "instrument_name": "BTC-16NOV26",
+        "mark_price": 64892.46,
+        "profit_loss": -7.915975829,
+        "session_profit_loss": 30703.094444829032
+      },
+      {
+        "position": 36.7,
+        "timestamp": 1794816000137,
+        "type": "exercise",
+        "index_price": 64892.46,
+        "instrument_name": "BTC-16NOV26-54000-P",
+        "mark_price": 0.0,
+        "profit_loss": -0.006249999999999999,
+        "session_profit_loss": 3744.279810345001
+      }
+    ]
+  },
+  "usIn": 1794827223873417,
+  "usOut": 1794827223874243,
+  "usDiff": 826,
+  "testnet": false
+}

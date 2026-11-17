@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": 106,
+  "result": "ok",
+  "usIn": 1794827335334706,
+  "usOut": 1794827335334725,
+  "usDiff": 19,
+  "testnet": false
+}

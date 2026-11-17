@@ -1,0 +1,16 @@
+{
+ "code": "SUCCESS",
+ "data": {
+  "contractId": 30000001,
+  "force": false,
+  "limitHighPrice": "0",
+  "limitLowPrice": "0",
+  "markPrice": "0",
+  "status": true
+ },
+ "errorParam": null,
+ "msg": null,
+ "requestTime": "1794779991331",
+ "responseTime": "1794779991333",
+ "traceId": ""
+}

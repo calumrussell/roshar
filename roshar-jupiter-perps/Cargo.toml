@@ -1,0 +1,18 @@
+[package]
+name = "roshar-jupiter-perps"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Jupiter Perpetuals (Solana) client for Roshar: Perps API market data, transaction building and signing"
+repository = "https://github.com/calumrussell/roshar"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+async-trait = "0.1"
+reqwest = { version = "0.11", features = ["json"] }
+base64 = "0.22"
+bs58 = "0.5"
+ed25519-dalek = "2"
+roshar-http = { version = "0.1.0", path = "../roshar-http" }

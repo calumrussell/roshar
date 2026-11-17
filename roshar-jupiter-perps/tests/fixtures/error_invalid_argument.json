@@ -1,0 +1,5 @@
+{
+ "code": "invalid_argument",
+ "message": "'inputMint' must be equal to the mint for the custody mint or the USDC mint. Custody mint: 3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh | USDC mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v ",
+ "metadata": null
+}

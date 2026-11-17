@@ -1,0 +1,547 @@
+{
+  "keys": {
+    "globalConfig": "2zskx2iyCvb6Stg7RBZkt1f6MrF4dpYtMG3yMvKwqtUZ",
+    "currentAuthorities": {
+      "rootAuthority": "GPgADQrhzGoUgLqxsZMKvSpwcLaJFVTq6gEixKhmcwpm",
+      "riskAuthority": "8wTcJdg4Xw3wnvmBu7Sokn3c2UnnHUhuB5g9sfeCMidR",
+      "marketAuthority": "8wTcJdg4Xw3wnvmBu7Sokn3c2UnnHUhuB5g9sfeCMidR",
+      "oracleAuthority": "8wTcJdg4Xw3wnvmBu7Sokn3c2UnnHUhuB5g9sfeCMidR",
+      "adlAuthority": "pDCif8ciTpF9KNUnLWq78i8cRpb9LVbNJqBUwefi4TC",
+      "cancelAuthority": "DKkunAPfdJAf7vuQrh6gvY5tF9JMXFJKev7CGtUffdkp",
+      "backstopAuthority": "GF1sYSqqt2v7sKojPejdGrm4rWZBKCFpP4sFznu4yMF1"
+    },
+    "pendingAuthorities": {
+      "rootAuthority": "11111111111111111111111111111111",
+      "riskAuthority": "11111111111111111111111111111111",
+      "marketAuthority": "11111111111111111111111111111111",
+      "oracleAuthority": "11111111111111111111111111111111",
+      "adlAuthority": "11111111111111111111111111111111",
+      "cancelAuthority": "11111111111111111111111111111111",
+      "backstopAuthority": "11111111111111111111111111111111"
+    },
+    "canonicalMint": "PhUsd11YkbjSaWjFncfAAmatntsjx3MgDR9B6g1ks3A",
+    "globalVault": "csZXgw2G58hbiWc9ndxaxrQVYVvqdXgQzYLuznEzHJu",
+    "perpAssetMap": "2nHGAaEw3D5dd4hVueaUNoygkQFmoeKqRQWnSPqSMFUC",
+    "globalTraderIndex": [
+      "HCrPXLByGqRh2szQi3gj7oRdRVBNi1gccAyn4CQCT3HK"
+    ],
+    "activeTraderBuffer": [
+      "2U32rSzzrQS3eVmGHsnbw5kcqKF3wQXpHGd3hMq5YJok"
+    ],
+    "withdrawQueue": "3c3NTwpg7yW91FxijkHBXwVH1xUifun3Z8TC5eW5Si3K"
+  },
+  "markets": [
+    {
+      "symbol": "BTC",
+      "assetId": 1,
+      "marketStatus": "active",
+      "metadata": {
+        "earningsDates": [],
+        "earningsDatesV2": [],
+        "name": "Bitcoin",
+        "description": "Bitcoin is a decentralized digital currency that allows for peer-to-peer transactions without the need for a central authority or intermediary. It operates on a blockchain that launched in 2009 and was founded by the anonymous Satoshi Nakamoto. It was the first blockchain that gained popularity.",
+        "classifications": [
+          "l1",
+          "featured"
+        ],
+        "assetClass": "crypto",
+        "logoUri": "https://phoenixcdn.trade/logos/BTC/29e92755162f3146841609e71d09b81142196df38b3d7301c82d4cb51dd692dd.svg",
+        "coinGeckoId": "bitcoin",
+        "coinMarketCapId": 1,
+        "tokensXyzAssetId": null,
+        "displayColor": "#F7931A",
+        "circulatingSupply": 20086206.0
+      },
+      "marketPubkey": "AXFz1MuzMUBHi5UKJuK3FDCQ73o3rSzubGU2mPr4LLU7",
+      "splinePubkey": "Dh9NrYjzzdvcYgFSbrkATQ1rPkPjDovXWnFVhfWmD2ZF",
+      "tickSize": 100,
+      "baseLotsDecimals": 4,
+      "takerFee": 0.00035,
+      "makerFee": 0.00005,
+      "leverageTiers": [
+        {
+          "maxLeverage": 40.0,
+          "maxSizeBaseLots": 7350672,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 7350673,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 7350674,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 7350675,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        }
+      ],
+      "riskFactors": {
+        "maintenance": 50.0,
+        "maintenanceBps": 5000,
+        "backstop": 20.0,
+        "backstopBps": 2000,
+        "highRisk": 10.0,
+        "highRiskBps": 1000,
+        "upnl": 100.0,
+        "upnlBps": 10000,
+        "upnlForWithdrawals": 70.0,
+        "upnlForWithdrawalsBps": 7000,
+        "cancelOrder": 70.0,
+        "cancelOrderBps": 7000
+      },
+      "fundingIntervalSeconds": 3600,
+      "fundingPeriodSeconds": 28800,
+      "maxFundingRatePerInterval": 14750,
+      "maxFundingRatePerIntervalPercentage": 0.22670334906167866,
+      "openInterestCapBaseLots": "7350672",
+      "maxLiquidationSizeBaseLots": "73507",
+      "isolatedOnly": false,
+      "statsSnapshot": {
+        "slot": 469888648,
+        "slotIndex": 227,
+        "openInterestBaseLots": "178752",
+        "fundingStartIntervalTimestamp": "1794776400",
+        "cumulativeFundingRate": "44317"
+      }
+    },
+    {
+      "symbol": "SOL",
+      "assetId": 0,
+      "marketStatus": "active",
+      "metadata": {
+        "earningsDates": [],
+        "earningsDatesV2": [],
+        "name": "Solana",
+        "description": "Solana is a blockchain for smart contracts and decentralized applications with a focus on scalability.",
+        "classifications": [
+          "solana",
+          "l1",
+          "featured"
+        ],
+        "assetClass": "crypto",
+        "logoUri": "https://phoenixcdn.trade/logos/SOL/b82944495839f0a92b535eaa8923ea68283b875e8c444840b9eff4fac8819c01.svg",
+        "coinGeckoId": "solana",
+        "coinMarketCapId": 5426,
+        "tokensXyzAssetId": null,
+        "displayColor": "#9945FF",
+        "circulatingSupply": 587296838.8226068
+      },
+      "marketPubkey": "71Si24E4uc3oCaPbPZTozC1ptSNNqygjjebxSmErSsC2",
+      "splinePubkey": "EVhkquLbfm5rDRXtZu9FoyDSXX5mYq2EYU6yD8zfKEqM",
+      "tickSize": 100,
+      "baseLotsDecimals": 2,
+      "takerFee": 0.00035,
+      "makerFee": 0.00005,
+      "leverageTiers": [
+        {
+          "maxLeverage": 25.0,
+          "maxSizeBaseLots": 32164684,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 32164685,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 32164686,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 32164687,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        }
+      ],
+      "riskFactors": {
+        "maintenance": 50.0,
+        "maintenanceBps": 5000,
+        "backstop": 20.0,
+        "backstopBps": 2000,
+        "highRisk": 10.0,
+        "highRiskBps": 1000,
+        "upnl": 100.0,
+        "upnlBps": 10000,
+        "upnlForWithdrawals": 70.0,
+        "upnlForWithdrawalsBps": 7000,
+        "cancelOrder": 75.0,
+        "cancelOrderBps": 7500
+      },
+      "fundingIntervalSeconds": 3600,
+      "fundingPeriodSeconds": 28800,
+      "maxFundingRatePerInterval": 1566,
+      "maxFundingRatePerIntervalPercentage": 0.21746979586168583,
+      "openInterestCapBaseLots": "32164684",
+      "maxLiquidationSizeBaseLots": "500000",
+      "isolatedOnly": false,
+      "statsSnapshot": {
+        "slot": 469888648,
+        "slotIndex": 227,
+        "openInterestBaseLots": "2037861",
+        "fundingStartIntervalTimestamp": "1794776400",
+        "cumulativeFundingRate": "49827"
+      }
+    },
+    {
+      "symbol": "kSHIB",
+      "assetId": 88,
+      "marketStatus": "active",
+      "metadata": {
+        "earningsDates": [],
+        "earningsDatesV2": [],
+        "name": "Shiba Inu",
+        "description": null,
+        "assetClass": "crypto",
+        "logoUri": "https://phoenixcdn.trade/logos/KSHIB/1e63473ca56672fbde7e3a84a838b282df0f4809b0608ec044648d4986dc36c3.svg",
+        "coinGeckoId": "shiba-inu",
+        "coinMarketCapId": 5994,
+        "tokensXyzAssetId": null,
+        "displayColor": "#FF8300",
+        "circulatingSupply": 589230000000.0
+      },
+      "marketPubkey": "9kGYga7xtQbYr8MZtHXj5TVNqTZVUf8xhcCQGoFfBTjE",
+      "splinePubkey": "4YgPasgYCEn4iqCBSnfy5ouYFF5E61C781orp8YMziXS",
+      "tickSize": 100,
+      "baseLotsDecimals": -2,
+      "takerFee": 0.00035,
+      "makerFee": 0.00005,
+      "leverageTiers": [
+        {
+          "maxLeverage": 10.0,
+          "maxSizeBaseLots": 8896006,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 8896007,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 8896008,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 8896009,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        }
+      ],
+      "riskFactors": {
+        "maintenance": 50.0,
+        "maintenanceBps": 5000,
+        "backstop": 20.0,
+        "backstopBps": 2000,
+        "highRisk": 10.0,
+        "highRiskBps": 1000,
+        "upnl": 100.0,
+        "upnlBps": 10000,
+        "upnlForWithdrawals": 1.0,
+        "upnlForWithdrawalsBps": 100,
+        "cancelOrder": 75.0,
+        "cancelOrderBps": 7500
+      },
+      "fundingIntervalSeconds": 3600,
+      "fundingPeriodSeconds": 28800,
+      "maxFundingRatePerInterval": 927,
+      "maxFundingRatePerIntervalPercentage": 0.23617834394904458,
+      "openInterestCapBaseLots": "8896006",
+      "maxLiquidationSizeBaseLots": "889601",
+      "isolatedOnly": false,
+      "statsSnapshot": {
+        "slot": 469888648,
+        "slotIndex": 227,
+        "openInterestBaseLots": "95557",
+        "fundingStartIntervalTimestamp": "1794776400",
+        "cumulativeFundingRate": "-10247"
+      }
+    },
+    {
+      "symbol": "INTC",
+      "assetId": 46,
+      "marketStatus": "active",
+      "commodityMetadata": {
+        "isCommodity": true,
+        "isReopen": false,
+        "isAfterHours": true,
+        "status": "afterHours",
+        "afterHoursRadius": {
+          "value": 5860,
+          "decimals": 3,
+          "ui": "5.860"
+        },
+        "lastKnownIndexPrice": {
+          "value": 58690,
+          "decimals": 3,
+          "ui": "58.690"
+        },
+        "markPriceBand": {
+          "min": {
+            "value": 52830,
+            "decimals": 3,
+            "ui": "52.830"
+          },
+          "max": {
+            "value": 64550,
+            "decimals": 3,
+            "ui": "64.550"
+          }
+        },
+        "executionPriceBand": {
+          "min": {
+            "value": 52830,
+            "decimals": 3,
+            "ui": "52.830"
+          },
+          "max": {
+            "value": 64550,
+            "decimals": 3,
+            "ui": "64.550"
+          }
+        },
+        "lastIndexExpiryTimestamp": 1794791100
+      },
+      "metadata": {
+        "earningsDates": [
+          "2027-01-28T00:00:00Z"
+        ],
+        "earningsDatesV2": [
+          {
+            "date": "2027-01-28",
+            "time": "amc"
+          }
+        ],
+        "name": "Intel",
+        "description": "INTC-PERP tracks the value of 1 share of common stock in Intel Corporation. Intel designs and manufactures semiconductors and computing platforms. The company produces CPUs and related hardware for personal computers, servers, and data centers.",
+        "assetClass": "equities",
+        "logoUri": "https://phoenixcdn.trade/logos/INTC/31ec4548306d398e91621c8393d2e70970c0219f11c0649386a7c95e59b19571.svg",
+        "coinGeckoId": null,
+        "coinMarketCapId": null,
+        "tokensXyzAssetId": null,
+        "calendar": {
+          "id": "us_equities_extended",
+          "description": "us_equities_extended",
+          "calendarUri": "https://phoenixcdn.trade/calendars/us_equities_extended.json",
+          "contentSha256": "8d308a62612513793d193699742ae06d90bb8ccda487f7f1e9f535f419c3768e",
+          "nextMarketTransitionUtc": "2026-11-16T01:00:00Z"
+        },
+        "displayColor": "#00C7FD",
+        "circulatingSupply": 5044000000.0
+      },
+      "marketPubkey": "B9upYgp7z7dFxLFMVxxLiCbp2gujrZGCvpCKdAc4xT3Q",
+      "splinePubkey": "31GTt7eSQ4nbZTsVzPYfGcj1xYoT6CUTGw6Uc5L6f64h",
+      "tickSize": 10,
+      "baseLotsDecimals": 3,
+      "takerFee": 0.00035,
+      "makerFee": 0.00005,
+      "leverageTiers": [
+        {
+          "maxLeverage": 10.0,
+          "maxSizeBaseLots": 21820000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 21821000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 21822000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 21823000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        }
+      ],
+      "riskFactors": {
+        "maintenance": 50.0,
+        "maintenanceBps": 5000,
+        "backstop": 20.0,
+        "backstopBps": 2000,
+        "highRisk": 10.0,
+        "highRiskBps": 1000,
+        "upnl": 100.0,
+        "upnlBps": 10000,
+        "upnlForWithdrawals": 1.0,
+        "upnlForWithdrawalsBps": 100,
+        "cancelOrder": 75.0,
+        "cancelOrderBps": 7500
+      },
+      "fundingIntervalSeconds": 3600,
+      "fundingPeriodSeconds": 28800,
+      "maxFundingRatePerInterval": 134,
+      "maxFundingRatePerIntervalPercentage": 0.22992450240219628,
+      "openInterestCapBaseLots": "21820000",
+      "maxLiquidationSizeBaseLots": "2180000",
+      "isolatedOnly": false,
+      "statsSnapshot": {
+        "slot": 469888648,
+        "slotIndex": 227,
+        "openInterestBaseLots": "1070068",
+        "fundingStartIntervalTimestamp": "1794776400",
+        "cumulativeFundingRate": "6613"
+      }
+    },
+    {
+      "symbol": "GOOGL",
+      "assetId": 43,
+      "marketStatus": "active",
+      "commodityMetadata": {
+        "isCommodity": true,
+        "isReopen": false,
+        "isAfterHours": true,
+        "status": "afterHours",
+        "afterHoursRadius": {
+          "value": 14700,
+          "decimals": 3,
+          "ui": "14.700"
+        },
+        "lastKnownIndexPrice": {
+          "value": 294020,
+          "decimals": 3,
+          "ui": "294.020"
+        },
+        "markPriceBand": {
+          "min": {
+            "value": 279320,
+            "decimals": 3,
+            "ui": "279.320"
+          },
+          "max": {
+            "value": 308720,
+            "decimals": 3,
+            "ui": "308.720"
+          }
+        },
+        "executionPriceBand": {
+          "min": {
+            "value": 279320,
+            "decimals": 3,
+            "ui": "279.320"
+          },
+          "max": {
+            "value": 308720,
+            "decimals": 3,
+            "ui": "308.720"
+          }
+        },
+        "lastIndexExpiryTimestamp": 1794791100
+      },
+      "metadata": {
+        "earningsDates": [
+          "2027-02-03T00:00:00Z"
+        ],
+        "earningsDatesV2": [
+          {
+            "date": "2027-02-03",
+            "time": "amc"
+          }
+        ],
+        "name": "Google",
+        "description": "GOOGL-PERP tracks the value of 1 share of Class A common stock in Alphabet Inc. (NASDAQ: GOOGL) Alphabet is the parent company of Google, operating search, advertising, cloud computing, and AI businesses, along with various technology subsidiaries.",
+        "classifications": [
+          "featured"
+        ],
+        "assetClass": "equities",
+        "logoUri": "https://phoenixcdn.trade/logos/GOOGL/ee995ceb4fd0b46b78cba712d90602f5fdbb09a93aa7e0f5c2f9ac8bc63b3477.svg",
+        "coinGeckoId": null,
+        "coinMarketCapId": null,
+        "tokensXyzAssetId": null,
+        "calendar": {
+          "id": "us_equities_extended",
+          "description": "us_equities_extended",
+          "calendarUri": "https://phoenixcdn.trade/calendars/us_equities_extended.json",
+          "contentSha256": "8d308a62612513793d193699742ae06d90bb8ccda487f7f1e9f535f419c3768e",
+          "nextMarketTransitionUtc": "2026-11-16T01:00:00Z"
+        },
+        "displayColor": "#4285F4",
+        "circulatingSupply": 12230000000.0
+      },
+      "marketPubkey": "BssatSRXDNf5J7465caVwLj9tj3tUnCWuBKMUbY2xsxC",
+      "splinePubkey": "8w2WHmvxfDwxWjSratnUW2b6Du97GRjajp8iamMDwxKY",
+      "tickSize": 10,
+      "baseLotsDecimals": 3,
+      "takerFee": 0.00035,
+      "makerFee": 0.00005,
+      "leverageTiers": [
+        {
+          "maxLeverage": 20.0,
+          "maxSizeBaseLots": 8210000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 8211000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 8212000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        },
+        {
+          "maxLeverage": 1.0,
+          "maxSizeBaseLots": 8213000,
+          "limitOrderRiskFactor": 100.0,
+          "limitOrderRiskFactorBps": 10000
+        }
+      ],
+      "riskFactors": {
+        "maintenance": 50.0,
+        "maintenanceBps": 5000,
+        "backstop": 20.0,
+        "backstopBps": 2000,
+        "highRisk": 10.0,
+        "highRiskBps": 1000,
+        "upnl": 100.0,
+        "upnlBps": 10000,
+        "upnlForWithdrawals": 1.0,
+        "upnlForWithdrawalsBps": 100,
+        "cancelOrder": 75.0,
+        "cancelOrderBps": 7500
+      },
+      "fundingIntervalSeconds": 3600,
+      "fundingPeriodSeconds": 28800,
+      "maxFundingRatePerInterval": 679,
+      "maxFundingRatePerIntervalPercentage": 0.23188306809644152,
+      "openInterestCapBaseLots": "8210000",
+      "maxLiquidationSizeBaseLots": "820000",
+      "isolatedOnly": false,
+      "statsSnapshot": {
+        "slot": 469888648,
+        "slotIndex": 227,
+        "openInterestBaseLots": "1156153",
+        "fundingStartIntervalTimestamp": "1794776400",
+        "cumulativeFundingRate": "24240"
+      }
+    }
+  ]
+}

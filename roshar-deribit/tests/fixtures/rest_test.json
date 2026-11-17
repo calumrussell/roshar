@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "version": "1.2.26"
+  },
+  "usIn": 1794827224922728,
+  "usOut": 1794827224922791,
+  "usDiff": 63,
+  "testnet": false
+}

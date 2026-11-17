@@ -1,0 +1,31 @@
+{
+  "jsonrpc": "2.0",
+  "id": 101,
+  "result": [
+    "trades.option.any.agg2",
+    "trades.future.BTC.100ms",
+    "ticker.BTC-PERPETUAL.agg2",
+    "quote.BTC-PERPETUAL",
+    "platform_state.public_methods_state",
+    "platform_state",
+    "perpetual.BTC-PERPETUAL.100ms",
+    "markprice.options.btc_usd",
+    "instrument.state.any.any",
+    "instrument.creation.any.any",
+    "incremental_ticker.BTC-PERPETUAL",
+    "incremental_ticker.BTC-17NOV26-65000-C",
+    "estimated_expiration_price.btc_usd",
+    "deribit_volatility_index.btc_usd",
+    "deribit_price_statistics.btc_usd",
+    "deribit_price_ranking.btc_usd",
+    "deribit_price_index.btc_usd",
+    "chart.trades.BTC-PERPETUAL.1",
+    "book.BTC-PERPETUAL.none.20.agg2",
+    "book.BTC-PERPETUAL.1.10.100ms",
+    "block_rfq.trades.any"
+  ],
+  "usIn": 1794827335332320,
+  "usOut": 1794827335334160,
+  "usDiff": 1840,
+  "testnet": false
+}

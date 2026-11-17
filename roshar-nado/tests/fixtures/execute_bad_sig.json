@@ -1,0 +1,8 @@
+{
+ "status": "failure",
+ "signature": "0x1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+ "id": 7,
+ "error_code": 2024,
+ "error": "The provided address has no previous deposits. Ensure you're using an address with prior deposits.",
+ "request_type": "execute_place_order"
+}

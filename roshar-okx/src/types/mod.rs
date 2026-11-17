@@ -1,12 +1,15 @@
+pub mod market;
 pub mod ws;
 
+pub use market::*;
 pub use ws::*;
 
 use serde::{Deserialize, Deserializer, Serialize};
 
-/// OKX instrument information for SWAP (perpetual) contracts.
+/// OKX instrument information.
 ///
-/// Corresponds to the response from `GET /api/v5/public/instruments?instType=SWAP`.
+/// Corresponds to an entry of `GET /api/v5/public/instruments`. OKX always sends every field;
+/// fields not applicable to an instrument type are sent as "".
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct OkxInstrumentInfo {
     /// Instrument type (e.g. "SWAP")
@@ -15,53 +18,60 @@ pub struct OkxInstrumentInfo {
     /// Instrument ID (e.g. "BTC-USDT-SWAP")
     #[serde(rename = "instId")]
     pub inst_id: String,
-    /// Underlying (e.g. "BTC-USDT")
-    #[serde(default)]
+    /// Base currency (e.g. "BTC"); SPOT/MARGIN only
+    #[serde(rename = "baseCcy")]
+    pub base_ccy: String,
+    /// Quote currency (e.g. "USDT"); SPOT/MARGIN only
+    #[serde(rename = "quoteCcy")]
+    pub quote_ccy: String,
+    /// Event-contract series ID (e.g. "BTC-UPDOWN-5MIN"; "" outside EVENTS). Absent from the WS
+    /// `instruments` push and from some `preopen` SPOT rows over REST.
+    #[serde(rename = "seriesId", default, skip_serializing_if = "Option::is_none")]
+    pub series_id: Option<String>,
+    /// Underlying (e.g. "BTC-USDT"); MARGIN/FUTURES/SWAP/OPTION only
     pub uly: String,
-    /// Instrument family (e.g. "BTC-USDT")
-    #[serde(rename = "instFamily", default)]
+    /// Instrument family (e.g. "BTC-USDT"); MARGIN/FUTURES/SWAP/OPTION only
+    #[serde(rename = "instFamily")]
     pub inst_family: String,
-    /// Settlement currency (e.g. "USDT")
-    #[serde(rename = "settleCcy", default)]
+    /// Settlement and margin currency (e.g. "USDT"); FUTURES/SWAP/OPTION only
+    #[serde(rename = "settleCcy")]
     pub settle_ccy: String,
-    /// Contract value (e.g. "0.01")
-    #[serde(rename = "ctVal", default)]
+    /// Contract value (e.g. "0.01"); FUTURES/SWAP/OPTION only
+    #[serde(rename = "ctVal")]
     pub ct_val: String,
-    /// Contract multiplier
-    #[serde(rename = "ctMult", default)]
+    /// Contract multiplier; FUTURES/SWAP/OPTION only
+    #[serde(rename = "ctMult")]
     pub ct_mult: String,
-    /// Contract value currency (e.g. "BTC")
-    #[serde(rename = "ctValCcy", default)]
+    /// Contract value currency (e.g. "BTC"); FUTURES/SWAP/OPTION only
+    #[serde(rename = "ctValCcy")]
     pub ct_val_ccy: String,
-    /// Contract type: "linear" or "inverse"
-    #[serde(rename = "ctType", default)]
+    /// Contract type: "linear" or "inverse"; FUTURES/SWAP only
+    #[serde(rename = "ctType")]
     pub ct_type: String,
     /// Tick size - minimum price increment (e.g. "0.1")
-    #[serde(rename = "tickSz", default)]
+    #[serde(rename = "tickSz")]
     pub tick_sz: String,
-    /// Lot size - minimum trading size (e.g. "1")
-    #[serde(rename = "lotSz", default)]
+    /// Lot size - order size increment (contracts for derivatives)
+    #[serde(rename = "lotSz")]
     pub lot_sz: String,
-    /// Minimum order size
-    #[serde(rename = "minSz", default)]
+    /// Minimum order size (contracts for derivatives)
+    #[serde(rename = "minSz")]
     pub min_sz: String,
-    /// Maximum leverage
-    #[serde(default)]
+    /// Maximum leverage; not applicable to SPOT/OPTION
     pub lever: String,
-    /// Instrument state: "live", "suspend", "preopen", etc.
-    #[serde(default)]
+    /// Instrument state: "live", "suspend", "preopen", "test", "rebase", "post_only", ...
     pub state: String,
     /// Listing time (ms timestamp)
-    #[serde(rename = "listTime", default)]
+    #[serde(rename = "listTime")]
     pub list_time: String,
-    /// Expiry time (empty for perpetuals)
-    #[serde(rename = "expTime", default)]
+    /// Expiry / offline time (ms timestamp; "" when none)
+    #[serde(rename = "expTime")]
     pub exp_time: String,
-    /// Maximum order size
-    #[serde(rename = "maxLmtSz", default)]
+    /// Maximum quantity of a single limit order
+    #[serde(rename = "maxLmtSz")]
     pub max_lmt_sz: String,
-    /// Maximum market order size
-    #[serde(rename = "maxMktSz", default)]
+    /// Maximum quantity of a single market order
+    #[serde(rename = "maxMktSz")]
     pub max_mkt_sz: String,
 }
 

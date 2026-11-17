@@ -1,0 +1,63 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "trades": [
+      {
+        "timestamp": 1794827311841,
+        "price": 7.55,
+        "direction": "buy",
+        "index_price": 1812.3,
+        "instrument_name": "ETH-FS-25DEC26_PERP",
+        "trade_seq": 4442,
+        "amount": 120000.0,
+        "mark_price": 7.43,
+        "tick_direction": 0,
+        "legs": [
+          {
+            "timestamp": 1794827311841,
+            "price": 1818.6,
+            "direction": "buy",
+            "index_price": 1812.3,
+            "instrument_name": "ETH-25DEC26",
+            "trade_seq": 707417,
+            "amount": 120000.0,
+            "mark_price": 1818.68,
+            "tick_direction": 0,
+            "combo_id": "ETH-FS-25DEC26_PERP",
+            "starbase_match_id": 248041541325565952,
+            "trade_id": "ETH-318864533",
+            "contracts": 120000.0,
+            "combo_trade_id": "ETH-318864531",
+            "starbase_timestamp": 1794827311841609314
+          },
+          {
+            "timestamp": 1794827311841,
+            "price": 1811.05,
+            "direction": "sell",
+            "index_price": 1812.3,
+            "instrument_name": "ETH-PERPETUAL",
+            "trade_seq": 227231953,
+            "amount": 120000.0,
+            "mark_price": 1811.24,
+            "tick_direction": 3,
+            "combo_id": "ETH-FS-25DEC26_PERP",
+            "starbase_match_id": 248041541325565952,
+            "trade_id": "ETH-318864532",
+            "contracts": 120000.0,
+            "combo_trade_id": "ETH-318864531",
+            "starbase_timestamp": 1794827311841609314
+          }
+        ],
+        "starbase_match_id": 248041541325565952,
+        "trade_id": "ETH-318864531",
+        "contracts": 120000.0,
+        "starbase_timestamp": 1794827311841609314
+      }
+    ],
+    "has_more": false
+  },
+  "usIn": 1794828335697958,
+  "usOut": 1794828335699224,
+  "usDiff": 1266,
+  "testnet": false
+}

@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "method": "subscription",
+  "params": {
+    "channel": "platform_state",
+    "data": {
+      "locked": false,
+      "price_index": "aaoi_usdc",
+      "reasons": []
+    }
+  }
+}

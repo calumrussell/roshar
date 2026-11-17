@@ -1,0 +1,17 @@
+{
+  "usOut": 1794827549810837,
+  "usIn": 1794827549808679,
+  "usDiff": 2158,
+  "testnet": false,
+  "result": {
+    "volume": [],
+    "ticks": [],
+    "status": "no_data",
+    "open": [],
+    "low": [],
+    "high": [],
+    "cost": [],
+    "close": []
+  },
+  "jsonrpc": "2.0"
+}

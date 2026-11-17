@@ -1,0 +1,1 @@
+{"method":"candle_update","channel":"candleUpdate","data":{"close_price":"65057","close_time":"2026-11-15T22:04:00Z","high_price":"65057","low_price":"65026","open_price":"65026","open_time":"2026-11-15T22:03:00Z","quote_volume":"219.82368","symbol":"BTC-USDT","timeframe":"1m","trade_count":3,"volume":"0.00338"},"seq":30660,"timestamp":1794780226629}

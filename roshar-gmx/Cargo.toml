@@ -1,0 +1,19 @@
+[package]
+name = "roshar-gmx"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "GMX v2 client for Roshar: GMX API and Oracle API reads, stream config, EIP-712 express order signing"
+repository = "https://github.com/calumrussell/roshar"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+async-trait = "0.1"
+reqwest = "0.11"
+hex = "0.4"
+k256 = { version = "0.13", features = ["ecdsa"] }
+sha3 = "0.10"
+roshar-http = { version = "0.1.0", path = "../roshar-http" }
+roshar-ws-mgr = { workspace = true }

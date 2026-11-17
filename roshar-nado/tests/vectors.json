@@ -1,0 +1,689 @@
+{
+  "sdk": "nado-protocol 2.0.0",
+  "private_key": "0x24f51bbea74e531270a2076f7b895eab582617e4f8e43eac6f497ed71379fea2",
+  "address": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd",
+  "networks": {
+    "mainnet": {
+      "chain_id": 57073,
+      "endpoint_addr": "0x05ec92d78ed421f3d3ada77ffde167106565974e"
+    },
+    "testnet": {
+      "chain_id": 763373,
+      "endpoint_addr": "0x698d87105274292b5673367dec81874ce3633ac2"
+    }
+  },
+  "subaccounts": [
+    {
+      "address": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd",
+      "name": "default",
+      "bytes32": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000"
+    },
+    {
+      "address": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd",
+      "name": "bot1",
+      "bytes32": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000"
+    },
+    {
+      "address": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd",
+      "name": "",
+      "bytes32": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd000000000000000000000000"
+    },
+    {
+      "address": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd",
+      "name": "abcdefghijkl",
+      "bytes32": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd6162636465666768696a6b6c"
+    }
+  ],
+  "appendix": [
+    {
+      "order_type": 0,
+      "isolated": false,
+      "reduce_only": false,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "1"
+    },
+    {
+      "order_type": 1,
+      "isolated": false,
+      "reduce_only": false,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "513"
+    },
+    {
+      "order_type": 2,
+      "isolated": false,
+      "reduce_only": true,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "3073"
+    },
+    {
+      "order_type": 3,
+      "isolated": false,
+      "reduce_only": false,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "1537"
+    },
+    {
+      "order_type": 3,
+      "isolated": false,
+      "reduce_only": true,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "3585"
+    },
+    {
+      "order_type": 0,
+      "isolated": true,
+      "reduce_only": false,
+      "trigger_type": 0,
+      "isolated_margin": 25000000,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "461168601842738790400000257"
+    },
+    {
+      "order_type": 1,
+      "isolated": true,
+      "reduce_only": false,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "769"
+    },
+    {
+      "order_type": 0,
+      "isolated": false,
+      "reduce_only": false,
+      "trigger_type": 0,
+      "isolated_margin": null,
+      "builder_id": 7,
+      "builder_fee_rate": 15,
+      "appendix": "1974448005578753"
+    },
+    {
+      "order_type": 2,
+      "isolated": true,
+      "reduce_only": true,
+      "trigger_type": 0,
+      "isolated_margin": 18446744073709551615,
+      "builder_id": 65535,
+      "builder_fee_rate": 1023,
+      "appendix": "340282366920938463463374607156890307841"
+    },
+    {
+      "order_type": 0,
+      "isolated": false,
+      "reduce_only": false,
+      "trigger_type": 1,
+      "isolated_margin": null,
+      "builder_id": null,
+      "builder_fee_rate": null,
+      "appendix": "4097"
+    }
+  ],
+  "place_order": [
+    {
+      "network": "mainnet",
+      "product_id": 2,
+      "id": 101,
+      "spot_leverage": null,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "price_x18": "65000000000000000000000",
+      "amount": "150000000000000000",
+      "expiration": "4294967295",
+      "nonce": "1881963233280000017",
+      "appendix": "1537",
+      "digest": "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f",
+      "request": {
+        "place_order": {
+          "signature": "0x0870a657edf5f34d78aa667b695f289498dbbc075fbef9da03545a3e5210c6b50a37de8ab18a4eca8a3a2c58ac481102ed4d3a67aa8659a23cdb983a282dff641b",
+          "id": 101,
+          "product_id": 2,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963233280000017",
+            "amount": "150000000000000000",
+            "priceX18": "65000000000000000000000",
+            "expiration": "4294967295",
+            "appendix": "1537"
+          }
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "product_id": 4,
+      "id": null,
+      "spot_leverage": false,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "price_x18": "1800000000000000000000",
+      "amount": "-3000000000000000000",
+      "expiration": "1794780100",
+      "nonce": "1881963233332429799",
+      "appendix": "2561",
+      "digest": "0x72b862c9281941a94da9efab44fa73d7aad630068e6a39e328c08029a0c40d34",
+      "request": {
+        "place_order": {
+          "signature": "0x92a611fb3a4a25c09c4811480020fa892d282d3769261396e64a731c6839c7ba4be4b7b04748fe858aade95ffb01366afd59722bd85e1369ee05c8235cdd31751b",
+          "product_id": 4,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963233332429799",
+            "amount": "-3000000000000000000",
+            "priceX18": "1800000000000000000000",
+            "expiration": "1794780100",
+            "appendix": "2561"
+          },
+          "spot_leverage": false
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "product_id": 2,
+      "id": 7,
+      "spot_leverage": null,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000",
+      "price_x18": "64000000000000000000000",
+      "amount": "1000000000000000",
+      "expiration": "1794790000",
+      "nonce": "1881963233384857600",
+      "appendix": "922337203686324754509202689",
+      "digest": "0xc086a6c890c2ab29567783961026a7139d330a00c7f144ea7a0d6e9791247a99",
+      "request": {
+        "place_order": {
+          "signature": "0x2c44cf1e894cb02e9ca9dd52a9822f27115edc7d4c6a57a0f15f4a6c2a10e3a95c43cc1df94091cf2f4ac1238ad958d9b1ff80969efc4a1e25772b889e09b0611c",
+          "id": 7,
+          "product_id": 2,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000",
+            "nonce": "1881963233384857600",
+            "amount": "1000000000000000",
+            "priceX18": "64000000000000000000000",
+            "expiration": "1794790000",
+            "appendix": "922337203686324754509202689"
+          }
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "product_id": 1,
+      "id": null,
+      "spot_leverage": true,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "price_x18": "65123456789000000000000",
+      "amount": "50000000000000",
+      "expiration": "4294967295",
+      "nonce": "1881963233490763775",
+      "appendix": "1",
+      "digest": "0x849a6a10dd74fb516709c91771b3cc887fc0ba3bb2a4351c0f8bcdb8baf8fd7c",
+      "request": {
+        "place_order": {
+          "signature": "0xe77f31523de80c94a118573ffdf891800f9adfd0c20e12d34de88b09d17620b359c76769973136677718d2789245f9a1e3fa08073a3709deea16684da1e0ace81b",
+          "product_id": 1,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963233490763775",
+            "amount": "50000000000000",
+            "priceX18": "65123456789000000000000",
+            "expiration": "4294967295",
+            "appendix": "1"
+          },
+          "spot_leverage": true
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "product_id": 4294967295,
+      "id": null,
+      "spot_leverage": null,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "price_x18": "170141183460469231731687303715884105727",
+      "amount": "-170141183460469231731687303715884105728",
+      "expiration": "18446744073709551615",
+      "nonce": "18446744073709551615",
+      "appendix": "340282366920938463463374607431768211455",
+      "digest": "0x43624e50ec6548f62a4437d67afdb1f25c47d423f2795c6c235569e65f39d66e",
+      "request": {
+        "place_order": {
+          "signature": "0xcf269f7410002319d736ce51667f85d021d3a4cf448c4f82d4b7d94f6b7967d778ffaeceaeb8757cd4abf6ed47929bd8f4d00bdc26539f2d6f7236d98fb82f3c1c",
+          "product_id": 4294967295,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "18446744073709551615",
+            "amount": "-170141183460469231731687303715884105728",
+            "priceX18": "170141183460469231731687303715884105727",
+            "expiration": "18446744073709551615",
+            "appendix": "340282366920938463463374607431768211455"
+          }
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "product_id": 3,
+      "id": null,
+      "spot_leverage": null,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "price_x18": "-1",
+      "amount": "-1",
+      "expiration": "0",
+      "nonce": "0",
+      "appendix": "0",
+      "digest": "0x00bbd45917430342431a3f4873c9af0184a047bf09d06fa520e23a536fa694e3",
+      "request": {
+        "place_order": {
+          "signature": "0x21e477c35ab1c2c7abdf45a30dbee9ed16797d1e7ebbb3c07b5ec0a30f5ad869508b6d05b4e6de48cf28cdf127330f126eff3a5597b134e92f80c5012dbbb3851c",
+          "product_id": 3,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "0",
+            "amount": "-1",
+            "priceX18": "-1",
+            "expiration": "0",
+            "appendix": "0"
+          }
+        }
+      }
+    },
+    {
+      "network": "testnet",
+      "product_id": 2,
+      "id": 1,
+      "spot_leverage": null,
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "price_x18": "65000000000000000000000",
+      "amount": "150000000000000000",
+      "expiration": "4294967295",
+      "nonce": "1881963233280000017",
+      "appendix": "1537",
+      "digest": "0xc406ce43ba8456691bd257a4275453e92688230a37a6e6ff01c1bf9d7f2f4c14",
+      "request": {
+        "place_order": {
+          "signature": "0x588373633383c4ebba15cbec98f8c0f6674bf8d91ee0bacc91013ec988eb81472b8d85f10069a38e407e96ec4cf26059fb7e851499153779ba02662dcdf622a21b",
+          "id": 1,
+          "product_id": 2,
+          "order": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963233280000017",
+            "amount": "150000000000000000",
+            "priceX18": "65000000000000000000000",
+            "expiration": "4294967295",
+            "appendix": "1537"
+          }
+        }
+      }
+    }
+  ],
+  "place_orders": [
+    {
+      "network": "mainnet",
+      "stop_on_failure": true,
+      "orders": [
+        {
+          "product_id": 2,
+          "id": 11,
+          "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+          "price_x18": "64900000000000000000000",
+          "amount": "20000000000000000",
+          "expiration": "4294967295",
+          "nonce": "1881963234328576001",
+          "appendix": "1537",
+          "digest": "0x49165564606b14bb1d55dd96d809eb1588c22e549021be3e37ef131df8c1c6f5"
+        },
+        {
+          "product_id": 4,
+          "id": null,
+          "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+          "price_x18": "1900000000000000000000",
+          "amount": "-1000000000000000000",
+          "expiration": "4294967295",
+          "nonce": "1881963234328576002",
+          "appendix": "3585",
+          "digest": "0x8e5fbcb45ac5f410d5c7a76c3b16da65916c8796bf40048389d4686d8e810f57"
+        }
+      ],
+      "request": {
+        "place_orders": {
+          "orders": [
+            {
+              "signature": "0xd14f96d8f338668d15786b5a08bc256b0f278a92a26e321f58102f3c19279f3f682c754f6a0f9e249b0e7e303310bb5effefb6d9b64f0b44d6588d794ffc90c91b",
+              "id": 11,
+              "product_id": 2,
+              "order": {
+                "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+                "nonce": "1881963234328576001",
+                "amount": "20000000000000000",
+                "priceX18": "64900000000000000000000",
+                "expiration": "4294967295",
+                "appendix": "1537"
+              }
+            },
+            {
+              "signature": "0x0c3c73cd0f82e67b144e58ec071d0e3847d1aedc89722f48a893f374d2ab2b7d2b4ff0673c3a2081768be44a0597432bfd34ff415b67765460e169f09fa692f31b",
+              "product_id": 4,
+              "order": {
+                "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+                "nonce": "1881963234328576002",
+                "amount": "-1000000000000000000",
+                "priceX18": "1900000000000000000000",
+                "expiration": "4294967295",
+                "appendix": "3585"
+              }
+            }
+          ],
+          "stop_on_failure": true
+        }
+      }
+    }
+  ],
+  "cancel_orders": [
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "product_ids": [
+        2,
+        4
+      ],
+      "digests": [
+        "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f",
+        "0x72b862c9281941a94da9efab44fa73d7aad630068e6a39e328c08029a0c40d34"
+      ],
+      "nonce": "1881963235377152005",
+      "digest": "0x20e20aa32e956bd85f4edd016635cc27c49fe01b578eca43397dbc1a0938bb3e",
+      "request": {
+        "cancel_orders": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963235377152005",
+            "productIds": [
+              2,
+              4
+            ],
+            "digests": [
+              "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f",
+              "0x72b862c9281941a94da9efab44fa73d7aad630068e6a39e328c08029a0c40d34"
+            ]
+          },
+          "signature": "0x78d18e7a4fb99fa74d691bc56eb521b5a9a0e16790052ba17f9099d2d9cb259d59928f5bf5ddff570fd069dfaeb518bd61bff6eee57002d84e8216aa707c1c871c"
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "product_ids": [
+        2
+      ],
+      "digests": [
+        "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f"
+      ],
+      "nonce": "1881963235377152006",
+      "digest": "0x5d77b01a27e6b62f9b436bec6722ecdcdda180b5214a0befa966196bff4f5c8e",
+      "request": {
+        "cancel_orders": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963235377152006",
+            "productIds": [
+              2
+            ],
+            "digests": [
+              "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f"
+            ]
+          },
+          "signature": "0x90f2ee094388885590a0bbaa066c870416c2e4d655b59fa8ae3723a5024bbada67fde6fa7228e21cb8c25c7724e500b3b098a7b49996489fdc18ee3fe29e5d021b"
+        }
+      }
+    },
+    {
+      "network": "testnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000",
+      "product_ids": [
+        2
+      ],
+      "digests": [
+        "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f"
+      ],
+      "nonce": "1",
+      "digest": "0x5e027a9b6f569cd7e5a453bca56cff3af5f9bac638ab21a39f31f00d2e47a5f1",
+      "request": {
+        "cancel_orders": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000",
+            "nonce": "1",
+            "productIds": [
+              2
+            ],
+            "digests": [
+              "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f"
+            ]
+          },
+          "signature": "0x23c269ced83ddf7a45dc0309606fc1885e85edb7e1fd0b16ed784a3ec183672337d4599353f46b45af8c70b0aecf848f7229bd8e1ac78a50a6deb50b824009f11c"
+        }
+      }
+    }
+  ],
+  "cancel_product_orders": [
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "product_ids": [
+        2,
+        4
+      ],
+      "nonce": "1881963236425728009",
+      "digest": "0xbf0baebd61194d21f43f4897f08253f1c125ac7ca488680e686dcc64cc99e7ef",
+      "request": {
+        "cancel_product_orders": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963236425728009",
+            "productIds": [
+              2,
+              4
+            ]
+          },
+          "signature": "0x709a29a02864f5ea07c0c56bb9d5e203b596bfe1ea9333db85193181bba68d2f0b827e4649b99337f53e8dc126b8812631f8caf5c9e64c7fb36255ec993e0fb81b"
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "product_ids": [],
+      "nonce": "1881963236425728010",
+      "digest": "0x56967c2fbdd2fa502401fbb12cc94bf8d60bdcd73e4888a814faaf8088e2d445",
+      "request": {
+        "cancel_product_orders": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963236425728010",
+            "productIds": []
+          },
+          "signature": "0x13feeac49ff91b16cdab9ce78dc52f9f458784bef37082bad763c3a92b4ab0ba25a01d406518bc1e4022a3a8ecaefb4e6ae0d65c41a4df244a5090057cbf91431b"
+        }
+      }
+    },
+    {
+      "network": "testnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "product_ids": [
+        1
+      ],
+      "nonce": "42",
+      "digest": "0x2cdb548ef00fdaddf68b6950c0461f9c5589c8ee61d8a163f730755e1a4ad412",
+      "request": {
+        "cancel_product_orders": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "42",
+            "productIds": [
+              1
+            ]
+          },
+          "signature": "0xb0fdd6b98cd2d1d895f5c5cdf6413597b256288b74bb65abbb2371932a676ff8373fd599ef5e78e25d256b77ac7a38e4549d17df616d037d0ce5db0bbd5109a21c"
+        }
+      }
+    }
+  ],
+  "cancel_and_place": [
+    {
+      "network": "mainnet",
+      "cancel": {
+        "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+        "product_ids": [
+          2
+        ],
+        "digests": [
+          "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f"
+        ],
+        "nonce": "1881963237474304004",
+        "digest": "0x5f4a1c18b5e926709d7bb007301d505a2543608a6f9b81324ffb46842c79f85d"
+      },
+      "place": {
+        "product_id": 2,
+        "id": 55,
+        "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+        "price_x18": "64950000000000000000000",
+        "amount": "30000000000000000",
+        "expiration": "4294967295",
+        "nonce": "1881963237474304003",
+        "appendix": "1537",
+        "digest": "0x090d9598affebb3832e2b108e0d4041f0089d4958154806de46feae9cf336054"
+      },
+      "request": {
+        "cancel_and_place": {
+          "cancel_tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "1881963237474304004",
+            "productIds": [
+              2
+            ],
+            "digests": [
+              "0x104ec2353ba48510fc413bfd130a762f469f35bc12101853a0393c5f78b0c92f"
+            ]
+          },
+          "place_order": {
+            "signature": "0xd76bde1bdbe911da3ffc96bcd0f46945191fa7060c419297a988c844466d01f45db02d1b231123ee326da6b9c22abb4410a9dce0ffe01f84da5fc9bcaf62bf181c",
+            "id": 55,
+            "product_id": 2,
+            "order": {
+              "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+              "nonce": "1881963237474304003",
+              "amount": "30000000000000000",
+              "priceX18": "64950000000000000000000",
+              "expiration": "4294967295",
+              "appendix": "1537"
+            }
+          },
+          "cancel_signature": "0x7db9064c34cddbcea50461df243fecec71b6a24a4733f9c05d148648ff6e00595ac78f24b6a7859697e9c6fcee4d787b5a84ba55abfc850ecb69ec52337a0b1b1b"
+        }
+      }
+    }
+  ],
+  "link_signer": [
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "signer": "0xe1c6e343aa0b84f66941aee5d99438165f179a2264656661756c740000000000",
+      "nonce": "3",
+      "digest": "0xf87c4aa3c2fe08e458265e1fe55cfa4f80b550cf1a61cc914b082245a19433ef",
+      "request": {
+        "link_signer": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "3",
+            "signer": "0xe1c6e343aa0b84f66941aee5d99438165f179a2264656661756c740000000000"
+          },
+          "signature": "0x2bc9d37a6af8d41d62aef66d76c45724154b1571814e86facb910060988208ae10ba9369d5e347d142322c12d54efe15ac1d3aad5ad8adbfd17bcacab4886cb11b"
+        }
+      }
+    },
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "signer": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "nonce": "4",
+      "digest": "0x6c96a518e612fd089b6cbd465bc2cefb5b428687b96ad0621cd4ee361ec5f69c",
+      "request": {
+        "link_signer": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "4",
+            "signer": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "signature": "0xdf4ef91137229b94b067fcdb6c6c695202583ece1db6ffde483ea183c73f77ac5af179a1947611b5d5b2eb707a0befb31c0f2ba7c1333dec4c4013c56e7630e01b"
+        }
+      }
+    },
+    {
+      "network": "testnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "signer": "0xe1c6e343aa0b84f66941aee5d99438165f179a2264656661756c740000000000",
+      "nonce": "0",
+      "digest": "0x2154f00119b951e07065c8647eb4ca63428069a5f88024e83f9ac06dbc3009c7",
+      "request": {
+        "link_signer": {
+          "tx": {
+            "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+            "nonce": "0",
+            "signer": "0xe1c6e343aa0b84f66941aee5d99438165f179a2264656661756c740000000000"
+          },
+          "signature": "0x937694ca8f3afec4c57558e8a93923e70343bd8160f704862f8f3e9fcab6299935c2c81fa9a498f23229a7d2ecce1702f8adc785dc8cb6454ddfcece85b8eee21c"
+        }
+      }
+    }
+  ],
+  "stream_auth": [
+    {
+      "network": "mainnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+      "expiration": "1794780060000",
+      "id": 1,
+      "digest": "0x7951c166cd15465c93b2948dfd7060f4130a4d981b6fe5d18e7a8cdafb605cbd",
+      "message": {
+        "method": "authenticate",
+        "id": 1,
+        "tx": {
+          "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd64656661756c740000000000",
+          "expiration": "1794780060000"
+        },
+        "signature": "0xd4b6c3a1a6d6f5e6407677e35c611c06538f991755c5053bf49f6091d0daa5c86799394ee41fe332dd3b1ea578a563122a106d2f69f8661dfc3285f10d3f23061b"
+      }
+    },
+    {
+      "network": "testnet",
+      "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000",
+      "expiration": "1794780099999",
+      "id": 42,
+      "digest": "0xecbce3f0ceb3ca13598aacb41f19ccd8080981b9e24484488a799b0506f69dac",
+      "message": {
+        "method": "authenticate",
+        "id": 42,
+        "tx": {
+          "sender": "0xbdbe3b2f50f2a225f692064f69e9407ede9daedd626f74310000000000000000",
+          "expiration": "1794780099999"
+        },
+        "signature": "0xee1f5de8bca7b6b4178c088d4dff6aeee319afe605e565bc4a5dbc69ea4f399454f73bbbbd5c5e6914a403ad48e7f3ad09abcc2d79ed5e42304cf9f108c35c511c"
+      }
+    }
+  ]
+}

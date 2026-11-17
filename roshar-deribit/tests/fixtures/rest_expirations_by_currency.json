@@ -1,0 +1,38 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "btc": {
+      "option": [
+        "17NOV26",
+        "18NOV26",
+        "19NOV26",
+        "20NOV26",
+        "27NOV26",
+        "4DEC26",
+        "25DEC26",
+        "29JAN27",
+        "26MAR27",
+        "25JUN27",
+        "24SEP27"
+      ],
+      "future": [
+        "17NOV26",
+        "18NOV26",
+        "19NOV26",
+        "20NOV26",
+        "27NOV26",
+        "4DEC26",
+        "25DEC26",
+        "29JAN27",
+        "26MAR27",
+        "25JUN27",
+        "24SEP27",
+        "PERPETUAL"
+      ]
+    }
+  },
+  "usIn": 1794827224441621,
+  "usOut": 1794827224442483,
+  "usDiff": 862,
+  "testnet": false
+}

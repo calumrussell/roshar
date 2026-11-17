@@ -1,0 +1,1 @@
+{"channel":"error","error":"Subscription manager failed to process request for client fc634705-286a-4dae-9949-cc5b68171a30: Invalid subscription request: exchange snapshot refresh requested too frequently; retry after 14s","code":400,"subscription":{"channel":"exchange"}}
